@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vorschau Heute 4.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grund:#D3DCCB; --karte:#F4F6F1; --karte-2:#ffffff; --tief:#C5CFBC;
+  --akzent:#2F5F70; --schrift:#1F2320; --schrift-2:#3D423C; --schrift-3:#5d6358;
+  --linie:rgba(31,35,32,.14); --gesund:#4F7A3F; --duenger:#B08A3A; --alarm:#A3231A; --ruhe:#4B4E8C;
+  --ton-wasser:rgba(47,95,112,.10); --ton-duenger:rgba(176,138,58,.14);
+  --vorschau:#6b3fa0;
+  --serif:'Newsreader',Georgia,serif; --sans:'Bricolage Grotesque',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#9aa592}
+body{font-family:var(--sans);color:var(--schrift);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+/* Vorschau-Steuerung (gehört nicht zur App) */
+.vs{position:sticky;top:0;z-index:50;background:#2a2433;color:#fff;padding:8px 10px 10px}
+.vs-titel{font:600 .62rem var(--mono);letter-spacing:.12em;opacity:.7;margin-bottom:6px;text-transform:uppercase}
+.vs-reihe{display:flex;gap:6px;overflow-x:auto}
+.vs-reihe button{flex:0 0 auto;padding:7px 11px;border-radius:99px;background:rgba(255,255,255,.12);font-size:.8rem;white-space:nowrap}
+.vs-reihe button.an{background:#fff;color:#2a2433;font-weight:600}
+
+.handy{max-width:420px;margin:0 auto;min-height:calc(100vh - 70px);background:var(--grund);position:relative;overflow:hidden;
+  background-image:radial-gradient(ellipse 60% 40% at 85% 12%,rgba(255,255,255,.35),transparent 70%),radial-gradient(ellipse 50% 35% at 10% 70%,rgba(79,122,63,.10),transparent 70%)}
+.seite{display:none;padding:22px 18px 110px}
+.seite.an{display:block}
+
+/* Hinweise der Vorschau */
+.hinweis{margin-top:22px;border:1.5px dashed var(--vorschau);border-radius:14px;padding:12px 14px;background:rgba(107,63,160,.06)}
+.hinweis h4{font:600 .62rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--vorschau);margin-bottom:6px}
+.hinweis li{font-size:.84rem;line-height:1.4;margin:4px 0 0 16px;color:var(--schrift-2)}
+
+/* Heute */
+.kopf-zeile{display:flex;justify-content:space-between;align-items:center}
+.mono{font:400 .66rem var(--mono);letter-spacing:.1em;color:var(--schrift-2)}
+.zahnrad{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.5)}
+h1{font:500 3.1rem/1 var(--serif);margin-top:18px;letter-spacing:-.01em}
+.gruss{font:400 1.55rem var(--serif);margin-top:10px}
+.unter{font-size:.95rem;color:var(--schrift-2);margin-top:6px}
+.strich{height:2px;background:var(--schrift);margin:18px 0 16px}
+.karte{background:var(--karte);border-radius:22px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 4px 14px rgba(30,40,30,.06)}
+.wetter{display:flex;gap:14px;align-items:center;padding:16px 18px}
+.wetter b{font-weight:600}
+.wetter small{display:block;color:var(--schrift-2);font-size:.82rem;margin-top:3px}
+.kz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.kz .karte{border-radius:14px;padding:12px;text-align:left}
+.kz span{font-size:.78rem;color:var(--schrift-2)}
+.kz strong{display:block;font:600 1.5rem var(--sans);margin-top:4px}
+.kz em{font-style:normal;font-size:.66rem;color:var(--schrift-3)}
+.giess{display:flex;align-items:center;gap:16px;padding:20px 18px;margin-top:22px;width:100%;text-align:left}
+.tropfen{width:52px;height:52px;border-radius:50%;background:var(--tief);display:grid;place-items:center;flex:0 0 auto}
+.giess h2{font:500 1.5rem var(--serif)}
+.giess p{font-size:.92rem;color:var(--schrift-2);margin-top:2px}
+.pfeil{margin-left:auto;font-size:1.2rem;color:var(--schrift-2)}
+.kacheln{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.kachel{padding:18px 16px;text-align:left}
+.kachel h3{font:600 1.08rem var(--sans);margin-top:14px}
+.kachel p{font-size:.84rem;color:var(--schrift-2);margin-top:3px;line-height:1.3}
+.leer-hinweis{font-size:.84rem;color:var(--schrift-3);text-align:center;margin-top:16px}
+
+/* Leiste */
+.leiste{position:absolute;left:0;right:0;bottom:0;background:#F4F6F1;border-top:1px solid var(--linie);display:flex;justify-content:space-around;padding:10px 0 14px}
+.leiste button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.8rem;color:var(--schrift-2);position:relative;min-width:84px}
+.leiste button.an{color:var(--schrift);font-weight:600}
+.badge{position:absolute;top:-6px;left:50%;margin-left:6px;background:#8A3F26;color:#fff;font-size:.68rem;font-weight:600;border-radius:99px;padding:1px 6px}
+
+/* Sheet */
+.schleier{position:absolute;inset:0;background:rgba(20,22,20,.45);display:none;z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--karte-2);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:none;z-index:21}
+.sheet.an,.schleier.an{display:block}
+.sheet h3{font:500 1.4rem var(--serif)}
+.sheet p{font-size:.9rem;color:var(--schrift-2);line-height:1.45;margin-top:8px}
+.balken{height:10px;border-radius:99px;background:var(--tief);margin-top:14px;overflow:hidden}
+.balken i{display:block;height:100%;background:var(--gesund);border-radius:99px}
+.zeile{display:flex;justify-content:space-between;font-size:.88rem;padding:9px 0;border-bottom:1px solid var(--linie)}
+.knopf{display:block;width:100%;padding:15px;border-radius:16px;font-weight:600;font-size:1rem;margin-top:10px;text-align:center}
+.k-haupt{background:var(--akzent);color:#fff}
+.k-neben{background:transparent;border:1.5px solid var(--linie)}
+.k-leise{color:var(--schrift-2);border:1.5px solid var(--linie);font-weight:400}
+
+/* Gießmodus-Übersicht */
+.zu{display:flex;justify-content:space-between;align-items:center}
+.zu button{font-size:1.4rem;width:40px;height:40px}
+.ueb-kopf{font:500 2.2rem/1.05 var(--serif);margin-top:8px}
+.ueb-unter{color:var(--schrift-2);margin-top:6px}
+.brauche{padding:14px 16px;margin-top:16px}
+.brauche h4,.raum h4{font:600 .64rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--schrift-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{font-size:.8rem;padding:6px 10px;border-radius:99px;background:var(--ton-wasser);color:#21485a}
+.chip.d{background:var(--ton-duenger);color:#654C15}
+.raum{margin-top:14px;padding:14px 14px 6px}
+.raum-kopf{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.raum-kopf b{font:600 1rem var(--sans)}
+.schalter{width:46px;height:28px;border-radius:99px;background:var(--akzent);position:relative;flex:0 0 auto;transition:background .2s}
+.schalter::after{content:"";position:absolute;top:3px;left:21px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.schalter.aus{background:#b9c2b1}
+.schalter.aus::after{left:3px}
+.schalter.fest{opacity:.45}
+.raum.aus .pfl{opacity:.35}
+.pfl{display:flex;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--linie)}
+.foto{width:46px;height:46px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center}
+.pfl b{font-weight:600;font-size:.95rem}
+.pfl small{display:block;font-size:.78rem;color:var(--schrift-2)}
+.marke{margin-left:auto;font-size:.68rem;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.m-frage{background:rgba(75,78,140,.12);color:var(--ruhe)}
+.m-glas{background:var(--ton-wasser);color:#21485a}
+.plus{margin-left:auto;width:36px;height:36px;border-radius:50%;background:var(--tief);font-size:1.3rem;font-weight:600;flex:0 0 auto}
+.plus.an{background:var(--akzent);color:#fff}
+.morgen{padding:14px 16px;margin-top:14px;display:flex;align-items:center;gap:12px}
+.morgen p{font-size:.88rem;flex:1}
+.morgen button{font-size:.84rem;font-weight:600;padding:8px 12px;border-radius:12px;background:var(--tief)}
+
+/* Gießmodus-Pflanze */
+.fortschritt{height:4px;border-radius:99px;background:rgba(31,35,32,.12);flex:1;margin-right:14px;overflow:hidden}
+.fortschritt i{display:block;height:100%;width:11%;background:var(--akzent)}
+.wo{font:600 .7rem var(--mono);letter-spacing:.14em;text-align:center;margin:26px 0 12px;color:var(--schrift-2)}
+.pkarte{border:1.5px solid var(--linie);border-radius:26px;padding:18px}
+.pk-oben{display:flex;gap:14px;align-items:center}
+.pk-oben .foto{width:96px;height:96px;border-radius:18px}
+.pk-oben h2{font:500 1.9rem var(--serif)}
+.pk-oben p{font-size:.88rem;color:var(--schrift-2);margin-top:2px}
+.dran{font-weight:600;margin-top:16px}
+.rueck{margin-top:14px;border-radius:16px;background:rgba(75,78,140,.08);padding:12px 14px}
+.rueck b{font-size:.9rem}
+.rueck p{font-size:.84rem;color:var(--schrift-2);margin-top:3px}
+.rueck .zwei{display:flex;gap:8px;margin-top:10px}
+.rueck .zwei button{flex:1;padding:9px;border-radius:12px;font-size:.84rem;font-weight:600;background:#fff}
+.rueck.erledigt{background:rgba(79,122,63,.10)}
+
+/* Rückblick */
+.story{position:relative;border-radius:26px;overflow:hidden;min-height:540px;color:#fff;background:linear-gradient(160deg,#2F5F70,#3D5A34)}
+.st-balken{display:flex;gap:4px;padding:12px 14px 0}
+.st-balken i{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.3)}
+.st-balken i.voll{background:#fff}
+.st-inhalt{padding:34px 24px;min-height:470px;display:flex;flex-direction:column;justify-content:center}
+.st-inhalt .mono{color:rgba(255,255,255,.75)}
+.st-gross{font:500 3rem/1.05 var(--serif);margin-top:10px}
+.st-mittel{font:500 1.6rem/1.2 var(--serif);margin-top:16px}
+.st-klein{font-size:.95rem;opacity:.85;margin-top:10px;line-height:1.4}
+.vn{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.vn div{aspect-ratio:3/4;border-radius:16px;display:flex;align-items:flex-end;padding:10px;font:600 .7rem var(--mono);letter-spacing:.08em}
+.st-tipp{position:absolute;inset:40px 0 0 0}
+.st-tipp .li{position:absolute;left:0;top:0;bottom:0;width:35%}
+.st-tipp .re{position:absolute;right:0;top:0;bottom:0;width:65%}
+.st-knoepfe{display:flex;gap:8px;margin-top:22px;position:relative;z-index:3}
+.st-knoepfe button{flex:1;padding:13px;border-radius:14px;font-weight:600}
+.st-k1{background:#fff;color:#1F2320}
+.st-k2{background:rgba(255,255,255,.18);color:#fff}
+
+/* Einstellungen */
+.einst-titel{font:500 2rem var(--serif);margin-top:8px}
+.einst-unter{font-size:.86rem;color:var(--schrift-2);margin-top:4px}
+.liste{margin-top:16px;padding:4px 16px}
+.e-zeile{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--linie)}
+.e-zeile:first-child{border-top:0}
+.e-zeile div{flex:1}
+.e-zeile b{font-weight:600;font-size:.95rem}
+.e-zeile small{display:block;font-size:.76rem;color:var(--schrift-3);margin-top:2px}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:#1F2320;color:#fff;font-size:.84rem;padding:10px 14px;border-radius:12px;display:none;z-index:30;white-space:nowrap}
+.toast.an{display:block}
+</style>
+</head>
+<body>
+
+<div class="vs">
+  <div class="vs-titel">Vorschau · nicht die App · Heute 4.0</div>
+  <div class="vs-reihe" id="vs">
+    <button data-s="heute" class="an">Heute</button>
+    <button data-s="ueb">Gießmodus-Übersicht</button>
+    <button data-s="pfl">Gießen: 1. Pflanze</button>
+    <button data-s="rueck">Rückblick</button>
+    <button data-s="einst">Einstellungen</button>
+  </div>
+</div>
+
+<div class="handy" id="handy">
+
+<!-- ========== HEUTE ========== -->
+<section class="seite an" id="s-heute">
+  <div class="kopf-zeile">
+    <span class="mono">Sicherung · gestern · aktuelle Fassung</span>
+    <button class="zahnrad" data-geh="einst" aria-label="Einstellungen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+  <h1>Heute</h1>
+  <div class="gruss">Guten Tag</div>
+  <div class="unter">9 Pflanzen sind heute dran.</div>
+  <div class="strich"></div>
+
+  <div class="karte wetter" data-teil="wetter">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12 3.5 3.5 0 0 0 6 19z"/></svg>
+    <div><b>Neubrandenburg · 16 °C · bedeckt</b><small>13 °C bis 19 °C · Luft 82 %</small></div>
+    <span class="pfeil">›</span>
+  </div>
+
+  <div class="kz" data-teil="kennzahlen">
+    <div class="karte"><span>Gesund</span><strong>46/46</strong></div>
+    <button class="karte" id="treue-knopf"><span>Gießtreue</span><strong>94%</strong><em>letzte 30 Tage</em></button>
+    <div class="karte"><span>Neu im Monat</span><strong>+1</strong></div>
+  </div>
+
+  <button class="karte giess" data-geh="ueb">
+    <span class="tropfen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>
+    <span><h2>Gießmodus</h2><p>9 Pflanzen warten</p></span>
+    <span class="pfeil">›</span>
+  </button>
+
+  <div class="kacheln">
+    <button class="karte kachel" data-teil="fotorunde" id="fotorunde-knopf">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      <h3>Fotorunde</h3><p>Raum wählen, Foto für Foto</p>
+    </button>
+    <button class="karte kachel" data-teil="wuensche" id="wuensche-knopf">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.3 5 5.4.6-4 3.7 1.1 5.3L12 15l-4.8 2.6 1.1-5.3-4-3.7 5.4-.6z"/></svg>
+      <h3>Wünsche</h3><p>4 Pflanzen · 3 Material</p>
+    </button>
+  </div>
+</section>
+
+<!-- ========== GIESSMODUS-ÜBERSICHT ========== -->
+<section class="seite" id="s-ueb">
+  <div class="zu"><span class="mono">GIESSMODUS</span><button data-geh="heute" aria-label="Schließen">×</button></div>
+  <div class="ueb-kopf" id="ueb-kopf">Heute:<br>8 Pflanzen, 1 Glas</div>
+  <div class="ueb-unter" id="ueb-zahl">3 Räume · etwa 12 Minuten</div>
+
+  <div class="karte brauche">
+    <h4>Was du brauchst</h4>
+    <div class="chips">
+      <span class="chip">Regenwasser · 3</span>
+      <span class="chip">Destilliert · 2</span>
+      <span class="chip">Leitungswasser · 1</span>
+      <span class="chip d">Wasser mit Dünger · 3</span>
+    </div>
+  </div>
+
+  <div class="karte raum" data-raum>
+    <div class="raum-kopf"><b>Balkon · 2</b><button class="schalter" aria-label="Raum mitnehmen"></button></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#7d8f4e,#3f4f2c)"></span><span><b>Vivi</b><small>Venusfliegenfalle · Fensterbank</small></span><span class="marke m-frage">Rückfrage</span></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#9bb06a,#4c5f33)"></span><span><b>Sonnentau</b><small>Drosera · Fensterbank</small></span></div>
+  </div>
+
+  <div class="karte raum" data-raum>
+    <div class="raum-kopf"><b>Wohnzimmer · 3</b><button class="schalter" aria-label="Raum mitnehmen"></button></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#4f7a3f,#24402a)"></span><span><b>Monti</b><small>Monstera · am Fenster</small></span><span class="marke" style="background:var(--ton-duenger);color:#654C15">Dünger</span></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#6f9a5a,#30502c)"></span><span><b>Efeutute</b><small>Epipremnum · Regal oben</small></span><span class="marke" style="background:var(--ton-duenger);color:#654C15">Dünger</span></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#8aa36e,#3c5530)"></span><span><b>Calathea</b><small>Goeppertia · Regal mitte</small></span></div>
+  </div>
+
+  <div class="karte raum" data-raum>
+    <div class="raum-kopf"><b>Schlafzimmer · 3</b><button class="schalter" aria-label="Raum mitnehmen"></button></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#a6b77f,#56693f)"></span><span><b>Begonie</b><small>Begonia maculata · Kommode</small></span><span class="marke" style="background:var(--ton-duenger);color:#654C15">Dünger</span></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#7f9c6c,#2f4a2a)"></span><span><b>Philodendron</b><small>Philodendron · Fenster</small></span></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#b6c48e,#5f7444)"></span><span><b>Fettkraut</b><small>Pinguicula · Fenster</small></span><span class="marke m-frage">Winterruhe?</span></div>
+  </div>
+
+  <div class="karte raum glas">
+    <div class="raum-kopf"><b>Anzucht · Wasserwechsel</b></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#d8e4c4,#8fae7a)"></span><span><b>Monti-Stecklinge</b><small>Glas · Regal unten · Tag 18</small></span><span class="marke m-glas">Wechsel</span></div>
+  </div>
+
+  <div class="karte raum" id="morgen">
+    <div class="raum-kopf"><b>Morgen dran · mitnehmen?</b></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#90ad73,#3c5a33)"></span><span><b>Ficus</b><small>Ficus elastica · Wohnzimmer</small></span><button class="plus" aria-label="mitnehmen">+</button></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#a5bd86,#4d6a3c)"></span><span><b>Pilea</b><small>Pilea peperomioides · Küche</small></span><button class="plus" aria-label="mitnehmen">+</button></div>
+    <div class="pfl"><span class="foto" style="background:linear-gradient(135deg,#7da36a,#2d4a2a)"></span><span><b>Kannenpflanze</b><small>Nepenthes · Schlafzimmer</small></span><button class="plus" aria-label="mitnehmen">+</button></div>
+  </div>
+
+  <button class="knopf k-haupt" data-geh="pfl" style="margin-top:18px">Los geht's · Balkon zuerst</button>
+</section>
+
+<!-- ========== GIESSEN: 1. PFLANZE ========== -->
+<section class="seite" id="s-pfl">
+  <div class="zu"><span class="fortschritt"><i></i></span><button data-geh="ueb" aria-label="Zurück zur Übersicht">×</button></div>
+  <div class="wo">BALKON · 1 VON 2</div>
+  <div class="pkarte">
+    <div class="pk-oben">
+      <span class="foto" style="background:linear-gradient(135deg,#7d8f4e,#3f4f2c)"></span>
+      <div><h2>Vivi</h2><p>Venusfliegenfalle · Balkon · auf Fensterbank</p></div>
+    </div>
+    <div class="dran">Heute dran · zuletzt vor 1 Tag</div>
+    <div class="rueck" id="rueck">
+      <b>Rückfrage: Trauermücken</b>
+      <p>Vor zwei Wochen gesehen. Ist es wieder normal?</p>
+      <div class="zwei"><button data-rueck="Wieder normal — erledigt.">Ja, wieder normal</button><button data-rueck="Ich frage in zwei Wochen wieder.">Noch zwei Wochen</button></div>
+    </div>
+  </div>
+  <div style="margin-top:22px">
+    <button class="knopf k-haupt" data-weiter>Gegossen</button>
+    <div style="display:flex;gap:8px">
+      <button class="knopf k-neben" data-weiter data-toast="Gegossen · nächstes Mal früher">Untersetzer war leer</button>
+      <button class="knopf k-neben" data-weiter data-toast="Nicht gegossen · nächstes Mal später">Noch voll</button>
+    </div>
+    <button class="knopf k-leise" data-weiter>Lieber morgen</button>
+  </div>
+</section>
+
+<!-- ========== RÜCKBLICK ========== -->
+<section class="seite" id="s-rueck">
+  <div class="story">
+    <div class="st-balken" id="st-balken"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="st-inhalt" id="st-inhalt"></div>
+    <div class="st-tipp"><span class="li" id="st-zurueck"></span><span class="re" id="st-vor"></span></div>
+  </div>
+</section>
+
+<!-- ========== EINSTELLUNGEN: HEUTE ========== -->
+<section class="seite" id="s-einst">
+  <div class="zu"><span class="mono">EINSTELLUNGEN</span><button data-geh="heute" aria-label="Schließen">×</button></div>
+  <div class="einst-titel">Heute</div>
+  <div class="einst-unter">Was auf Heute erscheint. Die Reihenfolge ist fest.</div>
+  <div class="karte liste">
+    <div class="e-zeile"><div><b>Wetter</b><small>Ort und Tageswerte</small></div><button class="schalter" data-zeigt="wetter"></button></div>
+    <div class="e-zeile"><div><b>Kennzahlen</b><small>Gesund, Gießtreue, Neu im Monat</small></div><button class="schalter" data-zeigt="kennzahlen"></button></div>
+    <div class="e-zeile"><div><b>Gießmodus</b><small>immer sichtbar</small></div><span class="schalter fest"></span></div>
+    <div class="e-zeile"><div><b>Fotorunde</b><small>Foto für Foto durch einen Raum</small></div><button class="schalter" data-zeigt="fotorunde"></button></div>
+    <div class="e-zeile"><div><b>Wünsche</b><small>Wunschpflanzen und Material</small></div><button class="schalter" data-zeigt="wuensche"></button></div>
+  </div>
+</section>
+
+<!-- Leiste -->
+<nav class="leiste" id="leiste">
+  <button class="an" data-geh="heute"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg>Heute<span class="badge">9</span></button>
+  <button data-info="Sammlung kommt in einer eigenen Vorschau."><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="14" height="14" rx="1"/><path d="M8 3h12v12"/></svg>Sammlung</button>
+  <button data-info="Der BOTaniker kommt in einer eigenen Vorschau. Dort liegt auch der Urlaubszettel (F34)."><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 18c0-6 4-11 12-12 0 8-5 12-12 12z"/><path d="M4 18l7-7"/></svg>BOTaniker</button>
+</nav>
+
+<div class="schleier" id="schleier"></div>
+<div class="sheet" id="sheet">
+  <h3>Gießtreue · 30 Tage</h3>
+  <p>47 von 50 fälligen Gießungen waren pünktlich: gegossen, als „noch feucht“ gemeldet oder höchstens 3 Tage verschoben.</p>
+  <div class="balken"><i style="width:94%"></i></div>
+  <div style="margin-top:12px">
+    <div class="zeile"><span>Monti</span><span>1 Tag überfällig · 18.09.</span></div>
+    <div class="zeile"><span>Calathea</span><span>2 Tage überfällig · 24.09.</span></div>
+  </div>
+  <button class="knopf k-neben" id="sheet-zu">Schließen</button>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  var seiten=['heute','ueb','pfl','rueck','einst'];
+  var vs=document.getElementById('vs');
+  function zeige(n){
+    seiten.forEach(function(s){document.getElementById('s-'+s).classList.toggle('an',s===n);});
+    Array.prototype.forEach.call(vs.children,function(b){b.classList.toggle('an',b.dataset.s===n);});
+    document.getElementById('leiste').style.display=(n==='heute')?'flex':'none';
+    if(n==='rueck'){st=0;story();}
+    window.scrollTo(0,0);
+  }
+  vs.addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.dataset.s)zeige(b.dataset.s);});
+  document.addEventListener('click',function(e){
+    var g=e.target.closest('[data-geh]'); if(g){zeige(g.dataset.geh);return;}
+    var i=e.target.closest('[data-info]'); if(i){toast(i.dataset.info);return;}
+  });
+
+  var t; function toast(x){var el=document.getElementById('toast');el.textContent=x;el.classList.add('an');el.style.whiteSpace=x.length>40?'normal':'nowrap';el.style.width=x.length>40?'86%':'auto';clearTimeout(t);t=setTimeout(function(){el.classList.remove('an');},2600);}
+
+  document.getElementById('fotorunde-knopf').onclick=function(){toast('Fotorunde kommt in einer eigenen Vorschau.');};
+  document.getElementById('wuensche-knopf').onclick=function(){toast('Wünsche-Board kommt in einer eigenen Vorschau.');};
+
+  /* Gießtreue-Fenster */
+  var sch=document.getElementById('schleier'),sh=document.getElementById('sheet');
+  function sheet(an){sch.classList.toggle('an',an);sh.classList.toggle('an',an);}
+  document.getElementById('treue-knopf').onclick=function(){sheet(true);};
+  document.getElementById('sheet-zu').onclick=function(){sheet(false);};
+  sch.onclick=function(){sheet(false);};
+
+  /* Räume abwählen */
+  var gesamt=9;
+  function zaehle(){
+    var n=0,r=0;
+    document.querySelectorAll('[data-raum]').forEach(function(k){if(!k.classList.contains('aus')){n+=k.querySelectorAll('.pfl').length;r++;}});
+    n+=document.querySelectorAll('.plus.an').length;
+    document.getElementById('ueb-kopf').innerHTML='Heute:<br>'+n+(n===1?' Pflanze':' Pflanzen')+', 1 Glas';
+    document.getElementById('ueb-zahl').textContent=r+(r===1?' Raum':' Räume')+' · etwa '+Math.max(2,Math.round((n+1)*1.3))+' Minuten';
+  }
+  document.querySelectorAll('[data-raum] .schalter').forEach(function(s){
+    s.onclick=function(){s.classList.toggle('aus');s.closest('[data-raum]').classList.toggle('aus');zaehle();};
+  });
+  document.querySelectorAll('.plus').forEach(function(p){
+    p.onclick=function(){p.classList.toggle('an');p.textContent=p.classList.contains('an')?'✓':'+';zaehle();};
+  });
+
+  /* Rückfrage */
+  document.querySelectorAll('[data-rueck]').forEach(function(b){
+    b.onclick=function(){var r=document.getElementById('rueck');r.classList.add('erledigt');r.innerHTML='<b>Rückfrage: Trauermücken</b><p>'+b.dataset.rueck+'</p>';};
+  });
+  document.querySelectorAll('[data-weiter]').forEach(function(b){
+    b.onclick=function(){toast((b.dataset.toast?b.dataset.toast+' · ':'')+'weiter zu Sonnentau');};
+  });
+
+  /* Einstellungen → Heute */
+  document.querySelectorAll('[data-zeigt]').forEach(function(s){
+    s.onclick=function(){
+      s.classList.toggle('aus');
+      var teil=document.querySelector('[data-teil="'+s.dataset.zeigt+'"]');
+      if(teil)teil.style.display=s.classList.contains('aus')?'none':'';
+      var f=document.querySelector('[data-teil="fotorunde"]'),w=document.querySelector('[data-teil="wuensche"]');
+      var beide=f.style.display!=='none'&&w.style.display!=='none';
+      document.querySelector('.kacheln').style.gridTemplateColumns=beide?'1fr 1fr':'1fr';
+    };
+  });
+
+  /* Rückblick als Story */
+  var st=0;
+  var folien=[
+    '<span class="mono">RÜCKBLICK</span><div class="st-gross">Dein<br>September</div><p class="st-klein">Tippe rechts für weiter.</p>',
+    '<span class="mono">GIESSEN</span><div class="st-gross">34-mal</div><p class="st-mittel">gegossen, Gießtreue 96 %</p><p class="st-klein">Am fleißigsten: Dienstags. Der Balkon war 9-mal dran.</p>',
+    '<span class="mono">SAMMLUNG</span><div class="st-mittel">2 neue Pflanzen</div><div class="st-mittel">1 Ableger bewurzelt</div><div class="st-mittel">3 neue Blätter an Monti</div>',
+    '<span class="mono">PFLANZE DES MONATS</span><div class="foto" style="width:150px;height:150px;border-radius:24px;margin-top:16px;background:linear-gradient(135deg,#7fbf6a,#1f3a1e)"></div><div class="st-gross" style="font-size:2.4rem">Monti</div><p class="st-klein">3 neue Blätter · nie überfällig · 4 Fotos</p>',
+    '<span class="mono">HIGHLIGHT</span><div class="st-mittel">Monti hat zugelegt</div><div class="vn"><div style="background:linear-gradient(160deg,#6f8a5e,#2c4128)">AUGUST</div><div style="background:linear-gradient(160deg,#5f9a4a,#1f3a1e)">SEPTEMBER</div></div><div class="st-knoepfe"><button class="st-k1" id="st-speichern">Speichern</button><button class="st-k2" id="st-fertig">Fertig</button></div>'
+  ];
+  function story(){
+    document.getElementById('st-inhalt').innerHTML=folien[st];
+    Array.prototype.forEach.call(document.getElementById('st-balken').children,function(b,i){b.classList.toggle('voll',i<=st);});
+    document.querySelector('.st-tipp').style.display=(st===folien.length-1)?'none':'';
+    var sp=document.getElementById('st-speichern');
+    if(sp){sp.onclick=function(){toast('Als Bild gespeichert · auch unter „Rückblicke“');};
+      document.getElementById('st-fertig').onclick=function(){zeige('heute');};}
+  }
+  document.getElementById('st-vor').onclick=function(){if(st<folien.length-1){st++;story();}};
+  document.getElementById('st-zurueck').onclick=function(){if(st>0){st--;story();}};
+})();
+</script>
+</body>
+</html>
