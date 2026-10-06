@@ -1,0 +1,1257 @@
+{
+  "__app": "greenkeeperai",
+  "__fassung": "4.0-beta.1",
+  "__gesichert": "2026-10-06T15:19:15.364Z",
+  "tasks": {},
+  "added": {
+    "E-116": [
+      {
+        "id": "vmuwtqrh3cll",
+        "text": "Trieb mit zwei bis drei Blättern wählen, gesund und nicht zu jung"
+      },
+      {
+        "id": "vmuwtqrh3ft0",
+        "text": "Einen halben Zentimeter unter einem Knoten abschneiden, sauberes Messer"
+      }
+    ]
+  },
+  "deleted": {},
+  "wish": [
+    {
+      "id": "w1",
+      "text": "Bims oder Lava zum Abmagern von Substraten",
+      "done": false
+    },
+    {
+      "id": "w2",
+      "text": "Grobe Pinienrinde für Aroideen und Orchideen",
+      "done": false
+    }
+  ],
+  "water": {
+    "E-100": [
+      "2026-08-07",
+      "2026-09-06"
+    ],
+    "E-101": [
+      "2026-08-27",
+      "2026-09-16"
+    ],
+    "E-102": [
+      "2026-08-17",
+      "2026-09-11"
+    ],
+    "E-103": [
+      "2026-09-01",
+      "2026-09-22"
+    ],
+    "E-104": [
+      "2026-09-24",
+      "2026-09-30"
+    ],
+    "E-105": [
+      "2026-09-20",
+      "2026-09-28"
+    ],
+    "E-106": [
+      "2026-09-10",
+      "2026-09-23"
+    ],
+    "E-107": [
+      "2026-09-24",
+      "2026-09-30"
+    ],
+    "E-108": [
+      "2026-09-12",
+      "2026-09-24"
+    ],
+    "E-109": [
+      "2026-09-24",
+      "2026-10-01"
+    ],
+    "E-110": [
+      "2026-10-02",
+      "2026-10-04"
+    ],
+    "E-111": [
+      "2026-09-30",
+      "2026-10-03"
+    ],
+    "E-112": [
+      "2026-10-01",
+      "2026-10-04"
+    ],
+    "E-113": [
+      "2026-09-29",
+      "2026-10-02"
+    ],
+    "E-114": [
+      "2026-09-24",
+      "2026-09-30"
+    ],
+    "E-115": [
+      "2026-09-06",
+      "2026-09-21"
+    ],
+    "E-116": [
+      "2026-10-04"
+    ]
+  },
+  "fotos": {},
+  "fotosWeg": {},
+  "profil": {},
+  "eigene": [
+    {
+      "id": "E-100",
+      "eigen": true,
+      "name": "Kaktus · Winterruhe",
+      "art": "Warzenkaktus",
+      "botanisch": "Mammillaria",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Kakteengewächse",
+      "klasse": "C",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Ungiftig. Das eigentliche Risiko sind die Stacheln oder Glochiden: sie setzen sich in Maul, Pfoten und Augen fest und müssen tierärztlich entfernt werden.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Fensterbank",
+      "typ": "Kaktus",
+      "sonne": "voll",
+      "frostMin": 5,
+      "duenger": "sparsam",
+      "bib": "Mammillaria",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-09-01",
+      "notiz": "Testpflanze: Wüstenkaktus (Klasse C), Zustand Winterruhe; „staubtrocken“-Fehler",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-101",
+      "eigen": true,
+      "name": "Echeverie · von unten",
+      "art": "Echeverie",
+      "botanisch": "Echeveria elegans",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Dickblattgewächse",
+      "klasse": "C",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die ASPCA führt diese Art ausdrücklich als ungiftig für Katzen und Hunde. Große Mengen Pflanzenmaterial können wie bei jeder Pflanze den Magen verstimmen — eine Vergiftung ist daraus nicht zu erwarten.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Fensterbank",
+      "typ": "Sukkulente",
+      "sonne": "voll",
+      "frostMin": 5,
+      "duenger": "sparsam",
+      "bib": "Echeveria elegans",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-12-10",
+      "notiz": "Testpflanze: Blattsukkulente, Gießart von unten",
+      "todo": [],
+      "log": [],
+      "giessart": "unten",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-102",
+      "eigen": true,
+      "name": "Lebende Steine · Sommerruhe",
+      "art": "Lebende Steine",
+      "botanisch": "Lithops",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Mittagsblumengewächse",
+      "klasse": "C",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die ASPCA führt diese Art ausdrücklich als ungiftig für Katzen und Hunde. Große Mengen Pflanzenmaterial können wie bei jeder Pflanze den Magen verstimmen — eine Vergiftung ist daraus nicht zu erwarten.",
+        "beleg": "F",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Fensterbank",
+      "typ": "Sukkulente",
+      "sonne": "voll",
+      "frostMin": 7,
+      "duenger": "nie",
+      "bib": "Lithops",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-01-29",
+      "notiz": "Testpflanze: Sukkulente mit Sommerruhe (umgekehrtes Jahr)",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-103",
+      "eigen": true,
+      "name": "Glücksfeder · Speicher",
+      "art": "Glücksfeder",
+      "botanisch": "Zamioculcas zamiifolia",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Aronstabgewächse",
+      "klasse": "C",
+      "gift": {
+        "tiere": {
+          "katze": "mittel",
+          "hund": "mittel",
+          "nager": "mittel",
+          "vogel": "mittel"
+        },
+        "grund": "Unlösliche Calciumoxalat-Nadeln in allen Pflanzenteilen. Sie bohren sich beim Kauen in Maul, Zunge und Rachen: sofortiges Brennen, Speicheln, Schluckbeschwerden, in schweren Fällen Schwellung des Kehlkopfs. Der Schmerz setzt so schnell ein, dass die meisten Tiere von selbst aufhören — gefährlich wird es, wenn die Schwellung die Atemwege verlegt.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal unten",
+      "typ": "Knollenpflanze",
+      "sonne": "indirekt",
+      "frostMin": 12,
+      "duenger": "sparsam",
+      "bib": "Zamioculcas zamiifolia",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-05-24",
+      "notiz": "Testpflanze: Rhizom- oder Knollenspeicher",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-104",
+      "eigen": true,
+      "name": "Buntwurz · Trockenruhe",
+      "art": "Buntwurz",
+      "botanisch": "Caladium bicolor",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Aronstabgewächse",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "schwer",
+          "hund": "schwer",
+          "nager": "schwer",
+          "vogel": "schwer"
+        },
+        "grund": "Calciumoxalat-Nadeln in allen Teilen, in der Knolle am stärksten. Ausgegrabene oder umgestoßene Knollen sind das eigentliche Risiko.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal oben",
+      "typ": "Knollenpflanze",
+      "sonne": "indirekt",
+      "frostMin": 18,
+      "duenger": "normal",
+      "bib": "Caladium bicolor",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-06-08",
+      "notiz": "Testpflanze: Knolle mit Trockenruhe",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-105",
+      "eigen": true,
+      "name": "Rosmarin · Hartlaub",
+      "art": "Rosmarin",
+      "botanisch": "Rosmarinus officinalis",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Lippenblütler",
+      "klasse": "C",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die ASPCA führt diese Art ausdrücklich als ungiftig für Katzen und Hunde. Große Mengen Pflanzenmaterial können wie bei jeder Pflanze den Magen verstimmen — eine Vergiftung ist daraus nicht zu erwarten.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgpgbg",
+      "stellplatz": "Brüstung",
+      "typ": "Kraut",
+      "sonne": "voll",
+      "frostMin": -8,
+      "duenger": "sparsam",
+      "bib": "Rosmarinus officinalis",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-03-20",
+      "notiz": "Testpflanze: Hartlaub, Balkon",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-106",
+      "eigen": true,
+      "name": "Monti · Mutter",
+      "art": "Fensterblatt",
+      "botanisch": "Monstera deliciosa",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Aronstabgewächse",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "mittel",
+          "hund": "mittel",
+          "nager": "mittel",
+          "vogel": "mittel"
+        },
+        "grund": "Unlösliche Calciumoxalat-Nadeln in allen Pflanzenteilen. Sie bohren sich beim Kauen in Maul, Zunge und Rachen: sofortiges Brennen, Speicheln, Schluckbeschwerden, in schweren Fällen Schwellung des Kehlkopfs. Der Schmerz setzt so schnell ein, dass die meisten Tiere von selbst aufhören — gefährlich wird es, wenn die Schwellung die Atemwege verlegt.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal unten",
+      "typ": "Kletterpflanze",
+      "sonne": "indirekt",
+      "frostMin": 13,
+      "duenger": "normal",
+      "bib": "Monstera deliciosa",
+      "eltern": null,
+      "linie": null,
+      "seit": "2024-11-05",
+      "notiz": "Testpflanze: Normales Laub, giftig, Mutterpflanze mit Ableger und Anzucht",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-107",
+      "eigen": true,
+      "name": "Silbernetz · durstig",
+      "art": "Silbernetzblatt",
+      "botanisch": "Fittonia albivenis",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Akanthusgewächse",
+      "klasse": "A",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die ASPCA führt diese Art ausdrücklich als ungiftig für Katzen und Hunde. Große Mengen Pflanzenmaterial können wie bei jeder Pflanze den Magen verstimmen — eine Vergiftung ist daraus nicht zu erwarten.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgr3n2",
+      "stellplatz": "Fenster",
+      "typ": "Bodendecker",
+      "sonne": "indirekt",
+      "frostMin": 15,
+      "duenger": "normal",
+      "bib": "Fittonia albivenis",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-07-08",
+      "notiz": "Testpflanze: Dünnblättrige (Klasse A), heute fällig",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-108",
+      "eigen": true,
+      "name": "Orchidee · Tauchen",
+      "art": "Schmetterlingsorchidee",
+      "botanisch": "Phalaenopsis",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Orchideen",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "keine",
+          "vogel": "keine"
+        },
+        "grund": "Ungiftig für alle vier Tierarten. Die Art wird in den Futterlisten für Nager und Ziervögel ausdrücklich als geeignet geführt.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgr3n2",
+      "stellplatz": "Fenster",
+      "typ": "Orchidee",
+      "sonne": "indirekt",
+      "frostMin": 16,
+      "duenger": "sparsam",
+      "bib": "Phalaenopsis",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-10-06",
+      "notiz": "Testpflanze: Rindenepiphyt, Gießart Tauchen",
+      "todo": [],
+      "log": [],
+      "giessart": "tauchen",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "rinde",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-109",
+      "eigen": true,
+      "name": "Guzmanie · Trichter",
+      "art": "Guzmanie",
+      "botanisch": "Guzmania lingulata",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Bromeliengewächse",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die ASPCA führt diese Art ausdrücklich als ungiftig für Katzen und Hunde. Große Mengen Pflanzenmaterial können wie bei jeder Pflanze den Magen verstimmen — eine Vergiftung ist daraus nicht zu erwarten.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgr3n2",
+      "stellplatz": "Fenster",
+      "typ": "Bromelie",
+      "sonne": "indirekt",
+      "frostMin": 15,
+      "duenger": "sparsam",
+      "bib": "Guzmania lingulata",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-08-07",
+      "notiz": "Testpflanze: Trichterbromelie",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-110",
+      "eigen": true,
+      "name": "Zyperngras · Sumpf",
+      "art": "Zyperngras",
+      "botanisch": "Cyperus alternifolius",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Sauergrasgewächse",
+      "klasse": "S",
+      "gift": {
+        "tiere": {
+          "katze": "unklar",
+          "hund": "unklar",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Die Quellen widersprechen sich oder es liegt für keine Tierart eine belastbare Angabe vor. Bis das geklärt ist, wie giftig behandeln und außer Reichweite stellen.",
+        "beleg": "-",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgr3n2",
+      "stellplatz": "Fenster",
+      "typ": "Sumpfpflanze",
+      "sonne": "hell",
+      "frostMin": 10,
+      "duenger": "normal",
+      "bib": "Cyperus alternifolius",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-05-09",
+      "notiz": "Testpflanze: Sumpfpflanze im Anstau",
+      "todo": [],
+      "log": [],
+      "giessart": "anstau",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-111",
+      "eigen": true,
+      "name": "Vivi · Venusfliegenfalle",
+      "art": "Venusfliegenfalle",
+      "botanisch": "Dionaea muscipula",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Sonnentaugewächse",
+      "klasse": "S",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Karnivoren sind für Wirbeltiere ungiftig — die Fallen fangen Insekten und können einem Tier nichts anhaben. Das Risiko liegt woanders: Karnivorensubstrat und das Gießwasser sind es nicht wert, dass ein Tier daran knabbert.",
+        "beleg": "F",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgpgbg",
+      "stellplatz": "Boden",
+      "typ": "Karnivore",
+      "sonne": "voll",
+      "frostMin": -5,
+      "duenger": "nie",
+      "bib": "Dionaea muscipula",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-11-10",
+      "notiz": "Testpflanze: Moorbeet im Anstau, lernt nicht; Untersetzer-Knöpfe",
+      "todo": [],
+      "log": [],
+      "giessart": "anstau",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-112",
+      "eigen": true,
+      "name": "Fettkraut · Winterrosette",
+      "art": "Fettkraut",
+      "botanisch": "Pinguicula",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Wasserschlauchgewächse",
+      "klasse": "S",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Karnivoren sind für Wirbeltiere ungiftig — die Fallen fangen Insekten und können einem Tier nichts anhaben. Das Risiko liegt woanders: Karnivorensubstrat und das Gießwasser sind es nicht wert, dass ein Tier daran knabbert.",
+        "beleg": "F",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Fensterbank",
+      "typ": "Karnivore",
+      "sonne": "hell",
+      "frostMin": 5,
+      "duenger": "nie",
+      "bib": "Pinguicula",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-04-09",
+      "notiz": "Testpflanze: Moorbeet-Gattung, mexikanisch: ruht trocken als Rosette",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-113",
+      "eigen": true,
+      "name": "Kannenpflanze",
+      "art": "Kannenpflanze",
+      "botanisch": "Nepenthes",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Kannenpflanzengewächse",
+      "klasse": "A",
+      "gift": {
+        "tiere": {
+          "katze": "keine",
+          "hund": "keine",
+          "nager": "unklar",
+          "vogel": "unklar"
+        },
+        "grund": "Karnivoren sind für Wirbeltiere ungiftig — die Fallen fangen Insekten und können einem Tier nichts anhaben. Das Risiko liegt woanders: Karnivorensubstrat und das Gießwasser sind es nicht wert, dass ein Tier daran knabbert.",
+        "beleg": "F",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgr3n2",
+      "stellplatz": "Fenster",
+      "typ": "Karnivore",
+      "sonne": "indirekt",
+      "frostMin": 15,
+      "duenger": "nie",
+      "bib": "Nepenthes",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-03-10",
+      "notiz": "Testpflanze: Kannenpflanze (eigene Gruppe)",
+      "todo": [],
+      "log": [],
+      "giessart": "",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-114",
+      "eigen": true,
+      "name": "Efeutute · Wasserkultur",
+      "art": "Efeutute",
+      "botanisch": "Epipremnum aureum",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Aronstabgewächse",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "mittel",
+          "hund": "mittel",
+          "nager": "mittel",
+          "vogel": "mittel"
+        },
+        "grund": "Unlösliche Calciumoxalat-Nadeln in allen Pflanzenteilen. Sie bohren sich beim Kauen in Maul, Zunge und Rachen: sofortiges Brennen, Speicheln, Schluckbeschwerden, in schweren Fällen Schwellung des Kehlkopfs. Der Schmerz setzt so schnell ein, dass die meisten Tiere von selbst aufhören — gefährlich wird es, wenn die Schwellung die Atemwege verlegt.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal oben",
+      "typ": "Kletterpflanze",
+      "sonne": "indirekt",
+      "frostMin": 12,
+      "duenger": "normal",
+      "bib": "Epipremnum aureum",
+      "eltern": null,
+      "linie": null,
+      "seit": "2026-06-28",
+      "notiz": "Testpflanze: Wasserkultur: Wasserwechsel statt Gießen",
+      "todo": [],
+      "log": [],
+      "giessart": "wasser",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "wasser",
+      "ablauf": "",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-115",
+      "eigen": true,
+      "name": "Gummibaum · Hydrokultur",
+      "art": "Gummibaum",
+      "botanisch": "Ficus elastica",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Maulbeergewächse",
+      "klasse": "B",
+      "gift": {
+        "tiere": {
+          "katze": "leicht",
+          "hund": "leicht",
+          "nager": "mittel",
+          "vogel": "mittel"
+        },
+        "grund": "Der weiße Milchsaft enthält Ficin und Ficusin. Er reizt Maul und Magen und macht die Haut lichtempfindlich. Meist bleibt es bei Speicheln und Erbrechen.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal unten",
+      "typ": "Baum",
+      "sonne": "hell",
+      "frostMin": 12,
+      "duenger": "normal",
+      "bib": "Ficus elastica",
+      "eltern": null,
+      "linie": null,
+      "seit": "2025-07-13",
+      "notiz": "Testpflanze: Hydrokultur: Wasserstand auffüllen",
+      "todo": [],
+      "log": [],
+      "giessart": "hydro",
+      "wichtig": "",
+      "speicher": "",
+      "topf": "12",
+      "topfform": "",
+      "substrat": "blaehton",
+      "ablauf": "ja",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "wichtig": "bib",
+        "frostMin": "bib"
+      }
+    },
+    {
+      "id": "E-116",
+      "eigen": true,
+      "name": "Monti-Ableger · Steckling",
+      "art": "Fensterblatt",
+      "botanisch": "Monstera deliciosa",
+      "sorte": "",
+      "sortenmerkmale": "",
+      "familie": "Aronstabgewächse",
+      "klasse": "B",
+      "raum": "rmuwtqrgrta8",
+      "stellplatz": "Regal unten",
+      "intervallEigen": false,
+      "bib": "Monstera deliciosa",
+      "eltern": "E-106",
+      "linie": null,
+      "seit": "2026-10-06",
+      "notiz": "Kopfsteckling am 6.10.2026, genommen von Monti · Mutter.\nErwartete Bewurzelung in etwa 4 Wochen.\nAus der Anzucht: Glas 1, angesetzt am 6. September 2026.",
+      "todo": [],
+      "log": [],
+      "gift": {
+        "tiere": {
+          "katze": "mittel",
+          "hund": "mittel",
+          "nager": "mittel",
+          "vogel": "mittel"
+        },
+        "grund": "Unlösliche Calciumoxalat-Nadeln in allen Pflanzenteilen. Sie bohren sich beim Kauen in Maul, Zunge und Rachen: sofortiges Brennen, Speicheln, Schluckbeschwerden, in schweren Fällen Schwellung des Kehlkopfs. Der Schmerz setzt so schnell ein, dass die meisten Tiere von selbst aufhören — gefährlich wird es, wenn die Schwellung die Atemwege verlegt.",
+        "beleg": "A2",
+        "quelle": "art",
+        "status": "fest",
+        "datum": "2026-10-06"
+      },
+      "typ": "Kletterpflanze",
+      "sonne": "indirekt",
+      "frostMin": 13,
+      "duenger": "normal",
+      "quellen": {
+        "art": "bib",
+        "botanisch": "bib",
+        "typ": "bib",
+        "klasse": "bib",
+        "sonne": "bib",
+        "frostMin": "bib"
+      }
+    }
+  ],
+  "zustand": {
+    "E-100": {
+      "code": "winterruhe",
+      "seit": "2026-10-06",
+      "bis": null,
+      "medium": null
+    },
+    "E-116": {
+      "code": "steckling",
+      "seit": "2026-10-06",
+      "bis": "2026-11-10",
+      "medium": null
+    }
+  },
+  "neueArten": [],
+  "blatt": {},
+  "vorrat": [],
+  "ereignisse": {
+    "E-106": [
+      {
+        "id": "emuwtqrh3pzh",
+        "datum": "2026-10-06",
+        "typ": "vermehrt",
+        "text": "Kopfsteckling",
+        "bezug": "E-116"
+      }
+    ],
+    "E-116": [
+      {
+        "id": "emuwtqrh4t38",
+        "datum": "2026-10-06",
+        "typ": "entstanden",
+        "text": "Kopfsteckling von Monti · Mutter",
+        "bezug": "E-106"
+      }
+    ]
+  },
+  "gesehen": {
+    "E-106": "2026-10-06",
+    "E-116": "2026-10-06"
+  },
+  "orte": {},
+  "acc": {
+    "giessen": 1,
+    "aufgaben": 1
+  },
+  "balkon": null,
+  "raeume": [
+    {
+      "id": "rmuwtqrgpgbg",
+      "name": "Balkon",
+      "sp": 6,
+      "re": 3,
+      "kacheln": {
+        "0,0": 1,
+        "1,0": 1,
+        "2,0": 1,
+        "3,0": 1,
+        "4,0": 1,
+        "5,0": 1,
+        "0,1": 1,
+        "1,1": 1,
+        "2,1": 1,
+        "3,1": 1,
+        "4,1": 1,
+        "5,1": 1,
+        "0,2": 1,
+        "1,2": 1,
+        "2,2": 1,
+        "3,2": 1,
+        "4,2": 1,
+        "5,2": 1
+      },
+      "kanten": {
+        "u:0,2": "bruestung",
+        "u:1,2": "bruestung",
+        "u:2,2": "bruestung",
+        "u:3,2": "bruestung",
+        "u:4,2": "bruestung",
+        "u:5,2": "bruestung",
+        "o:2,0": "tuer",
+        "o:3,0": "fenster"
+      },
+      "drehung": 90,
+      "dach": false,
+      "deckeH": 250,
+      "moebel": [],
+      "notiz": "",
+      "plaetze": [
+        "Brüstung"
+      ]
+    },
+    {
+      "id": "rmuwtqrgrta8",
+      "name": "Wohnzimmer",
+      "sp": 5,
+      "re": 4,
+      "kacheln": {
+        "0,0": 1,
+        "1,0": 1,
+        "2,0": 1,
+        "3,0": 1,
+        "4,0": 1,
+        "0,1": 1,
+        "1,1": 1,
+        "2,1": 1,
+        "3,1": 1,
+        "4,1": 1,
+        "0,2": 1,
+        "1,2": 1,
+        "2,2": 1,
+        "3,2": 1,
+        "4,2": 1,
+        "0,3": 1,
+        "1,3": 1,
+        "2,3": 1,
+        "3,3": 1,
+        "4,3": 1
+      },
+      "kanten": {},
+      "drehung": 180,
+      "dach": false,
+      "deckeH": 250,
+      "moebel": [],
+      "notiz": "",
+      "plaetze": [
+        "Regal oben",
+        "Regal unten"
+      ]
+    },
+    {
+      "id": "rmuwtqrgr3n2",
+      "name": "Bad",
+      "sp": 3,
+      "re": 2,
+      "kacheln": {
+        "0,0": 1,
+        "1,0": 1,
+        "2,0": 1,
+        "0,1": 1,
+        "1,1": 1,
+        "2,1": 1
+      },
+      "kanten": {},
+      "drehung": 90,
+      "dach": false,
+      "deckeH": 250,
+      "moebel": [],
+      "notiz": "",
+      "plaetze": [
+        "Fenster"
+      ]
+    }
+  ],
+  "raumAktiv": "rmuwtqrgpgbg",
+  "rundgang": null,
+  "meldeMail": "",
+  "sammlungOffen": null,
+  "design": "botanisch",
+  "wetter": {
+    "ort": null,
+    "lat": null,
+    "lon": null,
+    "stand": null,
+    "daten": null
+  },
+  "letzteSicherung": null,
+  "sicherFassung": null,
+  "startGesehen": null,
+  "grundrissWunsch": null,
+  "tutorial": {
+    "aus": false,
+    "kapitel": {},
+    "einricht": 0
+  },
+  "tiere": {
+    "aktiv": null,
+    "arten": [
+      "katze"
+    ]
+  },
+  "feuchtRueck": {},
+  "dichte": "normal",
+  "heuteWetter": true,
+  "heuteKennzahlen": false,
+  "kiModell": null,
+  "kiModelle": null,
+  "rundeAngeboten": null,
+  "dueng": {},
+  "duengLangzeit": {},
+  "giess": {
+    "art": "leitung",
+    "haerte": "",
+    "dgArt": "fluessig",
+    "winterpause": true,
+    "saison": true,
+    "saisonStaerke": "normal"
+  },
+  "ablegerErbe": 1,
+  "ansicht": null,
+  "anzucht": {
+    "bereiche": [],
+    "gefaesse": [
+      {
+        "id": "AZG-muwtqrgy0ffw",
+        "name": "Glas 1",
+        "medium": "wasser",
+        "bereich": null,
+        "start": "2026-09-06",
+        "abstand": 7,
+        "gewechselt": [
+          "2026-09-27"
+        ]
+      }
+    ],
+    "gruppen": [
+      {
+        "id": "AZR-muwtqrgz42ag",
+        "gefaess": "AZG-muwtqrgy0ffw",
+        "anzahl": 2,
+        "methode": "Steckling",
+        "methodeId": "kopfsteckling",
+        "mutter": "E-106",
+        "mutterName": "Monti · Mutter",
+        "art": "Fensterblatt",
+        "botanisch": "Monstera deliciosa",
+        "sorte": "",
+        "start": "2026-09-06",
+        "verlauf": [
+          {
+            "datum": "2026-10-06",
+            "typ": "eingetopft",
+            "text": "1 eingetopft"
+          }
+        ]
+      }
+    ]
+  },
+  "einfach": null,
+  "fassungGesehen": "4.0-beta.1",
+  "gruppierung": null,
+  "hinweisWeg": null,
+  "histAnsicht": null,
+  "installBandWeg": null,
+  "installiert": null,
+  "kartei": null,
+  "kartenTab": null,
+  "kiDienst": null,
+  "pflegehinweise": null,
+  "samAnsicht": null,
+  "sicherTage": null,
+  "sortierung": null,
+  "speicherFest": null,
+  "speicherGefragt": null,
+  "teilenDefekt": null,
+  "umtopfPlan": null,
+  "bereinigtFassung": "3.31.0",
+  "idHoch": 116
+}
