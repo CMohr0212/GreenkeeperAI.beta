@@ -27,7 +27,7 @@ let zahl = 0;
 const dom = new JSDOM(html, {
   runScripts: 'dangerously',
   pretendToBeVisual: true,
-  url: 'https://cmohr0212.github.io/GreenkeeperAi/',
+  url: 'https://cmohr0212.github.io/GreenkeeperAI.beta/',
   beforeParse(w) {
     w.matchMedia = q => ({ matches: false, media: q, addListener(){}, removeListener(){},
       addEventListener(){}, removeEventListener(){}, onchange: null });
@@ -156,9 +156,9 @@ setTimeout(async () => {
   pruef('DESIGNS vorhanden', typeof w.__T('DESIGNS') === 'object');
   pruef('S.design gesetzt', w.__T('S.design') === 'botanisch', w.__T('S.design'));
   pruef('Zweitschlüssel geschrieben',
-    w.localStorage.getItem('gk-design') === 'botanisch',
-    w.localStorage.getItem('gk-design'));
-  pruef('FASSUNG 3.31.0', w.__T('FASSUNG') === '3.31.0', w.__T('FASSUNG'));
+    w.localStorage.getItem('gk-beta-design') === 'botanisch',
+    w.localStorage.getItem('gk-beta-design'));
+  pruef('FASSUNG 4.0-beta.1', w.__T('FASSUNG') === '4.0-beta.1', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -168,7 +168,7 @@ setTimeout(async () => {
     pruef('→ ' + n,
       d.documentElement.getAttribute('data-design') === n
       && w.__T('S.design') === n
-      && w.localStorage.getItem('gk-design') === n
+      && w.localStorage.getItem('gk-beta-design') === n
       && d.querySelector(`[data-design-go="${n}"]`).getAttribute('aria-pressed') === 'true'
       && d.querySelectorAll('[data-design-go][aria-pressed="true"]').length === 1);
   });
@@ -206,8 +206,8 @@ setTimeout(async () => {
 
   const alt = { ansicht: 'heute', ansichtAlles: false, einfach: false,
     tasks: {}, water: {}, profil: {}, eigene: [], zustand: {} };
-  w.localStorage.setItem('pflanzenglossar-start', JSON.stringify(alt));
-  w.localStorage.removeItem('gk-design');
+  w.localStorage.setItem('gk-beta', JSON.stringify(alt));
+  w.localStorage.removeItem('gk-beta-design');
   try {
     w.__T('S = LEERSTAND(); laden();');
     pruef('Zustand ohne design ergänzt', w.__T('S.design') === 'botanisch', w.__T('S.design'));
@@ -10263,10 +10263,10 @@ setTimeout(async () => {
       && d.getElementById('sich-pflicht-ohne').hidden === true);
     d.getElementById('sich-pflicht-los').click(); await tick(); await tick();
     w.URL.createObjectURL = altUrl; w.URL.revokeObjectURL = altRev; w.HTMLAnchorElement.prototype.click = altKlick;
-    pruef('3.31.0: Der Download startet mit dem Sicherungsnamen', geladen === 'pflanzen-sicherung.json', String(geladen));
+    pruef('3.31.0: Der Download startet mit dem Sicherungsnamen', geladen === 'pflanzen-sicherung-BETA.json', String(geladen));
     pruef('3.31.0: Nach dem Download ist das Fenster zu', T(`modalOffen('sich-pflicht')`) === false);
     pruef('3.31.0: Nach dem Download ist bereinigt', T(`'edits' in S`) === false && T('S.bereinigtFassung') === '3.31.0');
-    pruef('3.31.0: Danach kommt „Neu in Fassung“', T(`modalOffen('neu-modal')`) === true);
+    pruef('3.31.0/beta.1: Danach kein „Neu in Fassung“ für 3.31.0 (die Beta hat keinen eigenen Eintrag)', T(`modalOffen('neu-modal')`) === false);
     if(T(`modalOffen('neu-modal')`)){ T(`modalZu('neu-modal')`); await tick(); }
     pruef('3.31.0: Ein zweiter Start zeigt kein Fenster', T(`sicherungPflichtZeigen()`) === false);
     zurueck(); T('render()');
@@ -10292,6 +10292,116 @@ setTimeout(async () => {
     pruef('3.31.0: PFLANZEN gibt es nicht mehr', T('typeof PFLANZEN') === 'undefined');
     pruef('3.31.0: Kein Aufruf von karteNeuZeichnen', html.indexOf('karteNeuZeichnen') === -1);
     pruef('3.31.0: Keine CSS-Regel für #weg-liste und .raum-batch', html.indexOf('#weg-liste') === -1 && html.indexOf('.raum-batch') === -1);
+  }
+
+
+  /* ══ 4.0-beta.1: Beta-Fundament ══
+     Die Beta benutzt eigene Schlüssel, einen eigenen Fotospeicher und
+     einen eigenen Zwischenspeicher. Sie liest und schreibt nie den
+     Speicher der echten App (Regel 6.10). Jeder Test legt seine Daten
+     selbst an. */
+  {
+    const T = c => w.__T(c);
+    const ECHT = {'pflanzenglossar-start': JSON.stringify({eigene:[{id:'E-ECHT', name:'Echte Pflanze'}], water:{}}),
+                  'gk-design': 'terrarium',
+                  'pflanzenglossar-start:kischluessel': 'ECHT-SCHLUESSEL',
+                  'pflanzenglossar-start:vorher': 'ECHT-VORHER'};
+    Object.keys(ECHT).forEach(k => w.localStorage.setItem(k, ECHT[k]));
+    /* Speicherspion: merkt sich jeden Schlüssel, den die App liest oder schreibt. */
+    const SP = w.Storage.prototype, alt = {g:SP.getItem, s:SP.setItem, r:SP.removeItem};
+    const benutzt = [];
+    SP.getItem = function(k){ benutzt.push('lesen:' + k); return alt.g.call(this, k); };
+    SP.setItem = function(k, v){ benutzt.push('schreiben:' + k); return alt.s.call(this, k, v); };
+    SP.removeItem = function(k){ benutzt.push('loeschen:' + k); return alt.r.call(this, k); };
+    let lauf = 'ok';
+    try{
+      T('S = LEERSTAND(); laden();');
+      T(`S.eigene = [{id:'E-9901', name:'Beta-Test', art:'Monstera deliciosa'}]; sichern();`);
+      d.querySelector('[data-design-go="klartext"]').click();
+      d.querySelector('[data-design-go="botanisch"]').click();
+      T(`kiSchluesselSetzen('BETA-SCHLUESSEL'); kiSchluessel();`);
+      /* Sicherung einlesen über den echten Weg (Datei wählen). */
+      const sich = JSON.stringify({__app:'greenkeeperai', __fassung:'3.31.0', eigene:[{id:'E-9902', name:'Aus Sicherung'}],
+        water:{}, fassungGesehen:'3.31.0', bereinigtFassung:'3.31.0'});
+      const inp = d.getElementById('import-file');
+      Object.defineProperty(inp, 'files', {value:[new w.File([sich], 'pflanzen-sicherung.json', {type:'application/json'})], configurable:true});
+      inp.onchange();
+      await tick(); await tick();
+    }catch(e){ lauf = e.message; }
+    SP.getItem = alt.g; SP.setItem = alt.s; SP.removeItem = alt.r;
+    pruef('beta.1: Der Ablauf läuft ohne Fehler', lauf === 'ok', lauf);
+    const fremd = benutzt.filter(x => !/:gk-beta(-design)?(:|$)/.test(x));
+    pruef('beta.1: Die App benutzt nur Schlüssel mit gk-beta', fremd.length === 0, fremd.join(', '));
+    pruef('beta.1: Die App hat unter gk-beta gespeichert', benutzt.indexOf('schreiben:gk-beta') > -1);
+    pruef('beta.1: Der Designschlüssel heißt gk-beta-design', w.localStorage.getItem('gk-beta-design') === 'botanisch');
+    pruef('beta.1: Der KI-Schlüssel liegt unter gk-beta', w.localStorage.getItem('gk-beta:kischluessel') === 'BETA-SCHLUESSEL');
+    const unveraendert = Object.keys(ECHT).filter(k => w.localStorage.getItem(k) !== ECHT[k]);
+    pruef('beta.1: Die Schlüssel der echten App sind unverändert', unveraendert.length === 0, unveraendert.join(', '));
+    pruef('beta.1: Die echte Pflanze taucht in der Beta nicht auf', T(`JSON.stringify(S).indexOf('E-ECHT')`) === -1);
+    pruef('beta.1: Die Sicherung wurde eingelesen', T(`S.eigene.some(function(p){ return p.id === 'E-9902'; })`) === true);
+    pruef('beta.1: Nach dem Einlesen kein Sicherungsfenster', T(`modalOffen('sich-pflicht')`) === false);
+    pruef('beta.1: Der Fotospeicher heißt gk-beta-fotos', T('FOTO_DB') === 'gk-beta-fotos');
+    pruef('beta.1: In der Datei steht kein Schlüssel der echten App',
+      html.indexOf('pflanzenglossar-start') === -1 && html.indexOf("'gk-design'") === -1 && html.indexOf('greenkeeper-fotos') === -1);
+
+    /* Kein „Neu in Fassung 3.31.0“ beim nächsten Start nach dem Einlesen */
+    if(T(`modalOffen('neu-modal')`)){ T(`modalZu('neu-modal')`); await tick(); }
+    T(`S.fassungGesehen = '3.31.0'; _sichPflichtFrei = true; fassungPruefen();`);
+    await tick();
+    pruef('beta.1: Kein „Neu in Fassung“ für 3.31.0', T(`modalOffen('neu-modal')`) === false
+      && d.getElementById('neu-titel').textContent.indexOf('3.31.0') === -1);
+    pruef('beta.1: Die Fassung gilt danach als gesehen', T('S.fassungGesehen') === '4.0-beta.1', T('S.fassungGesehen'));
+
+    /* Kennzeichen (F37) und Name (F39) */
+    const band = d.getElementById('beta-band');
+    pruef('beta.1: Das Band zeigt BETA und die Fassung', !!band && band.textContent === 'BETA 4.0-beta.1 · Testdaten', band && band.textContent);
+    pruef('beta.1: Das Band fängt keine Tipps ab', html.indexOf('#beta-band{position:fixed;top:0;left:0;right:0;z-index:2147483000;pointer-events:none;') > -1);
+    pruef('beta.1: Titel GK Beta', d.title === 'GK Beta', d.title);
+
+    /* Keine Benachrichtigungen (F38) */
+    const altSw = Object.getOwnPropertyDescriptor(w.navigator, 'serviceWorker');
+    const altPerm = w.Notification.permission;
+    let gemeldet = false;
+    Object.defineProperty(w.navigator, 'serviceWorker', {configurable:true,
+      value:{ get ready(){ gemeldet = true; return Promise.resolve({showNotification(){ gemeldet = true; }}); } }});
+    w.__ki.gefragt = false;
+    T(`(function(){ var alt = eigenstaendigGestartet; eigenstaendigGestartet = function(){ return true; };
+       try{ karteiErlaubnisFragen(); } finally { eigenstaendigGestartet = alt; } })()`);
+    w.Notification.permission = 'granted';
+    Object.defineProperty(d, 'hidden', {configurable:true, get(){ return true; }});
+    T(`karteiMelden({fertig:{a:{stand:'ok'}}, alle:['a']})`);
+    await tick();
+    delete d.hidden;
+    w.Notification.permission = altPerm;
+    Object.defineProperty(w.navigator, 'serviceWorker', altSw);
+    pruef('beta.1: Die Beta fragt nicht nach Benachrichtigungen', w.__ki.gefragt === false);
+    pruef('beta.1: Die Beta schickt keine Benachrichtigung', gemeldet === false);
+
+    /* Sicherungsdatei (F40) */
+    pruef('beta.1: Die Sicherungsdatei heißt pflanzen-sicherung-BETA.json', T('sicherungDatei().name') === 'pflanzen-sicherung-BETA.json', T('sicherungDatei().name'));
+    pruef('beta.1: Die Sicherung trägt die Beta-Fassung', JSON.parse(T('sicherungInhalt()')).__fassung === '4.0-beta.1');
+
+    /* sw.js mit Attrappen: löscht nur eigene alte Stände */
+    const vm = require('vm');
+    const ereignisse = {}, geloescht = [];
+    const selbst = {addEventListener:(n, f) => { ereignisse[n] = f; }, clients:{claim:() => Promise.resolve()},
+      location:{origin:'https://cmohr0212.github.io'}};
+    const kiste = {self:selbst, URL, Promise,
+      caches:{keys:() => Promise.resolve(['greenkeeperai-v127', 'greenkeeperai-beta-0', 'greenkeeperai-beta-1', 'anderes']),
+              delete:n => { geloescht.push(n); return Promise.resolve(true); }}};
+    vm.runInNewContext(fs.readFileSync('sw.js', 'utf8'), kiste);
+    let warten = null;
+    ereignisse.activate({waitUntil:p => { warten = p; }});
+    await warten;
+    pruef('beta.1: sw.js löscht den alten Beta-Stand', geloescht.indexOf('greenkeeperai-beta-0') > -1, geloescht.join(','));
+    pruef('beta.1: sw.js lässt den Speicher der echten App stehen', geloescht.indexOf('greenkeeperai-v127') === -1, geloescht.join(','));
+    pruef('beta.1: sw.js lässt fremde Speicher stehen', geloescht.indexOf('anderes') === -1 && geloescht.indexOf('greenkeeperai-beta-1') === -1, geloescht.join(','));
+
+    /* Manifest (F39) */
+    let man = {};
+    try{ man = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8')); }catch(e){}
+    pruef('beta.1: Manifest heißt GK Beta', man.short_name === 'GK Beta' && man.name === 'GreenkeeperAI Beta', man.short_name);
+    pruef('beta.1: Manifest bleibt im eigenen Pfad', man.start_url === './' && man.scope === './' && man.id === './');
   }
 
   console.log('\n── Ergebnis ──');

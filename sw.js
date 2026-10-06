@@ -5,7 +5,11 @@
    nächsten Öffnen die neue Fassung.
    ══════════════════════════════════════════════════════════════ */
 
-const VERSION = 'greenkeeperai-v127';
+/* Beta: eigener Name. Alle Seiten unter cmohr0212.github.io teilen sich
+   die Zwischenspeicher. Die Beta löscht deshalb nur ihre eigenen alten
+   Stände (Präfix `greenkeeperai-beta-`), nie den der echten App. */
+const PRAEFIX = 'greenkeeperai-beta-';
+const VERSION = PRAEFIX + '1';
 const DATEIEN = [
   './',
   './index.html',
@@ -28,7 +32,7 @@ self.addEventListener('install', ev=>{
 self.addEventListener('activate', ev=>{
   ev.waitUntil(
     caches.keys()
-      .then(namen=>Promise.all(namen.filter(n=>n !== VERSION).map(n=>caches.delete(n))))
+      .then(namen=>Promise.all(namen.filter(n=>n.indexOf(PRAEFIX) === 0 && n !== VERSION).map(n=>caches.delete(n))))
       .then(()=>self.clients.claim())
   );
 });

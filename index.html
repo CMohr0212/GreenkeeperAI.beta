@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GreenkeeperAi</title>
+<title>GK Beta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>
@@ -14,7 +14,7 @@
    Designname zusätzlich in einem eigenen, winzigen Schlüssel. */
 (function(){
   var d = 'botanisch';
-  try{ var g = localStorage.getItem('gk-design');
+  try{ var g = localStorage.getItem('gk-beta-design');
        if(g === 'klartext' || g === 'terrarium' || g === 'botanisch') d = g; }catch(e){}
   document.documentElement.setAttribute('data-design', d);
 })();
@@ -3605,11 +3605,19 @@ html[data-design="botanisch"] #karte-rumpf .alert{border-radius:var(--r-mittel)}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="GreenkeeperAi">
+<meta name="apple-mobile-web-app-title" content="GK Beta">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" href="./icon-192.png" sizes="192x192">
+<style>
+/* Beta-Kennzeichen (F37): immer sichtbar, fängt keine Tipps ab. */
+#beta-band{position:fixed;top:0;left:0;right:0;z-index:2147483000;pointer-events:none;
+  padding:calc(env(safe-area-inset-top, 0px) + 1px) 8px 1px;text-align:center;
+  font:600 10px/14px system-ui,-apple-system,sans-serif;letter-spacing:.06em;
+  background:#E8A317;color:#1D1300}
+</style>
 </head>
 <body>
+<div id="beta-band">BETA · Testdaten</div>
 <script>
 /* ══════════════════════════════════════════════════════════════
    NEUE PFLANZE AUFNEHMEN
@@ -11186,7 +11194,7 @@ const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const hatBilder = typeof BILDER !== 'undefined';
 
 /* ══════════════════ Zustand ══════════════════ */
-const KEY = 'pflanzenglossar-start';
+const KEY = 'gk-beta';
 
 /* Wohin Rückmeldungen gehen. Beides ist vorbelegt, damit niemand erst
    etwas eintragen muss — die Mailadresse lässt sich unter „Mehr“
@@ -11203,7 +11211,12 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 
    Die Einträge vor 1.3 sind nachträglich zusammengetragen — die
    frühen Uploads liegen ohne Beschreibung im Verlauf. */
-const FASSUNG = '3.31.0';
+/* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
+   PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
+   einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
+const FASSUNG = '4.0-beta.1';
+(function(){ const b = document.getElementById('beta-band');
+  if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
    CHANGELOG. `sicherung:true` heißt: Diese Fassung löscht alte Daten
    und verlangt vorher eine Sicherung. Der neueste so markierte Eintrag
@@ -11469,7 +11482,7 @@ const DESIGNS = {
               kartendetail:'reiter', dichte:'voll',   statistiken:true,
               leiste:'#0C1810', dunkel:'#0C1810'}
 };
-const DESIGN_SCHLUESSEL = 'gk-design';
+const DESIGN_SCHLUESSEL = 'gk-beta-design';
 
 /* ── Miniaturen ───────────────────────────────────────────────
    Die Vorschau wird nicht gemalt, sondern aus denselben Tokens
@@ -11782,7 +11795,7 @@ function laden(){
    ganz normales Objekt im Arbeitsspeicher und wird überall gelesen wie
    bisher. Nur beim Sichern wird es aus dem kleinen Speicher heraus- und
    in den grossen hineingeschrieben. */
-const FOTO_DB = 'greenkeeper-fotos';
+const FOTO_DB = 'gk-beta-fotos';
 const FOTO_LADEN = 'bilder';
 let fotoDb = null;
 let FOTOS_BEREIT = false;   /* Sperre: nicht speichern, bevor gelesen wurde */
@@ -16041,7 +16054,7 @@ document.addEventListener('click', e=>{
 /* Ein Name für beide Wege — Herunterladen und Teilen. Ohne Datum,
    damit jede neue Sicherung die vorherige ersetzt, statt sich zu
    fünfzig Dateien im Download-Ordner zu stapeln. */
-const SICHERUNG_NAME = 'pflanzen-sicherung.json';
+const SICHERUNG_NAME = 'pflanzen-sicherung-BETA.json';
 
 /* Gibt true zurück, wenn gespeichert oder der Download gestartet ist,
    false, wenn der Speichern-Dialog abgebrochen wurde. Ein echter
@@ -18433,7 +18446,10 @@ function fassungPruefen(){
   S.fassungGesehen = FASSUNG;
   sichern();
   if(erstinstallation) return;
-  const eintrag = PATCHNOTES.find(e=>e.nr === FASSUNG) || PATCHNOTES[0];
+  /* Ohne eigenen Eintrag (Beta) kein Fenster. Früher fiel die App hier auf
+     den obersten Eintrag zurück und zeigte nach dem Einlesen einer
+     Sicherung „Neu in Fassung 3.31.0“. */
+  const eintrag = PATCHNOTES.find(e=>e.nr === FASSUNG);
   if(eintrag) neuFensterZeigen(eintrag);
 }
 
@@ -28894,8 +28910,12 @@ function karteiFertig(){
 /* ── Benachrichtigung ────────────────────────────────────────
    Nur in der installierten App: wer sie im Browsertab offen hat,
    sieht die Leiste. Und nur, wenn gerade niemand hinsieht. */
+/* Die Beta schickt keine Benachrichtigungen (F38): Die Erlaubnis gilt für
+   alle Seiten unter cmohr0212.github.io gemeinsam. */
+const BENACHRICHTIGUNGEN = false;
 function karteiErlaubnisFragen(){
   try{
+    if(!BENACHRICHTIGUNGEN) return;
     if(typeof Notification === 'undefined') return;
     if(typeof eigenstaendigGestartet === 'function' && !eigenstaendigGestartet()) return;
     if(Notification.permission === 'default') Notification.requestPermission();
@@ -28903,6 +28923,7 @@ function karteiErlaubnisFragen(){
 }
 function karteiMelden(k){
   try{
+    if(!BENACHRICHTIGUNGEN) return;
     if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     if(!document.hidden) return;
     const n = Object.keys(k.fertig).filter(id=>k.fertig[id].stand === 'ok'
