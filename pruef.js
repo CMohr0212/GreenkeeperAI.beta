@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.1', w.__T('FASSUNG') === '4.0-beta.1', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.3', w.__T('FASSUNG') === '4.0-beta.3', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -295,15 +295,20 @@ setTimeout(async () => {
   await zu('gift-modal');
   pruef('nach Aufheben schließt es', stapel().length === 0);
 
-  const knopf = d.querySelector('[data-design-go="klartext"]');
-  w.__T("modalAuf('gift-modal', document.querySelector('[data-design-go=\\'klartext\\']'))");
+  /* beta.2: Ein sichtbarer Auslöser. jsdom 30.1 fokussiert nichts in einem
+     versteckten Bereich, und der Designknopf liegt in einem eingeklappten
+     Mehr-Bereich. */
+  const knopf = d.createElement('button'); knopf.id = 'fokus-ausloeser'; knopf.textContent = 'Test';
+  d.body.appendChild(knopf);
+  w.__T("modalAuf('gift-modal', document.getElementById('fokus-ausloeser'))");
   await zu('gift-modal');
   pruef('Fokus kehrt zum Auslöser zurück', d.activeElement === knopf, d.activeElement && d.activeElement.id);
   /* 3.28.1: Sofort wieder geschlossen — der verzoegerte Titelfokus darf
      danach nicht mehr in das versteckte Fenster springen. */
-  w.__T("modalAuf('gift-modal', document.querySelector('[data-design-go=\\'klartext\\']')); _modalWeg('gift-modal');");
+  w.__T("modalAuf('gift-modal', document.getElementById('fokus-ausloeser')); _modalWeg('gift-modal');");
   await tick();
   pruef('Sofort geschlossen: Fokus bleibt am Auslöser', d.activeElement === knopf, d.activeElement && (d.activeElement.id || d.activeElement.tagName));
+  knopf.remove();
   try{ w.history.back(); }catch(e){}
   await tick();
 
@@ -869,16 +874,11 @@ setTimeout(async () => {
      Ohne Frist wartete sie unbegrenzt, wenn Google langsam antwortete
      statt „\u00fcberlastet" zu melden. */
   {
-    pruef('Es gibt eine Frist f\u00fcr Anfragen mit Bild',
-      w.__T('KI_FRIST_BILD') === 30000, String(w.__T('KI_FRIST_BILD')));
-    pruef('und eine k\u00fcrzere f\u00fcr Anfragen ohne',
-      w.__T('KI_FRIST_TEXT') === 15000, String(w.__T('KI_FRIST_TEXT')));
-    pruef('Die Frist mit Bild ist die l\u00e4ngere',
-      w.__T('KI_FRIST_BILD') > w.__T('KI_FRIST_TEXT'));
-    pruef('Nachgefasst wird nur noch einmal',
-      w.__T('KI_NACHFASSEN.length') === 1, String(w.__T('KI_NACHFASSEN.length')));
-    pruef('und zwar z\u00fcgig',
-      w.__T('KI_NACHFASSEN[0]') <= 2000, String(w.__T('KI_NACHFASSEN[0]')));
+    /* 3.32.0: eine Grenze von zwei Minuten als Sicherheitsnetz, kein Nachfassen. */
+    pruef('Es gibt eine Frist f\u00fcr Anfragen (3.32.0: 120 s)',
+      w.__T('KI_FRIST') === 120000, String(w.__T('KI_FRIST')));
+    pruef('Nachgefasst wird nicht mehr (3.32.0)',
+      w.__T("typeof KI_NACHFASSEN") === 'undefined' && w.__T("typeof kiFragenHartnaeckig") === 'undefined');
   }
 
   /* Die eigene Frage: sie ist der Anlass und muss im Prompt stehen. */
@@ -2972,15 +2972,16 @@ setTimeout(async () => {
     pruef('Die Grundriss-Frage bleibt', !!d.querySelector('[data-wk="3"] [data-wkplan]'));
 
     /* Rueckweg-Hinweise an jedem Ausgang */
-    const hinweisAuf = el => el && /Mehr\s*\u203a\s*App Tour/.test(el.textContent);
+    /* beta.3: „Mehr“ heißt hinter dem Zahnrad „Einstellungen“. */
+    const hinweisAuf = el => el && /Einstellungen\s*\u203a\s*App Tour/.test(el.textContent);
     pruef('Willkommen Schritt 1 nennt den R\u00fcckweg',
       hinweisAuf(d.querySelector('[data-wk="1"]')));
     pruef('Willkommen Schritt 4 nennt den R\u00fcckweg',
       hinweisAuf(d.querySelector('[data-wk="4"]')));
     pruef('Der Schlussschritt der Runde nennt ihn',
-      /Mehr \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[6].text')));
+      /Einstellungen \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[6].text')));
     pruef('Der \u00dcberspringen-Knopf nennt ihn',
-      html.indexOf('Du findest die Runde jederzeit unter Mehr \u203a App Tour wieder.') !== -1);
+      html.indexOf('Du findest die Runde jederzeit unter Einstellungen \u203a App Tour wieder.') !== -1);
 
     /* Ersteinrichtung bleibt, startet aber nie von allein */
     pruef('Die Ersteinrichtung ist noch da', !!w.__T('TOUR_KAPITEL.einricht'));
@@ -3163,8 +3164,8 @@ setTimeout(async () => {
     }`);
     await w.__T('kiModelleHolen()');
     const liste = w.__T('kiModelle()');
-    pruef('Embedding und Imagen fliegen aus der Liste',
-      liste.length === 3, JSON.stringify(liste.map(m=>m.id)));
+    pruef('Embedding, Imagen und Vorschau fliegen aus der Liste (3.32.0: Positivliste)',
+      liste.length === 2, JSON.stringify(liste.map(m=>m.id)));
     pruef('Empfohlen ist das neueste stabile Modell',
       liste[0].id === 'models/gemini-3-flash' && liste[0].empfohlen === true, liste[0].id);
     pruef('Das Empfohlene ist gesetzt', w.__T('S.kiModell') === 'models/gemini-3-flash');
@@ -3198,7 +3199,11 @@ setTimeout(async () => {
       catch(e){ return String(e.message || e); }
     };
     const f400 = await fehler(400);
-    pruef('400 nennt den Schlüssel', /400/.test(f400) && /Schl/.test(f400), f400);
+    pruef('400 nennt das Modell, nicht den Schlüssel (3.32.0)', /400/.test(f400) && !/Schl/.test(f400) && /3 Flash/.test(f400), f400);
+    w.__T('window.fetch = () => Promise.resolve({ok:false, status:400, json:()=>Promise.resolve({error:{message:"API key not valid. Please pass a valid API key."}})})');
+    let f400k = '';
+    try{ await w.__T("kiFragen('x', [])"); }catch(e){ f400k = String(e.message || e); }
+    pruef('400 mit Schlüsselfehler nennt den Schlüssel (3.32.0)', /400/.test(f400k) && /Schl/.test(f400k), f400k);
     const f429 = await fehler(429);
     pruef('429 nennt das Kontingent', /Kontingent/.test(f429), f429);
     const f403 = await fehler(403);
@@ -3279,8 +3284,9 @@ setTimeout(async () => {
       String(d.querySelectorAll('.ki-modell-wahl').length));
     w.__T('kiModellZeichnen()');
     const wahlen = [...d.querySelectorAll('.ki-modell-wahl')];
+    /* 3.32.0: Die Vorschau fällt aus der Liste (Positivliste), es bleiben zwei. */
     pruef('Alle Auswahlen zeigen dieselbe Liste',
-      wahlen.length === 4 && wahlen.every(x => x.options.length === 3));
+      wahlen.length === 4 && wahlen.every(x => x.options.length === 2));
     pruef('Das Empfohlene trägt ein Häkchen',
       wahlen[0].options[0].textContent.indexOf('\u2713') > -1, wahlen[0].options[0].textContent);
     pruef('Das Abzeichen steht am empfohlenen Modell',
@@ -3544,104 +3550,24 @@ setTimeout(async () => {
     await tick();
   }
 
-  /* ══ 503: nachfassen und ausweichen ════════════════════════════
-     Ein 503 heisst, dass Google die Rechenleistung ausgeht — nicht,
-     dass der Schluessel falsch waere oder die Bilder zu gross. Vorher
-     abfragen laesst sich das nicht, also wird es abgefangen. */
+  /* ══ 503: seit 3.32.0 kein Nachfassen und kein Ausweichen ══════
+     Ein Tipp, eine Anfrage. Der Nutzer entscheidet, ob noch einmal
+     oder mit einem anderen Modell gefragt wird. */
   {
     w.__T("kiSchluesselSetzen('" + ATTRAPPE + "')");
     w.__T(`S.kiModelle = [
       {id:'models/gemini-3.6-flash', anzeige:'3.6 Flash', empfohlen:true},
       {id:'models/gemini-3.5-flash', anzeige:'3.5 Flash'},
-      {id:'models/gemini-3-flash', anzeige:'3 Flash'},
-      {id:'models/gemini-3-flash-lite', anzeige:'3 Flash Lite'},
-      {id:'models/gemini-2.5-flash', anzeige:'2.5 Flash'}];
+      {id:'models/gemini-3-flash', anzeige:'3 Flash'}];
       S.kiModell = 'models/gemini-3.6-flash'`);
-    /* Die Wartezeiten werden fuer den Pruefstand auf 5 ms gekuerzt.
-       Die LAENGE bleibt, wie sie in der App steht — sie bestimmt,
-       wie oft nachgefasst wird, und darf hier nicht verstellt
-       werden, sonst prueft man eine andere Leiter als die echte. */
-    w.__T('KI_NACHFASSEN.forEach(function(_, i){ KI_NACHFASSEN[i] = 5; })');
-
-    const kette = () => w.__T("kiAusweichModelle('models/gemini-3.6-flash').map(m=>m.anzeige)");
-    pruef('Ausgewichen wird auf das naechstaeltere, nicht auf irgendein altes',
-      JSON.stringify(kette()) === '["3.5 Flash","3 Flash"]', JSON.stringify(kette()));
-    pruef('Auf eine Lite-Variante nie',
-      kette().every(x => !/Lite/.test(x)));
-    pruef('Nie mehr als eine Generation zurueck',
-      kette().every(x => !/2\.5/.test(x)));
-    pruef('Hoechstens zwei Schritte', kette().length <= 2);
-
-    /* Kurze Lastspitze: dasselbe Modell, zweiter Versuch klappt.
-       Seit 3.3.1 wird genau einmal nachgefasst — wer laenger wartet,
-       wartet meistens umsonst. */
-    w.__T(`window.__n = 0; window.fetch = () => { window.__n++;
-      return window.__n < 2
-        ? Promise.resolve({ok:false, status:503, json:()=>Promise.resolve({error:{message:'high demand'}})})
-        : Promise.resolve({ok:true, status:200, json:()=>Promise.resolve({candidates:[{content:{parts:[{text:'ART: Efeutute'}]}, finishReason:'STOP'}]})});
-    }`);
-    const r1 = await w.__T("kiFragenHartnaeckig('x', [])");
-    pruef('Bei 503 wird einmal nachgefasst', w.__T('window.__n') === 2,
-      String(w.__T('window.__n')));
-    pruef('Dafuer braucht es keinen Modellwechsel',
-      r1.gewechselt === false && r1.modell.id === 'models/gemini-3.6-flash');
-    pruef('Die Antwort kommt trotzdem an', r1.text === 'ART: Efeutute');
-
-    /* Beim dritten Fehlschlag desselben Modells ist Schluss mit
-       Nachfassen — dann zaehlt Tempo. */
-    w.__T('for(const k in KI_UEBERLASTET) delete KI_UEBERLASTET[k]');
-    w.__T(`window.__n = 0; window.fetch = () => { window.__n++;
-      return window.__n < 3
-        ? Promise.resolve({ok:false, status:503, json:()=>Promise.resolve({error:{message:'high demand'}})})
-        : Promise.resolve({ok:true, status:200, json:()=>Promise.resolve({candidates:[{content:{parts:[{text:'ART: Efeutute'}]}, finishReason:'STOP'}]})});
-    }`);
-    const r1b = await w.__T("kiFragenHartnaeckig('x', [])");
-    pruef('Beim zweiten Fehlschlag wird gewechselt statt gewartet',
-      r1b.gewechselt === true && r1b.modell.id === 'models/gemini-3.5-flash',
-      r1b.modell.id);
-
-    /* Bleibt es voll, uebernimmt das naechste Modell. */
-    w.__T('for(const k in KI_UEBERLASTET) delete KI_UEBERLASTET[k]');
-    w.__T(`window.__n = 0; window.fetch = (u) => { window.__n++;
-      return String(u).indexOf('3.6-flash') > -1
-        ? Promise.resolve({ok:false, status:503, json:()=>Promise.resolve({error:{message:'high demand'}})})
-        : Promise.resolve({ok:true, status:200, json:()=>Promise.resolve({candidates:[{content:{parts:[{text:'ART: Efeutute'}]}, finishReason:'STOP'}]})});
-    }`);
-    const r2 = await w.__T("kiFragenHartnaeckig('x', [])");
-    pruef('Bleibt es voll, antwortet das naechste Modell',
-      r2.gewechselt === true && r2.modell.anzeige === '3.5 Flash');
-    pruef('Ein volles Modell wird gemerkt',
-      w.__T("kiIstUeberlastet('models/gemini-3.6-flash')") === true);
-    pruef('Ein freies Modell wird nicht gemerkt',
-      w.__T("kiIstUeberlastet('models/gemini-3.5-flash')") === false);
-
-    /* Ein 400 wird durch Warten nicht besser. */
-    w.__T('for(const k in KI_UEBERLASTET) delete KI_UEBERLASTET[k]');
-    w.__T(`window.__n = 0; window.fetch = () => { window.__n++;
-      return Promise.resolve({ok:false, status:400, json:()=>Promise.resolve({error:{message:'bad key'}})}); }`);
-    let f400 = '';
-    try{ await w.__T("kiFragenHartnaeckig('x', [])"); }catch(e){ f400 = String(e.message || e); }
-    pruef('Ein 400 wird kein zweites Mal versucht', w.__T('window.__n') === 1);
-    pruef('Und meldet weiterhin den Schluessel', /Schl/.test(f400), f400);
-
-    /* Ist alles voll, sagt die Meldung auch das. */
-    w.__T('for(const k in KI_UEBERLASTET) delete KI_UEBERLASTET[k]');
     w.__T(`window.__n = 0; window.fetch = () => { window.__n++;
       return Promise.resolve({ok:false, status:503, json:()=>Promise.resolve({error:{message:'high demand'}})}); }`);
-    /* Seit 3.3.1: nachgefasst wird nur beim ersten Modell, danach
-       zaehlt Tempo. Erwartet sind also zwei Versuche fuer das erste
-       und je einer fuer die Ausweichmodelle. Die Kettenlaenge muss
-       VOR dem Lauf stehen — waehrenddessen werden alle Modelle als
-       voll gemerkt und fallen aus der Kette. */
-    const ketteN = w.__T('kiAusweichModelle(kiModellAktiv().id).length + 1');
-    let voll = '';
-    try{ await w.__T("kiFragenHartnaeckig('x', [])"); }catch(e){ voll = String(e.message || e); }
-    pruef('Nur das erste Modell wird zweimal gefragt',
-      w.__T('window.__n') === ketteN + 1,
-      w.__T('window.__n') + ' Anfragen bei ' + ketteN + ' Modellen');
-    pruef('Die Meldung nennt die Ausweichversuche',
-      /Ausweichmodelle/.test(voll), voll.slice(-60));
-
+    let voll = '', vollModell = '';
+    try{ await w.__T("kiFragenEinmal('x', [])"); }catch(e){ voll = String(e.message || e); vollModell = e.modell; }
+    pruef('Bei 503 genau eine Anfrage (3.32.0)', w.__T('window.__n') === 1, String(w.__T('window.__n')));
+    pruef('Die Meldung nennt das Modell', /3\.6 Flash/.test(voll) && /berlastet/.test(voll), voll);
+    pruef('Der Fehler trägt das Modell für die Knöpfe', vollModell === 'models/gemini-3.6-flash', vollModell);
+    pruef('Das nächste Modell für „Mit … versuchen“', w.__T("kiNaechstesModell('models/gemini-3.6-flash').id") === 'models/gemini-3.5-flash');
     w.__T("kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null");
     w.__T("window.fetch = () => Promise.reject(new Error('offline'))");
   }
@@ -4017,11 +3943,13 @@ setTimeout(async () => {
       /* ── Steckbrief aus der Artenbibliothek ── */
       const sb = w.__T(`JSON.stringify(steckbriefDaten(allePflanzen().find(x=>x.id==='A2P')))`);
       const sbo = JSON.parse(sb);
-      pruef('Der Steckbrief füllt die Familie aus der Bibliothek',
-        !!sbo.daten['Familie'], sb.slice(0, 200));
+      /* beta.2 (F71 B): Die Bibliothek füllt nichts mehr von selbst, sie
+         steht als Vorschlag mit Knopf darunter. */
+      pruef('beta.2: Die Familie der Bibliothek steht nur als Vorschlag da',
+        !sbo.daten['Familie'] && (sbo.vorschlag || []).some(v => v.feld === 'familie'), sb.slice(0, 200));
       pruef('Und die Frostgrenze in Worten',
         /ins Haus|winterhart/.test(sbo.daten['Frostgrenze'] || ''), sbo.daten['Frostgrenze']);
-      pruef('Die Herkunft der Angaben steht dabei', sbo.ausBib === true);
+      pruef('beta.2: Kein Vermerk „Aus der Artenbibliothek“ mehr', sbo.ausBib === false);
       /* Gegenprobe: eigene Angaben werden nicht überschrieben. */
       const sbEigen = JSON.parse(w.__T(`(function(){
         const p = Object.assign({}, allePflanzen().find(x=>x.id==='A2P'),
@@ -5072,7 +5000,7 @@ setTimeout(async () => {
   pruef('Kopf auf Heute', await setzen('heute') === 'Heute');
   pruef('Kopf auf Sammlung', await setzen('sammlung') === 'Sammlung');
   pruef('Kopf auf Werkzeuge', await setzen('werkzeuge') === 'Werkzeuge');
-  pruef('Kopf auf Mehr', await setzen('mehr') === 'Mehr');
+  pruef('Kopf auf Einstellungen (beta.3, Zahnrad)', await setzen('mehr') === 'Einstellungen');
   pruef('Etikett bleibt leer', et.textContent === '', et.textContent);
   pruef('leeres Etikett verschwindet', /\.top-etikett:empty\{display:none/.test(stil));
   pruef('Etikett vor der Überschrift',
@@ -7096,7 +7024,7 @@ setTimeout(async () => {
   {
     const n = w.__T("JSON.stringify(PATCHNOTES[0])");
     const e0 = JSON.parse(n);
-    pruef('Der oberste Eintrag ist 3.31.0', e0.nr === '3.31.0', e0.nr);
+    pruef('Der oberste Eintrag ist 3.33.0', e0.nr === '3.33.0', e0.nr);
     pruef('Und traegt eine Kurzfassung',
       Array.isArray(e0.kurz) && e0.kurz.length > 0 && e0.kurz.length <= 5,
       e0.kurz && e0.kurz.length);
@@ -9330,13 +9258,28 @@ setTimeout(async () => {
     await haengt(T(`kiFragen('x', null)`));
     const l3 = w.__leiber[w.__leiber.length - 1];
     pruef('3.26.0: Ohne Option keine Denkstufe (Anlegen, Doktor)', !!l3 && !l3.generationConfig.thinkingConfig);
-    w.__plan = [{status:400}, {text:'ok'}];
+    w.__plan = [{status:400, fehler:{error:{message:'Thinking level is not supported for this model.'}}}, {text:'ok'}];
     const vor = w.__leiber.length;
-    const t4 = await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig'})`));
-    pruef('3.26.0: Lehnt das Modell die Denkstufe ab, einmal ohne',
+    const t4 = await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig', denkenNochmal:true})`));
+    pruef('3.26.0: Lehnt das Modell die Denkstufe ab, fragt die Kartei einmal ohne',
       t4 === 'ok' && w.__leiber.length === vor + 2 && !w.__leiber[vor + 1].generationConfig.thinkingConfig);
     pruef('3.26.0: und das Modell wird gemerkt', T(`KI_DENKEN_AUS['models/gemini-3-flash'] === true`) === true);
     T(`(function(){ delete KI_DENKEN_AUS['models/gemini-3-flash']; return 1; })()`);
+    /* 3.32.0: Ohne denkenNochmal bleibt es bei einer Anfrage. */
+    w.__plan = [{status:400, fehler:{error:{message:'Thinking level is not supported for this model.'}}}, {text:'ok'}];
+    const vor2 = w.__leiber.length;
+    let t5 = '';
+    try{ await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig'})`)); t5 = 'kam durch'; }catch(e){ t5 = String(e.message || e); }
+    pruef('3.32.0: Ein Tipp mit abgelehnter Denkstufe bleibt eine Anfrage',
+      w.__leiber.length === vor2 + 1 && /Denkstufe/.test(t5), w.__leiber.length - vor2 + ' | ' + t5);
+    pruef('3.32.0: und der nächste geht ohne Denkstufe', T(`KI_DENKEN_AUS['models/gemini-3-flash'] === true`) === true);
+    T(`(function(){ delete KI_DENKEN_AUS['models/gemini-3-flash']; return 1; })()`);
+    /* 3.32.0: Ein anderer 400 löst keine zweite Anfrage aus. */
+    w.__plan = [{status:400, fehler:{error:{message:'Image input modality is not enabled for this model'}}}, {text:'ok'}];
+    const vor3 = w.__leiber.length;
+    try{ await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig', denkenNochmal:true})`)); }catch(e){}
+    pruef('3.32.0: Ein anderer 400 wird auch in der Kartei nicht wiederholt', w.__leiber.length === vor3 + 1, String(w.__leiber.length - vor3));
+    pruef('3.32.0: und das Modell wird nicht als ohne Denkstufe gemerkt', T(`!KI_DENKEN_AUS['models/gemini-3-flash']`) === true);
 
     /* Kontingent lesen */
     const tag = {error:{message:'Quota exceeded', details:[{'@type':'type.googleapis.com/google.rpc.QuotaFailure',
@@ -9556,9 +9499,9 @@ setTimeout(async () => {
     w.__leiber = [];
     let r503 = '';
     try{ r503 = await T(`karteiFragen('x', null, null, {denken:'niedrig'}, KARTEI_GEN)`); }catch(e){ r503 = 'Fehler: ' + e.message; }
-    const letzte = w.__leiber[w.__leiber.length - 1];
-    pruef('3.27.0: Nach 503 weicht die Kartei einmal auf das nächste Modell aus',
-      r503 === 'ausgewichen' && /gemini-3-pro/.test(letzte.u), r503 + ' | ' + (letzte && letzte.u));
+    pruef('3.32.0: Nach 503 weicht die Kartei nicht mehr aus',
+      /^Fehler: /.test(r503) && w.__leiber.length === 1 && /gemini-3-flash/.test(w.__leiber[0].u), r503 + ' | ' + w.__leiber.length);
+    w.__plan = [];
     T(`(function(){ window.setTimeout = window.__st1; return 1; })()`);
     w.fetch = fetch0;
 
@@ -9581,7 +9524,9 @@ setTimeout(async () => {
   /* ══ 3.28.0: Anzucht ══ */
   {
     const T = c => w.__T(c);
-    const vor = t => `iso(new Date(HEUTE.getTime() - ${t}*86400000))`;
+    /* Kalendertage statt 24-Stunden-Schritten: am Tag der Zeitumstellung
+       lag „vor 8 Tagen“ sonst kurz vor Mitternacht auf dem falschen Tag. */
+    const vor = t => `iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - ${t}))`;
     T(`(function(){ S.anzucht = {}; S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,3) !== 'AZT'; });
       S.eigene.push({id:'AZT-M', eigen:true, name:'Rexi', art:'Königsbegonie', botanisch:'Begonia rex', sorte:'', klasse:'B', notiz:'', todo:[], log:[]});
       sichern(); return 1; })()`);
@@ -9858,6 +9803,25 @@ setTimeout(async () => {
     if(ak) ak.click();
     const nachA = JSON.parse(T(`JSON.stringify(azGruppe('${zid}'))`));
     pruef('3.29.0: Art per Tipp übernommen', nachA.art === 'Efeutute' && nachA.botanisch === 'Epipremnum aureum', JSON.stringify(nachA));
+    /* 3.32.0: Anzucht bestimmen — eine Anfrage, Knöpfe nach einem Fehlschlag */
+    T(`S.kiModelle = [{id:'gemini-9.9-flash', anzeige:'9.9 Flash'}, {id:'gemini-9.8-flash', anzeige:'9.8 Flash'}]; S.kiModell = 'gemini-9.9-flash'; AZ_BEST.erg = null; azZeichnen()`);
+    w.__ki.fehler = 503;
+    const az0 = w.__ki.zaehler;
+    d.querySelector('[data-az="best-los"]').click();
+    await warte(300);
+    pruef('3.32.0: Anzucht bei 503: genau eine Anfrage', w.__ki.zaehler - az0 === 1, String(w.__ki.zaehler - az0));
+    const azNoch = d.querySelector('#az-ansicht [data-az="best-nochmal"]'), azAnders = d.querySelector('#az-ansicht [data-az="best-anders"]');
+    pruef('3.32.0: Anzucht zeigt „Noch einmal“ und „Mit 9.8 Flash versuchen“',
+      !!azNoch && !!azAnders && azAnders.textContent === 'Mit 9.8 Flash versuchen', azAnders && azAnders.textContent);
+    w.__ki.fehler = null;
+    const az1 = w.__ki.zaehler;
+    if(azAnders) azAnders.click();
+    await warte(300);
+    const azProt = JSON.parse(T('JSON.stringify(kiProtokoll()[0] || {})'));
+    pruef('3.32.0: Anzucht „Mit … versuchen“ fragt einmal das andere Modell',
+      w.__ki.zaehler - az1 === 1 && azProt.modell === 'gemini-9.8-flash' && azProt.zweck === 'Anzucht' && azProt.ergebnis === 'ok', JSON.stringify(azProt));
+    pruef('3.32.0: Anzucht nach Erfolg ohne Fehlerknöpfe, Auswahl unverändert',
+      !d.querySelector('#az-ansicht [data-az="best-nochmal"]') && T('S.kiModell') === 'gemini-9.9-flash' && /Geantwortet hat 9\.8 Flash/.test(d.getElementById('az-ansicht').textContent));
     T(`kiSchluesselSetzen(''); AZ_BEST.erg = null; azZeichnen()`);
     d.querySelector('[data-az="best-los"]').click();
     await tick();
@@ -10207,7 +10171,7 @@ setTimeout(async () => {
     pruef('3.31.0: Vor der Sicherung ist nichts bereinigt', sp.editsVor === true && sp.ivVor === true, JSON.stringify(sp));
     pruef('3.31.0: Nach der Sicherung ist bereinigt', sp.editsNach === false && sp.ivNach === false && sp.fass === '3.31.0' && sp.offenNach === false, JSON.stringify(sp));
     pruef('3.31.0: Ohne Daten wird sofort bereinigt', sp.leerEdits === false && sp.leerFass === '3.31.0', JSON.stringify(sp));
-    const ohneKenn = T(`(function(){ var e = PATCHNOTES[0]; var vor = e.sicherung; e.sicherung = false;
+    const ohneKenn = T(`(function(){ var e = PATCHNOTES.find(function(x){ return x.sicherung === true; }); var vor = e.sicherung; e.sicherung = false;
       S = Object.assign(LEERSTAND(), {eigene:[{id:'E-9341', name:'K'}]}); grundwerteErgaenzen();
       var r = sicherungPflichtOffen(); e.sicherung = vor; return r; })()`);
     zurueck();
@@ -10274,7 +10238,7 @@ setTimeout(async () => {
     /* Patchnotes, Mehr, toter Code */
     const pn = JSON.parse(T(`JSON.stringify(PATCHNOTES.map(function(e){ return [e.nr, !!e.sicherung]; }))`));
     pruef('3.31.0: Zehn Fassungen in den Patchnotes', pn.length === 10, pn.length);
-    pruef('3.31.0: Oben steht 3.31.0 mit Kennung', pn[0][0] === '3.31.0' && pn[0][1] === true);
+    pruef('3.31.0: 3.31.0 trägt die Kennung', pn.some(x => x[0] === '3.31.0' && x[1] === true));
     pruef('3.31.0: Nur 3.31.0 trägt die Kennung', pn.filter(x => x[1]).length === 1);
     T('patchListe()');
     const cl = d.getElementById('patch-changelog');
@@ -10292,6 +10256,743 @@ setTimeout(async () => {
     pruef('3.31.0: PFLANZEN gibt es nicht mehr', T('typeof PFLANZEN') === 'undefined');
     pruef('3.31.0: Kein Aufruf von karteNeuZeichnen', html.indexOf('karteNeuZeichnen') === -1);
     pruef('3.31.0: Keine CSS-Regel für #weg-liste und .raum-batch', html.indexOf('#weg-liste') === -1 && html.indexOf('.raum-batch') === -1);
+  }
+
+  /* ══ 3.32.0: KI — eine Anfrage pro Tipp ══
+     Ein Tipp schickte bis zu vier Anfragen (nachfassen, zwei
+     Ausweichmodelle), darunter Modelle ohne Gratis-Kontingent. */
+  {
+    const T = c => w.__T(c);
+    const fetch0 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 5000))]);
+    /* Der Download-Test davor stellt URL.revokeObjectURL zurück, das es
+       in jsdom nicht gibt; die App ruft es zeitversetzt auf. */
+    if(typeof w.URL.revokeObjectURL !== 'function') w.URL.revokeObjectURL = () => {};
+    w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    w.__aufrufe = [];
+    w.__antwort = {};
+    w.__verzug = 10;
+    w.fetch = (u, o) => {
+      const url = String(u);
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe.push({u:url, leib:leib});
+      if(url.indexOf('/models?') > -1) return Promise.resolve({ok:true, status:200, json:()=>Promise.resolve({models:w.__liste})});
+      const m = (url.match(/models\/([^:]+):/) || [])[1];
+      const f = w.__antwort[m] || w.__antwort['*'];
+      const a = f ? f(leib) : {status:200, body:{candidates:[{finishReason:'STOP', content:{parts:[{text:'ok'}]}}]}};
+      return new Promise(res => setTimeout(() => res({ok:a.status === 200, status:a.status, json:()=>Promise.resolve(a.body)}), w.__verzug));
+    };
+    const ok = (text, extra) => ({status:200, body:Object.assign({candidates:[{finishReason:'STOP', content:{parts:[{text:text || 'ok'}]}}]}, extra || {})});
+    const err = (st, msg) => ({status:st, body:{error:{message:msg}}});
+    const posts = () => w.__aufrufe.filter(a => a.u.indexOf(':generateContent') > -1);
+    const modell = name => ({name:'models/' + name,
+      displayName:'Gemini ' + name.replace('gemini-', '').split('-').map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' '),
+      supportedGenerationMethods:['generateContent']});
+    w.__liste = ['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-2.5-flash',
+      'gemini-4-argon','gemini-3.5-transcribe','gemini-3.8-flash-tts','gemini-nano-banana-2.1','gemini-3-flash-preview',
+      'gemini-3.1-pro-preview'].map(modell);
+    w.__antwort = {
+      'gemini-3.7-flash': () => ok('ok', {modelVersion:'gemini-3.8-flash'}),
+      'gemini-3.5-flash-lite': () => err(429, 'Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.5-flash-lite'),
+      'gemini-2.5-flash': leib => (leib && leib.generationConfig && leib.generationConfig.thinkingConfig)
+        ? err(400, 'Thinking budget is not supported for this model.') : ok('ok')
+    };
+
+    /* Modellliste: Positivliste und Prüfung */
+    T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = null; S.kiModell = null`);
+    await haengt(T('kiModelleHolen()'));
+    const ids = JSON.parse(T('JSON.stringify(kiModelle().map(function(m){ return m.id; }))'));
+    const gefragt = posts().map(a => (a.u.match(/models\/([^:]+):/) || [])[1]);
+    pruef('3.32.0: Geprüft werden nur Flash-Modelle der Positivliste',
+      JSON.stringify(Array.from(new Set(gefragt)).sort()) === JSON.stringify(['gemini-2.5-flash','gemini-3.5-flash-lite','gemini-3.6-flash','gemini-3.7-flash','gemini-3.8-flash']),
+      JSON.stringify(gefragt));
+    pruef('3.32.0: Argon, Transcribe, TTS, Bild- und Vorschaumodelle werden nie gefragt',
+      !gefragt.some(x => /argon|transcribe|tts|banana|preview/.test(x)));
+    pruef('3.32.0: Je Modell eine Prüfanfrage, nur bei abgelehnter Denkstufe zwei',
+      gefragt.length === 6 && gefragt.filter(x => x === 'gemini-2.5-flash').length === 2, String(gefragt.length));
+    pruef('3.32.0: „limit: 0“ fällt heraus', ids.indexOf('models/gemini-3.5-flash-lite') === -1, JSON.stringify(ids));
+    pruef('3.32.0: Ein weitergeleitetes Modell fällt heraus', ids.indexOf('models/gemini-3.7-flash') === -1, JSON.stringify(ids));
+    pruef('3.32.0: Die freien bleiben, das neueste vorn und gesetzt',
+      JSON.stringify(ids) === JSON.stringify(['models/gemini-3.8-flash','models/gemini-3.6-flash','models/gemini-2.5-flash'])
+      && T('S.kiModell') === 'models/gemini-3.8-flash', JSON.stringify(ids));
+    pruef('3.32.0: Eine abgelehnte Denkstufe ist am Modell gemerkt',
+      T(`S.kiModelle.find(function(m){ return m.id === 'models/gemini-2.5-flash'; }).denken`) === false);
+    const ausgebl = T('kiAusgeblendetText()');
+    pruef('3.32.0: Die Meldung nennt, was ausgeblendet ist', /nicht kostenlos/.test(ausgebl) && /weitergeleitet/.test(ausgebl), ausgebl);
+    w.__aufrufe = [];
+    try{ await haengt(T(`kiFragen('x', null, 'models/gemini-2.5-flash', null, {denken:'niedrig'})`)); }catch(e){}
+    pruef('3.32.0: Ein Modell ohne Denkstufe bekommt im Gebrauch keine',
+      posts().length === 1 && !posts()[0].leib.generationConfig.thinkingConfig, JSON.stringify(posts().map(a => a.leib.generationConfig)));
+
+    /* Eine ältere Liste zeigt nur noch Modelle der Positivliste */
+    const altListe = T(`(function(){ var alt = S.kiModelle; S.kiModelle = [{id:'models/gemini-4-argon', anzeige:'4 Argon', empfohlen:true},
+      {id:'models/gemini-3.5-transcribe', anzeige:'3.5 Transcribe'}, {id:'models/gemini-3.8-flash', anzeige:'3.8 Flash'}];
+      var r = JSON.stringify(kiModelle()); S.kiModelle = alt; return r; })()`);
+    pruef('3.32.0: Eine alte Liste blendet Argon und Transcribe aus, das erste übrige ist empfohlen',
+      altListe === JSON.stringify([{id:'models/gemini-3.8-flash', anzeige:'3.8 Flash', empfohlen:true}]), altListe);
+
+    /* Anlegen: eine Anfrage, Denkstufe niedrig, Knöpfe */
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => err(503, 'The model is overloaded.')};
+    T(`alStart(); neuWegSetzen('ki'); KI_BILDER.anlegen.length = 0;
+      KI_BILDER.anlegen.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'})`);
+    await haengt(T(`kiDirektLos('anlegen')`));
+    const p1 = posts();
+    pruef('3.32.0: Anlegen bei 503: genau eine Anfrage', p1.length === 1, String(p1.length));
+    pruef('3.32.0: Anlegen fragt mit Denkstufe niedrig',
+      !!p1[0] && !!p1[0].leib.generationConfig.thinkingConfig && p1[0].leib.generationConfig.thinkingConfig.thinkingLevel === 'low',
+      p1[0] && JSON.stringify(p1[0].leib.generationConfig));
+    pruef('3.32.0: Der Anlege-Auftrag kündigt keine MASSNAHME-Zeilen an',
+      !!p1[0] && p1[0].leib.contents[0].parts[0].text.indexOf('MASSNAHME') === -1);
+    pruef('3.32.0: Der kopierte Anlege-Prompt auch nicht', T('anlegenPromptBauen()').indexOf('MASSNAHME') === -1);
+    pruef('3.32.0: Das Antwortformat des Doktors bleibt wortgleich',
+      T('ANTWORT_FORMAT').indexOf('und ein bis drei MASSNAHME-Zeilen') > -1 && T('GEMINI_PROMPT').indexOf('MASSNAHME-Zeilen') > -1);
+    const meld = d.getElementById('ki-hinweis').textContent;
+    pruef('3.32.0: Die Meldung nennt das Modell und nicht den Schlüssel',
+      /3\.8 Flash/.test(meld) && /berlastet/.test(meld) && !/Schl/.test(meld), meld);
+    const noch = d.querySelector('#ki-lauf-anlegen [data-do="ki-nochmal"]');
+    const anders = d.querySelector('#ki-lauf-anlegen [data-do="ki-anders"]');
+    pruef('3.32.0: Knopf „Noch einmal“', !!noch && d.getElementById('ki-lauf-anlegen').hidden === false
+      && noch.dataset.kimodell === 'models/gemini-3.8-flash');
+    pruef('3.32.0: Knopf „Mit 3.6 Flash versuchen“',
+      !!anders && /^Mit 3\.6 Flash versuchen$/.test(anders.textContent) && anders.dataset.kimodell === 'models/gemini-3.6-flash',
+      anders && anders.textContent);
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => ok('```\nART: Efeutute\nBOTANISCH: Epipremnum aureum\n```')};
+    if(anders) anders.click();
+    await warte(250);
+    const p2 = posts();
+    pruef('3.32.0: „Mit … versuchen“ fragt genau einmal das andere Modell',
+      p2.length === 1 && /models\/gemini-3\.6-flash:/.test(p2[0].u), p2.map(a => a.u.replace(/\?.*/, '')).join(' '));
+    pruef('3.32.0: und ändert die Auswahl nicht', T('S.kiModell') === 'models/gemini-3.8-flash');
+    pruef('3.32.0: Die Erfolgsmeldung nennt das antwortende Modell',
+      /Geantwortet hat 3\.6 Flash/.test(d.getElementById('ki-hinweis').textContent), d.getElementById('ki-hinweis').textContent);
+    pruef('3.32.0: Nach Erfolg keine Fehlerknöpfe', !d.querySelector('#ki-lauf-anlegen .ki-nochmal'));
+
+    /* Fehlerknöpfe gehören nicht ins nächste Anlegen */
+    T(`kiFehlerKnoepfe('anlegen', 'models/gemini-3.8-flash')`);
+    const vorLeeren = !!d.querySelector('#ki-lauf-anlegen .ki-nochmal');
+    T('formularLeeren()');
+    pruef('3.32.0: Formular leeren nimmt die Fehlerknöpfe weg',
+      vorLeeren && !d.querySelector('#ki-lauf-anlegen .ki-nochmal') && d.getElementById('ki-lauf-anlegen').hidden === true);
+    T(`kiFehlerKnoepfe('doktor', 'models/gemini-3.6-flash')`);
+    pruef('3.32.0: Auch der Doktor bekommt die Knöpfe',
+      !!d.querySelector('#ki-lauf-doktor [data-do="ki-nochmal"][data-kiwo="doktor"]')
+      && /Mit 2\.5 Flash versuchen/.test(d.getElementById('ki-lauf-doktor').textContent), d.getElementById('ki-lauf-doktor').textContent);
+    T(`kiLaufZeigen('doktor', false)`);
+
+    /* Laufanzeige: Modell und Sekunden statt „nach dreißig steige ich um“ */
+    w.__verzug = 1400;
+    w.__antwort = {'*': () => ok('```\nART: Efeutute\n```')};
+    T(`alStart(); neuWegSetzen('ki'); KI_BILDER.anlegen.length = 0;
+      KI_BILDER.anlegen.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'})`);
+    const lauf = T(`kiDirektLos('anlegen')`);
+    await warte(50);
+    const t0 = d.querySelector('#ki-lauf-anlegen .kilauf-txt');
+    pruef('3.32.0: Die Laufanzeige nennt Modell und Sekunden',
+      !!t0 && t0.textContent === 'Die Frage an 3.8 Flash läuft · 0\u00a0s', t0 && t0.textContent);
+    pruef('3.32.0: mit Abbrechen-Knopf', !!d.querySelector('#ki-lauf-anlegen [data-do="ki-stop"]'));
+    await warte(1100);
+    const t1 = d.querySelector('#ki-lauf-anlegen .kilauf-txt');
+    pruef('3.32.0: Die Sekunden zählen hoch', !!t1 && / · 1\u00a0s$/.test(t1.textContent), t1 && t1.textContent);
+    await haengt(lauf);
+    w.__verzug = 10;
+    pruef('3.32.0: Kein „steige ich um“ mehr in der App', html.indexOf('steige ich auf ein anderes Modell um') === -1);
+
+    /* Zeitgrenze: zwei Minuten, keine zweite Anfrage */
+    pruef('3.32.0: Die Frist ist 120 Sekunden, auch für Fotobündel der Kartei',
+      T('KI_FRIST') === 120000 && T('KARTEI_FRIST_BUENDEL') === 120000);
+    w.__aufrufe = [];
+    T(`(function(){ window.__st2 = window.setTimeout;
+      window.setTimeout = function(f, ms){ return window.__st2(f, Math.min(ms || 0, 60)); }; return 1; })()`);
+    w.fetch = (u, o) => { w.__aufrufe.push({u:String(u), leib:null});
+      return new Promise((ja, nein) => { o.signal.addEventListener('abort', () => nein(Object.assign(new Error('ab'), {name:'AbortError'}))); }); };
+    let zeit = '';
+    try{ await haengt(T(`kiFragenEinmal('x', [])`)); }catch(e){ zeit = String(e.message || e); }
+    T(`(function(){ window.setTimeout = window.__st2; return 1; })()`);
+    pruef('3.32.0: Nach der Frist kommt keine zweite Anfrage', w.__aufrufe.length === 1 && /nicht rechtzeitig/.test(zeit) && /120 Sekunden/.test(zeit),
+      w.__aufrufe.length + ' | ' + zeit);
+    w.fetch = (u, o) => {
+      const url = String(u);
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe.push({u:url, leib:leib});
+      const m = (url.match(/models\/([^:]+):/) || [])[1];
+      const f = w.__antwort[m] || w.__antwort['*'];
+      const a = f ? f(leib) : ok('ok');
+      return new Promise(res => setTimeout(() => res({ok:a.status === 200, status:a.status, json:()=>Promise.resolve(a.body)}), w.__verzug));
+    };
+
+    /* 429: „limit: 0“ nimmt das Modell aus der Liste, ein volles Kontingent nicht */
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => err(429, 'Resource has been exhausted (e.g. check quota).')};
+    let f429 = '';
+    try{ await haengt(T(`kiFragenEinmal('x', [])`)); }catch(e){ f429 = String(e.message || e); }
+    pruef('3.32.0: Ein volles Kontingent lässt das Modell in der Liste',
+      posts().length === 1 && T('S.kiModell') === 'models/gemini-3.8-flash' && /Kontingent/.test(f429), f429);
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => err(429, 'Quota exceeded for metric: generate_content_free_tier_requests, limit: 0, model: gemini-3.8-flash')};
+    let f0 = '';
+    try{ await haengt(T(`kiFragenEinmal('x', [])`)); }catch(e){ f0 = String(e.message || e); }
+    const nachIds = JSON.parse(T('JSON.stringify(kiModelle().map(function(m){ return m.id; }))'));
+    pruef('3.32.0: „limit: 0“ im Gebrauch: eine Anfrage, Modell aus der Liste',
+      posts().length === 1 && nachIds.indexOf('models/gemini-3.8-flash') === -1 && T('S.kiModell') === 'models/gemini-3.6-flash', JSON.stringify(nachIds));
+    pruef('3.32.0: und die Meldung sagt es', /nicht enthalten/.test(f0) && /3\.8 Flash/.test(f0), f0);
+
+    /* Fehlertexte */
+    w.__antwort = {'*': () => err(400, 'Image input modality is not enabled for this model')};
+    let f400 = '';
+    try{ await haengt(T(`kiFragenEinmal('x', [])`)); }catch(e){ f400 = String(e.message || e); }
+    pruef('3.32.0: Ein 400 nennt Modell und Googles Text, nicht den Schlüssel',
+      /3\.6 Flash/.test(f400) && /Image input modality/.test(f400) && !/Schl/.test(f400), f400);
+
+    /* Protokoll */
+    T(`kiProtokollZeichnen()`);
+    const prot = JSON.parse(T('JSON.stringify(kiProtokoll())'));
+    const anl = prot.find(e => /^Anlegen/.test(e.zweck) && /^503/.test(e.ergebnis));
+    pruef('3.32.0: Das Protokoll führt die Anlegen-Anfrage mit allen Angaben',
+      !!anl && anl.modell === 'models/gemini-3.8-flash' && anl.zeichen > 1000 && anl.bilder === 1 && typeof anl.dauer === 'number' && /overloaded/.test(anl.ergebnis),
+      JSON.stringify(anl));
+    pruef('3.32.0: Das Protokoll führt die Prüfanfragen', prot.some(e => e.zweck === 'Prüfung' && /limit: 0/.test(e.ergebnis)));
+    pruef('3.32.0: Die Liste unter KI-Dienst zeigt jeden Eintrag',
+      d.querySelectorAll('#ki-protokoll li').length === prot.length && prot.length > 0, String(d.querySelectorAll('#ki-protokoll li').length));
+    T(`(function(){ for(var i = 0; i < 25; i++) kiProtokollEintragen({zweck:'Test ' + i, modell:'models/gemini-3.6-flash', ergebnis:'ok'}); return 1; })()`);
+    const prot2 = JSON.parse(T('JSON.stringify(kiProtokoll())'));
+    pruef('3.32.0: Höchstens 20 Einträge, der neueste oben', prot2.length === 20 && prot2[0].zweck === 'Test 24', prot2.length + ' / ' + (prot2[0] && prot2[0].zweck));
+    pruef('3.32.0: Das Protokoll steht nicht in der Sicherung', JSON.stringify(T('sicherungInhalt()')).indexOf('Test 24') === -1);
+
+    /* Kartei: kein Ausweichen, eine abgelehnte Denkstufe einmal ohne */
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => err(503, 'The model is overloaded.')};
+    let fk = '';
+    try{ await haengt(T(`karteiFragen('x', null, null, {denken:'niedrig'}, KARTEI_GEN)`)); }catch(e){ fk = String(e.message || e); }
+    pruef('3.32.0: Die Kartei fragt bei 503 kein anderes Modell', posts().length === 1 && /3\.6 Flash/.test(fk), posts().length + ' | ' + fk);
+
+    w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    T(`kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null; KI_BILDER.anlegen.length = 0`);
+    T(`modalZu('anleg-modal')`);
+    await tick();
+    w.fetch = fetch0;
+  }
+
+  /* ══ 3.33.0: Art richtig zuordnen, schnelles Modell empfehlen ══
+     „Drosera“ wurde per Teiltreffer zum Kap-Sonnentau, und 3.8 Flash
+     war empfohlen, obwohl seine Prüfanfrage in die Zeitgrenze lief. */
+  {
+    const T = c => w.__T(c);
+    const fetch0 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 5000))]);
+
+    /* Bibliothek nur bei genau dieser Art */
+    const anl = text => JSON.parse(T(`(function(){ alStart(); neuWegSetzen('ki');
+      document.getElementById('f-paste').value = ${JSON.stringify(text)};
+      document.getElementById('btn-paste-los').click();
+      return JSON.stringify({art:gewaehlteArt ? gewaehlteArt.bot : null, bot:document.getElementById('f-bot').value,
+        sonne:document.getElementById('f-sonne').value, sorte:document.getElementById('f-sorte').value}); })()`));
+    const g1 = anl('ART: Sonnentau\nBOTANISCH: Drosera\nLICHT: indirekt');
+    pruef('3.33.0: Nur die Gattung holt keine Art aus der Bibliothek', g1.art === null && g1.bot === 'Drosera', JSON.stringify(g1));
+    pruef('3.33.0: dann gilt das Licht der KI', g1.sonne === 'indirekt', g1.sonne);
+    const g2 = anl('ART: Sonnentau\nBOTANISCH: Drosera prolifera × schizandra\nSORTE: Andromeda | hoch\nSORTE_BELEG: breite, rundliche Blattspreiten, rote Tentakel\nLICHT: indirekt');
+    pruef('3.33.0: Eine Kreuzung holt keine Art aus der Bibliothek', g2.art === null && g2.sonne === 'indirekt', JSON.stringify(g2));
+    pruef('3.33.0: Die Kreuzungsformel bleibt im botanischen Namen', g2.bot === 'Drosera prolifera × schizandra', g2.bot);
+    pruef('3.33.0: Die Sorte steht in Sorte', g2.sorte === 'Andromeda', g2.sorte);
+    const g3 = anl('ART: Sonnentau\nBOTANISCH: Drosera prolifera x schizandra\nLICHT: indirekt');
+    pruef('3.33.0: Auch „x“ als Kreuzungszeichen holt nichts', g3.art === null && g3.bot === 'Drosera prolifera x schizandra', JSON.stringify(g3));
+    /* Eine Elternart steht in der Bibliothek: ohne Kreuzungsregel träfe „Drosera capensis“. */
+    const g3b = anl('ART: Sonnentau\nBOTANISCH: Drosera capensis \u00d7 aliciae\nLICHT: indirekt');
+    pruef('3.33.0: Auch wenn eine Elternart in der Bibliothek steht, holt die Kreuzung nichts', g3b.art === null && g3b.sonne === 'indirekt', JSON.stringify(g3b));
+    const g4 = anl('ART: Feige\nBOTANISCH: Ficus\nLICHT: hell');
+    pruef('3.33.0: „Ficus“ allein wird kein Gummibaum', g4.art === null, JSON.stringify(g4));
+    const g5 = anl('ART: Kap-Sonnentau\nBOTANISCH: Drosera capensis\nLICHT: indirekt');
+    /* beta.2 (F71 B, Regel 10.13): Die Bibliothek setzt das Licht nicht mehr; weicht die KI ab, wählst du. */
+    pruef('3.33.0: Die genaue Art trifft weiter', g5.art === 'Drosera capensis', JSON.stringify(g5));
+    pruef('beta.2: Abweichung im Licht steht zur Wahl', T(`JSON.stringify(AW && AW.offen && AW.offen.sonne)`) === JSON.stringify({ki:'indirekt', bib:'voll'}), T(`JSON.stringify(AW && AW.offen)`));
+    const g6 = anl('ART: Kap-Sonnentau\nLICHT: indirekt');
+    pruef('3.33.0: Der genaue deutsche Name trifft weiter', g6.art === 'Drosera capensis', JSON.stringify(g6));
+    /* Eine Sorte, die nicht in der Bibliothek steht, und kein genauer deutscher Name. */
+    const g7 = anl("ART: Monstera\nBOTANISCH: Monstera deliciosa 'Pruefsorte'\nLICHT: hell");
+    pruef('3.33.0: Ein Sortenzusatz in Anführungszeichen stört nicht', g7.art === 'Monstera deliciosa', JSON.stringify(g7));
+    T(`modalZu('anleg-modal')`);
+    await tick();
+
+    /* Auftrag: Kreuzungen */
+    pruef('3.33.0: Der Anlege-Auftrag nennt die Kreuzungsformel',
+      /^BOTANISCH:.*Gattung art × art, etwa Drosera prolifera × schizandra/m.test(T('anlegenPromptBauen()')));
+    pruef('3.33.0: Der Kartei-Auftrag mit und ohne Foto auch',
+      /^BOTANISCH:.*Gattung art × art/m.test(T(`karteiFormat('foto')`)) && /^BOTANISCH:.*Gattung art × art/m.test(T(`karteiFormat('text')`)));
+    pruef('3.33.0: Das Antwortformat des Doktors bleibt wortgleich',
+      T('ANTWORT_FORMAT').indexOf('Gattung art') === -1 && T('GEMINI_PROMPT').indexOf('Gattung art') === -1);
+
+    /* Modell nach Tempo */
+    const echtJetzt = w.Date.now.bind(w.Date);
+    w.__plus = 0;
+    w.Date.now = () => echtJetzt() + w.__plus;
+    w.__langsam = {};
+    const modell = name => ({name:'models/' + name,
+      displayName:'Gemini ' + name.replace('gemini-', '').split('-').map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' '),
+      supportedGenerationMethods:['generateContent']});
+    w.fetch = (u, o) => {
+      const url = String(u);
+      if(url.indexOf('/models?') > -1) return Promise.resolve({ok:true, status:200, json:()=>Promise.resolve({models:
+        ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'].map(modell)})});
+      const m = (url.match(/models\/([^:]+):/) || [])[1];
+      const lahm = !!w.__langsam[m];
+      return new Promise(res => setTimeout(() => {
+        if(lahm) w.__plus += 20000;
+        res({ok:true, status:200, json:()=>Promise.resolve({candidates:[{finishReason:'STOP', content:{parts:[{text:'ok'}]}}]})});
+      }, lahm ? 80 : 10));
+    };
+    T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = null; S.kiModell = 'models/gemini-3.8-flash'`);
+    w.__langsam = {'gemini-3.8-flash':true};
+    await haengt(T('kiModelleHolen()'));
+    const l1 = JSON.parse(T('JSON.stringify(kiModelle())'));
+    pruef('3.33.0: Eine Prüfung über 15 s macht das Modell langsam',
+      l1.length === 3 && l1[0].langsam === true && !l1[1].langsam && !l1[2].langsam, JSON.stringify(l1));
+    pruef('3.33.0: Empfohlen ist das neueste schnelle Modell', l1[1].empfohlen === true && !l1[0].empfohlen, JSON.stringify(l1));
+    pruef('3.33.0: Eine langsame Wahl wird umgestellt', T('S.kiModell') === 'models/gemini-3.6-flash', T('S.kiModell'));
+    T('kiModellZeichnen()');
+    const opt = Array.from(d.querySelector('.ki-modell-wahl').options).map(o => o.textContent);
+    pruef('3.33.0: In der Auswahl steht „(langsam)“, das Häkchen beim schnellen',
+      opt[0] === '3.8 Flash (langsam)' && opt[1] === '3.6 Flash ✓', JSON.stringify(opt));
+    pruef('3.33.0: Die Meldung nennt das langsame Modell',
+      /Langsam, nicht vorausgewählt: 3\.8 Flash\./.test(T('kiAusgeblendetText()')), T('kiAusgeblendetText()'));
+    T(`S.kiModell = 'models/gemini-3.5-flash-lite'`);
+    await haengt(T('kiModelleHolen()'));
+    pruef('3.33.0: Eine schnelle Wahl von Hand bleibt', T('S.kiModell') === 'models/gemini-3.5-flash-lite', T('S.kiModell'));
+    w.__langsam = {'gemini-3.8-flash':true, 'gemini-3.6-flash':true, 'gemini-3.5-flash-lite':true};
+    T(`S.kiModell = null`);
+    await haengt(T('kiModelleHolen()'));
+    const l3 = JSON.parse(T('JSON.stringify(kiModelle())'));
+    pruef('3.33.0: Sind alle langsam, ist das neueste empfohlen und gesetzt',
+      l3[0].empfohlen === true && T('S.kiModell') === 'models/gemini-3.8-flash', JSON.stringify(l3));
+    w.Date.now = echtJetzt;
+
+    /* Zeitgrenze bei der Prüfung heißt langsam, nicht kostenpflichtig */
+    T(`(function(){ window.__st3 = window.setTimeout;
+      window.setTimeout = function(f, ms){ return window.__st3(f, Math.min(ms || 0, 60)); }; return 1; })()`);
+    w.fetch = (u, o) => new Promise((ja, nein) => {
+      o.signal.addEventListener('abort', () => nein(Object.assign(new Error('ab'), {name:'AbortError'}))); });
+    let zp = null;
+    try{ zp = await haengt(T(`kiModellPruefen('${ATTRAPPE_ECHT}', {id:'models/gemini-3.8-flash', anzeige:'3.8 Flash'}, [])`)); }catch(e){ zp = {fehler:String(e.message || e)}; }
+    T(`(function(){ window.setTimeout = window.__st3; return 1; })()`);
+    pruef('3.33.0: Läuft die Prüfung in die Zeitgrenze, ist das Modell frei, aber langsam',
+      !!zp && zp.frei === true && zp.langsam === true, JSON.stringify(zp));
+
+    w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    T(`kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null`);
+    w.fetch = fetch0;
+  }
+
+
+
+  /* ══ 4.0-beta.2: Anlegen in zwei Schritten, gelernte Arten,
+     Bibliothek nur Vorschlag, Teilen, langsame Modelle überspringen ══
+     Jeder Test legt Pflanzen, Arten und Modelle selbst an. */
+  {
+    const T = c => w.__T(c);
+    const fetch0 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 5000))]);
+    if(typeof w.URL.revokeObjectURL !== 'function') w.URL.revokeObjectURL = () => {};
+    w.__aufrufe = [];
+    w.__verzug = 10;
+    w.__foto = {}; w.__art = {};
+    const ok = text => ({status:200, body:{candidates:[{finishReason:'STOP', content:{parts:[{text:text}]}}]}});
+    const err = (st, msg) => ({status:st, body:{error:{message:msg}}});
+    const fotoAntwort = o => JSON.stringify(Object.assign({ART:'Testpflanze', BOTANISCH:'Testgattung neuart', MERKMALE:'keine',
+      SORTE:'keine', SORTE_BELEG:'keine', SORTEN_VERWECHSLUNG:'keine', SICHERHEIT:'hoch', FEHLT:'keine', VERWECHSLUNG:'keine',
+      SUBSTRAT:'Erde', TOPFART:'Kulturtopf', ABLAUF:'ja'}, o || {}));
+    const artAntwort = o => JSON.stringify(Object.assign({LICHT:'voll', GIESSKLASSE:'kakteenmodus', GIESSART:'schluck', TYP:'Sukkulente',
+      SPEICHER:'dickfleischige Blätter', FROST:'5', WICHTIG:'Nie in Staunässe stellen', PFLEGE:'Im Winter kühl stellen', WINTERRUHE:'keine',
+      KATZEN:'unbedenklich, kein Gift bekannt',
+      VERMEHRUNG:['Blattsteckling | 80 | Frühjahr | Sand | 4 Wochen', 'Teilung | 90 | Frühjahr | Erde | 2 Wochen']}, o || {}));
+    const standard = leib => {
+      const foto = leib.contents[0].parts.some(p => p.inline_data);
+      return ok(foto ? fotoAntwort(w.__foto) : artAntwort(w.__art));
+    };
+    w.__antwort = {'*': standard};
+    w.fetch = (u, o) => {
+      const url = String(u);
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe.push({u:url, leib:leib});
+      const m = (url.match(/models\/([^:]+):/) || [])[1];
+      const f = w.__antwort[m] || w.__antwort['*'];
+      const a = f(leib);
+      return new Promise(res => setTimeout(() => res({ok:a.status === 200, status:a.status, json:()=>Promise.resolve(a.body)}), w.__verzug));
+    };
+    const posts = () => w.__aufrufe.filter(a => a.u.indexOf(':generateContent') > -1);
+    const istFoto = a => a.leib.contents[0].parts.some(p => p.inline_data);
+    const promptVon = a => a.leib.contents[0].parts[0].text;
+    const schemaVon = a => (a.leib.generationConfig || {}).responseSchema || null;
+    const MODELLE = `[{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}, {id:'models/gemini-3.8-flash', anzeige:'3.8 Flash', langsam:true},
+      {id:'models/gemini-3.5-flash-lite', anzeige:'3.5 Flash Lite'}]`;
+    T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = ${MODELLE}; S.kiModell = 'models/gemini-3.6-flash'; S.gelernteArten = {};
+      Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; }); S.eigene = S.eigene.filter(function(p){ return !/^Testgattung/.test(p.botanisch || ''); })`);
+    const start = (name) => T(`alStart(); neuWegSetzen('ki'); KI_BILDER.anlegen.length = 0;
+      KI_BILDER.anlegen.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'});
+      document.getElementById('f-name').value = ${JSON.stringify(name || '')}; 1`);
+    const anlegen = async () => { await haengt(T(`kiDirektLos('anlegen')`)); await warte(150); };
+    const feld = id => d.getElementById(id).value;
+    const status = () => d.getElementById('al-artfrage').textContent;
+
+    /* F73: „Mit … versuchen“ überspringt langsame Modelle */
+    pruef('beta.2: Das nächste Modell überspringt ein langsames',
+      T(`(kiNaechstesModell('models/gemini-3.6-flash') || {}).id`) === 'models/gemini-3.5-flash-lite', T(`(kiNaechstesModell('models/gemini-3.6-flash') || {}).id`));
+    const nurLangsam = T(`(function(){ var alt = S.kiModelle; S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'},
+      {id:'models/gemini-3.8-flash', anzeige:'3.8 Flash', langsam:true}];
+      var h = kiNochmalHTML('models/gemini-3.6-flash', function(w, id){ return 'data-x="' + w + '"'; }); S.kiModelle = alt; return h; })()`);
+    pruef('beta.2: Gibt es nur ein langsames, steht „(langsam)“ auf dem Knopf', /Mit 3\.8 Flash \(langsam\) versuchen/.test(nurLangsam), nurLangsam);
+
+    /* JSON der strukturierten Ausgabe wird zu Zeilen */
+    pruef('beta.2: JSON mit Liste wird zu Zeilen',
+      T(`awJsonText('{"ART":"a","VERMEHRUNG":["x | 1","y | 2"]}', ['ART','VERMEHRUNG'])`) === 'ART: a\nVERMEHRUNG: x | 1\nVERMEHRUNG: y | 2');
+    pruef('beta.2: Text statt JSON bleibt, wie er ist', T(`awJsonText('ART: a', ['ART'])`) === 'ART: a');
+
+    /* Neue Art: zwei Anfragen, die zweite automatisch und ohne Foto */
+    w.__aufrufe = []; w.__foto = {}; w.__art = {};
+    start('Rudi');
+    await anlegen();
+    const p1 = posts();
+    pruef('beta.2: Neue Art: genau zwei Anfragen', p1.length === 2, String(p1.length));
+    pruef('beta.2: Die erste geht mit Foto und fragt nur das Bestimmen',
+      !!p1[0] && istFoto(p1[0]) && !!schemaVon(p1[0]) && !!schemaVon(p1[0]).properties.ART && !schemaVon(p1[0]).properties.LICHT,
+      p1[0] && JSON.stringify(Object.keys((schemaVon(p1[0]) || {}).properties || {})));
+    pruef('beta.2: Die erste nutzt die feste Antwortform', !!p1[0] && p1[0].leib.generationConfig.responseMimeType === 'application/json');
+    pruef('beta.2: Der Foto-Auftrag ist kürzer als der große Auftrag',
+      !!p1[0] && promptVon(p1[0]).length < T('anlegenPromptBauen()').length, p1[0] && String(promptVon(p1[0]).length));
+    pruef('beta.2: Die zweite geht ohne Foto und fragt das Artwissen',
+      !!p1[1] && !istFoto(p1[1]) && !!schemaVon(p1[1]) && !!schemaVon(p1[1]).properties.LICHT
+      && schemaVon(p1[1]).properties.VERMEHRUNG.type === 'ARRAY', p1[1] && JSON.stringify(Object.keys((schemaVon(p1[1]) || {}).properties || {})));
+    pruef('beta.2: Die zweite nennt Art und botanischen Namen, nie den Namen aus der Karte',
+      !!p1[1] && /Testgattung neuart/.test(promptVon(p1[1])) && promptVon(p1[1]).indexOf('Rudi') === -1, p1[1] && promptVon(p1[1]).slice(0, 200));
+    pruef('beta.2: Das Artwissen steht im Formular', feld('f-klasse') === 'C' && feld('f-sonne') === 'voll' && feld('f-typ') === 'Sukkulente',
+      feld('f-klasse') + ' ' + feld('f-sonne') + ' ' + feld('f-typ'));
+    pruef('beta.2: Die Statuszeile meldet das Artwissen', /Artwissen für .* ist da/.test(status()), status());
+    pruef('beta.2: Das Protokoll trennt Foto und Artwissen',
+      JSON.parse(T('JSON.stringify(kiProtokoll().slice(0, 2).map(function(e){ return e.zweck; }))')).join(',') === 'Anlegen · Artwissen,Anlegen · Foto',
+      T('JSON.stringify(kiProtokoll().slice(0, 2).map(function(e){ return e.zweck; }))'));
+    pruef('beta.2: „unbedenklich“ wird nicht ungeprüft übernommen', feld('f-giftig') === 'unbekannt', feld('f-giftig'));
+    /* Anlegen: gelernte Art und Karte */
+    T('alSpeichern()'); await warte(120);
+    const gel = JSON.parse(T(`JSON.stringify(S.gelernteArten['testgattung neuart'] || null)`));
+    pruef('beta.2: Nach dem Anlegen ist die Art gelernt', !!gel && gel.klasse === 'C' && gel.sonne === 'voll' && gel.typ === 'Sukkulente'
+      && /Blattsteckling/.test(gel.vermehrung || ''), JSON.stringify(gel));
+    const neu1 = JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === 'Testgattung neuart'; }).pop() || null)`));
+    pruef('beta.2: Die Karte trägt das Artwissen mit Herkunft KI',
+      !!neu1 && neu1.klasse === 'C' && neu1.sonne === 'voll' && neu1.quellen.klasse === 'ki' && !!neu1.vermehrungKi && Array.isArray(neu1.pflege),
+      JSON.stringify(neu1 && {k:neu1.klasse, s:neu1.sonne, q:neu1.quellen, v:!!neu1.vermehrungKi, p:neu1.pflege}));
+
+    /* Bekannte (gelernte) Art: eine Anfrage */
+    w.__aufrufe = [];
+    start('Zweite');
+    await anlegen();
+    pruef('beta.2: Gelernte Art: nur die Foto-Anfrage', posts().length === 1, String(posts().length));
+    pruef('beta.2: Das Artwissen kommt aus den gelernten Arten', feld('f-klasse') === 'C' && feld('f-sonne') === 'voll'
+      && T('AW && AW.quelle') === 'gelernt' && /gelernten Arten/.test(status()), feld('f-klasse') + ' ' + T('AW && AW.quelle') + ' ' + status());
+    pruef('beta.2: Ein Knopf fragt trotzdem die KI', !!d.querySelector('#al-artfrage [data-aw="ki"]'));
+    d.querySelector('#al-artfrage [data-aw="ki"]').click();
+    await warte(150);
+    pruef('beta.2: Der Knopf schickt genau eine Anfrage ohne Foto', posts().length === 2 && !istFoto(posts()[1]), String(posts().length));
+
+    /* Sicherheit niedrig: erst „Stimmt die Art?“ */
+    w.__aufrufe = []; w.__foto = {ART:'Zweitpflanze', BOTANISCH:'Testgattung zweitart', SICHERHEIT:'niedrig'};
+    start('');
+    await anlegen();
+    pruef('beta.2: Bei „niedrig“ keine zweite Anfrage', posts().length === 1, String(posts().length));
+    pruef('beta.2: Die App fragt „Stimmt die Art?“', /Stimmt die Art\?/.test(status()), status());
+    d.querySelector('#al-artfrage [data-aw="ki"]').click();
+    await warte(150);
+    pruef('beta.2: „Ja, Artwissen holen“ schickt die zweite', posts().length === 2 && !istFoto(posts()[1]), String(posts().length));
+    /* Art von Hand geändert: keine Anfrage von selbst, ein Knopf */
+    w.__aufrufe = [];
+    const bot = d.getElementById('f-bot');
+    bot.value = 'Testgattung drittart';
+    bot.dispatchEvent(new w.Event('change', {bubbles:true}));
+    await warte(60);
+    pruef('beta.2: Eine Änderung der Art schickt nichts von selbst', posts().length === 0, String(posts().length));
+    pruef('beta.2: und bietet das Artwissen per Knopf an', /hat sich geändert/.test(status()) && !!d.querySelector('#al-artfrage [data-aw="ki"]'), status());
+
+    /* Eigene Pflanze gleicher Art: keine zweite Anfrage. Aus der Bibliothek stammende Werte zählen nicht. */
+    T(`S.eigene.push({id:'BT2-1', eigen:true, name:'Vorbild', art:'Pflanzart', botanisch:'Testgattung pflanzart', sorte:'',
+      klasse:'A', sonne:'hell', typ:'Strauch', quellen:{klasse:'ki', sonne:'ki'}});
+      S.eigene.push({id:'BT2-2', eigen:true, name:'Bibvorbild', art:'Bibart', botanisch:'Testgattung bibart', sorte:'',
+      klasse:'S', sonne:'voll', quellen:{klasse:'bib', sonne:'bib'}}); 1`);
+    w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung pflanzart'};
+    start('');
+    await anlegen();
+    pruef('beta.2: Eigene Pflanze gleicher Art: nur die Foto-Anfrage', posts().length === 1, String(posts().length));
+    pruef('beta.2: Das Artwissen kommt von der eigenen Pflanze', feld('f-klasse') === 'A' && feld('f-sonne') === 'hell' && T('AW && AW.quelle') === 'pflanze',
+      feld('f-klasse') + ' ' + T('AW && AW.quelle'));
+    w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung bibart'};
+    start('');
+    await anlegen();
+    pruef('beta.2: Eine Pflanze mit Bibliothekswerten zählt nicht', posts().length === 2, String(posts().length));
+
+    /* Exakter Bibliothekstreffer (F80): keine zweite Anfrage, Werte nur als Vorschlag */
+    const bib = JSON.parse(T(`JSON.stringify(BIB.find(function(a){ return a.klasse === 'C' && a.licht === 'voll' && a.frost != null && !bibKreuzung(a.bot); }) || null)`));
+    if(bib){
+      w.__aufrufe = []; w.__foto = {ART:bib.de, BOTANISCH:bib.bot};
+      start('');
+      await anlegen();
+      pruef('beta.2: Bibliothekstreffer: nur die Foto-Anfrage', posts().length === 1, String(posts().length));
+      pruef('beta.2: Die Bibliothek belegt nichts vor', feld('f-klasse') === 'B' && feld('f-sonne') === 'indirekt',
+        feld('f-klasse') + ' ' + feld('f-sonne'));
+      T('alStufeZeigen(4)');
+      pruef('beta.2: Auf „Platz und Pflege“ steht der Vorschlag aus der Bibliothek',
+        d.getElementById('al-bibzsf').hidden === false && d.getElementById('al-bibzsf-titel').textContent === 'Vorschlag aus der Bibliothek'
+        && !!d.querySelector('#al-bibzsf [data-aw="bib-alle"]') && !!d.querySelector('#al-bibzsf [data-aw="ki"]'),
+        d.getElementById('al-bibzsf-titel').textContent);
+      d.querySelector('#al-bibzsf [data-aw="bib-alle"]').click();
+      pruef('beta.2: „Vorschlag übernehmen“ setzt die Werte', feld('f-klasse') === 'C' && feld('f-sonne') === 'voll', feld('f-klasse') + ' ' + feld('f-sonne'));
+      T('alSpeichern()'); await warte(120);
+      const pb = JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === ${JSON.stringify(bib.bot)}; }).pop() || null)`));
+      pruef('beta.2: Übernommene Bibliothekswerte tragen die Herkunft Bibliothek, mit Frost',
+        !!pb && pb.quellen.klasse === 'bib' && pb.frostMin === bib.frost, JSON.stringify(pb && {q:pb.quellen, f:pb.frostMin}));
+      pruef('beta.2: Bibliothekswerte werden nicht gelernt', T(`Object.keys(S.gelernteArten).some(function(k){ return k.indexOf(${JSON.stringify(bib.bot.toLowerCase())}) === 0; })`) === false);
+      /* Ohne Übernahme: kein Frost, keine Bibliotheksherkunft */
+      T(`alStart(); artWaehlen(${JSON.stringify(bib.bot)})`);
+      pruef('beta.2: Eine Art aus der Bibliothek wählen belegt Gießklasse und Licht nicht vor', feld('f-klasse') === 'B' && feld('f-sonne') === 'indirekt',
+        feld('f-klasse') + ' ' + feld('f-sonne'));
+      T('alSpeichern()'); await warte(120);
+      const pb2 = JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === ${JSON.stringify(bib.bot)}; }).pop() || null)`));
+      pruef('beta.2: Ohne Übernahme kein Frost aus der Bibliothek', !!pb2 && pb2.frostMin == null && pb2.quellen.klasse !== 'bib',
+        JSON.stringify(pb2 && {q:pb2.quellen, f:pb2.frostMin}));
+      /* Abweichung KI gegen Bibliothek: Wahl je Feld (Regel 10.13) */
+      T(`alStart(); neuWegSetzen('ki'); document.getElementById('f-paste').value = ${JSON.stringify('ART: ' + bib.de + '\nBOTANISCH: ' + bib.bot + '\nGIESSKLASSE: durstig\nLICHT: voll')};
+        document.getElementById('btn-paste-los').click(); alStufeZeigen(4); 1`);
+      pruef('beta.2: Weicht die KI ab, wird nichts vorbelegt', feld('f-klasse') === 'B' && T(`JSON.stringify(AW.offen.klasse)`) === JSON.stringify({ki:'A', bib:'C'}),
+        feld('f-klasse') + ' ' + T(`JSON.stringify(AW.offen)`));
+      pruef('beta.2: Stimmt die KI mit der Bibliothek überein, wird vorbelegt', feld('f-sonne') === 'voll', feld('f-sonne'));
+      const wahl = d.querySelector('#al-bibzsf [data-aw="wahl"][data-f="klasse"][data-q="ki"]');
+      pruef('beta.2: Die Wahl steht als zwei Knöpfe da', !!wahl && !!d.querySelector('#al-bibzsf [data-aw="wahl"][data-q="bib"]'));
+      if(wahl) wahl.click();
+      pruef('beta.2: Die Wahl setzt den Wert', feld('f-klasse') === 'A' && T(`JSON.stringify(AW.offen)`) === '{}', feld('f-klasse'));
+    } else pruef('beta.2: Testart in der Bibliothek gefunden', false);
+
+    /* Giftwarnung bleibt automatisch (F81) */
+    T(`alStart(); artWaehlen('Epipremnum aureum')`);
+    if(T(`!!BIB_NACH_BOT['Epipremnum aureum']`)){
+      T('alSpeichern()'); await warte(120);
+      pruef('beta.2: Die Giftwarnung kommt ohne Übernahme aus der Bibliothek',
+        T(`istGiftig(S.eigene.filter(function(p){ return p.botanisch === 'Epipremnum aureum'; }).pop(), 'katze')`) === true);
+    }
+
+    /* Antwortform abgelehnt: der nächste Tipp geht ohne */
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => err(400, 'Invalid JSON payload received. Unknown name "responseSchema" at generation_config')};
+    let fs400 = '';
+    try{ await haengt(T(`kiFragenEinmal('x', [], null, {schema:{type:'OBJECT'}})`)); }catch(e){ fs400 = String(e.message || e); }
+    pruef('beta.2: Lehnt das Modell die Antwortform ab, sagt die Meldung es', /feste Antwortform/.test(fs400), fs400);
+    w.__antwort = {'*': () => ok('ART: a')};
+    try{ await haengt(T(`kiFragenEinmal('x', [], null, {schema:{type:'OBJECT'}})`)); }catch(e){}
+    pruef('beta.2: Der nächste Tipp geht ohne Antwortform', posts().length === 2 && !posts()[1].leib.generationConfig.responseSchema,
+      JSON.stringify(posts().map(a => a.leib.generationConfig)));
+    T('Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; })');
+    /* Antwort als Zeilen statt JSON */
+    w.__aufrufe = [];
+    w.__antwort = {'*': leib => ok(istFoto({leib:leib}) ? 'ART: Textpflanze\nBOTANISCH: Testgattung textart\nSICHERHEIT: hoch' : 'LICHT: hell\nGIESSKLASSE: durstig')};
+    start('');
+    await anlegen();
+    pruef('beta.2: Kommen Zeilen statt JSON, klappt es trotzdem', posts().length === 2 && feld('f-klasse') === 'A' && feld('f-sonne') === 'hell',
+      posts().length + ' ' + feld('f-klasse') + ' ' + feld('f-sonne'));
+    w.__antwort = {'*': standard};
+
+    /* Bibliothek: nur genau diese Art (bibVon) */
+    const gat = T(`(BIB.find(function(a){ return /^[A-Z][a-z]+ [a-z]/.test(a.bot) && !bibKreuzung(a.bot); }) || {bot:'Monstera deliciosa'}).bot.split(' ')[0]`);
+    pruef('beta.2: Eine unbekannte Art einer bekannten Gattung bekommt keine Bibliothekswerte',
+      T(`bibVon({botanisch:${JSON.stringify(gat + ' unbekanntissima')}})`) === null);
+    pruef('beta.2: Eine Kreuzung bekommt keine Bibliothekswerte', T(`bibVon({botanisch:'Drosera capensis × aliciae'})`) === null);
+    pruef('beta.2: Die genaue Art trifft weiter', !!T(`bibVon({botanisch:'Epipremnum aureum'})`) || !T(`!!BIB_NACH_BOT['Epipremnum aureum']`));
+    /* Steckbrief: Vorschlag mit Knopf */
+    T(`S.eigene.push({id:'BT2-3', eigen:true, name:'Ohne Familie', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', sonne:'hell',
+      familie:'', typ:'', quellen:{}}); 1`);
+    const kd = d.createElement('div'); kd.innerHTML = T(`kartenDetailHTML(allePflanzen().find(function(p){ return p.id === 'BT2-3'; }))`); d.body.appendChild(kd);
+    const nimm = kd.querySelector('[data-do="bib-nimm"][data-f="familie"]');
+    pruef('beta.2: Die Karte zeigt die Familie der Bibliothek als Vorschlag mit Knopf', !!nimm && /Vorschlag aus der Artenbibliothek/.test(kd.textContent));
+    if(nimm) nimm.click();
+    pruef('beta.2: Der Knopf übernimmt die Familie in die Karte',
+      !!T(`allePflanzen().find(function(p){ return p.id === 'BT2-3'; }).familie`), T(`allePflanzen().find(function(p){ return p.id === 'BT2-3'; }).familie`));
+    kd.remove();
+
+    /* Teilen gelernter Arten (F72) */
+    T(`S.neueArten = []; S.gelernteArten = {'testgattung meldeart':{art:'Meldepflanze', bot:'Testgattung meldeart', klasse:'C', sonne:'voll', datum:'2026-10-26'}};
+      MELDE_AUS = {}; meldeRender(); 1`);
+    pruef('beta.2: Gelernte Arten machen den Melde-Block sichtbar', d.getElementById('melde-sec').hidden === false);
+    pruef('beta.2: Die Nachricht nennt die gelernte Art mit Werten',
+      /Gelernte Arten/.test(T('meldeText()')) && /Testgattung meldeart/.test(T('meldeText()')) && /Gießklasse C/.test(T('meldeText()')), T('meldeText()'));
+    const haken = d.querySelector('[data-melde-gel="testgattung meldeart"]');
+    if(haken){ haken.checked = false; haken.dispatchEvent(new w.Event('change', {bubbles:true})); }
+    pruef('beta.2: Ohne Haken fehlt sie in der Nachricht', !!haken && !/Testgattung meldeart/.test(T('meldeText()')));
+    if(haken){ haken.checked = true; haken.dispatchEvent(new w.Event('change', {bubbles:true})); }
+    const open0 = w.open; let geoeffnet = '';
+    w.open = u => { geoeffnet = String(u); return null; };
+    d.getElementById('btn-melde-github').click();
+    w.open = open0;
+    pruef('beta.2: „Auf GitHub melden“ öffnet ein Issue mit Titel und Text',
+      geoeffnet.indexOf(T('ISSUE_URL') + '?title=') === 0 && geoeffnet.indexOf(encodeURIComponent('Testgattung meldeart')) > -1, geoeffnet.slice(0, 120));
+    pruef('beta.2: Daneben steht der Hinweis auf das GitHub-Konto', /GitHub-Konto/.test(d.getElementById('melde-sec').textContent));
+
+    T(`S.gelernteArten = {}; S.eigene = S.eigene.filter(function(p){ return !/^Testgattung/.test(p.botanisch || '') && ['BT2-1','BT2-2','BT2-3'].indexOf(p.id) === -1; });
+      kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null; formularLeeren(); 1`);
+    w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    w.fetch = fetch0;
+  }
+
+
+  /* ══ 4.0-beta.3: neue Leiste, Zahnrad, BOTaniker ══
+     Jeder Test legt seine Pflanzen selbst an. */
+  {
+    const T = c => w.__T(c);
+    const fetch0 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    w.__aufrufe = [];
+    w.__verzug = 10;
+    const antwort = o => JSON.stringify(Object.assign({KURZANTWORT:'Ja, im Frühjahr in einen 2 bis 4 cm größeren Topf.',
+      SICHERHEIT:'mittel', SICHERHEIT_GRUND:'Die Wurzeln sind auf dem Foto nicht zu sehen.',
+      PRUEFEN:['Topf abziehen und auf Wurzeln am Rand schauen', 'Kommen Wurzeln unten heraus?'], RUECKFRAGE:'keine'}, o || {}));
+    w.__antwort = {'*': () => ({status:200, body:{candidates:[{finishReason:'STOP', content:{parts:[{text:antwort()}]}}]}})};
+    w.fetch = (u, o) => {
+      const url = String(u);
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe.push({u:url, leib:leib});
+      const a = w.__antwort['*'](leib);
+      return new Promise(res => setTimeout(() => res({ok:a.status === 200, status:a.status, json:()=>Promise.resolve(a.body)}), w.__verzug));
+    };
+    const posts = () => w.__aufrufe.filter(a => a.u.indexOf(':generateContent') > -1);
+    const verlauf = () => d.getElementById('bot-verlauf');
+    const letzte = () => { const k = verlauf().querySelectorAll('.bot-antwort'); return k[k.length - 1]; };
+    const senden = async text => { d.getElementById('bot-text').value = text; d.getElementById('bot-senden').click(); await warte(80); };
+    T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}]; S.kiModell = 'models/gemini-3.6-flash';
+      S.eigene.push({id:'BT3-1', eigen:true, name:'Monti', art:'Fensterblatt', botanisch:'Monstera deliciosa', klasse:'B', sonne:'hell', topf:'17', substrat:'erde', quellen:{}, todo:[], log:[], seit:'2026-10-01'});
+      S.eigene.push({id:'BT3-2', eigen:true, name:'Rankel', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', sonne:'hell', quellen:{}, todo:[], log:[], seit:'2026-10-01'});
+      S.eigene.push({id:'BT3-3', eigen:true, name:'Hängi', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', sonne:'hell', quellen:{}, todo:[], log:[], seit:'2026-10-01'});
+      try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} botNeu(); 1`);
+
+    /* B: Leiste und Zahnrad */
+    const reiter = Array.from(d.querySelectorAll('#tabs [data-ans-go]')).map(b => b.dataset.ansGo);
+    pruef('beta.3: Die Leiste hat Heute, Sammlung, BOTaniker', JSON.stringify(reiter) === JSON.stringify(['heute','sammlung','botaniker']), JSON.stringify(reiter));
+    const zahnrad = d.getElementById('kopf-zahnrad');
+    pruef('beta.3: Im Kopf steht das Zahnrad', !!zahnrad && zahnrad.dataset.ansGo === 'mehr');
+    T(`ansichtZeigen('heute')`);
+    pruef('beta.3: Auf Heute kein Umschalter und keine Eingabe', d.getElementById('zr-umschalter').hidden === true && d.getElementById('bot-eingabe').hidden === true);
+    if(zahnrad) zahnrad.click();
+    pruef('beta.3: Das Zahnrad öffnet die Einstellungen mit Umschalter', T('S.ansicht') === 'mehr' && d.getElementById('kopf-titel').textContent === 'Einstellungen'
+      && d.getElementById('zr-umschalter').hidden === false, T('S.ansicht') + ' ' + d.getElementById('kopf-titel').textContent);
+    d.querySelector('#zr-umschalter [data-ans-go="werkzeuge"]').click();
+    pruef('beta.3: Der Umschalter führt zu den Werkzeugen', T('S.ansicht') === 'werkzeuge' && d.getElementById('zr-umschalter').hidden === false
+      && d.querySelector('#zr-umschalter [data-ans-go="werkzeuge"]').classList.contains('on'));
+    d.querySelector('#tabs [data-ans-go="botaniker"]').click();
+    pruef('beta.3: Auf dem BOTaniker steht die Eingabe, kein Umschalter', T('S.ansicht') === 'botaniker' && d.getElementById('bot-eingabe').hidden === false
+      && d.getElementById('zr-umschalter').hidden === true && d.getElementById('kopf-titel').textContent === 'BOTaniker');
+    pruef('beta.3: Der BOTaniker-Bereich ist sichtbar', !d.getElementById('bot-sec').classList.contains('ans-aus'));
+
+    /* C: Start */
+    pruef('beta.3: Start mit acht Kacheln und Urlaubszettel', d.querySelectorAll('#bot-start .bot-aktion').length === 8
+      && !!d.querySelector('#bot-start [data-bot-aktion="urlaub"]') && d.getElementById('bot-gespraech').hidden === true);
+
+    /* Erkannt ohne KI */
+    w.__aufrufe = [];
+    await senden('Ich möchte Monti umtopfen, er ist total wurzelgebunden.');
+    const k1 = letzte();
+    pruef('beta.3: Pflanze und Absicht werden ohne KI erkannt', !!k1 && /Ohne KI/.test(k1.textContent) && /Monti/.test(k1.textContent) && /Umtopfen/.test(k1.textContent),
+      k1 && k1.textContent.slice(0, 160));
+    pruef('beta.3: Dabei geht keine Anfrage raus', posts().length === 0, String(posts().length));
+    pruef('beta.3: Die Kacheln verschwinden, sobald das Gespräch läuft', d.getElementById('bot-start').hidden === true && d.getElementById('bot-gespraech').hidden === false);
+    const oeffnen = k1 && k1.querySelector('[data-bot-aktion="umtopfen"]');
+    pruef('beta.3: Ein Knopf führt ins Werkzeug', !!oeffnen && /Umtopfen öffnen/.test(oeffnen.textContent));
+    if(oeffnen) oeffnen.click();
+    await warte(30);
+    pruef('beta.3: Der Knopf öffnet das Werkzeug Umtopfen', T(`modalOffen('sek-modal')`) === true && /Umtopfen/i.test(d.getElementById('sekm-titel').textContent),
+      d.getElementById('sekm-titel').textContent);
+    T(`try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} 1`);
+
+    /* KI per Knopf: eine Anfrage, ohne Namen aus der Karte */
+    w.__aufrufe = [];
+    const frag = k1 && k1.querySelector('[data-bot="ki"]');
+    if(frag) frag.click();
+    await warte(120);
+    const p1 = posts();
+    pruef('beta.3: „BOTaniker fragen“ schickt genau eine Anfrage', p1.length === 1, String(p1.length));
+    const pr1 = p1[0] ? p1[0].leib.contents[0].parts[0].text : '';
+    pruef('beta.3: Der Auftrag nennt die Art, nie den Namen aus der Karte', /Monstera deliciosa/.test(pr1) && pr1.indexOf('Monti') === -1, pr1.slice(0, 300));
+    pruef('beta.3: Der Auftrag nutzt die feste Antwortform', !!p1[0] && !!p1[0].leib.generationConfig.responseSchema
+      && !!p1[0].leib.generationConfig.responseSchema.properties.KURZANTWORT);
+    const k2 = letzte();
+    pruef('beta.3: Die Antwort zeigt Kurzantwort, Sicherheit und „So prüfst du es“', !!k2 && /größeren Topf/.test(k2.textContent)
+      && /Sicherheit: mittel/.test(k2.textContent) && k2.querySelectorAll('.bot-punkte i.v').length === 2
+      && k2.querySelectorAll('.bot-block li').length === 2, k2 && k2.textContent.slice(0, 200));
+    pruef('beta.3: Die Antwort sagt, dass der Name nicht mitging', !!k2 && /Nicht mitgeschickt: der Name „Monti“/.test(k2.textContent));
+    pruef('beta.3: Das Protokoll führt die Anfrage als BOTaniker', T('kiProtokoll()[0].zweck') === 'BOTaniker', T('kiProtokoll()[0].zweck'));
+
+    /* Rückfrage bei zwei passenden Pflanzen */
+    w.__aufrufe = [];
+    await senden('Warum werden die Blätter bei der Efeutute gelb?');
+    const k3 = letzte();
+    const wahl = k3 ? Array.from(k3.querySelectorAll('[data-bot-wahl]')) : [];
+    pruef('beta.3: Passen zwei Pflanzen, fragt der BOTaniker nach', !!k3 && /Welche Pflanze meinst du/.test(k3.textContent)
+      && ['BT3-2','BT3-3'].every(id => wahl.some(b => b.dataset.botWahl === id)) && !wahl.some(b => b.dataset.botWahl === 'BT3-1'), k3 && k3.textContent.slice(0, 160));
+    const rankel = wahl.find(b => b.dataset.botWahl === 'BT3-2');
+    if(rankel) rankel.click();
+    await warte(40);
+    const k4 = letzte();
+    pruef('beta.3: Nach der Wahl stehen Pflanze und Problem da', !!k4 && /Rankel/.test(k4.textContent) && /Problem klären/.test(k4.textContent)
+      && posts().length === 0, k4 && k4.textContent.slice(0, 160));
+
+    /* Nichts erkannt */
+    await senden('Hallo du');
+    pruef('beta.3: Ohne Treffer sagt er es und bietet die KI an', /nicht zuordnen/.test(letzte().textContent) && !!letzte().querySelector('[data-bot="ki"]'));
+
+    /* Foto geht mit, danach ist die Auswahl leer */
+    w.__aufrufe = [];
+    T(`KI_BILDER.bot.length = 0; KI_BILDER.bot.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'}); botBilderZeichnen(); 1`);
+    pruef('beta.3: Das Foto steht über der Eingabe', d.getElementById('bot-bilder').hidden === false && d.querySelectorAll('#bot-bilder img').length === 1);
+    T(`botAktion('frage')`);
+    await senden('Monti hat braune Ränder, was ist das?');
+    await warte(120);
+    pruef('beta.3: „Frage stellen“ fragt die KI direkt, mit Foto', posts().length === 1 && posts()[0].leib.contents[0].parts.some(p => p.inline_data),
+      String(posts().length));
+    pruef('beta.3: Nach der Antwort ist die Fotoauswahl leer', T('KI_BILDER.bot.length') === 0);
+
+    /* Fehler: eine Anfrage, Knopf „Noch einmal“ */
+    w.__aufrufe = [];
+    w.__antwort = {'*': () => ({status:503, body:{error:{message:'The model is overloaded.'}}})};
+    T(`botKiFragen('Was braucht sie im Winter?', 'BT3-1')`);
+    await warte(120);
+    const nochmal = letzte() && letzte().querySelector('[data-bot="nochmal"]');
+    pruef('beta.3: Bei 503 genau eine Anfrage und ein Knopf „Noch einmal“', posts().length === 1 && !!nochmal, String(posts().length));
+    w.__antwort = {'*': () => ({status:200, body:{candidates:[{finishReason:'STOP', content:{parts:[{text:antwort()}]}}]}})};
+    if(nochmal) nochmal.click();
+    await warte(120);
+    pruef('beta.3: „Noch einmal“ schickt genau eine weitere', posts().length === 2 && /größeren Topf/.test(letzte().textContent), String(posts().length));
+
+    /* Ohne Schlüssel: kopieren statt fragen */
+    w.__aufrufe = [];
+    T(`kiSchluesselSetzen('')`);
+    T(`botKiFragen('Wie oft gießen?', 'BT3-1')`);
+    await warte(40);
+    pruef('beta.3: Ohne Schlüssel keine Anfrage, dafür „Frage kopieren“', posts().length === 0 && /fehlt der Schlüssel/.test(letzte().textContent)
+      && !!letzte().querySelector('[data-bot="kopieren"]') && letzte().dataset.botPrompt.indexOf('Monti') === -1);
+    T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}')`);
+
+    /* Neues Thema schließt das Gespräch */
+    d.querySelector('#bot-gespraech [data-bot="zu"]').click();
+    pruef('beta.3: Schließen leert das Gespräch und zeigt die Kacheln', verlauf().children.length === 0 && d.getElementById('bot-start').hidden === false);
+
+    /* Kacheln führen in die Werkzeuge (F78) */
+    d.querySelector('#bot-start [data-bot-aktion="problem"]').click(); await warte(30);
+    pruef('beta.3: „Problem klären“ öffnet den Doktor', T(`modalOffen('sek-modal')`) === true && /Doktor/i.test(d.getElementById('sekm-titel').textContent), d.getElementById('sekm-titel').textContent);
+    T(`try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} 1`);
+    d.querySelector('#bot-start [data-bot-aktion="urlaub"]').click(); await warte(30);
+    pruef('beta.3: „Urlaubszettel“ öffnet den Zettel', T(`modalOffen('sek-modal')`) === true && /Urlaub|Vertretung/i.test(d.getElementById('sekm-titel').textContent), d.getElementById('sekm-titel').textContent);
+    T(`try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} 1`);
+    d.querySelector('#bot-start [data-bot-aktion="bestimmen"]').click(); await warte(30);
+    pruef('beta.3: „Art bestimmen“ öffnet das Anlegen mit der KI', T(`modalOffen('anleg-modal')`) === true && T('neuWeg') === 'ki' && T('alStufe') === 2);
+    T(`try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} formularLeeren(); 1`);
+
+    T(`S.eigene = S.eigene.filter(function(p){ return !/^BT3-/.test(p.id); }); kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null; botNeu(); ansichtZeigen('heute'); 1`);
+    w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    w.fetch = fetch0;
   }
 
 
@@ -10350,11 +11051,11 @@ setTimeout(async () => {
     await tick();
     pruef('beta.1: Kein „Neu in Fassung“ für 3.31.0', T(`modalOffen('neu-modal')`) === false
       && d.getElementById('neu-titel').textContent.indexOf('3.31.0') === -1);
-    pruef('beta.1: Die Fassung gilt danach als gesehen', T('S.fassungGesehen') === '4.0-beta.1', T('S.fassungGesehen'));
+    pruef('beta.1: Die Fassung gilt danach als gesehen', T('S.fassungGesehen') === T('FASSUNG'), T('S.fassungGesehen'));
 
     /* Kennzeichen (F37) und Name (F39) */
     const band = d.getElementById('beta-band');
-    pruef('beta.1: Das Band zeigt BETA und die Fassung', !!band && band.textContent === 'BETA 4.0-beta.1 · Testdaten', band && band.textContent);
+    pruef('beta.1: Das Band zeigt BETA und die Fassung', !!band && band.textContent === 'BETA ' + w.__T('FASSUNG') + ' · Testdaten', band && band.textContent);
     pruef('beta.1: Das Band fängt keine Tipps ab', html.indexOf('#beta-band{position:fixed;top:0;left:0;right:0;z-index:2147483000;pointer-events:none;') > -1);
     pruef('beta.1: Titel GK Beta', d.title === 'GK Beta', d.title);
 
@@ -10379,15 +11080,16 @@ setTimeout(async () => {
 
     /* Sicherungsdatei (F40) */
     pruef('beta.1: Die Sicherungsdatei heißt pflanzen-sicherung-BETA.json', T('sicherungDatei().name') === 'pflanzen-sicherung-BETA.json', T('sicherungDatei().name'));
-    pruef('beta.1: Die Sicherung trägt die Beta-Fassung', JSON.parse(T('sicherungInhalt()')).__fassung === '4.0-beta.1');
+    pruef('beta.1: Die Sicherung trägt die Beta-Fassung', JSON.parse(T('sicherungInhalt()')).__fassung === T('FASSUNG'));
 
     /* sw.js mit Attrappen: löscht nur eigene alte Stände */
     const vm = require('vm');
+    const SW_JETZT = 'greenkeeperai-beta-' + (fs.readFileSync('sw.js', 'utf8').match(/PRAEFIX \+ '(\d+)'/) || [])[1];
     const ereignisse = {}, geloescht = [];
     const selbst = {addEventListener:(n, f) => { ereignisse[n] = f; }, clients:{claim:() => Promise.resolve()},
       location:{origin:'https://cmohr0212.github.io'}};
     const kiste = {self:selbst, URL, Promise,
-      caches:{keys:() => Promise.resolve(['greenkeeperai-v127', 'greenkeeperai-beta-0', 'greenkeeperai-beta-1', 'anderes']),
+      caches:{keys:() => Promise.resolve(['greenkeeperai-v127', 'greenkeeperai-beta-0', SW_JETZT, 'anderes']),
               delete:n => { geloescht.push(n); return Promise.resolve(true); }}};
     vm.runInNewContext(fs.readFileSync('sw.js', 'utf8'), kiste);
     let warten = null;
@@ -10395,7 +11097,7 @@ setTimeout(async () => {
     await warten;
     pruef('beta.1: sw.js löscht den alten Beta-Stand', geloescht.indexOf('greenkeeperai-beta-0') > -1, geloescht.join(','));
     pruef('beta.1: sw.js lässt den Speicher der echten App stehen', geloescht.indexOf('greenkeeperai-v127') === -1, geloescht.join(','));
-    pruef('beta.1: sw.js lässt fremde Speicher stehen', geloescht.indexOf('anderes') === -1 && geloescht.indexOf('greenkeeperai-beta-1') === -1, geloescht.join(','));
+    pruef('beta.1: sw.js lässt fremde Speicher stehen', geloescht.indexOf('anderes') === -1 && geloescht.indexOf(SW_JETZT) === -1, geloescht.join(','));
 
     /* Manifest (F39) */
     let man = {};

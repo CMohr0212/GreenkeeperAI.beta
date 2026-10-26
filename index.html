@@ -835,6 +835,13 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 #melde-liste .mrow{border-bottom:1px solid var(--line);padding:8px 0;overflow-wrap:anywhere;font-size:var(--t-m);line-height:1.6}
 .weg-datum{color:var(--ink-2);font-size:var(--t-s)}
 #melde-liste .mrow:last-child{border-bottom:0}
+/* beta.2 */
+.kb-bibvorschlag{margin:8px 0 4px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
+.kb-bibzeile{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;font-size:var(--t-m)}
+#melde-liste .mrow label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+#melde-liste .mrow small{display:block;color:var(--text-2, inherit);font-size:var(--t-s);line-height:1.45}
+#melde-liste h4{margin:10px 0 2px;font-size:var(--t-m)}
+.melde-konto{font-size:var(--t-s);margin-top:6px}
 @media(max-width:420px){.bibfeld{flex-wrap:wrap}.bibfeld button{width:100%}}
 
 [hidden]{display:none!important}
@@ -1517,6 +1524,17 @@ html[data-design="klartext"] .ver-k{border-width:2px}
   background:var(--fl-karte);margin-bottom:15px}
 .al-bibzsf h4{margin:0 0 8px;font-family:var(--f-display);font-size:var(--t-l);font-weight:600}
 .al-bibzsf .al-zsf>div:last-child{border-bottom:0}
+/* beta.2: Artwissen als Vorschlag, Abweichungen je Feld */
+.aw-status{margin:4px 0 16px}
+.aw-status .linkbtn{margin-left:2px}
+.aw-lauf::before{content:'';display:inline-block;width:.8em;height:.8em;margin-right:6px;border-radius:50%;
+  border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:awdreh 1s linear infinite}
+@keyframes awdreh{to{transform:rotate(360deg)}}
+.al-zsf>.aw-abw{display:block}
+.aw-lab{display:block;font-size:var(--t-s);color:var(--schrift-2, inherit);margin-bottom:6px}
+.aw-wahl{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.aw-wahl button{text-align:left}
+.aw-hinweis{font-size:var(--t-s);color:var(--text-2, inherit);margin:6px 0 0}
 /* Der Anstoss auf der frisch angelegten Karte. Eigene Klassen statt
    `.tools`, damit kein Spezifitaetskampf mit den Kartenknoepfen
    entsteht. */
@@ -1667,7 +1685,7 @@ html[data-design="klartext"] .kz-feld em{font-size:var(--t-md)}
 .mh-ikon svg{width:100%;height:100%;display:block;fill:none;
   stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-/* ── Designwahl unter Mehr › Ansicht ──────────────────────────
+/* ── Designwahl unter Einstellungen › Ansicht ──────────────────────────
    Vorlaeufiger Platz. Das richtige Ansicht-Fenster mit den
    Miniaturen kommt spaeter; bis dahin soll der Wechsel auf dem
    Geraet pruefbar sein. */
@@ -1839,7 +1857,7 @@ button:disabled{opacity:.45;cursor:default}
 .ans-aus{display:none!important}
 body{padding-bottom:76px}
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;
-  grid-template-columns:repeat(4,1fr);gap:0;background:var(--paper);
+  grid-template-columns:repeat(3,1fr);gap:0;background:var(--paper);
   border-top:1px solid var(--line);box-shadow:var(--sch-leiste-ab);
   padding-bottom:env(safe-area-inset-bottom)}
 .tabs button{position:relative;font:inherit;font-size:var(--t-xs);letter-spacing:.03em;
@@ -1852,22 +1870,103 @@ html[data-design="botanisch"] .tabs{background:var(--fl-karte)}
 .tab-i{width:20px;height:20px;border-radius:4px;border:1.6px solid currentColor;position:relative}
 .tabs button:nth-child(1) .tab-i{border-radius:50%}
 .tabs button:nth-child(2) .tab-i{border-radius:2px;box-shadow:inset 0 0 0 1.6px transparent,4px 4px 0 -1.6px currentColor}
-/* 3 = Werkzeuge (Kreuz aus drei Strichen), 4 = Mehr (gepunktet) */
-.tabs button:nth-child(3) .tab-i{border-radius:50%}
-.tabs button:nth-child(3) .tab-i::after{content:'';position:absolute;left:50%;top:4px;bottom:4px;width:1.6px;margin-left:-.8px;background:currentColor;box-shadow:-5px 5px 0 -.8px currentColor,5px 5px 0 -.8px currentColor}
-.tabs button:nth-child(4) .tab-i{border-radius:50%;border-style:dotted}
+/* 3 = BOTaniker (Blatt, 4.0-beta.3) */
+.tab-svg{width:21px;height:21px}
+.tabs button.on .tab-svg{fill:color-mix(in srgb, currentColor 14%, transparent)}
 .tabs.flach .tab-z{display:none}
 .tabs button.on .tab-i{background:color-mix(in srgb, currentColor 14%, transparent)}
 .tab-z{position:absolute;top:4px;left:calc(50% + 7px);min-width:16px;height:16px;
   border-radius:var(--r-gross);background:var(--terra);color:var(--schrift-invers);font-size:var(--t-xs);line-height:16px;
   padding:0 4px;font-variant-numeric:tabular-nums}
 @media(min-width:760px){
-  .tabs{position:sticky;top:0;bottom:auto;grid-template-columns:repeat(4,auto);
+  .tabs{position:sticky;top:0;bottom:auto;grid-template-columns:repeat(3,auto);
     justify-content:center;gap:4px;border-top:0;border-bottom:1px solid var(--line);
     box-shadow:var(--sch-leiste-auf)}
   .tabs button{flex-direction:row;font-size:var(--t-s);padding:11px 16px}
   body{padding-bottom:0}
 }
+
+/* ── 4.0-beta.3: Zahnrad, Umschalter und BOTaniker ── */
+header.top{position:relative}
+header.top .sich-stempel{margin-right:54px;min-height:24px}
+.kopf-zahnrad{position:absolute;right:0;top:12px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--line);background:color-mix(in srgb, var(--paper) 70%, transparent);color:var(--ink-2);cursor:pointer;z-index:2}
+.kopf-zahnrad svg{width:21px;height:21px}
+.kopf-zahnrad.on{color:var(--ink);border-color:var(--ink)}
+.zr-umschalter{display:flex;gap:6px;margin:4px 0 14px}
+.zr-umschalter button{font:inherit;font-size:var(--t-s);padding:8px 14px;border-radius:999px;border:1px solid var(--line);
+  background:none;color:var(--ink-2);cursor:pointer}
+.zr-umschalter button.on{background:var(--ink);border-color:var(--ink);color:var(--schrift-invers);font-weight:600}
+body[data-ansicht="botaniker"]{padding-bottom:150px}
+body[data-ansicht="botaniker"] #fab-neu{display:none!important}
+.bot-stand{font-family:var(--f-mono, ui-monospace, monospace);font-size:var(--t-xs);letter-spacing:.08em;color:var(--ink-2);margin:0 0 6px}
+.bot-unter{color:var(--ink-2);margin:0;line-height:1.45}
+.bot-strich{height:2px;background:var(--ink);margin:14px 0 12px}
+.bot-ak-titel{font-family:var(--f-mono, ui-monospace, monospace);font-size:var(--t-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px}
+.bot-aktionen{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bot-aktion,.bot-vorschlag{font:inherit;color:inherit;display:flex;gap:10px;align-items:center;text-align:left;cursor:pointer;
+  padding:13px 12px;border-radius:18px;border:1px solid var(--line);background:var(--fl-karte, var(--paper));min-width:0}
+.bot-aktion b,.bot-vorschlag b{display:block;font-weight:600;font-size:var(--t-m)}
+.bot-aktion small,.bot-vorschlag small{display:block;font-size:var(--t-xs);color:var(--ink-2);margin-top:1px}
+.bot-aktion small.bot-off{color:var(--moss);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.bot-ico{width:34px;height:34px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;
+  background:color-mix(in srgb, var(--ink) 10%, transparent);font-size:1.05rem}
+.bot-ico-ruhe{background:color-mix(in srgb, var(--water) 16%, transparent)}
+.bot-vorschlag{width:100%;margin-top:12px;background:color-mix(in srgb, var(--water) 9%, transparent)}
+.bot-gkopf{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  font-family:var(--f-mono, ui-monospace, monospace);font-size:var(--t-xs);letter-spacing:.08em;color:var(--ink-2)}
+.bot-zu{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:none;color:inherit;font:inherit;cursor:pointer}
+.bot-blase{max-width:86%;margin:14px 0 0 auto;background:var(--water);color:var(--schrift-invers);padding:10px 14px;
+  border-radius:18px 18px 4px 18px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap}
+.bot-blase .bot-anhang{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.bot-blase .bot-anhang img{width:58px;height:58px;border-radius:10px;object-fit:cover;display:block}
+.bot-antwort{margin-top:14px;padding:14px 14px 12px;border-radius:20px 20px 20px 6px;background:var(--fl-karte, var(--paper));border:1px solid var(--line)}
+.bot-antwort p{margin:0;line-height:1.45}
+.bot-antwort p+p{margin-top:8px}
+.bot-quelle{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.bot-etikett{font-family:var(--f-mono, ui-monospace, monospace);font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:99px}
+.bot-e-lokal{background:color-mix(in srgb, var(--moss) 16%, transparent);color:var(--moss)}
+.bot-e-ki{background:color-mix(in srgb, var(--water) 14%, transparent);color:var(--water)}
+.bot-erkannt{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 4px}
+.bot-erk{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:14px;padding:6px 10px;background:var(--paper)}
+.bot-erk b{font-size:var(--t-m)}
+.bot-erk small{display:block;font-size:var(--t-xs);color:var(--ink-2)}
+.bot-block{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.bot-block h5{margin:0 0 6px;font-family:var(--f-mono, ui-monospace, monospace);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.bot-block ul{margin:0;padding-left:18px}
+.bot-block li{margin:3px 0 0;line-height:1.4}
+.bot-sicher{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--terra) 10%, transparent)}
+.bot-sicher.hoch{background:color-mix(in srgb, var(--moss) 14%, transparent)}
+.bot-punkte{display:flex;gap:3px;flex:0 0 auto}
+.bot-punkte i{width:16px;height:6px;border-radius:99px;background:color-mix(in srgb, var(--ink) 18%, transparent)}
+.bot-punkte i.v{background:var(--terra)}
+.bot-sicher.hoch .bot-punkte i.v{background:var(--moss)}
+.bot-sicher small{display:block;font-size:var(--t-s);color:var(--ink-2)}
+.bot-mit{margin-top:12px!important;font-size:var(--t-xs);color:var(--ink-2)}
+.bot-knoepfe{margin-top:12px}
+.bot-wahl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;max-height:320px;overflow:auto}
+.bot-wahl button{font:inherit;color:inherit;text-align:left;padding:8px 10px;border-radius:14px;border:1px solid var(--line);background:var(--paper);cursor:pointer;min-width:0}
+.bot-wahl b{display:block;font-size:var(--t-m);overflow-wrap:anywhere}
+.bot-wahl small{display:block;font-size:var(--t-xs);color:var(--ink-2);overflow-wrap:anywhere}
+.bot-lauf::before{content:'';display:inline-block;width:.8em;height:.8em;margin-right:8px;border-radius:50%;
+  border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:awdreh 1s linear infinite}
+.bot-eingabe{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom));z-index:39;
+  background:color-mix(in srgb, var(--paper) 92%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-top:1px solid var(--line);padding:8px 12px}
+.bot-zeile{display:flex;gap:8px;align-items:flex-end;max-width:760px;margin:0 auto}
+.bot-rund{width:44px;height:44px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  border:1.5px solid var(--line);background:var(--fl-karte, var(--paper));color:var(--ink)}
+.bot-rund svg{width:20px;height:20px}
+.bot-senden{background:var(--water);border-color:var(--water);color:var(--schrift-invers)}
+#bot-text{flex:1;min-width:0;font:inherit;font-size:16px;line-height:1.35;resize:none;max-height:120px;
+  border:1.5px solid var(--line);border-radius:22px;padding:11px 14px;background:var(--fl-karte, var(--paper));color:var(--ink)}
+.bot-bilder{display:flex;gap:6px;max-width:760px;margin:0 auto 6px;flex-wrap:wrap}
+.bot-bilder span{position:relative}
+.bot-bilder img{width:48px;height:48px;border-radius:10px;object-fit:cover;display:block}
+.bot-bilder button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;min-width:0;min-height:0;box-sizing:border-box;
+  border-radius:50%;border:0;display:grid;place-items:center;background:var(--ink);color:var(--schrift-invers);font-size:13px;line-height:1;padding:0;cursor:pointer}
+#bot-bilder button{width:22px!important;height:22px!important;min-height:0!important;max-height:22px;padding:0!important}
+@media(min-width:760px){ .bot-eingabe{bottom:0} body[data-ansicht="botaniker"]{padding-bottom:90px} }
 
 /* ── Werkzeuge und Mehr: Akkordion-Blöcke, immer nur einer offen ── */
 .wz,.mh,.sm{padding-top:0!important;border-top:0!important}
@@ -2314,6 +2413,13 @@ html[data-design="terrarium"] .nt{box-shadow:var(--glanz)}
 .kigalerie button[aria-pressed="true"]{border-color:var(--moss);box-shadow:0 0 0 2px var(--moss) inset}
 .kigalerie img{width:100%;height:100%;object-fit:cover;display:block}
 .kilauf{display:flex;align-items:center;gap:9px;margin-top:8px;font-size:var(--t-s);color:var(--ink-2)}
+.ki-nochmal{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ki-prot-box{margin-top:10px}
+.ki-prot-box summary{cursor:pointer;font-size:var(--t-s);color:var(--ink)}
+.ki-prot{list-style:none;margin:6px 0 0;padding:0;font-size:var(--t-xs);line-height:1.45;color:var(--ink-2)}
+.ki-prot li{padding:6px 0;border-top:1px solid var(--line)}
+.ki-prot li b{display:block;font-weight:600;color:var(--ink)}
+.ki-prot li.warn span{color:var(--terra)}
 .kispin{width:15px;height:15px;flex:0 0 auto;border:2px solid var(--line);border-top-color:var(--water);
   border-radius:50%;animation:kidreh .8s linear infinite}
 @keyframes kidreh{to{transform:rotate(360deg)}}
@@ -5593,6 +5699,34 @@ function bibSuche(q, max){ return bibSucheWert(q, max).map(t=>t.a); }
 function bibTreffer(q, max){ return bibSucheWert(q, max||5); }
 const SICHERER_TREFFER = 300;
 
+/* 3.33.0: Beim Übernehmen einer KI-Antwort gilt die Bibliothek nur
+   für genau diese Art. Vorher reichte ein Teiltreffer: „Drosera“ ist
+   der Anfang von „Drosera capensis“, „Sonnentau“ steckt in
+   „Kap-Sonnentau“ — und eine Andromeda bekam volle Sonne. Eine
+   Kreuzung (×) übernimmt nie Werte einer ihrer Elternarten. */
+function bibKreuzung(bot){ return /\u00d7|\s[x]\s/i.test(' ' + String(bot || '') + ' '); }
+function bibExakt(bot, art){
+  const b = String(bot || '').trim();
+  if(b && bibKreuzung(b)) return null;
+  if(b){
+    if(BIB_NACH_BOT[b]) return BIB_NACH_BOT[b];
+    /* Sortenzusatz in Anführungszeichen und Klammern zählen nicht. */
+    const kern = norm(b.replace(/\([^()]*\)/g, ' ')
+      .replace(/['"\u201e\u201c\u201a\u2018\u2019\u201d][^'"\u201e\u201c\u201a\u2018\u2019\u201d]*['"\u201e\u201c\u201a\u2018\u2019\u201d]?/g, ' '))
+      .split(' ').slice(0, 2).join(' ');
+    if(kern.indexOf(' ') > 0){
+      const t = BIB.find(a => norm(a.bot) === kern);
+      if(t) return t;
+    }
+  }
+  const a = norm(art);
+  if(a){
+    const t = BIB.find(x => norm(x.de) === a || norm(x.bot) === a);
+    if(t) return t;
+  }
+  return null;
+}
+
 function verwechslungFuer(bot){
   const raus = [];
   VERWECHSLUNG.forEach(([gruppe, arten])=>{
@@ -5623,14 +5757,11 @@ function bibVon(p){
   /* Aus einer von Hand bearbeiteten Sicherung kann hier auch eine
      Zahl stehen. String() davor, sonst bricht split() ab. */
   const bot = String(p.botanisch || '').trim();
-  if(bot){
-    if(BIB_NACH_BOT[bot]) return BIB_NACH_BOT[bot];
-    const gat = bot.split(' ').slice(0,2).join(' ');
-    if(BIB_NACH_BOT[gat]) return BIB_NACH_BOT[gat];
-    const t = BIB.find(a=>a.bot.startsWith(bot.split(' ')[0]+' '));
-    if(t) return t;
-  }
-  return null;
+  /* beta.2 (F71 B): nur genau diese Art. Vorher fiel eine Kreuzung oder
+     eine unbekannte Art auf irgendeine Art derselben Gattung zurück und
+     bekam deren Werte. Der deutsche Name zählt nur, wenn kein
+     botanischer dasteht. */
+  return bibExakt(bot, bot ? '' : p.art) || null;
 }
 function zustandsAuswahl(p){
   const b = bibVon(p);
@@ -6050,7 +6181,11 @@ function auftragMitTieren(namen, sonicht, pruefliste){
 
 function anlegenFormat(){
   let f = auftragMitTieren(ANLEGEN_FELDER, ANLEGEN_SONICHT, ANLEGEN_PRUEFLISTE);
+  /* 3.32.0: Die Regelzeile kündigt MASSNAHME-Zeilen an, die das Anlegen
+     nicht fragt. Gemini hat über den Widerspruch nachgedacht. */
+  f = f.replace(' und ein bis drei MASSNAHME-Zeilen', '');
   if(typeof formatZeileErgaenzen === 'function'){
+    f = formatZeileErgaenzen(f, 'BOTANISCH', KI_KREUZUNG_REGEL);
     f = formatZeileErgaenzen(f, 'MERKMALE', KI_MERKMALE_REGEL);
     f = formatZeileErgaenzen(f, 'LICHT', KI_LICHT_PANASCHIERT);
   }
@@ -6059,6 +6194,9 @@ function anlegenFormat(){
 /* Zusätze für Anlegen und Kartei (3.27.0). */
 const KI_MERKMALE_REGEL = 'Nur Merkmale der Sorte: Farbe, Muster, Blattform. Nie Größe, Alter, Zustand oder dass es ein Steckling ist.';
 const KI_LICHT_PANASCHIERT = 'Bei einer panaschierten Sorte gilt der Lichtbedarf der Sorte, nicht der Art — weniger Blattgrün braucht mehr Licht.';
+/* 3.33.0: Kreuzungen bekamen bisher nur die Gattung, weil die Zeile
+   sagt „Bist du dir nur bei der Gattung sicher, nenne nur die Gattung“. */
+const KI_KREUZUNG_REGEL = 'Ist die Pflanze eine Kreuzung zweier Arten, schreib sie als Gattung art \u00d7 art, etwa Drosera prolifera \u00d7 schizandra, auch wenn du die Sorte erkennst. Einen Sortennamen wie Andromeda schreibst du nur in SORTE.';
 
 /* Zur Sicherheit: Stellen, die den Prompt ohne Kontext brauchen. */
 const GEMINI_PROMPT = ANLEGEN_KOPF + '\n\n' + ANTWORT_FORMAT;
@@ -6420,13 +6558,28 @@ function meldeRender(){
   const sec = document.getElementById('melde-sec');
   if(!sec) return;
   const liste = S.neueArten || [];
-  sec.hidden = !liste.length;
+  const gel = (typeof gelernteArten === 'function') ? meldeGelernte() : [];
+  sec.hidden = !liste.length && !gel.length;
   const ziel = document.getElementById('melde-liste');
-  if(ziel) ziel.innerHTML = liste.map(x=>{
+  if(ziel) ziel.innerHTML = (liste.length && gel.length ? '<h4>Nicht in der Bibliothek</h4>' : '')
+    + liste.map(x=>{
     const b = botOhneDeutsch(x.bot, x.art);
     return `<div class="mrow"><b>${esc(x.art)}</b>${b?` · <i>${esc(b)}</i>`:''}</div>`;
-  }).join('');
+  }).join('')
+    + (gel.length ? '<h4>Gelernte Arten</h4>' + gel.map(x => {
+      const z = gelernteZeile(x).split('\n');
+      return '<div class="mrow"><label><input type="checkbox" data-melde-gel="' + esc(x.schluessel) + '"'
+        + (MELDE_AUS[x.schluessel] ? '' : ' checked') + '><span><b>' + esc(z[0]) + '</b>'
+        + (z[1] ? '<small>' + esc(z[1].trim()) + '</small>' : '') + '</span></label></div>';
+    }).join('') : '');
 }
+document.addEventListener('change', e => {
+  const c = e.target && e.target.closest ? e.target.closest('[data-melde-gel]') : null;
+  if(!c) return;
+  if(c.checked) delete MELDE_AUS[c.dataset.meldeGel]; else MELDE_AUS[c.dataset.meldeGel] = true;
+  const box = document.getElementById('melde-box');
+  if(box && !box.hidden) document.getElementById('melde-text').value = meldeText();
+});
 /* Der botanische Name kommt oft mit angehängtem deutschen Namen zurück:
    „Begonia rex-cultorum (Königsbegonie)“. In der Meldung steht der
    deutsche Name schon davor — die Klammer wäre nur eine Wiederholung. */
@@ -6443,12 +6596,38 @@ function meldeText(){
     const b = botOhneDeutsch(x.bot, x.art);
     return `${i+1}. ${x.art}${b ? ' · ' + b : ''}`;
   });
-  return ['Neue Arten für die Pflanzen-Bibliothek',
-    '',
-    'Bitte mit Gießklasse, Licht, Dünger, Frostgrenze, Katzengiftigkeit',
-    'und den typischen Zuständen aufnehmen.',
-    '',
-    ...zeilen].join('\n');
+  const teile = ['Neue Arten für die Pflanzen-Bibliothek', ''];
+  if(zeilen.length) teile.push('Nicht in der Bibliothek. Bitte mit Gießklasse, Licht, Dünger, Frostgrenze,',
+    'Katzengiftigkeit und den typischen Zuständen aufnehmen.', '', ...zeilen);
+  /* beta.2 (F72): gelernte Arten mit ihren Werten, nur die angehakten. */
+  const gel = meldeGelernte().filter(x => !MELDE_AUS[x.schluessel]);
+  if(gel.length){
+    if(zeilen.length) teile.push('');
+    teile.push('Gelernte Arten (aus einer KI-Antwort übernommen, bitte prüfen):', '');
+    gel.forEach((x, i) => teile.push((i + 1) + '. ' + gelernteZeile(x)));
+  }
+  return teile.join('\n');
+}
+/* Gelernte Arten fürs Melden, neueste zuerst. */
+let MELDE_AUS = {};
+function meldeGelernte(){
+  const g = (typeof gelernteArten === 'function') ? gelernteArten() : {};
+  return Object.keys(g).map(k => Object.assign({schluessel:k}, g[k]))
+    .sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || '')));
+}
+function gelernteZeile(x){
+  const kl = {A:'A durstig', B:'B normal', C:'C Kakteenmodus', S:'S Anstau'};
+  const wert = [
+    x.klasse ? 'Gießklasse ' + (kl[x.klasse] || x.klasse) : '',
+    x.sonne ? 'Licht ' + (SONNE[x.sonne] ? SONNE[x.sonne].text : x.sonne) : '',
+    x.typ ? 'Wuchs ' + x.typ : '', x.giessart ? 'Gießart ' + x.giessart : '',
+    x.frost ? (isNaN(Number(x.frost)) ? 'Frost: ' + x.frost : 'Frostgrenze ' + x.frost + ' °C') : '', x.speicher ? 'Speicher ' + x.speicher : '',
+    x.gift === 'ja' ? 'giftig für Tiere' : '', x.wichtig ? 'Wichtig: ' + x.wichtig : '',
+    x.pflege && !keineAngabe(x.pflege) ? 'Pflege: ' + x.pflege : '',
+    x.winterruhe && !keineAngabe(x.winterruhe) ? 'Winterruhe: ' + x.winterruhe : ''
+  ].filter(Boolean).join(' · ');
+  const name = [x.art, x.bot && norm(x.bot) !== norm(x.art) ? x.bot : '', x.sorte ? '‚' + x.sorte + '‘' : ''].filter(Boolean).join(' · ');
+  return name + (wert ? '\n   ' + wert : '');
 }
 
 
@@ -9189,7 +9368,7 @@ function pflanzeEntfernen(id){
         <button class="wk-haupt" data-wkgo="2">Los geht's</button>
         <button class="wk-neben" data-wkfertig="0">Überspringen</button>
       </div>
-      <p class="wk-klein">Übersprungenes findest du später unter Mehr › App Tour.</p>
+      <p class="wk-klein">Übersprungenes findest du später unter Einstellungen › App Tour.</p>
     </div>
 
     <div class="wk-schritt" data-wk="2" hidden>
@@ -9220,7 +9399,7 @@ function pflanzeEntfernen(id){
         <button class="wk-gross" data-wkplan="1">Ja, zeig mir das</button>
         <button class="wk-gross" data-wkplan="0">Später</button>
       </div>
-      <p class="wk-klein">Du kannst das jederzeit ändern — unter „Mehr“.</p>
+      <p class="wk-klein">Du kannst das jederzeit ändern — hinter dem Zahnrad.</p>
     </div>
 
     <div class="wk-schritt" data-wk="4" hidden>
@@ -9228,8 +9407,8 @@ function pflanzeEntfernen(id){
       <h2 class="wk-titel">Kann losgehen</h2>
       <p class="wk-lead">Ein letzter Hinweis, der wichtigste von allen:</p>
       <p class="wk-warnung">Alles liegt nur in diesem Browser. Wird er aufgeräumt oder das
-        Gerät gewechselt, ist alles weg. Lade regelmäßig eine Sicherung herunter — unter
-        „Mehr“, ganz oben. Die App erinnert dich von allein daran, sobald es zu lange her ist.</p>
+        Gerät gewechselt, ist alles weg. Lade regelmäßig eine Sicherung herunter — hinter dem
+        Zahnrad oben rechts, ganz oben. Die App erinnert dich von allein daran, sobald es zu lange her ist.</p>
 
       <div class="wk-install" id="wk-install" hidden>
         <p class="wk-frage">Gleich als App einrichten?</p>
@@ -9242,7 +9421,7 @@ function pflanzeEntfernen(id){
         <button class="wk-neben" data-wkfertig="0">Selbst umsehen</button>
       </div>
       <p class="wk-klein">Die Runde dauert eine Minute und steht später
-        jederzeit unter Mehr › App Tour.</p>
+        jederzeit unter Einstellungen › App Tour.</p>
     </div>
   </div>
 </div>
@@ -9271,12 +9450,51 @@ function pflanzeEntfernen(id){
 
 <div class="wrap">
   <header class="top">
+    <button class="kopf-zahnrad" id="kopf-zahnrad" type="button" data-ans-go="mehr" aria-label="Einstellungen und Werkzeuge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
+    </button>
     <button class="sich-stempel" id="sich-stempel" type="button" aria-label="Letzte Sicherung" hidden></button>
     <p class="top-etikett" id="kopf-etikett" aria-hidden="true"></p>
     <h1 id="kopf-titel">Heute</h1>
     <p class="top-gruss" id="kopf-gruss"></p>
     <p class="top-lage" id="kopf-lage"></p>
   </header>
+
+  <!-- 4.0-beta.3 (F77 a): Einstellungen und Werkzeuge liegen hinter dem
+       Zahnrad, als eigener Block. Der Umschalter verbindet beide Seiten,
+       bis sie mit Baustein D, H und I umziehen. -->
+  <div class="zr-umschalter" id="zr-umschalter" role="group" aria-label="Einstellungen oder Werkzeuge" hidden>
+    <button type="button" data-ans-go="mehr">Einstellungen</button>
+    <button type="button" data-ans-go="werkzeuge">Werkzeuge</button>
+  </div>
+
+  <!-- 4.0-beta.3: der BOTaniker (Baustein C) -->
+  <section data-ans="botaniker" class="bot" id="bot-sec">
+    <p class="bot-stand">Offline bereit · KI nur per Knopf</p>
+    <div id="bot-start">
+      <p class="bot-unter">Schreib, was los ist, oder tipp eine Aktion an. Ein Foto hilft immer.</p>
+      <div class="bot-strich"></div>
+      <p class="bot-ak-titel">Was möchtest du tun?</p>
+      <div class="bot-aktionen">
+        <button type="button" class="bot-aktion" data-bot-aktion="problem"><span class="bot-ico">⚕</span><span><b>Problem klären</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="umtopfen"><span class="bot-ico">⟳</span><span><b>Umtopfen</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="substrat"><span class="bot-ico">≋</span><span><b>Substrat</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="vermehren"><span class="bot-ico">✂</span><span><b>Vermehren</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="standort"><span class="bot-ico">☀</span><span><b>Standort</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="bestimmen"><span class="bot-ico">◎</span><span><b>Art bestimmen</b><small>mit KI</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="nachschlagen"><span class="bot-ico">❒</span><span><b>Nachschlagen</b><small class="bot-off">offline</small></span></button>
+        <button type="button" class="bot-aktion" data-bot-aktion="frage"><span class="bot-ico">?</span><span><b>Frage stellen</b><small>mit KI</small></span></button>
+      </div>
+      <button type="button" class="bot-vorschlag" data-bot-aktion="urlaub"><span class="bot-ico bot-ico-ruhe">✈</span>
+        <span><b>Urlaubszettel</b><small>Zettel für Vertretungen ohne App</small></span></button>
+    </div>
+    <div id="bot-gespraech" hidden>
+      <div class="bot-gkopf"><span>Gespräch · gilt bis zum Schließen</span>
+        <button type="button" class="bot-zu" data-bot="zu" aria-label="Gespräch schließen">✕</button></div>
+      <div id="bot-verlauf" aria-live="polite"></div>
+    </div>
+  </section>
 
   <section data-ans="heute" class="faellig" id="faellig-sec">
     <div id="runde-angebot" hidden></div>
@@ -10557,7 +10775,13 @@ function pflanzeEntfernen(id){
         <span class="ki-empf ki-modell-abz" hidden>empfohlen</span>
         <button id="btn-ki-modelle" type="button">Neu holen</button>
       </div>
-      <p class="fhint">Die Liste kommt von Google und wechselt mit jeder Modellgeneration — deshalb steht in dieser App kein Modellname fest eingebaut. Vorausgewählt ist das neueste stabile Modell; daran erkennst du das Häkchen. Das neueste ist allerdings oft auch das vollste: Google gibt neuen Modellen anfangs wenig Rechenleistung, und dann kommt „überlastet“ zurück. Passiert das ständig, wähl hier eine Stufe tiefer — die App weicht sonst von selbst dorthin aus.</p>
+      <p class="fhint">Die Liste kommt von Google und wechselt mit jeder Modellgeneration — deshalb steht in dieser App kein Modellname fest eingebaut. In der Liste stehen nur Flash-Modelle, die mit deinem Schlüssel kostenlos laufen; das prüft die App beim Holen mit je einer kurzen Anfrage und misst dabei das Tempo. Braucht ein Modell dafür länger als 15 Sekunden, steht es mit „(langsam)“ da. Vorausgewählt ist das neueste schnelle (Häkchen). Meldet Google „überlastet“, kannst du direkt ein anderes Modell versuchen. Von selbst wechselt die App nicht, weil jeder Versuch dein Kontingent kostet.</p>
+
+      <details class="ki-prot-box">
+        <summary>Letzte Anfragen <span id="ki-protokoll-zahl"></span></summary>
+        <p class="fhint">Jede Anfrage an Google, auch die Prüfung beim Holen der Liste. Damit lässt sich das Diagramm in Google AI Studio nachzählen. Es stehen höchstens 20 Einträge hier, der neueste oben.</p>
+        <div id="ki-protokoll"></div>
+      </details>
 
       <p class="ein-abschnitt">Wo der Schlüssel herkommt</p>
       <ol class="ki-schritte">
@@ -10661,14 +10885,14 @@ function pflanzeEntfernen(id){
 
 
   <section data-ans="mehr" class="plan mh" id="melde-sec" data-mh="melde" hidden>
-    <h2 class="wz-h2">Nicht in der Bibliothek</h2>
+    <h2 class="wz-h2">Arten melden</h2>
     <div class="wz-kopfzeile">
       <button class="wz-kopf" data-mh-go="melde" aria-expanded="false" aria-controls="mh-in-melde">
-        <span class="wz-t">Nicht in der Bibliothek</span><span class="wz-p" aria-hidden="true">›</span></button>
+        <span class="wz-t">Arten melden</span><span class="wz-p" aria-hidden="true">›</span></button>
       <button class="wz-i" data-mh-info="melde" aria-expanded="false" aria-label="Was steht hier?">i</button>
     </div>
     <div class="wz-in" id="mh-in-melde" hidden>
-      <p class="wz-hilfe" hidden>Diese Arten hast du von Hand angelegt, weil die Bibliothek sie nicht kennt. Mit dem Knopf baust du daraus eine fertige Nachricht — abschicken oder in den Chat kopieren, dann kommen sie mit vollständigen Pflegedaten in die nächste Fassung. Der Block erscheint nur, solange etwas darin liegt.</p>
+      <p class="wz-hilfe" hidden>Hier stehen Arten, die die Bibliothek nicht kennt, und deine gelernten Arten aus KI-Antworten. Mit dem Knopf baust du daraus eine fertige Nachricht — abschicken oder in den Chat kopieren, dann kommen sie mit vollständigen Pflegedaten in die nächste Fassung. Der Block erscheint nur, solange etwas darin liegt.</p>
     <div id="melde-liste"></div>
     <div class="tools">
       <button id="btn-melden" class="haupt">Nachricht erzeugen</button>
@@ -10681,6 +10905,7 @@ function pflanzeEntfernen(id){
         <button id="btn-melde-mail">Als E-Mail öffnen</button>
         <button id="btn-melde-github">Auf GitHub melden</button>
       </div>
+      <p class="fhint melde-konto">Für GitHub brauchst du ein GitHub-Konto. Ohne Konto geht es per E-Mail.</p>
     </div>
     </div>
   </section>
@@ -10833,7 +11058,7 @@ function pflanzeEntfernen(id){
         <div class="al-wege neu-wahl">
           <button type="button" class="al-weg" data-neuweg="bib">
             <b>Aus der Bibliothek</b>
-            <i>Wenn du weißt, was es ist. Rund 250 Arten mit fertigen Pflegedaten — Gießklasse, Licht, Dünger und Giftigkeit sind danach gesetzt.</i>
+            <i>Wenn du weißt, was es ist. Rund 250 Arten — ihre Pflegedaten stehen danach als Vorschlag bereit, die Giftwarnung kommt von selbst.</i>
           </button>
           <button type="button" class="al-weg" data-neuweg="ki">
             <b>Von einer KI bestimmen lassen</b>
@@ -10928,6 +11153,7 @@ function pflanzeEntfernen(id){
           <input id="f-sorte" placeholder="z. B. Thai Constellation">
           <span class="fhint" id="f-sorte-hint" hidden></span>
         </div>
+        <p class="pastemeld aw-status" id="al-artfrage" hidden></p>
         <div class="al-feld">
           <span class="lab">Zustand</span>
           <select id="f-zustand" hidden></select>
@@ -10955,9 +11181,9 @@ function pflanzeEntfernen(id){
           <select id="f-stellplatz"></select>
         </div>
         <div class="al-bibzsf" id="al-bibzsf" hidden>
-          <h4>Aus der Bibliothek übernommen</h4>
+          <h4 id="al-bibzsf-titel">Aus der Bibliothek übernommen</h4>
           <div class="al-zsf" id="al-bibzsf-liste"></div>
-          <div class="tools"><button type="button" id="btn-al-pflege-auf">Ändern</button></div>
+          <div class="tools" id="al-bibzsf-tools"><button type="button" id="btn-al-pflege-auf">Ändern</button></div>
         </div>
         <div class="al-feld">
           <span class="lab">Wie steht sie?</span>
@@ -11089,10 +11315,24 @@ function pflanzeEntfernen(id){
 <nav class="tabs" id="tabs">
   <button data-ans-go="heute"><span class="tab-i"></span>Heute</button>
   <button data-ans-go="sammlung"><span class="tab-i"></span>Sammlung</button>
-  <button data-ans-go="werkzeuge"><span class="tab-i"></span>Werkzeuge</button>
-  <button data-ans-go="mehr"><span class="tab-i"></span>Mehr</button>
+  <button data-ans-go="botaniker"><svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19c0-7 4.5-12 13-13 0 8.5-5 13-13 13z"/><path d="M4 19l7.5-7.5"/></svg>BOTaniker</button>
 </nav>
 
+
+<div class="bot-eingabe" id="bot-eingabe" hidden>
+  <div class="bot-bilder" id="bot-bilder" hidden></div>
+  <div class="bot-zeile">
+    <label class="bot-rund" aria-label="Foto anhängen" title="Foto anhängen">
+      <input type="file" id="bot-foto" accept="image/*" multiple hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+    </label>
+    <textarea id="bot-text" rows="1" aria-label="Nachricht an den BOTaniker" placeholder="Schreib dem BOTaniker …"></textarea>
+    <button type="button" class="bot-rund bot-senden" id="bot-senden" aria-label="Senden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
 
 <button id="fab-neu" type="button" aria-label="Neue Pflanze anlegen" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -11197,7 +11437,7 @@ const hatBilder = typeof BILDER !== 'undefined';
 const KEY = 'gk-beta';
 
 /* Wohin Rückmeldungen gehen. Beides ist vorbelegt, damit niemand erst
-   etwas eintragen muss — die Mailadresse lässt sich unter „Mehr“
+   etwas eintragen muss — die Mailadresse lässt sich hinter dem Zahnrad
    trotzdem überschreiben, falls die App jemand anderes weiterpflegt. */
 const MELDE_MAIL = 'greenkeeperai@gmail.com';
 const REPO_URL   = 'https://github.com/cmohr0212/GreenkeeperAi';
@@ -11207,14 +11447,14 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
    Beim Veröffentlichen einer neuen Fassung: oben einen Eintrag in
    PATCHNOTES ergänzen und FASSUNG auf dessen Nummer setzen. Beim
    ersten Öffnen nach dem Update zeigt die App den obersten Eintrag
-   einmalig an; unter „Mehr“ steht die ganze Liste zum Nachlesen.
+   einmalig an; hinter dem Zahnrad steht die ganze Liste zum Nachlesen.
 
    Die Einträge vor 1.3 sind nachträglich zusammengetragen — die
    frühen Uploads liegen ohne Beschreibung im Verlauf. */
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.1';
+const FASSUNG = '4.0-beta.3';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -11224,6 +11464,45 @@ const FASSUNG = '4.0-beta.1';
    Fassung die Kennung trägt. */
 const CHANGELOG_URL = REPO_URL + '/blob/HEAD/CHANGELOG.md';
 const PATCHNOTES = [
+  {
+    nr: '3.33.0', datum: '2026-10-26', titel: 'Richtige Art, schnelles Modell',
+    kurz: [
+      'Die Bibliothek gibt ihre Werte nur noch, wenn genau diese Art in ihr steht. Aus „Drosera“ wird kein Kap-Sonnentau mehr.',
+      'Kreuzungen stehen als Formel im botanischen Namen, etwa Drosera prolifera × schizandra; der Sortenname steht in Sorte.',
+      'Langsame Modelle stehen mit „(langsam)“ in der Liste und werden nicht mehr vorausgewählt. Hol die Liste einmal neu.'
+    ],
+    besser: [
+      'Beim Holen der Modellliste misst die App das Tempo jedes Modells. Braucht die Prüfanfrage länger als 15 Sekunden, steht das Modell mit „(langsam)“ da. Vorausgewählt ist das neueste schnelle; war ein langsames gewählt, stellt „Neu holen“ um.',
+      'Die KI schreibt Kreuzungen zweier Arten als Formel, auch beim Auffrischen der Kartei.'
+    ],
+    behoben: [
+      'Eine KI-Antwort mit nur der Gattung oder einem allgemeinen deutschen Namen bekam die Werte einer bestimmten Art aus der Bibliothek, etwa „Drosera“ die volle Sonne des Kap-Sonnentaus. Jetzt gelten in diesem Fall die Angaben der KI.',
+      'Bei einer Kreuzung stand nur die Gattung im botanischen Namen.'
+    ]
+  },
+  {
+    nr: '3.32.0', datum: '2026-10-25', titel: 'KI: eine Anfrage pro Tipp',
+    kurz: [
+      'Ein Tipp auf „Fragen“ schickt jetzt genau eine Anfrage an Google. Vorher konnten es bis zu vier sein.',
+      'In der Modellliste stehen nur noch Flash-Modelle, die mit deinem Schlüssel kostenlos laufen. Hol die Liste einmal neu: Zahnrad, KI-Dienst, „Neu holen“.',
+      'Schlägt eine Frage fehl, stehen darunter „Noch einmal“ und „Mit … versuchen“.'
+    ],
+    neu: [
+      'Unter KI-Dienst stehen die letzten 20 Anfragen mit Uhrzeit, Zweck, Modell, Ergebnis und Dauer. Damit lässt sich das Diagramm in Google AI Studio nachzählen.',
+      'Schlägt eine Frage fehl, stehen darunter „Noch einmal“ und „Mit … versuchen“, beim Anlegen, im Doktor und beim Bestimmen in der Anzucht.'
+    ],
+    besser: [
+      'Die App bricht eine Frage nicht mehr nach 30 Sekunden ab und wechselt nicht mehr von selbst das Modell. Die Sekunden zählen sichtbar mit, abbrechen kannst du selbst. Erst nach zwei Minuten gibt die App auf.',
+      'Beim Holen der Modellliste prüft die App jedes Flash-Modell mit einer kurzen Anfrage. Modelle ohne Gratis-Kontingent und Modelle, die Google auf ein anderes umleitet, fallen heraus.',
+      'Beim Anlegen und beim Bestimmen in der Anzucht denkt das Modell nur kurz nach. Das geht schneller.',
+      'Die Kartei weicht nicht mehr auf ein anderes Modell aus.'
+    ],
+    behoben: [
+      'Bei jedem abgelehnten Bild stand „Meist ist der Schlüssel falsch kopiert“. Die Meldung nennt jetzt das Modell und Googles Text. Vom Schlüssel ist nur die Rede, wenn Google ihn ablehnt.',
+      'Die Fehlermeldung kam vom letzten Ausweichmodell, das Auswahlfeld zeigte aber das gewählte.',
+      'Der Anlege-Auftrag kündigte MASSNAHME-Zeilen an, die er gar nicht fragt.'
+    ]
+  },
   {
     nr: '3.31.0', datum: '2026-09-27', titel: 'Aufräumen, Teil 2', sicherung: true,
     kurz: [
@@ -11366,37 +11645,6 @@ const PATCHNOTES = [
     behoben: [
       'Jede Pflanze mit Winterruhe bekam den Text der Venusfliegenfalle. Steht ein eigener Text da, gilt jetzt dieser.'
     ]
-  },
-  {
-    nr: '3.24.0', datum: '2026-09-21', titel: 'Kartei: Kreuzen statt Anhaken',
-    kurz: [
-      'Im Abgleich-Fenster kreuzt du weg, was nicht passt, und übernimmst den Rest mit einem Tipp.'
-    ],
-    besser: [
-      'Die Kästchen im Abgleich-Fenster sind weg. Jede Zeile hat nur noch ihr ×, unten steht „Übrige übernehmen“ mit Anzahl.',
-      'Angaben, die du selbst gesetzt hast, sind deutlicher markiert. Sie gehen beim Übernehmen mit, wenn du sie nicht wegkreuzt.'
-    ],
-    behoben: [
-      'Beim Anlegen konnte ein Sortenname der KI im botanischen Namen landen, etwa „Brasil“. Er steht jetzt nur noch als unsichere Vermutung unter dem Feld Sorte.',
-      'Eine stockende Antwort hielt den Kartei-Balken unbegrenzt kurz vor dem Ziel. Die Zeitgrenze gilt jetzt, bis die Antwort ganz gelesen ist.',
-      'Ein Foto, das nicht lädt, hält den Kartei-Lauf nicht mehr an. Nach zehn Sekunden geht die Anfrage ohne Bild.'
-    ]
-  },
-  {
-    nr: '3.23.0', datum: '2026-09-16', titel: 'Die KI erkennt die Sorte',
-    kurz: [
-      'Beim Anlegen und in der Kartei nennt die KI jetzt die Sorte und wie sicher sie sich ist. In die Karte kommt sie erst, wenn du es bestätigst.'
-    ],
-    neu: [
-      'Beim Anlegen steht eine sicher erkannte Sorte schon im Feld, mit dem Hinweis „KI-Vorschlag“ und der Sicherheit. Bei unsicherer Erkennung steht nur „Vielleicht“ darunter, mit dem Knopf „Als Sorte eintragen“. Was du selbst eingetragen hast, bleibt.',
-      'Die Kartei bietet die Sorte als eigene Zeile an. Eine unsichere Vermutung erscheint nur als Hinweis.',
-      'Steht eine Sorte noch im botanischen Namen, etwa „Philodendron hederaceum Brasil“, bietet die Kartei an, sie ins Feld Sorte zu verschieben.',
-      'Ableger erben auch, ob die Sorte von der KI oder von dir stammt.'
-    ],
-    besser: [
-      'Der Balken der Kartei bewegt sich, während eine Anfrage läuft, und bleibt kurz vor dem Ziel stehen, bis die Antwort da ist. Die Prozentzahl im Text ist weg.',
-      'In der Ergebnisliste führt „Durchsehen ›“ zu den Abweichungen. Die Kästchen erscheinen erst nach „Noch einmal prüfen“.'
-    ]
   }
 ];
 let SPEICHER_OK = true;
@@ -11436,6 +11684,10 @@ const LEERSTAND = () => ({
      schreibt S als Ganzes heraus, und ein Feld dort zu uebersehen
      waere nur eine Frage der Zeit. Er bekommt ein eigenes Fach. */
   kiModell:null, kiModelle:null,
+  /* beta.2 (F57 bis F59): Artwissen, das du aus einer KI-Antwort
+     übernommen hast, je Art und Sorte. Liegt in S und damit in der
+     Sicherung. */
+  gelernteArten:{},
   /* Einmaliges Angebot der Runde an Bestandsnutzer. */
   rundeAngeboten:null,
   /* Wann zuletzt gedüngt wurde, je Pflanze — wie S.water aufgebaut.
@@ -11909,14 +12161,14 @@ function sichern(){
     if(anteil > 0.8 && !speicherGewarnt){
       speicherGewarnt = true;
       alert('Der Browserspeicher ist zu ' + Math.round(anteil*100) + ' Prozent voll.\n\n'
-        + 'Lade jetzt unter „Mehr“ eine Sicherung herunter. Fotos brauchen den meisten '
+        + 'Lade jetzt hinter dem Zahnrad eine Sicherung herunter. Fotos brauchen den meisten '
         + 'Platz — wenn es eng wird, hilft es, ältere Bilder zu löschen.');
     }
     if(anteil < 0.7) speicherGewarnt = false;
   }catch(e){
     SPEICHER_OK = false; statusText();
     alert('Der Browserspeicher ist voll — diese Änderung konnte NICHT gespeichert werden.\n\n'
-      + 'Schließe die Seite jetzt nicht. Lade zuerst unter „Mehr“ eine Sicherung herunter '
+      + 'Schließe die Seite jetzt nicht. Lade zuerst hinter dem Zahnrad eine Sicherung herunter '
       + 'und lösche danach ein paar Fotos, damit wieder Platz entsteht.');
   }
 }
@@ -13873,16 +14125,26 @@ function steckbriefDaten(p){
   const stamm = (p.stamm && typeof p.stamm === 'object') ? Object.assign({}, p.stamm) : {};
   const b = (typeof bibVon === 'function') ? bibVon(p) : null;
   const hat = re => Object.keys(stamm).some(k=>re.test(k));
-  const dazu = {};
-  const fam = String(p.familie || (b && b.fam) || '').trim();
-  if(fam && !hat(/famil/i)) dazu['Familie'] = fam;
+  const dazu = {}, vorschlag = [];
+  /* beta.2 (F71 B): Was nur die Bibliothek weiß, steht als Vorschlag mit
+     Knopf darunter und kommt erst nach dem Tipp in die Karte. */
+  const fam = String(p.familie || '').trim();
+  if(!hat(/famil/i)){
+    if(fam) dazu['Familie'] = fam;
+    else if(b && b.fam) vorschlag.push({feld:'familie', lab:'Familie', text:String(b.fam)});
+  }
   let typ = String(p.typ || '').trim();
-  if(!typ || typ === 'Ohne Angabe') typ = b && b.typ ? String(b.typ) : '';
-  if(typ && !hat(/wuchs/i)) dazu['Wuchsform'] = typ;
-  const roh = p.frostMin != null && p.frostMin !== '' ? p.frostMin : (b && b.frost != null ? b.frost : null);
-  const frost = roh == null ? NaN : Number(roh);
-  if(!isNaN(frost) && !hat(/frost/i)) dazu['Frostgrenze'] = frostWort(frost);
-  return {daten: Object.assign(stamm, dazu), ausBib: !!b && Object.keys(dazu).length > 0};
+  if(typ === 'Ohne Angabe') typ = '';
+  if(!hat(/wuchs/i)){
+    if(typ) dazu['Wuchsform'] = typ;
+    else if(b && b.typ) vorschlag.push({feld:'typ', lab:'Wuchsform', text:String(b.typ)});
+  }
+  const frost = (p.frostMin != null && p.frostMin !== '') ? Number(p.frostMin) : NaN;
+  if(!hat(/frost/i)){
+    if(!isNaN(frost)) dazu['Frostgrenze'] = frostWort(frost);
+    else if(b && b.frost != null && !isNaN(Number(b.frost))) vorschlag.push({feld:'frostMin', lab:'Frostgrenze', text:frostWort(Number(b.frost))});
+  }
+  return {daten: Object.assign(stamm, dazu), ausBib:false, vorschlag:vorschlag};
 }
 
 /* Bei Viktor stand die Wasserregel viermal auf einem Bildschirm —
@@ -14285,7 +14547,10 @@ function kartenDetailHTML(p){
   const lebens = dl(p.bedingungen);
   const sb = steckbriefDaten(p);
   const steckbrief = dl(sb.daten)
-    + (sb.ausBib ? '<p class="kb-quelle">Aus der Artenbibliothek</p>' : '')
+    + (sb.vorschlag && sb.vorschlag.length ? '<div class="kb-bibvorschlag"><p class="kb-quelle">Vorschlag aus der Artenbibliothek</p>'
+        + sb.vorschlag.map(v => '<div class="kb-bibzeile"><span><b>' + esc(v.lab) + '</b> ' + esc(v.text) + '</span>'
+          + '<button type="button" class="linkbtn" data-do="bib-nimm" data-p="' + esc(p.id) + '" data-f="' + v.feld + '">Übernehmen</button></div>').join('')
+        + '</div>' : '')
     + herkunftZeileHTML(p)
     + (lebens ? `<h4>Lebensumstände</h4>${lebens}` : '');
   const herkunft = p.herkunft
@@ -15842,7 +16107,11 @@ function formularLeeren(){
     KI_BILDER.anlegen.length = 0;
     if(typeof kiBilderZeichnen === 'function') kiBilderZeichnen('anlegen');
   }
+  /* 3.32.0: Die Knöpfe nach einem Fehlschlag gehören nicht ins nächste Anlegen. */
+  if(typeof kiFehlerKnoepfeWeg === 'function') kiFehlerKnoepfeWeg('anlegen');
   gewaehlteArt = null; artManuell = false; letzteKiAntwort = null;
+  /* beta.2: Artwissen und laufende Anfrage gehören zu diesem Formular. */
+  if(typeof AW !== 'undefined'){ AW = null; AW_TOKEN++; awStatus(''); }
   $('#bib-gewaehlt').hidden = true; $('#bib-liste').hidden = true;
   $('#paste-box').hidden = true; $('#paste-meld').hidden = true;
   const uns = $('#neu-unsicher'); if(uns) uns.innerHTML = '';
@@ -16802,7 +17071,12 @@ function alBibZsfZeichnen(){
   const pflege = document.getElementById('al-pflege');
   const liste = document.getElementById('al-bibzsf-liste');
   if(!kasten || !pflege || !liste) return;
-  const a = (typeof gewaehlteArt !== 'undefined') ? gewaehlteArt : null;
+  /* beta.2: Artwissen aus KI, gelernter Art, eigener Pflanze oder
+     Bibliothek. Die Bibliothek ist nur Vorschlag, bis du übernimmst. */
+  if(typeof AW !== 'undefined' && !AW && typeof gewaehlteArt !== 'undefined' && gewaehlteArt)
+    AW = {quelle:'bib', bib:gewaehlteArt, fuer:{bot:gewaehlteArt.bot, art:gewaehlteArt.de, sorte:''}, schluessel:''};
+  if(typeof AW !== 'undefined' && AW) return awKastenZeichnen(kasten, pflege, liste);
+  const a = null;
   /* Kommt die Art aus der Bibliothek, sind sieben Felder bereits
      beantwortet. Sie trotzdem alle zu zeigen heißt, den Nutzer sieben
      Entscheidungen treffen zu lassen, die schon getroffen sind. */
@@ -16828,12 +17102,60 @@ function alBibZsfZeichnen(){
    nichts bekannt wäre: bei Arten aus der Bibliothek ermittelt die App
    die Giftigkeit beim Anlegen aus Art und Familie. Die
    Zusammenfassung soll nicht das Gegenteil behaupten. */
+function awKastenZeichnen(kasten, pflege, liste){
+  const titel = document.getElementById('al-bibzsf-titel');
+  const tools = document.getElementById('al-bibzsf-tools');
+  const b = (AW.quelle === 'bib' || AW.bibUebernommen) ? (AW.bib || awBib()) : null;
+  const text = id => { const s = document.getElementById(id); const o = s && s.options[s.selectedIndex]; return o ? o.textContent : ''; };
+  const klText = c => { const s = document.getElementById('f-klasse'); const o = s && Array.prototype.find.call(s.options, x => x.value === c); return o ? o.textContent : c; };
+  const soText = c => (SONNE[c] ? SONNE[c].text : c);
+  const offen = AW.offen || {};
+  const vorschlag = AW.quelle === 'bib' && !AW.bibUebernommen;
+  kasten.hidden = false;
+  if(titel) titel.textContent = vorschlag ? 'Vorschlag aus der Bibliothek'
+    : AW.quelle === 'bib' ? 'Aus der Bibliothek übernommen'
+    : AW.quelle === 'gelernt' ? 'Artwissen aus deinen gelernten Arten'
+    : AW.quelle === 'pflanze' ? 'Artwissen wie bei „' + (AW.name || 'deiner Pflanze') + '“'
+    : 'Artwissen von der KI';
+  let html = '';
+  if(vorschlag && b){
+    const frost = b.frost == null ? 'winterhart' : (b.frost <= 0 ? 'hält bis ' + b.frost + ' °C' : 'nicht unter ' + b.frost + ' °C');
+    html = alZeile('Gießklasse', klText(b.klasse)) + alZeile('Licht', soText(b.licht))
+      + alZeile('Typ', b.typ || '') + alZeile('Frostgrenze', frost)
+      + alZeile('Dünger', DUENGER[b.duenger] ? DUENGER[b.duenger].text : '')
+      + alZeile('Für Katzen', alGiftText()) + alZeile('Familie', b.fam || '');
+  } else {
+    ['klasse','sonne'].forEach(feld => {
+      const lab = feld === 'klasse' ? 'Gießklasse' : 'Licht';
+      if(offen[feld]){
+        const t = feld === 'klasse' ? klText : soText;
+        html += '<div class="aw-abw"><span class="aw-lab">' + lab + ' · KI und Bibliothek weichen ab</span><div class="tools aw-wahl">'
+          + '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="ki">KI: ' + esc(t(offen[feld].ki)) + '</button>'
+          + '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="bib">Bibliothek: ' + esc(t(offen[feld].bib)) + '</button></div></div>';
+      } else html += alZeile(lab, text(feld === 'klasse' ? 'f-klasse' : 'f-sonne'));
+    });
+    html += alZeile('Für Katzen', alGiftText()) + alZeile('Typ', (document.getElementById('f-typ') || {}).value);
+    if(b) html += alZeile('Familie', b.fam || '');
+  }
+  liste.innerHTML = html;
+  if(tools){
+    tools.innerHTML = vorschlag
+      ? '<button type="button" class="haupt" data-aw="bib-alle">Vorschlag übernehmen</button><button type="button" id="btn-al-pflege-auf" data-aw="pflege-auf">Selbst eintragen</button>'
+        + (kiBereit() ? '<button type="button" data-aw="ki">KI fragen</button>' : '')
+      : '<button type="button" id="btn-al-pflege-auf" data-aw="pflege-auf">Ändern</button>'
+        + (AW.quelle !== 'ki' && kiBereit() ? '<button type="button" data-aw="ki">KI fragen</button>' : '');
+  }
+  /* Erst wählen, dann ändern: Solange eine Abweichung offen ist, bleiben
+     die Felder zu. Sonst öffnen „Ändern“ und „Selbst eintragen“ sie. */
+  pflege.hidden = Object.keys(offen).length ? true : !kasten.dataset.offen;
+}
 function alGiftText(){
   const gi = document.getElementById('f-giftig');
   const o = gi && gi.options ? gi.options[gi.selectedIndex] : null;
   const roh = o ? o.textContent : '';
   if(!gi || gi.value !== 'unbekannt') return roh;
-  const a = (typeof gewaehlteArt !== 'undefined') ? gewaehlteArt : null;
+  const a = (typeof gewaehlteArt !== 'undefined' && gewaehlteArt) ? gewaehlteArt
+    : (typeof AW !== 'undefined' && AW && AW.bib) ? AW.bib : null;
   if(!a || typeof giftErmitteln !== 'function') return roh;
   try{
     const g = giftErmitteln({botanisch:a.bot, bib:a.bot, art:a.de, familie:a.fam});
@@ -17428,7 +17750,7 @@ function rundeAngebotZeichnen(){
       <button class="haupt" data-do="angebot-ja">Ansehen</button>
       <button data-do="angebot-nein">Nicht nötig</button>
     </div>
-    <p class="start-fuss">Später jederzeit unter Mehr › App Tour.</p>
+    <p class="start-fuss">Später jederzeit unter Einstellungen › App Tour.</p>
   </div>`;
 }
 
@@ -17539,7 +17861,9 @@ function kiAnbieter(v){
    die Liste abgerufen und nach einer Regel bewertet, statt einen
    Namen zu raten: höchste Versionsnummer zuerst, flash vor pro,
    Vorschauen und Experimente nur, wenn nichts Stabiles da ist. */
-const KI_MODELL_AUS = /embedding|aqa|imagen|veo|image-generation|-tts|native-audio|-live|gemma/i;
+/* 3.32.0: Positivliste statt Ausschlussliste. In die Liste kommen nur „gemini-Zahl-flash“
+   und „gemini-Zahl-flash-lite“ ohne weiteren Zusatz. */
+const KI_MODELL_MUSTER = /^(?:models\/)?gemini-\d+(?:\.\d+)?-flash(?:-lite)?$/;
 
 function kiModellPunkte(id){
   const n = String(id).replace(/^models\//, '');
@@ -17561,13 +17885,23 @@ function kiModellPunkte(id){
 function kiModellVersion(id){
   return parseFloat((String(id).match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || '0');
 }
-function kiIstLite(id){ return /lite|-8b/i.test(String(id)); }
 
 function kiModellAnzeige(m){
   if(m.displayName) return String(m.displayName).replace(/^Gemini\s*/i, '').trim() || String(m.displayName);
   return String(m.name || '').replace(/^models\/gemini-/, '').replace(/-/g, ' ');
 }
-function kiModelle(){ return Array.isArray(S.kiModelle) ? S.kiModelle : []; }
+/* 3.32.0: Eine ältere Liste kann noch Modelle außerhalb der Positiv-
+   liste enthalten (Argon, Transcribe). Sie fallen beim Lesen heraus;
+   neu gespeichert wird erst beim nächsten Holen. Empfohlen ist das
+   erste der übrigen. */
+function kiModelle(){
+  if(!Array.isArray(S.kiModelle)) return [];
+  const l = S.kiModelle.filter(m => m && KI_MODELL_MUSTER.test(m.id || ''));
+  /* 3.33.0: empfohlen ist das erste schnelle Modell, sonst das erste. */
+  let e = l.findIndex(m => !m.langsam);
+  if(e < 0) e = 0;
+  return l.map((m, i) => Object.assign({}, m, {empfohlen:i === e}));
+}
 function kiModellAktiv(){
   const l = kiModelle();
   if(!l.length) return null;
@@ -17575,17 +17909,185 @@ function kiModellAktiv(){
   return l[0];
 }
 
-async function kiFehlerText(r){
-  let m = '';
-  try{ const d = await r.json(); m = (d && d.error && d.error.message) || ''; try{ r._gk = d && d.error; }catch(e2){} }catch(e){}
-  const an = m ? ' Google meldet: ' + m : '';
-  if(r.status === 400) return 'Google hat die Anfrage abgelehnt (400). Meist ist der Schlüssel falsch kopiert.' + an;
+/* ── 3.32.0: Fehlertexte nennen das Modell ─────────────────────
+   Vorher stand bei jedem 400 „Meist ist der Schlüssel falsch kopiert“,
+   auch wenn Google etwas ganz anderes meldete. Und die Meldung stammte
+   vom letzten Ausweichmodell, während das Auswahlfeld das gewählte
+   zeigte. Jetzt steht das Modell im Satz, und vom Schlüssel ist nur
+   die Rede, wenn Google den Schlüssel ablehnt. */
+function kiNameVon(m){
+  if(!m) return '';
+  if(typeof m === 'object' && m.anzeige) return m.anzeige;
+  const id = typeof m === 'object' ? m.id : m;
+  const l = Array.isArray(S.kiModelle) ? S.kiModelle : [];
+  const da = l.find(x => x && x.id === id);
+  if(da && da.anzeige) return da.anzeige;
+  return String(id || '').replace(/^models\//, '').replace(/^gemini-/, '').replace(/-/g, ' ')
+    .replace(/\b([a-z])/g, c => c.toUpperCase());
+}
+/* Ein Modell ohne Gratis-Kontingent antwortet mit 429 und
+   „limit: 0, model: …“ (belegt im Google-Forum, Oktober 2026). */
+function kiNichtKostenlos(roh){
+  const t = typeof roh === 'string' ? roh : JSON.stringify(roh || {});
+  return /limit\W{0,3}0(?![\d.])/i.test(t) || /"quotaValue"\s*:\s*"0"/.test(t);
+}
+async function kiFehlerText(r, m){
+  let text = '', roh = null;
+  try{ const d = await r.json(); roh = (d && d.error) || null; text = (roh && roh.message) || ''; try{ r._gk = roh; }catch(e2){} }catch(e){}
+  const an = text ? ' Google meldet: ' + text : '';
+  const name = m ? kiNameVon(m) : '';
+  if(r.status === 400){
+    if(/api[ _-]?key/i.test(text + ' ' + JSON.stringify(roh || {})))
+      return 'Google lehnt den Schlüssel ab (400). Prüf ihn hinter dem Zahnrad unter KI-Dienst.' + an;
+    return (name ? 'Google hat die Anfrage an ' + name + ' abgelehnt (400).' : 'Google hat die Anfrage abgelehnt (400).') + an;
+  }
   if(r.status === 401 || r.status === 403)
     return 'Der Schlüssel ist ungültig oder nicht freigeschaltet (' + r.status + ').' + an;
-  if(r.status === 404) return 'Dieses Modell gibt es nicht mehr (404). Hol die Modellliste in den Einstellungen neu.' + an;
-  if(r.status === 429) return 'Das kostenlose Kontingent ist für den Moment erschöpft (429). In ein paar Minuten noch einmal — oder heute über die Zwischenablage.' + an;
-  if(r.status === 500 || r.status === 503) return 'Google ist gerade überlastet (' + r.status + '). Gleich noch einmal versuchen.' + an;
-  return 'Die Anfrage ist fehlgeschlagen (' + r.status + ').' + an;
+  if(r.status === 404)
+    return (name ? name + ' gibt es bei Google nicht mehr (404).' : 'Google kennt die Adresse nicht (404).')
+      + ' Hol die Modellliste in den Einstellungen neu.' + an;
+  if(r.status === 429){
+    if(kiNichtKostenlos(roh || text))
+      return (name || 'Dieses Modell') + ' ist im kostenlosen Kontingent nicht enthalten (429). Es ist aus der Liste genommen.' + an;
+    return 'Das kostenlose Kontingent ' + (name ? 'von ' + name + ' ' : '')
+      + 'ist für den Moment erschöpft (429). In ein paar Minuten noch einmal — oder heute über die Zwischenablage.' + an;
+  }
+  if(r.status === 500 || r.status === 503)
+    return (name || 'Google') + ' ist gerade überlastet (' + r.status + '). Noch einmal versuchen oder ein anderes Modell wählen.' + an;
+  return 'Die Anfrage ' + (name ? 'an ' + name + ' ' : '') + 'ist fehlgeschlagen (' + r.status + ').' + an;
+}
+
+/* ── 3.32.0: Protokoll der Anfragen ────────────────────────────
+   Damit sich jede Zahl im Diagramm von Google AI Studio nachzählen
+   lässt: die letzten 20 Anfragen mit Zweck, Modell, Ergebnis und
+   Dauer. Eigenes Fach im lokalen Speicher, nicht in S — es gehört
+   nicht in die Sicherung. */
+const KI_PROTOKOLL_FACH = KEY + ':kiprotokoll';
+const KI_PROTOKOLL_MAX = 20;
+function kiProtokoll(){
+  try{
+    const l = JSON.parse(localStorage.getItem(KI_PROTOKOLL_FACH) || '[]');
+    return Array.isArray(l) ? l : [];
+  }catch(e){ return []; }
+}
+function kiProtokollEintragen(e){
+  const l = kiProtokoll();
+  const eintrag = Object.assign({zeit:Date.now(), zweck:'Frage', modell:'', ergebnis:'', dauer:0, zeichen:0, bilder:0, kb:0}, e || {});
+  eintrag.ergebnis = String(eintrag.ergebnis || '').slice(0, 200);
+  l.unshift(eintrag);
+  try{ localStorage.setItem(KI_PROTOKOLL_FACH, JSON.stringify(l.slice(0, KI_PROTOKOLL_MAX))); }catch(err){}
+  if(typeof kiProtokollZeichnen === 'function') kiProtokollZeichnen();
+}
+function kiZahlText(n){ return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function kiProtokollZeichnen(){
+  const box = document.getElementById('ki-protokoll');
+  if(!box) return;
+  const l = kiProtokoll();
+  const zahl = document.getElementById('ki-protokoll-zahl');
+  if(zahl) zahl.textContent = l.length ? '(' + l.length + ')' : '';
+  if(!l.length){ box.innerHTML = '<p class="fhint">Noch keine Anfrage.</p>'; return; }
+  const zwei = n => String(n).padStart(2, '0');
+  box.innerHTML = '<ol class="ki-prot">' + l.map(e => {
+    const d = new Date(e.zeit);
+    const zeit = zwei(d.getDate()) + '.' + zwei(d.getMonth() + 1) + '. '
+      + zwei(d.getHours()) + ':' + zwei(d.getMinutes()) + ':' + zwei(d.getSeconds());
+    const ok = e.ergebnis === 'ok';
+    const sek = (Math.round((e.dauer || 0) / 100) / 10).toString().replace('.', ',') + ' s';
+    const bild = e.bilder ? ' · ' + e.bilder + (e.bilder === 1 ? ' Bild, ' : ' Bilder, ') + kiZahlText(e.kb) + ' kB' : '';
+    return '<li class="' + (ok ? 'ok' : 'warn') + '"><b>' + esc(zeit + ' · ' + e.zweck + ' · ' + (kiNameVon(e.modell) || '—'))
+      + '</b><span>' + esc(e.ergebnis) + ' · ' + esc(sek) + ' · ' + kiZahlText(e.zeichen) + ' Zeichen' + esc(bild) + '</span></li>';
+  }).join('') + '</ol>';
+}
+
+/* ── 3.32.0: Nur Flash-Modelle, die kostenlos laufen ───────────
+   Positivliste statt Ausschlussliste: Neue Modellfamilien (Argon,
+   Transcribe, Nano Banana) rutschten sonst als Ausweichmodell durch.
+   Googles Modellliste sagt nicht, was kostenlos ist. Deshalb bekommt
+   beim Holen jedes Flash-Modell eine Mini-Anfrage — einmal je Modell,
+   nicht bei jeder Frage. */
+const KI_PRUEF_FRIST = 30000;
+/* 3.33.0: Braucht die Prüfanfrage länger, gilt das Modell als langsam.
+   15 s, weil 3.1 Flash Lite bei der Prüfung 11,5 s brauchte, die echte
+   Frage aber nur 9,1 s; 3.8 Flash lief in die Zeitgrenze und brauchte
+   für die echte Frage 115 s (Protokoll vom 26.10.2026). */
+const KI_LANGSAM_MS = 15000;
+let KI_PRUEF_AUS = [];
+let KI_PRUEF_LANGSAM = [];
+function kiDenkCfg(id, stufe){
+  if(stufe !== 'niedrig' && stufe !== 'mittel') return null;
+  const gv = kiModellVersion(id), mittel = stufe === 'mittel';
+  if(gv >= 3) return {thinkingLevel: mittel ? 'medium' : 'low'};
+  if(gv >= 2.5) return {thinkingBudget: mittel ? 2048 : 512};
+  return null;
+}
+async function kiModellPruefen(k, m, alleIds){
+  const prompt = 'Antworte nur mit: ok';
+  const versuch = async mitDenken => {
+    const cfg = {temperature:0};
+    const dc = mitDenken ? kiDenkCfg(m.id, 'niedrig') : null;
+    if(dc) cfg.thinkingConfig = dc;
+    const t0 = Date.now();
+    const c = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const uhr = c ? setTimeout(()=>{ try{ c.abort(); }catch(e){} }, KI_PRUEF_FRIST) : null;
+    let r, d = null;
+    try{
+      r = await fetch(KI_BASIS + '/' + m.id + ':generateContent?key=' + encodeURIComponent(k), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{role:'user', parts:[{text:prompt}]}], generationConfig:cfg}),
+        signal:c ? c.signal : undefined});
+      try{ d = await r.json(); }catch(e){ d = null; }
+    }catch(e){
+      if(uhr) clearTimeout(uhr);
+      const zeit = !!(e && e.name === 'AbortError');
+      kiProtokollEintragen({zweck:'Prüfung', modell:m.id, ergebnis:zeit ? 'Zeitgrenze' : 'keine Verbindung',
+        dauer:Date.now() - t0, zeichen:prompt.length});
+      return {status:0, netz:!zeit, zeit:zeit, dauer:Date.now() - t0, dc:!!dc};
+    }
+    if(uhr) clearTimeout(uhr);
+    const fehler = (d && d.error) || null;
+    const dauer = Date.now() - t0;
+    kiProtokollEintragen({zweck:'Prüfung', modell:m.id,
+      ergebnis:r.ok ? 'ok' : String(r.status) + (fehler && fehler.message ? ' · ' + fehler.message : ''),
+      dauer:dauer, zeichen:prompt.length});
+    return {status:r.ok ? 200 : r.status, d:d, fehler:fehler, dc:!!dc, dauer:dauer};
+  };
+  let e = await versuch(true);
+  let denken = true;
+  /* Lehnt ein Modell die Denkstufe ab, einmal ohne. Das Ergebnis wird
+     gemerkt, damit es im Gebrauch nicht noch einmal passiert. */
+  if(e.status === 400 && e.dc && /think/i.test(JSON.stringify(e.fehler || ''))){
+    denken = false;
+    e = await versuch(false);
+  }
+  if(e.netz) return {netz:true};
+  const langsam = !!e.zeit || (e.dauer || 0) > KI_LANGSAM_MS;
+  if(e.status === 200){
+    /* Leitet Google ein altes Modell auf ein neues um, nennt die
+       Antwort das neue. Das alte stünde sonst doppelt in der Liste. */
+    const echt = String((e.d && e.d.modelVersion) || '').replace(/^models\//, '');
+    const gefragt = m.id.replace(/^models\//, '');
+    const ziel = echt && echt.indexOf(gefragt) !== 0
+      ? (alleIds || []).find(id => id !== m.id && echt.indexOf(id.replace(/^models\//, '')) === 0) : null;
+    if(ziel) return {frei:false, grund:'weitergeleitet auf ' + kiNameVon(ziel)};
+    return {frei:true, denken:denken, langsam:langsam};
+  }
+  if(e.status === 429)
+    return kiNichtKostenlos(e.fehler) ? {frei:false, grund:'nicht kostenlos'} : {frei:true, denken:denken, langsam:langsam};
+  if(e.status === 401 || e.status === 403) return {schluessel:true, status:e.status, fehler:e.fehler};
+  /* Überlastet oder zu langsam heißt nicht „kostenpflichtig“. */
+  if(e.status === 0 || e.status === 500 || e.status === 503) return {frei:true, denken:denken, langsam:langsam};
+  return {frei:false, grund:'Fehler ' + e.status};
+}
+function kiAusgeblendetText(){
+  return (KI_PRUEF_LANGSAM.length ? ' Langsam, nicht vorausgewählt: ' + KI_PRUEF_LANGSAM.join(', ') + '.' : '')
+    + (KI_PRUEF_AUS.length ? ' Ausgeblendet: ' + KI_PRUEF_AUS.map(x => x.anzeige + ' (' + x.grund + ')').join(', ') + '.' : '');
+}
+function kiModellAusblenden(id){
+  if(!Array.isArray(S.kiModelle)) return;
+  S.kiModelle = S.kiModelle.filter(m => m && m.id !== id);
+  if(S.kiModell === id){ const l = kiModelle(); S.kiModell = l.length ? l[0].id : null; }
+  sichern();
+  if(typeof kiModellZeichnen === 'function') kiModellZeichnen();
 }
 
 async function kiModelleHolen(schluessel){
@@ -17601,74 +18103,56 @@ async function kiModelleHolen(schluessel){
   let d;
   try{ d = await r.json(); }catch(e){ throw new Error('Die Antwort von Google war nicht lesbar.'); }
   const roh = (d && d.models) || [];
-  const liste = roh
+  const kandidaten = roh
     .filter(m => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
-    .filter(m => !KI_MODELL_AUS.test(m.name || ''))
+    .filter(m => KI_MODELL_MUSTER.test(m.name || ''))
     .map(m => ({id:m.name, anzeige:kiModellAnzeige(m), punkte:kiModellPunkte(m.name)}))
     .sort((a, b) => b.punkte - a.punkte);
+  if(!kandidaten.length)
+    throw new Error('Der Schlüssel funktioniert, aber Google bietet kein Flash-Modell an, das Bilder beantworten kann.');
+  const ids = kandidaten.map(m => m.id);
+  const erg = await Promise.all(kandidaten.map(m => kiModellPruefen(k, m, ids)));
+  if(erg.some(e => e.netz)) throw new Error(KI_NETZ);
+  const schl = erg.find(e => e.schluessel);
+  if(schl) throw new Error('Der Schlüssel ist ungültig oder nicht freigeschaltet (' + schl.status + ').'
+    + (schl.fehler && schl.fehler.message ? ' Google meldet: ' + schl.fehler.message : ''));
+  KI_PRUEF_AUS = kandidaten.map((m, i) => erg[i].frei ? null : {anzeige:m.anzeige, grund:erg[i].grund})
+    .filter(Boolean);
+  const liste = kandidaten.map((m, i) => erg[i].frei ? Object.assign({}, m, {denken:erg[i].denken, langsam:!!erg[i].langsam}) : null)
+    .filter(Boolean);
+  KI_PRUEF_LANGSAM = liste.filter(m => m.langsam).map(m => m.anzeige);
   if(!liste.length)
-    throw new Error('Der Schlüssel funktioniert, aber es kam kein Modell zurück, das Bilder beantworten kann.');
-  S.kiModelle = liste.map((m, i) => ({id:m.id, anzeige:m.anzeige, empfohlen:i === 0}));
-  if(!S.kiModell || !S.kiModelle.some(m => m.id === S.kiModell)) S.kiModell = S.kiModelle[0].id;
+    throw new Error('Keines der Flash-Modelle läuft mit diesem Schlüssel kostenlos.' + kiAusgeblendetText()
+      + ' Prüf in Google AI Studio, ob das Projekt im kostenlosen Kontingent ist.');
+  S.kiModelle = liste.map(m => {
+    const o = {id:m.id, anzeige:m.anzeige};
+    if(m.denken === false) o.denken = false;
+    if(m.langsam) o.langsam = true;
+    return o;
+  });
+  /* Vorausgewählt ist das neueste schnelle Modell. Eine schnelle
+     Wahl von Hand bleibt, eine langsame wird umgestellt. */
+  const empf = kiModelle().find(m => m.empfohlen);
+  const jetzt = S.kiModelle.find(m => m.id === S.kiModell);
+  if(!jetzt || (jetzt.langsam && empf && !empf.langsam)) S.kiModell = empf ? empf.id : S.kiModelle[0].id;
   sichern();
   return S.kiModelle;
 }
 
 /* ── Die Anfrage ───────────────────────────────────────────────
-   Ein 503 heißt nicht „falscher Schlüssel“ und nicht „Bild zu groß“,
-   sondern: Google fehlt gerade die Rechenleistung. Das trifft Gratis-
-   wie Firmenkunden gleichermaßen und lässt sich vorher nicht
-   abfragen — die API kennt keinen Endpunkt für Auslastung. Man merkt
-   es erst beim Versuchen.
-
-   Neue Modelle bekommen anfangs wenig Kapazität, und ausgerechnet das
-   neueste schlägt die Empfehlungsregel vor. Deshalb zwei Notausgänge:
-   kurz nachfassen, und wenn das nicht hilft, eine Stufe zurück. */
+   3.32.0: Ein Tipp, eine Anfrage. Bis 3.31.0 fasste die App bei 503
+   und nach 30 Sekunden nach und wich danach auf zwei weitere Modelle
+   aus — bis zu vier Anfragen je Tipp, darunter Modelle ohne
+   Gratis-Kontingent und solche, die Google auf das erste zurück-
+   leitet. Eine Anfrage, die die App selbst abbricht, rechnet Google
+   trotzdem ab. Jetzt entscheidet der Nutzer: „Noch einmal“ oder
+   ein anderes Modell. */
 let KI_LAEUFT = null;
-/* Eine Anfrage darf nicht ewig laufen. Ohne Zeitgrenze wartete die App
-   unbegrenzt, wenn Google langsam antwortete statt „ueberlastet" zu
-   melden — vier Minuten vor einem drehenden Rad waren moeglich.
-   Mit Bildern dauert eine ehrliche Antwort selten laenger als 30 s. */
-const KI_FRIST_BILD = 30000;
-const KI_FRIST_TEXT = 15000;
-/* Nur noch ein Nachfassen, und nur beim ersten Modell. Ist das voll,
-   ist es meistens laenger voll — dann bringt Warten weniger als der
-   Wechsel. Frueher: zwei Wiederholungen je Modell mit 2 s und 6 s. */
-const KI_NACHFASSEN = [1500];         /* Wartezeit vor Versuch 2 */
-const KI_MERK_DAUER = 10 * 60 * 1000; /* so lange gilt ein Modell als voll */
-const KI_UEBERLASTET = {};            /* Modellkennung → Zeitpunkt */
-
-function kiUeberlastetMerken(id){ KI_UEBERLASTET[id] = Date.now(); }
-function kiIstUeberlastet(id){
-  const t = KI_UEBERLASTET[id];
-  return !!t && (Date.now() - t) < KI_MERK_DAUER;
-}
-
-/* Wohin ausgewichen wird. Die Liste ist bereits nach der
-   Empfehlungsregel sortiert, das nächste Modell ist also das
-   nächstältere — nicht irgendein altes. Zwei Bremsen: nie auf eine
-   Lite-Variante, weil die bei feinen Bildunterschieden abbaut, und
-   nie mehr als eine Generation zurück. Lieber eine ehrliche
-   Fehlermeldung als eine Antwort, der man nicht trauen kann. */
-function kiAusweichModelle(startId){
-  const liste = kiModelle();
-  const i = liste.findIndex(m => m.id === startId);
-  if(i < 0) return [];
-  const v0 = kiModellVersion(startId);
-  return liste.slice(i + 1)
-    .filter(m => !kiIstLite(m.id))
-    .filter(m => kiModellVersion(m.id) >= v0 - 1)
-    .filter(m => !kiIstUeberlastet(m.id))
-    .slice(0, 2);
-}
+/* Nur noch ein Sicherheitsnetz. Abbrechen kann jeder selbst. */
+const KI_FRIST = 120000;
 
 function warte(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-/* `ctrl`: Wer mehrere Anfragen gleichzeitig laufen lässt — die
-   Sammelprüfung tut das —, bringt seinen eigenen Abbrecher mit.
-   Sonst überschriebe jede neue Anfrage KI_LAEUFT, und kiAbbrechen
-   träfe nur die zuletzt gestartete. Ohne Argument bleibt alles,
-   wie es war. */
 /* Modelle, die eine Denkstufe abgelehnt haben (3.26.0). */
 const KI_DENKEN_AUS = {};
 /* Tageskontingent oder Minutenlimit? Google nennt es in den Details
@@ -17679,20 +18163,26 @@ function kiKontingentLesen(fehler, info){
   const w = roh.match(/retryDelay"?\s*:\s*"(\d+(?:\.\d+)?)s"/) || roh.match(/retry in (\d+(?:\.\d+)?)\s*s/i);
   if(w) fehler.warte = Math.min(300000, Math.ceil(parseFloat(w[1]) * 1000));
 }
-/* `opt` (3.26.0): {denken:'niedrig'} setzt eine niedrige Denkstufe,
-   {frist:ms} eine eigene Zeitgrenze. Ohne `opt` bleibt alles wie bisher. */
+/* `ctrl`: Wer mehrere Anfragen gleichzeitig laufen lässt — die
+   Sammelprüfung tut das —, bringt seinen eigenen Abbrecher mit.
+   `opt`: {denken:'niedrig'|'mittel'} Denkstufe, {frist:ms} eigene
+   Zeitgrenze, {zweck:'Anlegen'} für das Protokoll, {denkenNochmal:true}
+   fragt nach einer abgelehnten Denkstufe einmal ohne (nur Kartei). */
+const KI_SCHEMA_AUS = {};
 async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   opt = opt || {};
   const k = kiSchluessel();
   if(!k) throw new Error('Kein Schlüssel hinterlegt.');
   const m = modellId ? (kiModelle().find(x => x.id === modellId) || {id:modellId}) : kiModellAktiv();
   if(!m) throw new Error('Kein Modell gewählt. Hol die Modellliste in den Einstellungen.');
+  const mit = (bilder || []).slice(0, KI_BILD_MAX);
   const teile = [{text:String(prompt || '')}];
-  (bilder || []).slice(0, KI_BILD_MAX).forEach(b => {
+  mit.forEach(b => {
     teile.push({inline_data:{mime_type:b.mime || 'image/jpeg', data:b.daten}});
   });
   const c = ctrl || ((typeof AbortController !== 'undefined') ? new AbortController() : null);
   if(!ctrl) KI_LAEUFT = c;
+  const fristMs = opt.frist || KI_FRIST;
   /* Die Frist bricht selbst ab. Damit der Aufrufer den Abbruch von
      einem Abbruch durch den Nutzer unterscheiden kann, wird er hier
      gemerkt und weiter unten in einen „voll"-Fehler uebersetzt. */
@@ -17700,16 +18190,28 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   const uhr = c ? setTimeout(()=>{
     frist = true;
     try{ c.abort(); }catch(e){}
-  }, opt.frist || ((bilder && bilder.length) ? KI_FRIST_BILD : KI_FRIST_TEXT)) : null;
+  }, fristMs) : null;
   /* Denkstufe: Gemini 3 kennt thinkingLevel, 2.5 thinkingBudget. Der
      falsche Parameter gibt einen Fehler — deshalb nach Generation. */
   const genCfg = {temperature:0.2};
-  if((opt.denken === 'niedrig' || opt.denken === 'mittel') && !KI_DENKEN_AUS[m.id]){
-    const gv = kiModellVersion(m.id);
-    const mittel = opt.denken === 'mittel';
-    if(gv >= 3) genCfg.thinkingConfig = {thinkingLevel: mittel ? 'medium' : 'low'};
-    else if(gv >= 2.5) genCfg.thinkingConfig = {thinkingBudget: mittel ? 2048 : 512};
+  /* beta.2: feste Antwortform über Googles strukturierte Ausgabe. Lehnt
+     ein Modell sie ab, geht der nächste Tipp ohne; der Auftrag nennt
+     für diesen Fall die Zeilenform. */
+  const mitSchema = !!(opt.schema && !KI_SCHEMA_AUS[m.id]);
+  if(mitSchema){ genCfg.responseMimeType = 'application/json'; genCfg.responseSchema = opt.schema; }
+  if(m.denken !== false && !KI_DENKEN_AUS[m.id]){
+    const dc = kiDenkCfg(m.id, opt.denken);
+    if(dc) genCfg.thinkingConfig = dc;
   }
+  const t0 = Date.now();
+  const prot = ergebnis => kiProtokollEintragen({zweck:opt.zweck || 'Frage', modell:m.id, ergebnis:ergebnis,
+    dauer:Date.now() - t0, zeichen:String(prompt || '').length, bilder:mit.length,
+    kb:Math.round(mit.reduce((n, b) => n + String((b && b.daten) || '').length * 0.75, 0) / 1024)});
+  const fristFehler = () => {
+    const f = new Error((kiNameVon(m) || 'Das Modell') + ' hat nicht rechtzeitig geantwortet (nach '
+      + Math.round(fristMs / 1000) + ' Sekunden).');
+    f.voll = true; f.modell = m.id; return f;
+  };
   let r;
   try{
     r = await fetch(KI_BASIS + '/' + m.id + ':generateContent?key=' + encodeURIComponent(k), {
@@ -17732,51 +18234,61 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   }catch(e){
     if(uhr) clearTimeout(uhr);
     if(!ctrl) KI_LAEUFT = null;
-    if(frist){
-      const f = new Error('Das Modell hat nicht rechtzeitig geantwortet.');
-      f.voll = true; f.modell = m.id;
-      throw f;
-    }
-    if(e && e.name === 'AbortError') throw e;
-    throw new Error(KI_NETZ);
+    if(frist){ prot('Zeitgrenze'); throw fristFehler(); }
+    if(e && e.name === 'AbortError'){ prot('abgebrochen'); throw e; }
+    prot('keine Verbindung');
+    const f = new Error(KI_NETZ); f.modell = m.id;
+    throw f;
   }
   /* Die Frist läuft weiter, bis die Antwort gelesen ist (3.24.0). Vorher
      endete sie mit dem Kopf der Antwort, und ein stockender Rumpf hielt
      den Kartei-Balken unbegrenzt bei 85 %. */
-  const fristFehler = () => { const f = new Error('Das Modell hat nicht rechtzeitig geantwortet.');
-    f.voll = true; f.modell = m.id; return f; };
   const ende = () => { if(uhr) clearTimeout(uhr); if(!ctrl) KI_LAEUFT = null; };
   if(!r.ok){
     ende();
-    /* Lehnt das Modell die Denkstufe ab, einmal ohne sie (3.26.0). */
-    if(r.status === 400 && genCfg.thinkingConfig){
+    const fehler = new Error(await kiFehlerText(r, m));
+    const gk = r._gk || null;
+    prot(String(r.status) + (gk && gk.message ? ' · ' + gk.message : ''));
+    /* Lehnt das Modell die Denkstufe ab, wird es gemerkt. Noch einmal
+       ohne fragt nur, wer es ausdrücklich will (die Kartei). Sonst gilt
+       ein Tipp, eine Anfrage — der nächste Tipp geht ohne Denkstufe. */
+    if(r.status === 400 && genCfg.thinkingConfig && /think/i.test(JSON.stringify(gk || ''))){
       KI_DENKEN_AUS[m.id] = true;
-      return kiFragen(prompt, bilder, m.id, ctrl, opt);
+      if(opt.denkenNochmal) return kiFragen(prompt, bilder, m.id, ctrl, Object.assign({}, opt, {denkenNochmal:false}));
+      fehler.message = (kiNameVon(m) || 'Das Modell') + ' kennt die gewählte Denkstufe nicht. Noch einmal tippen, dann geht es ohne.';
     }
-    const fehler = new Error(await kiFehlerText(r));
-    if(r.status === 429) kiKontingentLesen(fehler, r._gk);
+    if(r.status === 400 && mitSchema && /schema|mime|response_?type|json/i.test(JSON.stringify(gk || ''))){
+      KI_SCHEMA_AUS[m.id] = true;
+      fehler.message = (kiNameVon(m) || 'Das Modell') + ' kennt die feste Antwortform nicht. Noch einmal tippen, dann geht es ohne.';
+    }
+    if(r.status === 429){
+      kiKontingentLesen(fehler, gk);
+      if(kiNichtKostenlos(gk || '')){ fehler.nichtKostenlos = true; kiModellAusblenden(m.id); }
+    }
     /* Der Aufrufer muss 503 von 400 unterscheiden können: das eine
        lohnt einen zweiten Versuch, das andere nie. */
     fehler.status = r.status;
-    fehler.voll = (r.status === 503 || r.status === 500 || r.status === 429);
+    fehler.voll = (r.status === 503 || r.status === 500 || r.status === 429) && !fehler.nichtKostenlos;
     fehler.modell = m.id;
     throw fehler;
   }
   let d;
   try{ d = await r.json(); }catch(e){
     ende();
-    if(frist) throw fristFehler();
-    if(e && e.name === 'AbortError') throw e;
+    if(frist){ prot('Zeitgrenze'); throw fristFehler(); }
+    if(e && e.name === 'AbortError'){ prot('abgebrochen'); throw e; }
+    prot('Antwort nicht lesbar');
     throw new Error('Die Antwort von Google war nicht lesbar.');
   }
   ende();
   const sperre = d && d.promptFeedback && d.promptFeedback.blockReason;
-  if(sperre) throw new Error('Google hat die Anfrage zurückgewiesen (' + sperre + ').');
+  if(sperre){ prot('zurückgewiesen · ' + sperre); throw new Error('Google hat die Anfrage zurückgewiesen (' + sperre + ').'); }
   const kand = ((d && d.candidates) || [])[0];
   const grund = kand && kand.finishReason;
   const txt = (kand && kand.content && Array.isArray(kand.content.parts))
     ? kand.content.parts.map(p => p.text || '').join('') : '';
   if(!String(txt).trim()){
+    prot('leere Antwort' + (grund ? ' · ' + grund : ''));
     throw new Error(grund === 'MAX_TOKENS'
       ? 'Die Antwort brach ab, bevor etwas Lesbares kam. Schick weniger Bilder mit.'
       : grund === 'SAFETY' ? 'Google hat die Antwort zurückgehalten (Sicherheitsfilter).'
@@ -17785,9 +18297,12 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   /* Kam Text UND ein Abbruch, war die Antwort bisher stillschweigend
      halb — der Leser fand ein paar Felder und trug sie ein, der Rest
      fehlte ohne ein Wort. Ein Rest ist keine Antwort. */
-  if(grund === 'MAX_TOKENS')
+  if(grund === 'MAX_TOKENS'){
+    prot('abgeschnitten');
     throw new Error('Die Antwort wurde mittendrin abgeschnitten. '
       + 'Versuch es mit weniger Bildern oder einem anderen Modell.');
+  }
+  prot('ok');
   return txt;
 }
 function kiAbbrechen(){
@@ -17796,53 +18311,41 @@ function kiAbbrechen(){
 }
 let KI_ABGEBROCHEN = false;
 
-/* Zuerst dreimal dasselbe Modell mit wachsender Pause — kurze
-   Lastspitzen sind damit erledigt. Erst danach eine Stufe zurück.
-   Meldet der Aufrufer zurück, was unterwegs passiert, damit der
-   Nutzer nicht zwanzig Sekunden vor einem stummen Knopf sitzt. */
-async function kiFragenHartnaeckig(prompt, bilder, sagen){
+/* Genau eine Anfrage. `modellId` fragt einmalig ein anderes Modell
+   („Mit … versuchen“), ohne die Auswahl zu ändern. */
+async function kiFragenEinmal(prompt, bilder, modellId, opt){
   KI_ABGEBROCHEN = false;
-  const start = kiModellAktiv();
-  if(!start) throw new Error('Kein Modell gewählt. Hol die Modellliste in den Einstellungen.');
-  const kette = [start].concat(kiAusweichModelle(start.id));
-  let letzter = null;
-
-  for(let mi = 0; mi < kette.length; mi++){
-    const m = kette[mi];
-    if(mi > 0){
-      if(sagen) sagen('Das Modell antwortet nicht. Ich versuche es mit ' + m.anzeige + ' …');
-      if(KI_ABGEBROCHEN) throw Object.assign(new Error('Abgebrochen.'), {name:'AbortError'});
-    }
-    /* Nachgefasst wird nur beim ersten Modell. Ab dem zweiten zaehlt
-       Tempo mehr als Beharrlichkeit — der Nutzer wartet schon. */
-    const versuche = mi === 0 ? KI_NACHFASSEN.length : 0;
-    for(let v = 0; v <= versuche; v++){
-      if(v > 0){
-        if(sagen) sagen('Google ist gerade voll. Zweiter Versuch in '
-          + Math.round(KI_NACHFASSEN[v - 1] / 1000) + ' Sekunden …');
-        await warte(KI_NACHFASSEN[v - 1]);
-        if(KI_ABGEBROCHEN) throw Object.assign(new Error('Abgebrochen.'), {name:'AbortError'});
-      }
-      try{
-        const txt = await kiFragen(prompt, bilder, m.id);
-        return {text:txt, modell:m, gewechselt:mi > 0};
-      }catch(e){
-        if(e && e.name === 'AbortError') throw e;
-        letzter = e;
-        if(!e.voll) throw e;          /* 400 wird durch Warten nicht besser */
-        kiUeberlastetMerken(m.id);
-        if(e.status === 429) break;   /* Kontingent: anderes Modell hilft nicht durch Warten */
-      }
-    }
-  }
-  if(letzter){
-    letzter.message = (letzter.message || '')
-      + (kette.length > 1
-          ? ' Auch ' + (kette.length - 1) + ' Ausweichmodell'
-            + (kette.length > 2 ? 'e waren' : ' war') + ' nicht frei.'
-          : '');
-  }
-  throw letzter || new Error('Die Anfrage ist fehlgeschlagen.');
+  const m = modellId ? kiModelle().find(x => x.id === modellId) : kiModellAktiv();
+  if(!m) throw new Error('Kein Modell gewählt. Hol die Modellliste in den Einstellungen.');
+  const txt = await kiFragen(prompt, bilder, m.id, null, opt);
+  return {text:txt, modell:m};
+}
+/* Das Modell für „Mit … versuchen“: das nächste schnelle in der Liste
+   (beta.2, F73). Gibt es keins, das nächste langsame. Die Liste enthält
+   nur kostenlose Modelle. */
+function kiNaechstesModell(id){
+  const l = kiModelle();
+  const i = l.findIndex(m => m.id === id);
+  if(i < 0) return l.find(m => !m.langsam) || l[0] || null;
+  if(l.length < 2) return null;
+  const reihe = [];
+  for(let k = 1; k < l.length; k++) reihe.push(l[(i + k) % l.length]);
+  return reihe.find(m => !m.langsam) || reihe[0];
+}
+/* Knöpfe nach einem Fehlschlag. `attr` erzeugt die Datenattribute
+   des jeweiligen Bereichs (Anlegen und Doktor: data-do, Anzucht:
+   data-az). */
+function kiNochmalHTML(id, attr){
+  const l = kiModelle();
+  /* Ist das gescheiterte Modell aus der Liste geflogen (nicht
+     kostenlos), fragt „Noch einmal“ das ausgewählte. */
+  const noch = l.some(m => m.id === id) ? id : '';
+  const basis = noch || ((kiModellAktiv() || {}).id || '');
+  const alt = kiNaechstesModell(basis);
+  return '<span class="tools ki-nochmal">'
+    + '<button type="button" ' + attr('nochmal', noch) + '>Noch einmal</button>'
+    + (alt && alt.id !== basis ? '<button type="button" ' + attr('anders', alt.id) + '>Mit ' + esc(alt.anzeige) + (alt.langsam ? ' (langsam)' : '') + ' versuchen</button>' : '')
+    + '</span>';
 }
 
 /* ── Bilder ──────────────────────────────────────────────────── */
@@ -17927,6 +18430,8 @@ document.addEventListener('click', e => {
   if(weg){ kiBildWeg(weg.dataset.kiwo, parseInt(weg.dataset.kibildWeg, 10) || 0); return; }
   const stop = e.target.closest('[data-do="ki-stop"]');
   if(stop){ kiAbbrechen(); return; }
+  const noch = e.target.closest('[data-do="ki-nochmal"],[data-do="ki-anders"]');
+  if(noch){ kiDirektLos(noch.dataset.kiwo, noch.dataset.kimodell || null); return; }
   const gal = e.target.closest('[data-kigal]');
   if(gal){
     const src = gal.dataset.kigal;
@@ -17967,7 +18472,7 @@ function kiModellZeichnen(){
     sel.innerHTML = liste.length
       ? liste.map(m => '<option value="' + esc(m.id) + '"'
           + (aktiv && m.id === aktiv.id ? ' selected' : '') + '>'
-          + esc(m.anzeige) + (m.empfohlen ? ' \u2713' : '') + '</option>').join('')
+          + esc(m.anzeige) + (m.langsam ? ' (langsam)' : '') + (m.empfohlen ? ' \u2713' : '') + '</option>').join('')
       : '<option value="">'
         + (kiBereit() ? 'Modellliste noch nicht geholt' : 'Erst Schlüssel eintragen') + '</option>';
     sel.disabled = !liste.length;
@@ -17988,6 +18493,7 @@ function kiSchluesselZeichnen(){
   const zeile = document.getElementById('ein-u-kidienst');
   if(zeile) zeile.textContent = da ? 'Schlüssel hinterlegt' : 'Noch kein Schlüssel';
   kiModellZeichnen();
+  kiProtokollZeichnen();
 }
 
 function kiKeyMeldung(txt, ton){
@@ -18006,23 +18512,34 @@ function kiDirektMeldung(wo, txt, ton){
 }
 
 /* Der Wartezustand ist gesprächig, weil das Warten sonst wie ein
-   Hänger aussieht: bei zwei Wiederholungen und einem Modellwechsel
-   vergeht eine gute Minute. */
+   Hänger aussieht. */
 function kiLaufText(wo, txt){
   const el = document.querySelector('#ki-lauf-' + wo + ' .kilauf-txt');
   if(el) el.textContent = txt;
 }
-function kiLaufZeigen(wo, laeuft){
+/* 3.32.0: Statt „nach dreißig steige ich um“ zählen die Sekunden
+   hoch. Die App bricht nicht mehr selbst ab und wechselt kein Modell. */
+const KI_UHREN = {};
+function kiLaufSatz(m, sek){
+  const name = kiNameVon(m || kiModellAktiv());
+  /* Geschütztes Leerzeichen: „12 s“ bricht nicht um. */
+  return (name ? 'Die Frage an ' + name + ' läuft' : 'Die Frage läuft') + ' · ' + sek + '\u00a0s';
+}
+function kiLaufZeigen(wo, laeuft, m){
   const p = document.getElementById('ki-lauf-' + wo);
   const knopf = document.getElementById(wo === 'anlegen' ? 'btn-gemini' : 'btn-dok-ki');
+  if(KI_UHREN[wo]){ clearInterval(KI_UHREN[wo]); delete KI_UHREN[wo]; }
   if(p){
     p.hidden = !laeuft;
     p.innerHTML = laeuft
       ? '<span class="kilauf"><span class="kispin"></span>'
-        + '<span class="kilauf-txt">Die Frage läuft. Mit Bildern dauert das gut zwanzig Sekunden. '
-        + 'Nach dreißig steige ich auf ein anderes Modell um.</span>'
+        + '<span class="kilauf-txt">' + esc(kiLaufSatz(m, 0)) + '</span>'
         + '<button type="button" data-do="ki-stop">Abbrechen</button></span>'
       : '';
+    if(laeuft){
+      const t0 = Date.now();
+      KI_UHREN[wo] = setInterval(()=>kiLaufText(wo, kiLaufSatz(m, Math.round((Date.now() - t0) / 1000))), 1000);
+    }
   }
   if(knopf){
     knopf.disabled = !!laeuft;
@@ -18094,6 +18611,19 @@ function kiZurEinrichtung(){
 }
 
 /* ── Der Lauf ────────────────────────────────────────────────── */
+/* 3.32.0: Nach einem Fehlschlag entscheidet der Nutzer: noch einmal
+   oder ein anderes Modell. Von selbst fragt die App nichts nach. */
+function kiFehlerKnoepfe(wo, id){
+  const p = document.getElementById('ki-lauf-' + wo);
+  if(!p) return;
+  p.hidden = false;
+  p.innerHTML = kiNochmalHTML(id, (was, mid) => 'data-do="ki-' + was + '" data-kiwo="' + wo + '"'
+    + (mid ? ' data-kimodell="' + esc(mid) + '"' : ''));
+}
+function kiFehlerKnoepfeWeg(wo){
+  const p = document.getElementById('ki-lauf-' + wo);
+  if(p && p.querySelector('.ki-nochmal')){ p.hidden = true; p.innerHTML = ''; }
+}
 /* Ein base64-Bild wieder zu einer Datei machen. Der Weg zurück ist
    nötig, weil fotosHinzu Dateien erwartet — dieselbe Funktion, die
    auch die Galerie füllt. */
@@ -18142,9 +18672,9 @@ function kiAntwortEinsetzen(wo, txt){
   if(knopf) knopf.click();
 }
 
-async function kiDirektLos(wo){
+async function kiDirektLos(wo, modellId){
   if(!kiBereit()){
-    kiDirektMeldung(wo, 'Dafür fehlt noch der Schlüssel. Er steht unter Mehr, Einstellungen, KI-Dienst — das dauert eine Minute.', 'warn');
+    kiDirektMeldung(wo, 'Dafür fehlt noch der Schlüssel. Er steht hinter dem Zahnrad unter KI-Dienst — das dauert eine Minute.', 'warn');
     return;
   }
   const anb = kiAnbieter(kiSchluessel());
@@ -18165,26 +18695,750 @@ async function kiDirektLos(wo){
     kiDirektMeldung(wo, 'Ohne Bild kann das Modell nichts beurteilen. Wähle mindestens eine Aufnahme.', 'warn');
     return;
   }
+  /* beta.2: Das Anlegen fragt in zwei Schritten (Bestimmen mit Foto,
+     Artwissen ohne Foto). „Prompt kopieren“ behält den großen Auftrag. */
+  if(wo === 'anlegen'){ await anlegenZweistufig((modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv(), modellId); return; }
   const prompt = wo === 'anlegen' ? anlegenPromptBauen() : dokPromptBauen();
+  /* 3.32.0: Beim Anlegen denkt das Modell nur kurz nach. */
+  const opt = wo === 'anlegen' ? {denken:'niedrig', zweck:'Anlegen'} : {zweck:'Doktor'};
+  const ziel = (modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv();
   kiDirektMeldung(wo, '', '');
-  kiLaufZeigen(wo, true);
+  kiLaufZeigen(wo, true, ziel);
+  let fehler = null;
   try{
-    const erg = await kiFragenHartnaeckig(prompt, KI_BILDER[wo],
-      txt => kiLaufText(wo, txt));
+    const erg = await kiFragenEinmal(prompt, KI_BILDER[wo], ziel ? ziel.id : null, opt);
     kiAntwortEinsetzen(wo, erg.text);
     const n = wo === 'anlegen' ? kiBilderUebernehmen() : 0;
+    const anders = !!(modellId && erg.modell && S.kiModell !== erg.modell.id);
     kiDirektMeldung(wo, 'Antwort ist da und übernommen.'
-      + (erg.gewechselt ? ' Geantwortet hat ' + erg.modell.anzeige
-          + ', weil das gewählte Modell überlastet war.' : '')
+      + (anders ? ' Geantwortet hat ' + erg.modell.anzeige + '.' : '')
       + (n ? ' ' + (n === 1 ? 'Das Bild liegt' : 'Die ' + n + ' Bilder liegen')
              + ' schon in der Fotoauswahl — dort kannst du sie wieder herausnehmen.' : '')
       + ' Was in die Karte geht, steht unten zum Bestätigen.', 'ok');
   }catch(e){
     if(e && e.name === 'AbortError') kiDirektMeldung(wo, 'Abgebrochen.', '');
-    else kiDirektMeldung(wo, e.message || String(e), 'warn');
+    else { kiDirektMeldung(wo, e.message || String(e), 'warn'); fehler = e; }
   }finally{
     kiLaufZeigen(wo, false);
   }
+  if(fehler) kiFehlerKnoepfe(wo, fehler.modell || (ziel && ziel.id) || '');
+}
+
+
+/* ══ beta.2: Anlegen in zwei Schritten, gelernte Arten ══════════
+   (F57 bis F59, F71 B, F80) Die erste Anfrage geht mit Foto und fragt
+   nur, was zu sehen ist. Das Artwissen hängt an der Art, nicht am
+   Exemplar. Es kommt in dieser Reihenfolge: gelernte Art, eigene
+   Pflanze gleicher Art und Sorte, Bibliothek (nur als Vorschlag), sonst
+   genau eine Anfrage ohne Foto (Regel 10.6). In die Karte kommt es erst
+   mit „Anlegen“ (Regel 10.8); weicht die KI von der Bibliothek ab,
+   entscheidest du je Feld (Regel 10.13). */
+const AW_FOTO_FELDER = ['ART','BOTANISCH','MERKMALE','SORTE','SORTE_BELEG','SORTEN_VERWECHSLUNG',
+  'SICHERHEIT','FEHLT','VERWECHSLUNG','SUBSTRAT','TOPFART','ABLAUF'];
+const AW_ART_TEXT = {
+  LICHT:'LICHT: Nur genau eines dieser Wörter: voll, hell, indirekt',
+  GIESSKLASSE:'GIESSKLASSE: Nur genau eines dieser Wörter: normal, durstig, kakteenmodus, anstau',
+  GIESSART:'GIESSART: Nur genau eines dieser Wörter: durchdringend, schluck, tauchen, von unten, anstau',
+  TYP:'TYP: Wuchsform in ein bis zwei Wörtern, etwa Kletterpflanze, Rosettenpflanze, Kaktus, Sukkulente, Kraut, Strauch, Palme, Farn, Orchidee, Bromelie, Karnivore.',
+  SPEICHER:'SPEICHER: Wie speichert die Art Wasser? Nur genau eine dieser Angaben: kein Speicher, dickfleischige Blätter, dicker Stamm oder Caudex, unterirdische Knolle oder Rhizom, Luftwurzeln am Baum, Sumpf- oder Moorpflanze.',
+  FROST:'FROST: Niedrigste verträgliche Temperatur als Zahl in Grad Celsius, ohne Einheit. Oder genau das Wort: winterhart',
+  WICHTIG:'WICHTIG: Eine kurze Anweisung, deren Missachtung genau diese Art umbringt und die man nicht von selbst weiß. Gibt es keine, schreib genau: keine',
+  VERMEHRUNG:'VERMEHRUNG: Liste mit ein bis drei Einträgen. Jeder Eintrag enthält fünf Angaben, getrennt durch genau vier senkrechte Striche: Methode | Erfolgsaussicht in Prozent als reine Zahl | beste Jahreszeit | Substrat oder Medium für den Steckling | Bewurzelungsdauer. Nur Methoden, die bei dieser Art wirklich üblich sind, die aussichtsreichste zuerst.'
+};
+const AW_ENUM = {
+  SICHERHEIT:['hoch','mittel','niedrig'], ABLAUF:['ja','nein','nicht sichtbar'],
+  LICHT:['voll','hell','indirekt','unbekannt'], GIESSKLASSE:['normal','durstig','kakteenmodus','anstau','unbekannt'],
+  GIESSART:['durchdringend','schluck','tauchen','von unten','anstau','unbekannt']
+};
+const AW_JSON_SATZ = 'Antworte nur mit einem JSON-Objekt, dessen Schlüssel genau die Schlüsselwörter unten sind, jeder Wert auf Deutsch. '
+  + 'Weißt du etwas nicht, schreib genau: unbekannt. Kannst du kein JSON ausgeben, schreib eine Zeile je Schlüsselwort: SCHLÜSSELWORT: Wert.';
+
+function awArtFelder(){
+  const f = ['LICHT','GIESSKLASSE','GIESSART','TYP','SPEICHER','FROST','WICHTIG','PFLEGE','WINTERRUHE'];
+  if(tierZeileFuer(meineTiere())) f.push('KATZEN');
+  f.push('VERMEHRUNG');
+  return f;
+}
+function awSchema(felder){
+  const props = {};
+  felder.forEach(n => {
+    props[n] = n === 'VERMEHRUNG' ? {type:'ARRAY', items:{type:'STRING'}}
+      : AW_ENUM[n] ? {type:'STRING', enum:AW_ENUM[n]} : {type:'STRING'};
+  });
+  return {type:'OBJECT', properties:props, required:felder.slice(), propertyOrdering:felder.slice()};
+}
+/* Feldzeile des Foto-Auftrags: dieselben Texte wie im großen Auftrag. */
+function awFotoZeile(n){
+  const f = FMT_ZEILEN.find(x => x.name === n);
+  let t = f ? f.zeilen.join('\n') : (FELD_ZUSATZ[n] ? FELD_ZUSATZ[n].text : '');
+  if(n === 'BOTANISCH') t += ' ' + KI_KREUZUNG_REGEL;
+  if(n === 'MERKMALE') t += ' ' + KI_MERKMALE_REGEL;
+  return sorteSaetze(t);
+}
+function anlegenFotoPromptBauen(){
+  const z = ['Du bestimmst eine Zimmer- oder Balkonpflanze an den angehängten Fotos. Hier geht es nur ums Bestimmen und um das, was zu sehen ist. Pflegewissen fragt die App getrennt.'];
+  const art = (typeof gewaehlteArt !== 'undefined' && gewaehlteArt) ? gewaehlteArt : null;
+  if(art) z.push('Die Art steht vermutlich schon fest: ' + art.de + ' (' + art.bot + '). Prüfe das am Foto und widersprich, wenn es nicht passt.');
+  z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER');
+  AW_FOTO_FELDER.forEach(n => z.push(awFotoZeile(n)));
+  return z.join('\n');
+}
+/* Der Auftrag ohne Foto nennt nur Art, botanischen Namen und Sorte,
+   nie den Namen aus der Karte (Regel 10.12). */
+function anlegenArtPromptBauen(f){
+  const name = [f.art, f.bot && f.bot !== f.art ? '(' + f.bot + ')' : ''].filter(Boolean).join(' ');
+  const z = ['Du gibst Pflegewissen zu einer Zimmer- oder Balkonpflanzenart: ' + name
+    + (f.sorte ? ', Sorte ' + f.sorte : '') + '. Es geht um die Art' + (f.sorte ? ' und Sorte' : '')
+    + ', nicht um ein bestimmtes Exemplar. Schreib nichts, was für jede Zimmerpflanze gilt.'];
+  z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER');
+  awArtFelder().forEach(n => {
+    let t = AW_ART_TEXT[n] || (n === 'KATZEN' ? tierZeileFuer(meineTiere()) : (FELD_ZUSATZ[n] ? FELD_ZUSATZ[n].text : ''));
+    if(n === 'LICHT' && f.sorte) t += ' ' + KI_LICHT_PANASCHIERT;
+    if(t) z.push(t);
+  });
+  return z.join('\n');
+}
+/* JSON der strukturierten Ausgabe in Zeilen umsetzen, die geminiLesen
+   versteht. Kommt Text statt JSON, bleibt er, wie er ist. */
+function awJsonText(txt, felder){
+  let t = String(txt || '').trim();
+  const cb = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if(cb) t = cb[1];
+  let o = null;
+  try{ o = JSON.parse(t); }catch(e){ o = null; }
+  if(!o || typeof o !== 'object' || Array.isArray(o)) return String(txt || '');
+  const zeilen = [];
+  felder.forEach(n => {
+    let v = o[n];
+    if(v == null){ const k = Object.keys(o).find(x => x.toUpperCase() === n); v = k ? o[k] : null; }
+    if(v == null) return;
+    (Array.isArray(v) ? v : [v]).forEach(x => {
+      const s = String(x).replace(/\s*\n\s*/g, ' ').trim();
+      if(s) zeilen.push(n + ': ' + s);
+    });
+  });
+  return zeilen.join('\n');
+}
+/* Wasser oder Blähton an der Oberfläche heißt Wasser- oder Hydrokultur.
+   Die Zeile geht durch dieselbe Übernahme wie bisher die Gießart. */
+function awKulturErgaenzen(text){
+  const d = geminiLesen(text);
+  const s = norm(d.substrat || '');
+  if(/blaehton|blähton|seramis|\bpon\b/.test(s)) return text + '\nGIESSART: hydrokultur';
+  if(/^wasser$/.test(s)) return text + '\nGIESSART: wasserkultur';
+  return text;
+}
+
+function gelernteArten(){
+  if(!S.gelernteArten || typeof S.gelernteArten !== 'object' || Array.isArray(S.gelernteArten)) S.gelernteArten = {};
+  return S.gelernteArten;
+}
+function awSchluessel(bot, sorte){
+  const b = norm(botOhneSorte(bot).bot);
+  if(!b) return '';
+  const s = norm(sorte || '');
+  return s ? b + ' | ' + s : b;
+}
+function awLeer(v){ return !v || /^(unbekannt|keine?|nicht bekannt|-)$/.test(norm(String(v))); }
+function awWerteAusAntwort(d){
+  const g = giessartLesen(d.giessart);
+  return {
+    klasse: klasseRaten(d.klasse) || '', sonne: lichtRaten(d.licht) || '',
+    giessart: (g && g !== 'wasser' && g !== 'hydro') ? g : '',
+    typ: awLeer(d.typ) ? '' : String(d.typ).trim(),
+    speicher: awLeer(d.speicher) ? '' : String(d.speicher).trim(),
+    frost: awLeer(d.frost) ? '' : String(d.frost).trim(),
+    wichtig: (awLeer(d.wichtig) || wieKarte(d.wichtig)) ? '' : String(d.wichtig).trim(),
+    gift: giftRaten(d.katzen) === true ? 'ja' : (giftRaten(d.katzen) === false ? 'nein' : ''),
+    pflege: d.pflege || '', winterruhe: d.winterruhe || '', vermehrung: d.vermehrung || ''
+  };
+}
+function awWerteAusPflanze(p){
+  const g = p.giessart || '';
+  return {
+    klasse: p.klasse || '', sonne: p.sonne || '',
+    giessart: (g && g !== 'wasser' && g !== 'hydro') ? g : '',
+    typ: (p.typ && p.typ !== 'Ohne Angabe') ? p.typ : '', speicher: p.speicher || '',
+    frost: p.frostMin != null && p.frostMin !== '' ? String(p.frostMin) : '',
+    wichtig: p.wichtig || '', gift: '',
+    pflege: Array.isArray(p.pflege) ? p.pflege.join(' | ') : '',
+    winterruhe: typeof p.winterruheText === 'string' ? p.winterruheText : '', vermehrung: ''
+  };
+}
+/* Woher das Artwissen kommt. Eine Pflanze, deren Gießklasse aus der
+   Bibliothek stammt, zählt nicht: die Bibliothek ist nur noch Vorschlag. */
+function awQuelle(bot, art, sorte){
+  const k = awSchluessel(bot || art, sorte);
+  const g = gelernteArten();
+  if(k && g[k]) return {quelle:'gelernt', werte:g[k]};
+  const kb = norm(botOhneSorte(bot || '').bot), ks = norm(sorte || '');
+  const p = kb ? (S.eigene || []).find(x => x && norm(botOhneSorte(x.botanisch || '').bot) === kb
+    && norm(x.sorte || '') === ks && x.klasse && x.sonne
+    && !(x.quellen && x.quellen.klasse === 'bib')) : null;
+  if(p) return {quelle:'pflanze', werte:awWerteAusPflanze(p), name:nice(p)};
+  const b = bibExakt(bot, art);
+  if(b) return {quelle:'bib', bib:b};
+  return null;
+}
+
+var AW = null;          /* Artwissen im offenen Formular (var: frühe Aufrufe sehen null statt eines Fehlers) */
+var AW_TOKEN = 0;       /* gilt nur für das Formular, das gefragt hat */
+function awFormArt(){
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  const a = (typeof gewaehlteArt !== 'undefined' && gewaehlteArt) ? gewaehlteArt : null;
+  return {bot: v('f-bot') || (a ? a.bot : ''), art: v('f-art') || (a ? a.de : ''), sorte: v('f-sorte')};
+}
+function awStatus(html){
+  const el = document.getElementById('al-artfrage');
+  if(!el) return;
+  el.innerHTML = html || '';
+  el.hidden = !html;
+}
+function awArtName(f){ return f.art && f.bot && norm(f.art) !== norm(f.bot) ? f.art + ' (' + f.bot + ')' : (f.bot || f.art); }
+const AW_QUELLE_TEXT = {gelernt:'gelernte Art', pflanze:'deine Pflanze', bib:'Bibliothek', ki:'KI'};
+function awKiKnopf(t){ return kiBereit() ? ' <button type="button" class="linkbtn" data-aw="ki">' + esc(t || 'Artwissen von der KI holen') + '</button>' : ''; }
+
+/* Setzt das Artwissen ins Formular. Gelernte Arten und eigene Pflanzen
+   hast du schon einmal bestätigt, sie werden vorbelegt. KI-Werte auch —
+   außer sie weichen von der Bibliothek ab (Regel 10.13), dann wählst du. */
+function awAnwenden(o){
+  o = o || {};
+  if(!AW || !AW.werte) return [];
+  const w = AW.werte, msg = [];
+  AW.gesetzt = AW.gesetzt || {}; AW.offen = {};
+  const f = awFormArt();
+  const b = AW.quelle === 'ki' ? bibExakt(f.bot, f.art) : null;
+  const setze = (id, wert, feld) => {
+    const el = document.getElementById(id);
+    if(!el || !wert) return false;
+    if(el.tagName === 'SELECT' && !Array.prototype.some.call(el.options, x => x.value === wert)) return false;
+    el.value = wert;
+    if(el.tagName === 'SELECT' && typeof alKnopfGruppe === 'function') alKnopfGruppe(id);
+    if(feld) AW.gesetzt[feld] = AW.quelle;
+    return true;
+  };
+  [['klasse','f-klasse', b && b.klasse], ['sonne','f-sonne', b && b.licht]].forEach(([feld, id, bw]) => {
+    if(!w[feld]) return;
+    if(bw && bw !== w[feld]){ AW.offen[feld] = {ki:w[feld], bib:bw}; return; }
+    setze(id, w[feld], feld);
+  });
+  const typ = document.getElementById('f-typ');
+  if(w.typ && typ && (!typ.value.trim() || AW.quelle !== 'bib')) { typ.value = w.typ; AW.gesetzt.typ = AW.quelle; }
+  const kul = document.getElementById('f-kultur');
+  if(w.giessart && !(kul && (kul.value === 'wasser' || kul.value === 'hydro'))) setze('f-giessart', w.giessart);
+  const wi = document.getElementById('f-wichtig');
+  if(w.wichtig && wi && !wi.value.trim()){ wi.value = w.wichtig; AW.gesetzt.wichtig = AW.quelle; msg.push('Wichtiger Hinweis übernommen'); }
+  /* Eine Auskunft darf verschärfen, nie entwarnen (wie bisher). */
+  if(w.gift === 'ja'){ setze('f-giftig', 'ja'); msg.push('Als giftig übernommen'); }
+  else if(w.gift === 'nein' && AW.quelle === 'ki') msg.push('Die Antwort nennt sie unbedenklich — das wird nicht ungeprüft übernommen');
+  letzteKiAntwort = Object.assign(letzteKiAntwort || {}, {
+    pflege: w.pflege || (letzteKiAntwort && letzteKiAntwort.pflege) || '',
+    winterruhe: w.winterruhe || (letzteKiAntwort && letzteKiAntwort.winterruhe) || '',
+    vermehrung: w.vermehrung || (letzteKiAntwort && letzteKiAntwort.vermehrung) || '',
+    speicher: w.speicher || (letzteKiAntwort && letzteKiAntwort.speicher) || ''
+  });
+  if(o.frostNotiz && w.frost && !/^winterhart$/.test(norm(w.frost))){
+    const nz = document.getElementById('f-notiz');
+    const zeile = 'Frostgrenze laut Bestimmung: ' + w.frost;
+    if(nz && nz.value.indexOf(zeile) === -1) nz.value = (nz.value.trim() ? nz.value.trim() + '\n\n' : '') + zeile;
+  }
+  if(Object.keys(AW.offen).length) msg.push('Bei ' + Object.keys(AW.offen).map(x => x === 'klasse' ? 'Gießklasse' : 'Licht').join(' und ')
+    + ' weicht die KI von der Bibliothek ab — du wählst auf der Stufe „Platz und Pflege“');
+  if(typeof alBibZsfZeichnen === 'function') alBibZsfZeichnen();
+  return msg;
+}
+
+/* Erste Anfrage: mit Foto bestimmen. */
+async function anlegenZweistufig(ziel, modellId){
+  const tok = ++AW_TOKEN;
+  kiDirektMeldung('anlegen', '', '');
+  kiLaufZeigen('anlegen', true, ziel);
+  let erg = null, fehler = null;
+  try{
+    erg = await kiFragenEinmal(anlegenFotoPromptBauen(), KI_BILDER.anlegen, ziel ? ziel.id : null,
+      {denken:'niedrig', zweck:'Anlegen · Foto', schema:awSchema(AW_FOTO_FELDER)});
+  }catch(e){
+    if(e && e.name === 'AbortError') kiDirektMeldung('anlegen', 'Abgebrochen.', '');
+    else { kiDirektMeldung('anlegen', e.message || String(e), 'warn'); fehler = e; }
+  }finally{
+    kiLaufZeigen('anlegen', false);
+  }
+  if(fehler) kiFehlerKnoepfe('anlegen', fehler.modell || (ziel && ziel.id) || '');
+  if(!erg || tok !== AW_TOKEN) return;
+  const text = awKulturErgaenzen(awJsonText(erg.text, AW_FOTO_FELDER));
+  AW = null; awStatus('');
+  kiAntwortEinsetzen('anlegen', text);
+  const n = kiBilderUebernehmen();
+  const anders = !!(modellId && erg.modell && S.kiModell !== erg.modell.id);
+  kiDirektMeldung('anlegen', 'Art bestimmt.'
+    + (anders ? ' Geantwortet hat ' + erg.modell.anzeige + '.' : '')
+    + (n ? ' ' + (n === 1 ? 'Das Bild liegt' : 'Die ' + n + ' Bilder liegen')
+           + ' schon in der Fotoauswahl — dort kannst du sie wieder herausnehmen.' : '')
+    + ' Was in die Karte geht, steht unten zum Bestätigen.', 'ok');
+  awNachBestimmung(geminiLesen(text), ziel ? ziel.id : null);
+}
+/* Nach der Bestimmung: woher das Artwissen kommt. */
+function awNachBestimmung(d, modellId){
+  const f = awFormArt();
+  if(!f.bot && !f.art) return;
+  const q = awQuelle(f.bot, f.art, f.sorte);
+  if(q && q.quelle !== 'bib'){
+    AW = {quelle:q.quelle, werte:q.werte, name:q.name || '', fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte)};
+    awAnwenden();
+    awStatus('Artwissen für ' + esc(awArtName(f)) + ' kommt ' + (q.quelle === 'gelernt' ? 'aus deinen gelernten Arten'
+      : 'von deiner Pflanze „' + esc(q.name) + '“') + ', ohne neue Anfrage.' + awKiKnopf('Trotzdem die KI fragen'));
+    return;
+  }
+  if(q && q.quelle === 'bib'){
+    awStatus(esc(awArtName(f)) + ' steht in der Bibliothek. Ihre Werte stehen auf der Stufe „Platz und Pflege“ als Vorschlag, ohne neue Anfrage.'
+      + awKiKnopf());
+    return;
+  }
+  if(norm(d.sicher || '') === 'niedrig'){
+    awStatus('<b>Stimmt die Art?</b> Bei „' + esc(awArtName(f)) + '“ ist sich die KI unsicher. '
+      + '<button type="button" class="linkbtn" data-aw="ki">Ja, Artwissen holen</button> '
+      + 'Sonst den botanischen Namen oben ändern und dann <button type="button" class="linkbtn" data-aw="ki">Artwissen für diese Art holen</button>.');
+    return;
+  }
+  awHolen(modellId);
+}
+/* Zweite Anfrage: Artwissen ohne Foto, genau eine. */
+async function awHolen(modellId){
+  const f = awFormArt();
+  if(!f.bot && !f.art){ awStatus('Erst eine Art eintragen, dann das Artwissen holen.'); return; }
+  if(!kiBereit()){ awStatus('Für das Artwissen fehlt der KI-Schlüssel. Die Werte trägst du auf der Stufe „Platz und Pflege“ selbst ein.'); return; }
+  const ziel = (modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv();
+  if(!ziel){ awStatus('Kein Modell gewählt. Hol die Modellliste in den Einstellungen.'); return; }
+  const tok = AW_TOKEN;
+  awStatus('<span class="aw-lauf">Hole das Artwissen für ' + esc(awArtName(f)) + ' bei ' + esc(ziel.anzeige || ziel.id) + ' …</span> '
+    + '<button type="button" class="linkbtn" data-aw="stopp">Abbrechen</button>');
+  let erg = null;
+  try{
+    erg = await kiFragenEinmal(anlegenArtPromptBauen(f), [], ziel.id,
+      {denken:'niedrig', zweck:'Anlegen · Artwissen', schema:awSchema(awArtFelder())});
+  }catch(e){
+    if(tok !== AW_TOKEN) return;
+    if(e && e.name === 'AbortError'){ awStatus('Abgebrochen.' + awKiKnopf('Artwissen holen')); return; }
+    awStatus(esc(e.message || String(e)) + ' '
+      + kiNochmalHTML(e.modell || ziel.id, (was, id) => 'class="linkbtn" data-aw="' + (was === 'nochmal' ? 'ki' : 'ki-mit') + '" data-m="' + esc(id || '') + '"'));
+    return;
+  }
+  if(tok !== AW_TOKEN) return;
+  const d = geminiLesen(awJsonText(erg.text, awArtFelder()));
+  AW = {quelle:'ki', werte:awWerteAusAntwort(d), fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte)};
+  const msg = awAnwenden({frostNotiz:true});
+  awStatus('Artwissen für ' + esc(awArtName(f)) + ' ist da. Es steht auf der Stufe „Platz und Pflege“ zum Bestätigen und kommt erst mit „Anlegen“ in die Karte.'
+    + (msg.length ? ' ' + esc(msg.join(' · ')) + '.' : ''));
+}
+document.addEventListener('click', e => {
+  const k = e.target.closest('[data-aw]');
+  if(!k) return;
+  const was = k.dataset.aw;
+  if(was === 'ki'){ awHolen(null); return; }
+  if(was === 'ki-mit'){ awHolen(k.dataset.m || null); return; }
+  if(was === 'stopp'){ kiAbbrechen(); return; }
+  if(was === 'bib-alle'){ awBibUebernehmen(); return; }
+  if(was === 'wahl'){ awWahl(k.dataset.f, k.dataset.q); return; }
+  if(was === 'pflege-auf'){
+    const kasten = document.getElementById('al-bibzsf');
+    if(kasten) kasten.dataset.offen = '1';
+    alBibZsfZeichnen();
+  }
+});
+/* Ändert sich die Art von Hand, passt das alte Artwissen nicht mehr.
+   Gelernte Arten und eigene Pflanzen kommen ohne Anfrage dazu, die KI
+   nur per Knopf. */
+document.addEventListener('change', e => {
+  if(!e.target || !/^f-(bot|sorte)$/.test(e.target.id)) return;
+  if(!AW || !AW.fuer) return;
+  const f = awFormArt();
+  if(awSchluessel(f.bot || f.art, f.sorte) === AW.schluessel) return;
+  const q = awQuelle(f.bot, f.art, f.sorte);
+  if(q && q.quelle !== 'bib'){
+    AW = {quelle:q.quelle, werte:q.werte, name:q.name || '', fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte)};
+    awAnwenden();
+    awStatus('Neue Art: Das Artwissen kommt ' + (q.quelle === 'gelernt' ? 'aus deinen gelernten Arten.' : 'von deiner Pflanze „' + esc(q.name) + '“.') + awKiKnopf('Trotzdem die KI fragen'));
+    return;
+  }
+  AW = q ? {quelle:'bib', bib:q.bib, fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte)} : null;
+  awStatus('Die Art hat sich geändert. Das Artwissen von vorher gilt nicht mehr.' + awKiKnopf('Artwissen für ' + awArtName(f) + ' holen'));
+  alBibZsfZeichnen();
+});
+function awBib(){
+  const f = awFormArt();
+  return (AW && AW.bib) || bibExakt(f.bot, f.art) || (typeof gewaehlteArt !== 'undefined' ? gewaehlteArt : null);
+}
+function awBibUebernehmen(){
+  const b = awBib();
+  if(!b) return;
+  if(!AW) AW = {quelle:'bib', bib:b, fuer:awFormArt(), schluessel:''};
+  AW.gesetzt = AW.gesetzt || {};
+  const kl = document.getElementById('f-klasse'), so = document.getElementById('f-sonne'), ty = document.getElementById('f-typ');
+  if(kl && b.klasse){ kl.value = b.klasse; alKnopfGruppe('f-klasse'); AW.gesetzt.klasse = 'bib'; }
+  if(so && b.licht){ so.value = b.licht; alKnopfGruppe('f-sonne'); AW.gesetzt.sonne = 'bib'; }
+  if(ty && b.typ && !ty.value.trim()){ ty.value = b.typ; AW.gesetzt.typ = 'bib'; }
+  AW.bibUebernommen = true;
+  alBibZsfZeichnen();
+}
+function awWahl(feld, q){
+  if(!AW || !AW.offen || !AW.offen[feld]) return;
+  const wert = AW.offen[feld][q];
+  const id = feld === 'klasse' ? 'f-klasse' : 'f-sonne';
+  const el = document.getElementById(id);
+  if(el && wert){ el.value = wert; alKnopfGruppe(id); }
+  AW.gesetzt = AW.gesetzt || {};
+  AW.gesetzt[feld] = q === 'bib' ? 'bib' : 'ki';
+  delete AW.offen[feld];
+  alBibZsfZeichnen();
+}
+/* Beim Anlegen: was du aus der KI-Antwort übernommen hast, merkt sich
+   die App als gelernte Art (F57, F59). Nur Felder, deren Wert in der
+   Karte genau der KI-Wert ist. */
+function awLernen(p){
+  if(!AW || AW.quelle !== 'ki' || !AW.werte || !AW.schluessel) return false;
+  const w = AW.werte, raus = {};
+  if(w.klasse && p.klasse === w.klasse) raus.klasse = w.klasse;
+  if(w.sonne && p.sonne === w.sonne) raus.sonne = w.sonne;
+  if(!raus.klasse && !raus.sonne) return false;
+  if(w.typ && p.typ === w.typ) raus.typ = w.typ;
+  if(w.giessart && p.giessart === w.giessart) raus.giessart = w.giessart;
+  if(w.wichtig && p.wichtig === w.wichtig) raus.wichtig = w.wichtig;
+  ['speicher','frost','pflege','winterruhe','vermehrung'].forEach(k => { if(w[k]) raus[k] = w[k]; });
+  if(w.gift === 'ja' && p.gift) raus.gift = 'ja';
+  const f = AW.fuer || {};
+  gelernteArten()[AW.schluessel] = Object.assign({art:p.art || f.art || '', bot:botOhneSorte(p.botanisch || f.bot || '').bot,
+    sorte:p.sorte || '', datum:iso(new Date())}, raus);
+  return true;
+}
+
+/* ══ 4.0-beta.3: der BOTaniker (Baustein C) ═════════════════════
+   Ein Chat, der zuerst ohne KI arbeitet: Er erkennt Pflanze und Absicht
+   aus dem Text und führt ins passende Werkzeug. Die KI fragt er nur per
+   Knopf, genau eine Anfrage je Tipp (Regel 10.6), mit Foto und dem, was
+   die App über die Pflanze weiß, nie mit ihrem Namen aus der Karte
+   (Regel 10.12). Das Gespräch gilt bis zum Schließen oder bis „Neues
+   Thema“ (F43 a); gespeichert wird nichts. Die Kacheln führen vorerst
+   in die bestehenden Werkzeuge (F78). */
+KI_BILDER.bot = [];
+const BOT = {direkt:false, letzte:null, nr:0};
+const BOT_ABSICHTEN = [
+  {key:'umtopfen',  name:'Umtopfen',      werkzeug:'umtopfen',  worte:/umtopf|umsetz|wurzelgebunden|topf (ist )?zu klein|neuen? topf|groe?(ß|ss)ere?n? topf|eintopf/},
+  {key:'vermehren', name:'Vermehren',     werkzeug:'vermehren', worte:/vermehr|steckling|ableger|abmoos|kindel|teilen|absenker/},
+  {key:'urlaub',    name:'Urlaubszettel', mehr:'urlaub',        worte:/urlaub|verreis|vertretung|bin weg|wegfahr|nachbar(in)? gie(ß|ss)t/},
+  {key:'bestimmen', name:'Art bestimmen',                       worte:/was ist das|welche (art|pflanze) ist|bestimm|wie hei(ß|ss)t (die|diese|das)/},
+  {key:'problem',   name:'Problem klären', werkzeug:'doktor',   worte:/gelb|braun|fleck|krank|schaedling|schädling|laus|läuse|laeuse|milbe|mücke|muecke|thrips|welk|haengt|hängt|fault|faul|schimmel|problem|stirbt|eingeht|vertrock|matsch|weich|abfall|fallen ab|blaetter fallen|blätter fallen|kaputt/},
+  {key:'substrat',  name:'Substrat',      werkzeug:'substrat',  worte:/substrat|erdmischung|mischung|pinienrinde|rinde|perlite|bims|torf|kokos|seramis|pon\b/},
+  {key:'standort',  name:'Standort',      werkzeug:'grundriss', worte:/standort|wohin|wo soll|welches fenster|zu dunkel|zu hell|sonne|licht/},
+  {key:'nachschlagen', name:'Nachschlagen', mehr:'bibliothek',  worte:/steckbrief|nachschlag|was braucht|infos? (zu|über|ueber)/}
+];
+function botAbsicht(key){ return BOT_ABSICHTEN.find(a => a.key === key) || null; }
+
+/* Pflanze und Absicht ohne KI. Gefunden wird über den Namen auf der
+   Karte, den Spitznamen, die Art und den botanischen Namen — jeweils als
+   ganzes Wort, damit „Mon“ nicht jede Monstera trifft. */
+function botErkennen(text){
+  const t = ' ' + norm(text).replace(/[^a-z0-9äöüß ]+/g, ' ') + ' ';
+  const hat = w => { const n = norm(w || '').trim(); return n.length >= 3 && t.indexOf(' ' + n + ' ') > -1; };
+  const alle = allePflanzen().filter(p => p && !p.nurBib);
+  let pflanzen = alle.filter(p => hat(p.name) || hat(spitznameVon(p)));
+  if(!pflanzen.length) pflanzen = alle.filter(p => hat(p.art) || hat(p.botanisch)
+    || hat(String(p.botanisch || '').split(/\s+/)[0]));
+  const a = BOT_ABSICHTEN.find(x => x.worte.test(t));
+  return {pflanzen:pflanzen.slice(0, 12), absicht:a ? a.key : null};
+}
+
+function botZeigenGespraech(an){
+  const st = document.getElementById('bot-start'), ge = document.getElementById('bot-gespraech');
+  if(st) st.hidden = !!an;
+  if(ge) ge.hidden = !an;
+}
+function botAnhaengen(html, cls){
+  const v = document.getElementById('bot-verlauf');
+  if(!v) return null;
+  const el = document.createElement('div');
+  el.className = cls || 'bot-antwort';
+  el.dataset.botNr = String(++BOT.nr);
+  el.innerHTML = html;
+  v.appendChild(el);
+  try{ el.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){}
+  return el;
+}
+function botName(p){ return (p && p.name && p.name !== 'Name offen') ? p.name : (p ? (p.art || p.botanisch || 'Pflanze') : ''); }
+function botPflanzeChip(p){
+  return '<span class="bot-erk"><span><b>' + esc(botName(p)) + '</b><small>' + esc(p.botanisch || p.art || '') + '</small></span></span>';
+}
+
+/* Antwort ohne KI */
+function botLokal(text, pid){
+  const erk = botErkennen(text);
+  let p = pid ? allePflanzen().find(x => x.id === pid) : null;
+  if(!p && erk.pflanzen.length === 1) p = erk.pflanzen[0];
+  if(!p && erk.pflanzen.length > 1) return botRueckfrage(text, erk.pflanzen, erk.absicht, 'lokal');
+  const a = botAbsicht(erk.absicht);
+  const teile = ['<div class="bot-quelle"><span class="bot-etikett bot-e-lokal">Ohne KI · aus deinen Daten</span></div>'];
+  if(p || a){
+    teile.push('<div class="bot-erkannt">' + (p ? botPflanzeChip(p) : '')
+      + (a ? '<span class="bot-erk"><span><b>' + esc(a.name) + '</b><small>Absicht</small></span></span>' : '') + '</div>');
+    teile.push('<button type="button" class="linkbtn" data-bot="andere">' + (p ? 'Falsch erkannt?' : 'Pflanze wählen') + '</button>');
+  } else {
+    teile.push('<p>Das kann ich ohne KI nicht zuordnen. Ich habe weder eine deiner Pflanzen noch eine Aktion darin gefunden.</p>');
+  }
+  if(a && a.key === 'problem') teile.push('<p class="bot-mit">Im Doktor klärst du das Problem offline Schritt für Schritt.</p>');
+  const kn = [];
+  if(a && (a.werkzeug || a.mehr || a.key === 'bestimmen'))
+    kn.push('<button type="button" class="haupt" data-bot-aktion="' + a.key + '"' + (p ? ' data-p="' + esc(p.id) + '"' : '') + '>' + esc(a.name) + ' öffnen</button>');
+  kn.push('<button type="button" data-bot="ki"' + (p ? ' data-p="' + esc(p.id) + '"' : '') + '>BOTaniker fragen</button>');
+  teile.push('<div class="tools bot-knoepfe">' + kn.join('') + '</div>');
+  const el = botAnhaengen(teile.join(''));
+  if(el) el.dataset.botFrage = text;
+  return el;
+}
+function botRueckfrage(text, liste, absicht, weiter){
+  const el = botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-lokal">Ohne KI · Rückfrage</span></div>'
+    + '<p><b>Welche Pflanze meinst du?</b></p>'
+    + (absicht ? '<p class="bot-mit">Erkannt: ' + esc(botAbsicht(absicht).name) + '.</p>' : '')
+    + '<div class="bot-wahl">' + liste.map(p => '<button type="button" data-bot-wahl="' + esc(p.id) + '"><b>' + esc(botName(p))
+      + '</b><small>' + esc([p.art && p.art !== botName(p) ? p.art : '', raumNameVon(p.raum)].filter(Boolean).join(' · ')) + '</small></button>').join('')
+    + '<button type="button" data-bot-wahl=""><b>Ohne Pflanze</b><small>allgemein fragen</small></button></div>');
+  if(el){ el.dataset.botFrage = text; el.dataset.botWeiter = weiter || 'lokal'; }
+  return el;
+}
+
+/* Was die App über die Pflanze weiß — ohne den Namen aus der Karte. */
+function botKontext(p){
+  if(!p) return [];
+  const z = [];
+  const art = [p.art && !/^unbestimmt$/i.test(p.art) ? p.art : '', p.botanisch ? '(' + p.botanisch + ')' : ''].filter(Boolean).join(' ');
+  if(art) z.push('Art: ' + art);
+  if(p.sorte) z.push('Sorte: ' + p.sorte);
+  try{ const zu = zustandVon(p); if(zu && zu.def) z.push('Zustand: ' + zu.def.name); }catch(e){}
+  const topf = [p.topf ? p.topf + ' cm' : '', p.topfform || '', p.substrat ? 'Substrat ' + p.substrat : '', p.ablauf === 'ja' ? 'mit Abzugsloch' : p.ablauf === 'nein' ? 'ohne Abzugsloch' : ''].filter(Boolean).join(', ');
+  if(topf) z.push('Topf: ' + topf);
+  const ort = [raumNameVon(p.raum), p.stellplatz || ''].filter(Boolean).join(', ');
+  if(ort) z.push('Standort: ' + ort);
+  if(p.sonne && SONNE[p.sonne]) z.push('Licht laut Karte: ' + SONNE[p.sonne].text);
+  if(p.klasse) z.push('Gießklasse: ' + p.klasse);
+  const w = (S.water && S.water[p.id]) || [];
+  if(w.length){
+    const letzt = w.slice().sort().pop();
+    const tage = Math.round((HEUTE - new Date(letzt + 'T00:00:00')) / 86400000);
+    z.push('Zuletzt gegossen: ' + (tage <= 0 ? 'heute' : tage === 1 ? 'gestern' : 'vor ' + tage + ' Tagen'));
+  }
+  return z;
+}
+const BOT_FELDER = ['KURZANTWORT', 'SICHERHEIT', 'SICHERHEIT_GRUND', 'PRUEFEN', 'RUECKFRAGE'];
+function botSchema(){
+  return {type:'OBJECT', properties:{KURZANTWORT:{type:'STRING'}, SICHERHEIT:{type:'STRING', enum:['hoch','mittel','niedrig']},
+    SICHERHEIT_GRUND:{type:'STRING'}, PRUEFEN:{type:'ARRAY', items:{type:'STRING'}}, RUECKFRAGE:{type:'STRING'}},
+    required:BOT_FELDER.slice(), propertyOrdering:BOT_FELDER.slice()};
+}
+/* Der Name der Pflanze kann in der Frage selbst stehen. Er wird durch
+   die Art ersetzt, bevor die Frage das Gerät verlässt. */
+function botOhneNamen(text, p){
+  let t = String(text || '');
+  if(!p) return t;
+  const ersatz = (p.art && !/^unbestimmt$/i.test(p.art)) ? 'die ' + p.art : 'die Pflanze';
+  [p.name, spitznameVon(p)].filter(n => n && n.trim().length >= 2 && n !== 'Name offen').forEach(n => {
+    const re = new RegExp('(^|[^0-9A-Za-zÄÖÜäöüß])' + n.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=$|[^0-9A-Za-zÄÖÜäöüß])', 'gi');
+    t = t.replace(re, (m, vor) => vor + ersatz);
+  });
+  return t;
+}
+function botPromptBauen(text, p, nBilder){
+  const z = ['Du bist der BOTaniker, ein Pflanzenberater in einer Pflanzenpflege-App. Beantworte die Frage zu einer Zimmer- oder Balkonpflanze kurz, konkret und ehrlich. '
+    + 'Rate nicht. Fehlt dir für eine sichere Antwort etwas, sag das und stell eine Rückfrage. Nenne nichts, was für jede Zimmerpflanze gilt, außer es beantwortet die Frage.'];
+  z.push('', 'FRAGE', botOhneNamen(text, p) || '(keine, nur Foto)');
+  const k = botKontext(p);
+  if(k.length) z.push('', 'WAS DIE APP ÜBER DIE PFLANZE WEISS', k.join('\n'));
+  if(nBilder) z.push('', 'Angehängt: ' + (nBilder === 1 ? 'ein Foto' : nBilder + ' Fotos') + ' dieser Pflanze.');
+  if(typeof MONATE !== 'undefined') z.push('Wir haben gerade ' + MONATE[new Date().getMonth()] + '.');
+  z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER',
+    'KURZANTWORT: Zwei bis vier Sätze, die die Frage direkt beantworten.',
+    'SICHERHEIT: Nur genau eines dieser Wörter: hoch, mittel, niedrig',
+    'SICHERHEIT_GRUND: Ein Satz, warum die Sicherheit so ist, etwa was auf dem Foto nicht zu sehen ist.',
+    'PRUEFEN: Liste mit ein bis drei kurzen Schritten, wie ich die Antwort selbst an der Pflanze überprüfe.',
+    'RUECKFRAGE: Eine Frage an mich, wenn für eine sichere Antwort etwas fehlt. Sonst genau: keine');
+  return z.join('\n');
+}
+function botAntwortLesen(txt){
+  let t = String(txt || '').trim();
+  const cb = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if(cb) t = cb[1];
+  let o = null;
+  try{ o = JSON.parse(t); }catch(e){ o = null; }
+  if(!o || typeof o !== 'object'){
+    const d = {};
+    String(txt || '').split(/\r?\n/).forEach(z => {
+      const m = z.match(/^\s*[-*]*\s*(KURZANTWORT|SICHERHEIT_GRUND|SICHERHEIT|PRUEFEN|RUECKFRAGE)\s*:\s*(.*)$/i);
+      if(!m) return;
+      const k = m[1].toUpperCase();
+      if(k === 'PRUEFEN') (d.PRUEFEN = d.PRUEFEN || []).push(m[2]); else d[k] = m[2];
+    });
+    o = d.KURZANTWORT ? d : {KURZANTWORT:String(txt || '').trim()};
+  }
+  const pr = Array.isArray(o.PRUEFEN) ? o.PRUEFEN : (o.PRUEFEN ? String(o.PRUEFEN).split(/\s*\|\s*|\n+/) : []);
+  const rf = String(o.RUECKFRAGE || '').trim();
+  return {kurz:String(o.KURZANTWORT || '').trim(), sicher:norm(String(o.SICHERHEIT || '')),
+    grund:String(o.SICHERHEIT_GRUND || '').trim(), pruefen:pr.map(x => String(x).trim()).filter(Boolean).slice(0, 3),
+    rueck:(rf && !/^keine?\.?$/i.test(rf)) ? rf : ''};
+}
+
+/* KI: genau eine Anfrage je Tipp */
+async function botKiFragen(text, pid, modellId){
+  const p = pid ? allePflanzen().find(x => x.id === pid) : null;
+  const bilder = KI_BILDER.bot.slice(0, KI_BILD_MAX);
+  BOT.letzte = {text:text, pid:pid || '', bilder:bilder};
+  const prompt = botPromptBauen(text, p, bilder.length);
+  if(!kiBereit()){
+    const el = botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-ki">KI</span></div>'
+      + '<p>Für Fragen an die KI fehlt der Schlüssel. Er steht hinter dem Zahnrad unter Einstellungen, KI-Dienst.</p>'
+      + '<p class="bot-mit">Ohne Schlüssel kopierst du die Frage und fügst sie in Gemini ein. Fotos hängst du dort selbst an.</p>'
+      + '<div class="tools bot-knoepfe"><button type="button" class="haupt" data-bot="kopieren">Frage kopieren</button></div>');
+    if(el) el.dataset.botPrompt = prompt;
+    return;
+  }
+  const ziel = (modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv();
+  if(!ziel){ botAnhaengen('<p>Kein Modell gewählt. Hol die Modellliste hinter dem Zahnrad unter KI-Dienst.</p>'); return; }
+  const lauf = botAnhaengen('<p class="bot-lauf">Die Frage an ' + esc(ziel.anzeige || ziel.id) + ' läuft …</p>'
+    + '<div class="tools bot-knoepfe"><button type="button" data-bot="stopp">Abbrechen</button></div>');
+  let erg = null;
+  try{
+    erg = await kiFragenEinmal(prompt, bilder, ziel.id, {zweck:'BOTaniker', schema:botSchema(), denken:'niedrig'});
+  }catch(e){
+    if(lauf) lauf.remove();
+    if(e && e.name === 'AbortError'){ botAnhaengen('<p>Abgebrochen.</p>'); return; }
+    botAnhaengen('<p>' + esc(e.message || String(e)) + '</p>'
+      + kiNochmalHTML(e.modell || ziel.id, (was, id) => 'data-bot="nochmal" data-m="' + esc(id || '') + '"'));
+    return;
+  }
+  if(lauf) lauf.remove();
+  KI_BILDER.bot.length = 0; botBilderZeichnen();
+  const a = botAntwortLesen(erg.text);
+  const stufe = a.sicher === 'hoch' ? 3 : a.sicher === 'mittel' ? 2 : a.sicher === 'niedrig' ? 1 : 0;
+  const mit = botKontext(p);
+  botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-ki">KI · ' + esc(erg.modell ? erg.modell.anzeige : 'Gemini') + '</span>'
+    + (p ? '<span class="bot-etikett bot-e-lokal">Pflanze: ' + esc(botName(p)) + '</span>' : '') + '</div>'
+    + '<div class="bot-block" style="margin-top:0;padding-top:0;border-top:0"><h5>Kurzantwort</h5></div>'
+    + '<p>' + esc(a.kurz || 'Die Antwort war leer.') + '</p>'
+    + (stufe ? '<div class="bot-sicher' + (stufe === 3 ? ' hoch' : '') + '"><span class="bot-punkte">'
+      + [1, 2, 3].map(i => '<i' + (i <= stufe ? ' class="v"' : '') + '></i>').join('') + '</span><span><b>Sicherheit: ' + esc(a.sicher) + '</b>'
+      + (a.grund ? '<small>' + esc(a.grund) + '</small>' : '') + '</span></div>' : '')
+    + (a.pruefen.length ? '<div class="bot-block"><h5>So prüfst du es</h5><ul>' + a.pruefen.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '')
+    + (a.rueck ? '<div class="bot-block"><h5>Rückfrage</h5><p>' + esc(a.rueck) + '</p></div>' : '')
+    + '<p class="bot-mit"><b>Mitgeschickt:</b> ' + esc([bilder.length ? (bilder.length === 1 ? '1 Foto' : bilder.length + ' Fotos') : 'kein Foto'].concat(mit).join(' · '))
+    + (p && p.name && p.name !== 'Name offen' ? '. Nicht mitgeschickt: der Name „' + esc(p.name) + '“.' : '') + '</p>'
+    + '<div class="tools bot-knoepfe"><button type="button" data-bot="neu">Neues Thema</button></div>');
+}
+
+/* Eingabe */
+function botBilderZeichnen(){
+  const box = document.getElementById('bot-bilder');
+  if(!box) return;
+  box.innerHTML = KI_BILDER.bot.map((b, i) => '<span><img alt="Foto ' + (i + 1) + '" src="' + b.vorschau + '"><button type="button" data-bot-bildweg="' + i + '" aria-label="Foto entfernen">×</button></span>').join('');
+  box.hidden = !KI_BILDER.bot.length;
+}
+function botSenden(){
+  const feld = document.getElementById('bot-text');
+  const text = feld ? feld.value.trim() : '';
+  if(!text && !KI_BILDER.bot.length){ if(feld) feld.focus(); return; }
+  botZeigenGespraech(true);
+  botAnhaengen((KI_BILDER.bot.length ? '<div class="bot-anhang">' + KI_BILDER.bot.map(b => '<img alt="" src="' + b.vorschau + '">').join('') + '</div>' : '')
+    + esc(text || 'Foto'), 'bot-blase');
+  if(feld){ feld.value = ''; feld.style.height = ''; feld.placeholder = 'Schreib dem BOTaniker …'; }
+  if(BOT.direkt){
+    BOT.direkt = false;
+    const erk = botErkennen(text);
+    if(erk.pflanzen.length > 1) return botRueckfrage(text, erk.pflanzen, null, 'ki');
+    return botKiFragen(text, erk.pflanzen[0] ? erk.pflanzen[0].id : '');
+  }
+  botLokal(text);
+}
+function botAktion(key, pid){
+  const a = botAbsicht(key);
+  if(key === 'frage'){
+    BOT.direkt = true;
+    const feld = document.getElementById('bot-text');
+    if(feld){ feld.placeholder = 'Deine Frage an die KI …'; feld.focus(); }
+    return;
+  }
+  if(key === 'bestimmen'){
+    alStart(); neuWegSetzen('ki'); alStufeZeigen(2);
+    return;
+  }
+  if(key === 'problem' && pid && typeof dokPflanzeSetzen === 'function') dokPflanzeSetzen(pid);
+  if(a && a.werkzeug) return sektionOeffnen(a.werkzeug);
+  if(a && a.mehr) return sektionOeffnen(a.mehr);
+}
+function botNeu(){
+  const v = document.getElementById('bot-verlauf');
+  if(v) v.innerHTML = '';
+  BOT.direkt = false; BOT.letzte = null;
+  KI_BILDER.bot.length = 0; botBilderZeichnen();
+  const feld = document.getElementById('bot-text');
+  if(feld){ feld.value = ''; feld.placeholder = 'Schreib dem BOTaniker …'; }
+  botZeigenGespraech(false);
+}
+document.addEventListener('click', e => {
+  const ak = e.target.closest('[data-bot-aktion]');
+  if(ak){ botAktion(ak.dataset.botAktion, ak.dataset.p || ''); return; }
+  const wahl = e.target.closest('[data-bot-wahl]');
+  if(wahl){
+    const karte = wahl.closest('.bot-antwort');
+    const text = karte ? karte.dataset.botFrage || '' : '';
+    const weiter = karte ? karte.dataset.botWeiter : 'lokal';
+    const pid = wahl.dataset.botWahl;
+    const p = pid ? allePflanzen().find(x => x.id === pid) : null;
+    botAnhaengen(esc(p ? botName(p) : 'Ohne Pflanze'), 'bot-blase');
+    if(weiter === 'ki') botKiFragen(text, pid);
+    else if(pid) botLokal(text, pid);
+    else botKiFragen(text, '');
+    return;
+  }
+  const b = e.target.closest('[data-bot]');
+  if(!b) return;
+  const was = b.dataset.bot;
+  const karte = b.closest('.bot-antwort');
+  if(was === 'zu' || was === 'neu') return botNeu();
+  if(was === 'stopp') return kiAbbrechen();
+  if(was === 'ki') return botKiFragen(karte ? karte.dataset.botFrage || '' : '', b.dataset.p || '');
+  if(was === 'nochmal' && BOT.letzte){
+    KI_BILDER.bot.length = 0; BOT.letzte.bilder.forEach(x => KI_BILDER.bot.push(x));
+    return botKiFragen(BOT.letzte.text, BOT.letzte.pid, b.dataset.m || null);
+  }
+  if(was === 'andere'){
+    const alle = allePflanzen().filter(p => p && !p.nurBib).slice().sort((x, y) => botName(x).localeCompare(botName(y), 'de'));
+    return botRueckfrage(karte ? karte.dataset.botFrage || '' : '', alle, null, 'lokal');
+  }
+  if(was === 'kopieren'){
+    const ok = inZwischenablage(karte ? karte.dataset.botPrompt || '' : '');
+    b.textContent = ok ? 'Kopiert' : 'Nicht kopiert — lang ins Feld tippen';
+  }
+});
+document.addEventListener('click', e => {
+  const w = e.target.closest('[data-bot-bildweg]');
+  if(!w) return;
+  KI_BILDER.bot.splice(Number(w.dataset.botBildweg), 1);
+  botBilderZeichnen();
+});
+{
+  const s = document.getElementById('bot-senden');
+  if(s) s.onclick = botSenden;
+  const f = document.getElementById('bot-text');
+  if(f){
+    f.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); botSenden(); } });
+    f.addEventListener('input', () => { f.style.height = ''; f.style.height = Math.min(f.scrollHeight, 120) + 'px'; });
+  }
+  const foto = document.getElementById('bot-foto');
+  if(foto) foto.onchange = async () => {
+    const ziel = KI_BILDER.bot;
+    for(const datei of Array.prototype.slice.call(foto.files || [])){
+      if(ziel.length >= KI_BILD_MAX) break;
+      try{ const b = kiBildAusDataUrl(await bildVerkleinern(datei, KI_BILD_KANTE, KI_BILD_GUETE)); if(b) ziel.push(b); }
+      catch(err){ console.warn('Bild nicht lesbar', err); }
+    }
+    foto.value = '';
+    botBilderZeichnen();
+  };
 }
 
 /* ── Einrichtung unter Mehr ──────────────────────────────────── */
@@ -18211,7 +19465,7 @@ async function kiDirektLos(wo){
       feld.value = '';
       const m = kiModellAktiv();
       kiKeyMeldung('Der Schlüssel funktioniert. ' + kiModelle().length
-        + ' Modelle gefunden, vorausgewählt ist ' + (m ? m.anzeige : '—') + '.', 'ok');
+        + ' kostenlose Modelle gefunden, vorausgewählt ist ' + (m ? m.anzeige : '—') + '.' + kiAusgeblendetText(), 'ok');
       kiSchluesselZeichnen();
       kiModusZeigen();
       if(typeof mehrNebenzeilen === 'function') mehrNebenzeilen();
@@ -18249,11 +19503,11 @@ async function kiDirektLos(wo){
   if(hol) hol.onclick = async ()=>{
     if(!kiBereit()){ kiKeyMeldung('Erst einen Schlüssel eintragen.', 'warn'); return; }
     hol.disabled = true;
-    kiKeyMeldung('Modellliste wird geholt …', '');
+    kiKeyMeldung('Modellliste wird geholt und jedes Flash-Modell kurz geprüft …', '');
     try{
       await kiModelleHolen();
       const m = kiModellAktiv();
-      kiKeyMeldung(kiModelle().length + ' Modelle. Empfohlen und gesetzt: ' + (m ? m.anzeige : '—') + '.', 'ok');
+      kiKeyMeldung(kiModelle().length + ' kostenlose Modelle. Empfohlen und gesetzt: ' + (m ? m.anzeige : '—') + '.' + kiAusgeblendetText(), 'ok');
       kiModellZeichnen();
     }catch(err){ kiKeyMeldung(err.message || String(err), 'warn'); }
     finally{ hol.disabled = false; }
@@ -18303,15 +19557,19 @@ function artWaehlen(bot){
   $('#f-art').value = a.de;
   $('#bib-liste').hidden = true;
   $('#f-bot').value = a.bot;
-  $('#f-klasse').value = a.klasse;
-  $('#f-sonne').value = a.licht;
+  /* beta.2 (F71 B): Gießklasse, Licht und Wuchsform der Bibliothek sind
+     nur noch ein Vorschlag auf der Stufe „Platz und Pflege“. Übernommen
+     wird erst per Knopf. */
+  if(typeof AW !== 'undefined'){
+    if(!AW || AW.quelle === 'bib') AW = {quelle:'bib', bib:a, fuer:{bot:a.bot, art:a.de, sorte:''}, schluessel:''};
+    else AW.bib = a;
+  }
   /* Das Feld bleibt auf „unbekannt“: es ist für DEINE Angabe da, nicht
      für die der Bibliothek. Die steht ohnehin schon in der Artentabelle
      und wird beim Anlegen von selbst übernommen. Stünde hier ein Wert
      vorbelegt, würde jede neue Pflanze so gespeichert, als hätte man
      die Frage selbst beantwortet. */
   $('#f-giftig').value = 'unbekannt';
-  if(!$('#f-typ').value.trim()) $('#f-typ').value = a.typ;
 
   const verw = verwechslungFuer(a.bot);
   const eigen = merkmalVon(a.bot);
@@ -18483,7 +19741,7 @@ function ortFrageStellen(){
     + 'sie auf „Heute". Übertragen wird einmal der Ortsname, danach nur '
     + 'noch die Koordinaten — nichts über dich, nichts über deine Pflanzen.\n\n'
     + 'Leer lassen geht auch, dann bleibt die Zeile aus. '
-    + 'Nachtragen kannst du den Ort jederzeit unter „Mehr › Wetter".');
+    + 'Nachtragen kannst du den Ort jederzeit unter „Einstellungen › Wetter“.');
   if(!ort || !ort.trim()) return;
   /* Die Suche kann mehrere Orte finden. Bei genau einem Treffer wird
      er genommen; sonst fuehrt die Antwort in die Einstellung, wo man
@@ -18633,37 +19891,22 @@ $('#btn-paste-los').onclick = ()=>{
     return;
   }
   const uebernommen = [];
-  /* Nur sichere Treffer übernehmen. Eine reine Tippfehler-Ähnlichkeit
-     würde sonst aus „Nonexistus fictus“ einen Ficus machen. */
-  const sicher = q => { const t = bibTreffer(q, 1)[0]; return t && t.s >= SICHERER_TREFFER ? t.a : null; };
-  let treffer = d.bot && BIB_NACH_BOT[d.bot] ? BIB_NACH_BOT[d.bot] : null;
-  if(!treffer && d.bot) treffer = sicher(d.bot);
-  if(!treffer && d.art) treffer = sicher(d.art);
+  /* 3.33.0: nur genau diese Art (bibExakt). Ein Teil- oder
+     Tippfehler-Treffer machte aus einer Gattung eine bestimmte Art. */
+  const treffer = bibExakt(d.bot, d.art);
   if(treffer){
     artWaehlen(treffer.bot);
     /* Der von der KI genannte botanische Name ist oft genauer als der
        Bibliothekseintrag, etwa mit Sortenangabe. */
     if(d.bot && d.bot.length > treffer.bot.length) $('#f-bot').value = d.bot;
-    uebernommen.push('Art „' + treffer.de + '“ aus der Bibliothek gesetzt');
+    uebernommen.push('Art „' + treffer.de + '“ in der Bibliothek gefunden');
   } else {
     $('#f-art').value = d.art || d.bot || '';
     if(d.bot) $('#f-bot').value = d.bot;
     artManuell = true;
     uebernommen.push('Art übernommen, aber nicht in der Bibliothek gefunden');
-    const licht = lichtRaten(d.licht);
-    if(licht) $('#f-sonne').value = licht;
-    /* Eine Auskunft am Foto darf verschärfen, aber nie entwarnen —
-       deshalb wird nur „giftig“ übernommen. Sagt die Antwort
-       „unbedenklich“, bleibt das Feld auf „unbekannt“ und die Pflanze
-       läuft als ungeprüft in die Sammlung, statt eine Entwarnung
-       mitzubringen, die niemand geprüft hat. */
-    const gift = giftRaten(d.katzen);
-    if(gift === true){
-      $('#f-giftig').value = 'ja';
-      uebernommen.push('Als giftig übernommen');
-    } else if(gift === false){
-      uebernommen.push('Die Antwort nennt sie unbedenklich — das wird nicht ungeprüft übernommen');
-    }
+    /* beta.2: Licht, Gift und die übrigen Artangaben setzt awAnwenden
+       weiter unten, auch bei einem Bibliothekstreffer. */
   }
   /* Ab 3.24.0 steht im botanischen Namen nie eine Sorte — weder aus der
      Antwort noch aus einem Bibliothekseintrag mit Sorte. So kam „Brasil“
@@ -18699,14 +19942,16 @@ $('#btn-paste-los').onclick = ()=>{
       }
     }
   }
-  if(d.typ && !$('#f-typ').value.trim()){
-    $('#f-typ').value = d.typ; uebernommen.push('Wuchsform übernommen');
-  }
-  const kcode = klasseRaten(d.klasse);
-  if(kcode && !treffer){ $('#f-klasse').value = kcode; uebernommen.push('Gießklasse gesetzt'); }
-  if(d.wichtig && !/^keine?$|^nichts$|^-$/.test(norm(d.wichtig)) && !wieKarte(d.wichtig)){
-    $('#f-wichtig').value = d.wichtig;
-    uebernommen.push('Wichtiger Hinweis übernommen');
+  /* beta.2: Artangaben einer vollständigen Antwort (Einfügen) laufen
+     durch awAnwenden. Weicht die KI bei Gießklasse oder Licht von der
+     Bibliothek ab, wählst du je Feld (Regel 10.13). Die kurze Antwort
+     der Foto-Anfrage hat keine Artangaben. */
+  if(['klasse','licht','typ','wichtig','katzen'].some(k => d[k] && !awLeer(d[k]))){
+    AW = {quelle:'ki', werte:awWerteAusAntwort(d), fuer:awFormArt(),
+      schluessel:awSchluessel(($('#f-bot').value || d.bot || d.art || ''), $('#f-sorte').value)};
+    awAnwenden().forEach(x => uebernommen.push(x));
+    if(AW.gesetzt.klasse) uebernommen.push('Gießklasse gesetzt');
+    if(AW.gesetzt.typ) uebernommen.push('Wuchsform übernommen');
   }
   /* Was die KI am Bild gesehen hat, belegt die Knopfgruppen vor.
      Entschieden wird am Geraet: die Vorbelegung ist ein Vorschlag,
@@ -18734,6 +19979,7 @@ $('#btn-paste-los').onclick = ()=>{
   }
   const sortMeld = sorteVorschlagZeigen(d);
   if(sortMeld) uebernommen.push(sortMeld);
+  if(AW && AW.quelle === 'ki'){ AW.fuer = awFormArt(); AW.schluessel = awSchluessel(AW.fuer.bot || AW.fuer.art, AW.fuer.sorte); }
   if(d.sortenmerkmale && !/^keine?$|^unbekannt$/.test(norm(d.sortenmerkmale)))
     uebernommen.push('Sortenmerkmale gelesen');
   /* Für den Anlegen-Knopf merken: die Maßnahmen sollen gleich als
@@ -19005,10 +20251,14 @@ async function alSpeichern(){
     gift: null,   /* gleich unten gesetzt, sobald Art und Familie stehen */
     raum: $('#f-raum').value || '',
     stellplatz: $('#f-stellplatz').value || '',
-    typ: $('#f-typ').value.trim() || (a ? a.typ : 'Ohne Angabe'),
+    /* beta.2 (F71 B): Wuchsform, Frost und Dünger der Bibliothek nur,
+       wenn du ihren Vorschlag übernommen hast. */
+    typ: $('#f-typ').value.trim() || 'Ohne Angabe',
     sonne: $('#f-sonne').value,
-    frostMin: a ? a.frost : null,
-    duenger: a ? a.duenger : null,
+    frostMin: (a && AW && AW.bibUebernommen) ? a.frost
+      : (AW && (AW.quelle === 'gelernt' || AW.quelle === 'pflanze') && AW.werte && AW.werte.frost !== ''
+         && !isNaN(Number(AW.werte.frost))) ? Number(AW.werte.frost) : null,
+    duenger: (a && AW && AW.bibUebernommen) ? a.duenger : null,
     intervall: KLASSE_IV[kl] || [8,12],
     bib: a ? a.bot : null,
     eltern:null, linie:null, seit:iso(HEUTE),
@@ -19039,6 +20289,13 @@ async function alSpeichern(){
   p.gift = (gift === 'ja' || gift === 'nein')
     ? giftEigenSetzen(p, gift) : giftErmitteln(p);
   if(p.sorte) p.quellen.sorte = (SORTE_VORSCHLAG && sorteGleich(p.sorte, SORTE_VORSCHLAG)) ? 'ki' : 'hand';
+  /* beta.2: Herkunft je Feld aus dem Artwissen. Gelernte Arten und
+     eigene Pflanzen gehen auf eine KI-Antwort zurück. */
+  if(AW && AW.gesetzt) Object.keys(AW.gesetzt).forEach(f => {
+    if(Q_FELDER.indexOf(f) > -1) p.quellen[f] = AW.gesetzt[f] === 'bib' ? 'bib' : 'ki';
+  });
+  if(AW && AW.bibUebernommen && p.frostMin != null) p.quellen.frostMin = 'bib';
+  awLernen(p);
   S.eigene.push(p);
   const zc = $('#f-zustand').value;
   if(zc && zc !== 'gesund') zustandSetzen(id, zc);
@@ -19095,6 +20352,18 @@ document.addEventListener('click', e=>{
   const m = e.target.closest('[data-zmed]');
   if(m){ mediumSetzen(m.dataset.zmed, m.dataset.m); render(); return; }
 });
+/* beta.2: einen Bibliothekswert in die Karte übernehmen (nur per Tipp). */
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('[data-do="bib-nimm"]'); if(!btn) return;
+  const p = allePflanzen().find(x => x.id === btn.dataset.p);
+  const b = p ? bibVon(p) : null;
+  if(!p || !b) return;
+  const f = btn.dataset.f;
+  const wert = f === 'familie' ? b.fam : f === 'typ' ? b.typ : f === 'frostMin' ? b.frost : null;
+  if(wert === null || wert === undefined || wert === '') return;
+  aenderungSetzen(p.id, {[f]: wert}, 'bib', true);
+  render();
+});
 document.addEventListener('click', e=>{
   const btn = e.target.closest('[data-do]'); if(!btn) return;
   const a = btn.dataset.do, id = btn.dataset.p;
@@ -19138,9 +20407,17 @@ $('#btn-melde-mail').onclick = ()=>{
   window.location.href = 'mailto:' + encodeURIComponent(an) +
     '?subject=' + encodeURIComponent(betreff) + '&body=' + encodeURIComponent(meldeText());
 };
+/* beta.2 (F72): Das Issue kommt mit Titel und fertigem Text. Ist die
+   Adresse zu lang, liegt der Text in der Zwischenablage. */
+function meldeIssueUrl(text){
+  const u = ISSUE_URL + '?title=' + encodeURIComponent('Arten für die Bibliothek') + '&body=' + encodeURIComponent(text);
+  return u.length <= 7000 ? u : null;
+}
 $('#btn-melde-github').onclick = ()=>{
-  if(typeof inZwischenablage === 'function') inZwischenablage(meldeText());
-  window.open(ISSUE_URL, '_blank', 'noopener');
+  const t = meldeText();
+  const u = meldeIssueUrl(t);
+  if(!u && typeof inZwischenablage === 'function') inZwischenablage(t);
+  window.open(u || ISSUE_URL, '_blank', 'noopener');
 };
 $('#btn-melden-weg').onclick = ()=>{
   if(!confirm('Die Liste der gemeldeten Arten wirklich leeren?')) return;
@@ -22026,7 +23303,7 @@ document.addEventListener('click', e=>{
 });
 
 /* ══════════════════ Ansichten und Navigation ══════════════════ */
-const ANSICHTEN = ['heute','sammlung','werkzeuge','mehr'];
+const ANSICHTEN = ['heute','sammlung','botaniker','werkzeuge','mehr'];
 /* Doktor, Substrat und Grundriss sind keine eigenen Reiter mehr, sondern
    Blöcke im Reiter „Werkzeuge“. Damit die vielen vorhandenen Aufrufe
    ansichtZeigen('doktor') und die Verknüpfung ?start=doktor weiter
@@ -22053,8 +23330,9 @@ const ANSICHT_KOPF = {
     let n = 0; try{ n = allePflanzen().length; }catch(e){}
     return n === 1 ? 'Eine Pflanze' : n + ' Pflanzen';
   }, 'Sammlung'],
+  botaniker:['', 'BOTaniker'],
   werkzeuge:['Sechs Helfer', 'Werkzeuge'],
-  mehr:     ['Einstellungen', 'Mehr']
+  mehr:     ['', 'Einstellungen']
 };
 
 /* Eine Zeile, die den Tag beschreibt — dieselbe Zahl, die auch auf
@@ -22137,6 +23415,11 @@ function ansichtZeigen(name, merken){
   if(typeof sicherungStempel === 'function') sicherungStempel();
   if(name === 'sammlung') sammlungZeichnen();
   document.body.dataset.ansicht = name;
+  /* 4.0-beta.3: Umschalter hinter dem Zahnrad, Eingabe des BOTanikers */
+  const zr = document.getElementById('zr-umschalter');
+  if(zr) zr.hidden = !(name === 'mehr' || name === 'werkzeuge');
+  const ein = document.getElementById('bot-eingabe');
+  if(ein) ein.hidden = name !== 'botaniker';
   if(werkzeug) werkzeugOeffnen(werkzeug);
   if(typeof themeFarbe === 'function') themeFarbe();
   if(typeof fabZeichnen === 'function') fabZeichnen();
@@ -22492,7 +23775,7 @@ const MH_UNTER = {
   },
   tour:      ()=>((S.tutorial||{}).aus ? 'Abgeschaltet' : 'Kapitel erneut ansehen'),
   install:   ()=>'Auf den Startbildschirm legen',
-  melde:     ()=>'Fehlende Art nachtragen',
+  melde:     ()=>'Fehlende und gelernte Arten melden',
   rueck:     ()=>'Fehler und Wünsche',
   patch:     ()=>'Fassung ' + FASSUNG,
   sprot:     ()=>{
@@ -23722,8 +25005,8 @@ function erststartZeigen(){
   if(!leer) return;
   box.innerHTML = `<div class="start">
     <h3>Willkommen</h3>
-    <p>Deine Sammlung ist noch leer. Leg die erste Pflanze an — such einfach ihren Namen,
-       den Rest holt sich die App aus der Bibliothek: Gießklasse, Licht, Dünger und die Katzenfrage.</p>
+    <p>Deine Sammlung ist noch leer. Leg die erste Pflanze an — such einfach ihren Namen.
+       Die Bibliothek schlägt Gießklasse, Licht und Dünger vor, die Katzenwarnung kommt von selbst.</p>
     <div class="tools">
       <button class="haupt" data-do="start-anlegen">Erste Pflanze anlegen</button>
       <button data-do="start-import">Sicherung laden</button>
@@ -23733,7 +25016,7 @@ function erststartZeigen(){
       &nbsp;·&nbsp;
       <button class="linkbtn" data-do="start-tour">Schritt für Schritt führen lassen</button>
     </p>
-    <p class="start-fuss">Beides findest du jederzeit unter Mehr › App Tour wieder.</p>
+    <p class="start-fuss">Beides findest du jederzeit unter Einstellungen › App Tour wieder.</p>
     <ol class="start-weg">
       <li><b>Anlegen</b> — Art suchen, Name vergeben, fertig.</li>
       <li><b>Grundriss</b> — Raum zeichnen und die Pflanze hineinstellen, dann kennt die App ihr Licht.</li>
@@ -26995,7 +28278,7 @@ function azBestimmenStart(id){
   AZ_BEST = {gruppe:id, bild:null, erg:null, meldung:'', handweg:false, laeuft:false, artDa:false, sorteDa:false};
   azZeigen({art:'bestimmen'});
 }
-async function azBestimmenLos(){
+async function azBestimmenLos(modellId){
   const r = AZ_BEST && azGruppe(AZ_BEST.gruppe);
   if(!r || AZ_BEST.laeuft) return;
   const sag = t => { if(AZ_BEST){ AZ_BEST.meldung = t; if(AZ_SICHT.art === 'bestimmen') azZeichnen(); } };
@@ -27008,18 +28291,32 @@ async function azBestimmenLos(){
     return;
   }
   AZ_BEST.laeuft = true;
-  AZ_BEST.erg = null; AZ_BEST.artDa = false; AZ_BEST.sorteDa = false;
+  AZ_BEST.erg = null; AZ_BEST.artDa = false; AZ_BEST.sorteDa = false; AZ_BEST.fehlerModell = null;
   sag('Frage läuft …');
+  let uhr = null, ziel = null;
   try{
     if(!kiModelle().length) await kiModelleHolen();
-    const erg = await kiFragenHartnaeckig(azBestimmenAuftrag(r), [AZ_BEST.bild], sag);
+    ziel = (modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv();
+    /* 3.32.0: Sekunden statt Modellwechsel. */
+    const t0 = Date.now();
+    sag(kiLaufSatz(ziel, 0));
+    uhr = setInterval(()=>{
+      if(!AZ_BEST) return;
+      AZ_BEST.meldung = kiLaufSatz(ziel, Math.round((Date.now() - t0) / 1000));
+      const el = document.getElementById('az-best-meld');
+      if(el) el.textContent = AZ_BEST.meldung;
+    }, 1000);
+    const erg = await kiFragenEinmal(azBestimmenAuftrag(r), [AZ_BEST.bild], ziel ? ziel.id : null,
+      {denken:'niedrig', zweck:'Anzucht'});
     AZ_BEST.erg = azBestimmenLesen(erg.text);
-    AZ_BEST.meldung = erg.gewechselt ? 'Geantwortet hat ' + erg.modell.anzeige + ', weil das gewählte Modell überlastet war.' : '';
+    AZ_BEST.meldung = (modellId && S.kiModell !== erg.modell.id) ? 'Geantwortet hat ' + erg.modell.anzeige + '.' : '';
   }catch(e){
     AZ_BEST.handweg = true;
+    if(!(e && e.name === 'AbortError')) AZ_BEST.fehlerModell = (e && e.modell) || (ziel && ziel.id) || '-';
     AZ_BEST.meldung = e && e.name === 'AbortError' ? 'Abgebrochen.'
       : ((e && e.message) || String(e)) + ' Du kannst es über Kopieren und Einfügen versuchen.';
   }finally{
+    if(uhr) clearInterval(uhr);
     AZ_BEST.laeuft = false;
     if(AZ_SICHT.art === 'bestimmen') azZeichnen();
   }
@@ -27055,6 +28352,9 @@ function azBestimmenHTML(){
     + '<input type="file" accept="image/*" capture="environment" hidden data-az-bfoto="1"></label></div>'
     + '<div class="tools"><button type="button" class="haupt" data-az="best-los"' + (!B.bild || B.laeuft ? ' disabled' : '') + '>Bestimmen</button></div>'
     + (B.meldung ? '<p class="az-still" id="az-best-meld">' + esc(B.meldung) + '</p>' : '')
+    + (B.laeuft ? '<div class="tools"><button type="button" data-do="ki-stop">Abbrechen</button></div>' : '')
+    + (B.fehlerModell && !B.laeuft ? kiNochmalHTML(B.fehlerModell, (was, mid) => 'data-az="best-' + was + '"'
+        + (mid ? ' data-kimodell="' + esc(mid) + '"' : '')) : '')
     + '<details class="kiprompt"' + (B.handweg ? ' open' : '') + '><summary>Ohne Schlüssel: kopieren und einfügen</summary>'
     + '<p class="az-still">Auftrag kopieren, zusammen mit dem Foto in Gemini stellen und die Antwort hier einfügen.</p>'
     + '<div class="tools"><button type="button" data-az="best-kopieren">Auftrag kopieren</button></div>'
@@ -27801,6 +29101,7 @@ document.addEventListener('click', e=>{
   if(a === 'frei-los'){ azFreiAnlegen(); return; }
   if(a === 'gruppe-speichern'){ azBearbeitenLos(k.dataset.r); return; }
   if(a === 'best-los'){ azBestimmenLos(); return; }
+  if(a === 'best-nochmal' || a === 'best-anders'){ azBestimmenLos(k.dataset.kimodell || null); return; }
   if(a === 'best-art' || a === 'best-sorte'){ azBestUebernehmen(a === 'best-art' ? 'art' : 'sorte'); render(); azZeichnen(); return; }
   if(a === 'best-kopieren'){
     const r = AZ_BEST && azGruppe(AZ_BEST.gruppe);
@@ -28346,6 +29647,7 @@ function karteiFormat(art){
   format = format.replace(' und ein bis drei MASSNAHME-Zeilen', '');
   if(typeof formatZeileErgaenzen === 'function'){
     const wie = 'Steht oben der Text meiner Karte dazu und stimmt er inhaltlich, schreib genau: wie Karte';
+    format = formatZeileErgaenzen(format, 'BOTANISCH', KI_KREUZUNG_REGEL);
     format = formatZeileErgaenzen(format, 'WICHTIG', wie);
     format = formatZeileErgaenzen(format, 'PFLEGE', wie);
     format = formatZeileErgaenzen(format, 'WINTERRUHE', wie);
@@ -28365,7 +29667,7 @@ function karteiFormat(art){
    Bis zu fünf Pflanzen gleicher Art (alle mit oder alle ohne Foto) in
    einer Anfrage. Jeder Block der Antwort beginnt mit PFLANZE: <Nummer>. */
 const KARTEI_BUENDEL = 5;
-const KARTEI_FRIST_BUENDEL = 90000;
+const KARTEI_FRIST_BUENDEL = 120000;
 /* Wie eine Pflanze im Auftrag heißt: Art, botanischer Name, Sorte —
    nie der Spitzname (3.27.0). */
 function karteiBezeichnung(p){
@@ -28814,16 +30116,11 @@ async function karteiEineInnen(id){
   }
 }
 
-/* 503 nach den Wiederholungen: einmal das nächste Modell (3.27.0). */
+/* 3.32.0: Kein Ausweichen mehr auf ein anderes Modell. Die
+   Wiederholung je Pflanze in der Warteschlange bleibt. Lehnt ein
+   Modell die Denkstufe ab, fragt die Kartei einmal ohne. */
 async function karteiFragen(text, bilder, c, opt, gen){
-  try{ return await kiFragen(text, bilder, null, c, opt); }
-  catch(e){
-    if(!e || e.status !== 503 || (gen !== undefined && gen !== KARTEI_GEN)) throw e;
-    const m0 = (typeof kiModellAktiv === 'function') ? kiModellAktiv() : null;
-    const alt = m0 ? kiAusweichModelle(m0.id)[0] : null;
-    if(!alt) throw e;
-    return kiFragen(text, bilder, alt.id, c, opt);
-  }
+  return kiFragen(text, bilder, null, c, Object.assign({zweck:'Kartei', denkenNochmal:true}, opt || {}));
 }
 async function karteiBuendelFragen(ids){
   KARTEI_AKTIV++;
@@ -29778,7 +31075,7 @@ function karteiMeldungZeigen(){
 
 function karteiLos(ids, behalten){
   if(typeof kiBereit === 'function' && !kiBereit()){
-    karteiMeldung('Dafür fehlt noch der Schlüssel. Er steht unter Mehr, KI-Dienst.', 'warn');
+    karteiMeldung('Dafür fehlt noch der Schlüssel. Er steht hinter dem Zahnrad unter KI-Dienst.', 'warn');
     return;
   }
   const anb = (typeof kiAnbieter === 'function') ? kiAnbieter(kiSchluessel()) : null;
@@ -30130,7 +31427,7 @@ const TOUR_KAPITEL = {
       { vor: ()=>ansichtZeigen('sammlung'),
         ziel: ()=>document.querySelector('#erststart [data-do="start-anlegen"], .sam-raster .card, #btn-neu'),
         titel: 'Das war die Runde',
-        text: 'Am besten legst du jetzt deine erste Pflanze an — fast alles in der App hängt daran. Die Runde steht unter Mehr › App Tour, falls du sie noch einmal sehen willst.',
+        text: 'Am besten legst du jetzt deine erste Pflanze an — fast alles in der App hängt daran. Die Runde steht unter Einstellungen › App Tour, falls du sie noch einmal sehen willst.',
         warte: 320 }
     ]
   },
@@ -30265,7 +31562,7 @@ const TOUR_KAPITEL = {
 
       { ziel: ()=>document.getElementById('btn-rundgang'),
         titel: 'Rundgang',
-        text: 'Geht die ganze Sammlung der Reihe nach durch, nicht nur das Fällige. Drei Tiefen von kurzem Blick bis Bestandsaufnahme mit Foto, einstellbar unter „Mehr“.' },
+        text: 'Geht die ganze Sammlung der Reihe nach durch, nicht nur das Fällige. Drei Tiefen von kurzem Blick bis Bestandsaufnahme mit Foto, einstellbar hinter dem Zahnrad.' },
 
       { ziel: ()=>document.getElementById('stichtage'),
         titel: 'Stichtage',
@@ -30303,7 +31600,7 @@ const TOUR_KAPITEL = {
       { fenster: 'rundgang',
         ziel: ()=>document.getElementById('rg-knoepfe'),
         titel: 'Was unterwegs erfasst wird',
-        text: 'Welche Knöpfe hier stehen, entscheidest du unter „Mehr“ › Rundgang: nur ein kurzer Blick, dazu Blattzahl und Ereignisse, oder zusätzlich ein Foto. Je weniger, desto schneller geht es.' }
+        text: 'Welche Knöpfe hier stehen, entscheidest du hinter dem Zahnrad › Rundgang: nur ein kurzer Blick, dazu Blattzahl und Ereignisse, oder zusätzlich ein Foto. Je weniger, desto schneller geht es.' }
     ]
   },
 
@@ -30507,7 +31804,7 @@ function tourErledigt(key){
 
 /* Wer schon Pflanzen hat, kennt die App. Der soll nach einem Update
    nicht plötzlich überall Erklärungen bekommen — die Kapitel gelten
-   für ihn als gesehen und stehen unter „Mehr“ bereit. Das läuft genau
+   für ihn als gesehen und stehen hinter dem Zahnrad bereit. Das läuft genau
    einmal, gemerkt an einem eigenen Feld statt am bloßen Vorhandensein
    des Objekts: sonst würde eine eingespielte Sicherung ohne dieses
    Feld die Prüfung erneut auslösen. */
@@ -30807,7 +32104,7 @@ function tourAbbruch(){
     const ti = document.getElementById('tour-titel');
     if(t && ti && tourLauf){
       ti.textContent = 'Abgebrochen';
-      t.textContent = 'Du findest die Runde jederzeit unter Mehr › App Tour wieder.';
+      t.textContent = 'Du findest die Runde jederzeit unter Einstellungen › App Tour wieder.';
       const f = document.getElementById('tour-fuss');
       if(f) f.hidden = true;
       setTimeout(()=>{ if(f) f.hidden = false; tourAbbruch(); }, 1600);
@@ -30836,7 +32133,7 @@ document.addEventListener('keydown', e=>{
    damit auf jedem Reiter ungefragt eine Erklärung auf — vier Stück,
    bevor man auch nur eine Pflanze angelegt hatte.
 
-   Die Kapitel bleiben alle bestehen und sind unter Mehr › App Tour
+   Die Kapitel bleiben alle bestehen und sind unter Einstellungen › App Tour
    einzeln aufrufbar. Was sie erklären, steht außerdem in den i-Knöpfen
    der jeweiligen Bereiche. Sie starten nur nicht mehr von selbst.
 
