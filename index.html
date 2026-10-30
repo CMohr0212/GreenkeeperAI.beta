@@ -587,24 +587,8 @@ footer{padding:30px 0 60px;color:var(--peat);font-size:var(--t-m);border-top:1px
   font-family:var(--f-body);font-size:var(--t-l);color:var(--ink)
 }
 .addbar input:focus{outline:2px solid var(--water);outline-offset:-1px;border-color:var(--water)}
-.addbar button{
-  font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.06em;text-transform:uppercase;
-  padding:8px 14px;border:1.5px solid var(--ink);border-radius:var(--r-klein);background:var(--ink);
-  color:var(--paper);cursor:pointer
-}
-.addbar button:hover{background:transparent;color:var(--ink)}
 .tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.tools button{
-  font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.06em;text-transform:uppercase;
-  padding:8px 13px;border:1px solid var(--line);border-radius:100px;background:transparent;
-  color:var(--peat);cursor:pointer
-}
-.tools button:hover{border-color:var(--ink);color:var(--ink)}
-/* Drei Ränge: Hauptaktion gefüllt, Nebenaktion umrandet, Löschen rot */
-.tools button.haupt,button.haupt{background:var(--water);border-color:var(--water);color:var(--schrift-invers);font-weight:600}
-.tools button.haupt:hover,button.haupt:hover{background:var(--wasser-tief)}
-.tools button.loeschen,button.loeschen{border-color:var(--terra);color:var(--terra)}
-.tools button.loeschen:hover{background:var(--terra);color:var(--schrift-invers)}
+/* Knopfarten (Haupt, Neben, Gefahr): Grundstil am Ende des Stils, 4.0-beta.4 */
 
 /* ---- Icons & Legende ---- */
 .icons{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:10px}
@@ -653,9 +637,6 @@ footer{padding:30px 0 60px;color:var(--peat);font-size:var(--t-m);border-top:1px
   line-height:1.08;margin:0 0 14px;letter-spacing:-.01em}
 .wk-lead{font-size:var(--t-l);line-height:1.55;color:var(--ink-2);margin:0 0 22px}
 .wk-knoepfe{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
-.wk-haupt{background:var(--water);color:var(--schrift-invers);border:1px solid var(--water);
-  padding:13px 24px;border-radius:var(--r-klein);font-family:var(--f-data);font-size:var(--t-mono);
-  letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .wk-neben{background:none;border:0;color:var(--peat);text-decoration:underline;
   cursor:pointer;font:inherit;font-size:var(--t-s);padding:8px 4px}
 .wk-wahl{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
@@ -1804,8 +1785,7 @@ body.vollbild .hinweis-kopf{display:none}
 .gm-dueng-vermerk{color:var(--moss);border-left-color:var(--moss)!important}
 .gm-zfrage-btns button{flex:1;font:inherit;font-size:var(--t-m);padding:8px 10px;
   border:1px solid var(--line);border-radius:var(--r-klein,8px);background:var(--paper);color:var(--ink);cursor:pointer}
-.gm-zwei{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.gm-zwei .gm-nein{width:100%}
+.gm-zwei{display:contents}
 .gm-befund{border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0;text-align:left}
 .gm-befund-name{font-weight:600;margin:0 0 4px}
 .gm-befund-text{font-size:.9rem;margin:0 0 8px}
@@ -1957,7 +1937,7 @@ body[data-ansicht="botaniker"] #fab-neu{display:none!important}
 .bot-rund{width:44px;height:44px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;cursor:pointer;
   border:1.5px solid var(--line);background:var(--fl-karte, var(--paper));color:var(--ink)}
 .bot-rund svg{width:20px;height:20px}
-.bot-senden{background:var(--water);border-color:var(--water);color:var(--schrift-invers)}
+.bot-senden{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers)}
 #bot-text{flex:1;min-width:0;font:inherit;font-size:16px;line-height:1.35;resize:none;max-height:120px;
   border:1.5px solid var(--line);border-radius:22px;padding:11px 14px;background:var(--fl-karte, var(--paper));color:var(--ink)}
 .bot-bilder{display:flex;gap:6px;max-width:760px;margin:0 auto 6px;flex-wrap:wrap}
@@ -2452,12 +2432,8 @@ body.gm-offen{overflow:hidden}
 .gm-hinweis{margin:0 0 10px;font-size:var(--t-md);line-height:1.6;color:var(--ink-2)}
 .gm-hinweis.warn{color:var(--terra)}
 .gm-wo{margin:12px 0 0;font-size:var(--t-s);color:var(--ink-2)}
-.gm-fuss{display:grid;gap:8px;padding:14px 18px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
-.gm-fuss button{font:inherit;font-size:var(--t-l);padding:16px;border-radius:var(--r-mittel);border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
-.gm-fuss .gm-ja{background:var(--water);border-color:var(--water);color:var(--schrift-invers);font-weight:600}
-.gm-fuss .gm-spaeter{font-size:var(--t-m);padding:11px;color:var(--ink-2)}
-.gm-fuss .gm-nein i{font-style:normal;opacity:.62;font-size:var(--t-xs)}
-@media(min-width:520px){.gm-fuss{grid-template-columns:1fr 1fr}.gm-fuss .gm-spaeter{grid-column:1/-1}}
+.gm-fuss{display:flex;flex-wrap:wrap;gap:10px;padding:14px 18px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.gm-fuss .gm-nein i{display:block;font-style:normal;font-weight:400;opacity:.7;font-size:var(--t-xs);margin-top:2px}
 
 /* ── Verlauf und Wachstum ────────────────────────────────── */
 .verlauf,.wachstum{border-top:1px solid var(--line);margin-top:12px;padding-top:11px}
@@ -3515,7 +3491,7 @@ html[data-design="klartext"] .kartei-zeile{border-width:2px}
 #tour-fuss{display:flex;gap:var(--a-2);align-items:center;flex-wrap:wrap}
 #tour-fuss button{font:inherit;font-size:var(--t-s);padding:9px 14px;border-radius:var(--r-klein);
   border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
-#tour-fuss button.haupt{background:var(--water);border-color:var(--water);color:var(--schrift-invers);font-weight:600}
+#tour-fuss button.haupt{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers);font-weight:600}
 #tour-fuss button[disabled]{opacity:.32;cursor:default}
 #tour-fuss button[hidden]{display:none}
 #tour-skip{margin-left:auto;border:0!important;background:none!important;
@@ -3621,7 +3597,7 @@ html[data-design="botanisch"] #karte-rumpf .km-zeichen .ico{gap:6px;padding:5px 
 html[data-design="botanisch"] #karte-rumpf .km-zeichen .ico.warn{background:var(--ton-gift);color:var(--gift)}
 html[data-design="botanisch"] #karte-rumpf .km-zeichen .ico.wet{color:var(--wasser)}
 html[data-design="botanisch"] #karte-rumpf .km-taten{margin:18px 0 0}
-html[data-design="botanisch"] #karte-rumpf .km-haupt{min-height:52px;border-radius:var(--r-mittel);background:var(--wasser);font-size:var(--t-l)}
+html[data-design="botanisch"] #karte-rumpf .km-haupt{min-height:52px;border-radius:var(--r-mittel);background:var(--fl-akzent);font-size:var(--t-l)}
 html[data-design="botanisch"] #karte-rumpf .km-haupt.erledigt{background:var(--ton-sicher);color:var(--sicher);box-shadow:none}
 html[data-design="botanisch"] #karte-rumpf .km-neben{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 html[data-design="botanisch"] #karte-rumpf .km-neben button{min-height:var(--tap);padding:0 4px;border:1px solid var(--linie-stark);
@@ -3705,6 +3681,88 @@ html[data-design="botanisch"] #karte-rumpf .prob{border-left:0;padding:10px 0 0;
 html[data-design="botanisch"] #karte-rumpf .prob:first-child{border-top:0;padding-top:0}
 html[data-design="botanisch"] #karte-rumpf .prob b{font-weight:500}
 html[data-design="botanisch"] #karte-rumpf .alert{border-radius:var(--r-mittel)}
+/* ══ Grundstil S1 — Knöpfe (4.0-beta.4) ═══════════════════════
+   Vier Arten, eine Form (Vorschau Grundstil, F86 bis F91):
+   Haupt   gefüllt im Akzent der Ansicht (F88; Petrol bleibt Wasser)
+   Neben   Kartenfläche mit Linie
+   Gefahr  Umriss in Alarmrot
+   Text    unterstrichen (.linkbtn, .wk-neben, .kb-link, .knopf-leise)
+   Normale Schreibung in der Grotesk, nie Versalien oder Monospace (F87).
+   Die Spezifität jeder Haupt- und Gefahrregel ist mindestens so hoch
+   wie die der Nebenregel für dasselbe Element; Zustände wie
+   .km-haupt.erledigt bleiben deshalb stärker. */
+:root{--knopf-h:max(48px, var(--tap))}
+
+button.haupt, .wk-haupt, .km-haupt,
+.tools button, .addbar button, .kb-zweit,
+.as-fuss button, .al-fuss button, .ut-fuss button,
+.gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
+.km-neben button, .dokwahl-gewaehlt button,
+.gm-fuss button, .gm-zfrage-btns button,
+.sich-hinweis button, .wt-zeile button, .kimodell button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:var(--knopf-h);padding:0 18px;
+  font-family:var(--f-body);font-size:var(--t-l);font-weight:600;font-style:normal;
+  line-height:1.15;text-align:center;text-transform:none;letter-spacing:0;text-decoration:none;
+  border-radius:var(--r-mittel);cursor:pointer;
+  transition:transform var(--dauer, .15s), background var(--dauer, .15s)}
+button.haupt:active, .wk-haupt:active, .km-haupt:active,
+.tools button:active, .addbar button:active, .kb-zweit:active,
+.as-fuss button:active, .al-fuss button:active, .ut-fuss button:active,
+.gr-karte-tools button:active, .km-neben button:active,
+.gm-fuss button:active, .gm-zfrage-btns button:active{transform:scale(.98)}
+
+/* Neben */
+.tools button, .addbar button, .kb-zweit,
+.as-fuss button, .al-fuss button, .ut-fuss button,
+.gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
+.km-neben button, .dokwahl-gewaehlt button,
+.gm-fuss button, .gm-zfrage-btns button,
+.sich-hinweis button, .wt-zeile button, .kimodell button, .takt-pm{
+  background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift)}
+
+/* Haupt */
+button.haupt, .tools button.haupt, .addbar button.haupt,
+.as-fuss button.haupt, .al-fuss button.haupt, .ut-fuss button.haupt,
+.gr-karte-tools button.haupt, .km-anstoss-taten button.haupt,
+.wk-haupt, .km-haupt, .gm-fuss .gm-ja{
+  background:var(--fl-akzent);border:1.5px solid var(--fl-akzent);color:var(--schrift-invers)}
+
+/* Gefahr */
+button.loeschen, .tools button.loeschen{
+  background:transparent;border:1.5px solid var(--alarm);color:var(--alarm)}
+
+/* Kompakt: Knöpfe in Reihen, Karten und Hinweisen */
+.gr-karte-tools button, .gr-zurueck button, .km-neben button, .dokwahl-gewaehlt button,
+.gm-zfrage-btns button, .sich-hinweis button, .wt-zeile button, .kimodell button,
+.km-anstoss-taten button{
+  min-height:var(--tap);padding:0 14px;font-size:var(--t-m)}
+.km-neben button{padding:0 6px;font-size:var(--t-s)}
+.kimodell button, .wt-zeile button{flex:0 0 auto}
+.takt-pm{width:var(--tap);height:var(--tap);padding:0;border-radius:var(--r-mittel);
+  font-family:var(--f-body);font-size:1.25rem;font-weight:500;cursor:pointer}
+
+/* Gießmodus und Rundgang: Haupttat breit, die übrigen nebeneinander (F90) */
+.gm-fuss > button, .gm-fuss .gm-zwei > button{flex:1 1 0;min-width:0;min-height:max(52px, var(--tap));
+  padding:6px 10px;font-size:var(--t-m);flex-direction:column;gap:0}
+.gm-fuss > button.gm-ja{flex:1 1 100%;min-height:max(58px, var(--tap));font-size:var(--t-xl)}
+@media (max-width:380px){ .gm-fuss > button, .gm-fuss .gm-zwei > button{hyphens:auto} }
+/* Klartext: große Schrift, deshalb jeder Knopf in eigener Zeile (wie .km-neben dort) */
+html[data-design="klartext"] .gm-fuss > button, html[data-design="klartext"] .gm-fuss .gm-zwei > button{flex-basis:100%}
+
+/* Runde Symbolknöpfe: Zahnrad, Zurück, Info, Kamera, Schließen, Senden */
+.kopf-zahnrad, .bot-rund, .sekm-raus, .sekm-kopf .sekm-i, #gm-abbruch, .sb-blatt-zu{
+  width:var(--tap);height:var(--tap);min-width:var(--tap);min-height:var(--tap);padding:0;
+  border-radius:50%;display:grid;place-items:center;cursor:pointer;font-family:var(--f-body);
+  background:var(--fl-karte);border:1px solid var(--linie);color:var(--schrift)}
+.kopf-zahnrad{width:var(--tap);height:var(--tap)}
+.kopf-zahnrad svg{width:22px;height:22px}
+.kopf-zahnrad.on{border-color:var(--schrift)}
+#gm-abbruch, .sb-blatt-zu{font-size:1.35rem;line-height:1}
+.bot-senden{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers)}
+.sekm-raus:active, .kopf-zahnrad:active, .bot-rund:active{transform:scale(.96)}
+.sekm-kopf .sekm-i[aria-expanded="true"]{background:var(--ton-tipp);border-color:var(--linie-stark)}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9452,7 +9510,7 @@ function pflanzeEntfernen(id){
   <header class="top">
     <button class="kopf-zahnrad" id="kopf-zahnrad" type="button" data-ans-go="mehr" aria-label="Einstellungen und Werkzeuge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
     <button class="sich-stempel" id="sich-stempel" type="button" aria-label="Letzte Sicherung" hidden></button>
     <p class="top-etikett" id="kopf-etikett" aria-hidden="true"></p>
@@ -11454,7 +11512,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.3';
+const FASSUNG = '4.0-beta.4';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -23714,7 +23772,7 @@ const MH_IKON = {
   rundgang:  '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/>',
   ansicht:   '<path d="M4 5h16v12H4z"/><path d="M9 20h6M12 17v3"/>',
   tour:      '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
-  rueck:     '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/><path d="M10 10v7M14 10v7"/>',
+  rueck:     '<path d="M4 5h16v11H10l-4.5 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
   patch:     '<path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
   melde:     '<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
   install:   '<path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 18h16"/>',

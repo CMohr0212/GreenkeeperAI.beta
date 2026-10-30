@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.3', w.__T('FASSUNG') === '4.0-beta.3', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.4', w.__T('FASSUNG') === '4.0-beta.4', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11104,6 +11104,64 @@ setTimeout(async () => {
     try{ man = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8')); }catch(e){}
     pruef('beta.1: Manifest heißt GK Beta', man.short_name === 'GK Beta' && man.name === 'GreenkeeperAI Beta', man.short_name);
     pruef('beta.1: Manifest bleibt im eigenen Pfad', man.start_url === './' && man.scope === './' && man.id === './');
+  }
+
+  /* ══ 4.0-beta.4: Grundstil S1 — Knöpfe ══
+     Jeder Test legt seine Pflanzen selbst an. */
+  {
+    const T = c => w.__T(c);
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+    const regeln = stil.replace(/\/\*[\s\S]*?\*\//g, '').split('}').map(r => r.split('{')).filter(r => r.length === 2)
+      .map(r => ({sel:r[0].trim(), rumpf:r[1]}));
+    const zahnrad = d.querySelector('#kopf-zahnrad svg');
+    pruef('beta.4: Das Zahnrad hat keine Sonnenstrahlen mehr', !!zahnrad && zahnrad.innerHTML.indexOf('M12 2.5v3') === -1, zahnrad && zahnrad.innerHTML.slice(0, 80));
+    pruef('beta.4: Das Zahnrad ist ein Zahnrad', !!zahnrad && zahnrad.innerHTML.indexOf('M19.4 15') > -1);
+    pruef('beta.4: Rückmeldung trägt keinen Mülleimer mehr', T('MH_IKON.rueck').indexOf('M3 6h18') === -1, T('MH_IKON.rueck'));
+
+    /* Knopfarten: jede Klasse der Zuordnung steht in ihrer Regel */
+    const abschnitt = kopf => { const i = stil.indexOf(kopf); if(i < 0) return ''; const j = stil.indexOf('{', i); return stil.slice(i, j); };
+    const haupt = abschnitt('/* Haupt */'), neben = abschnitt('/* Neben */'), gefahr = abschnitt('/* Gefahr */');
+    const fehltIn = (teil, liste) => liste.filter(k => teil.indexOf(k) === -1);
+    const H = ['button.haupt', '.tools button.haupt', '.as-fuss button.haupt', '.al-fuss button.haupt', '.ut-fuss button.haupt',
+      '.gr-karte-tools button.haupt', '.km-anstoss-taten button.haupt', '.addbar button.haupt', '.wk-haupt', '.km-haupt', '.gm-fuss .gm-ja'];
+    const N = ['.tools button', '.addbar button', '.kb-zweit', '.as-fuss button', '.al-fuss button', '.ut-fuss button',
+      '.gr-karte-tools button', '.gr-zurueck button', '.km-anstoss-taten button', '.km-neben button', '.dokwahl-gewaehlt button',
+      '.gm-fuss button', '.gm-zfrage-btns button', '.sich-hinweis button', '.wt-zeile button', '.kimodell button', '.takt-pm'];
+    const G = ['button.loeschen', '.tools button.loeschen'];
+    pruef('beta.4: Hauptknöpfe stehen in der Regel Haupt', fehltIn(haupt, H).length === 0, fehltIn(haupt, H).join(', '));
+    pruef('beta.4: Nebenknöpfe stehen in der Regel Neben', fehltIn(neben, N).length === 0, fehltIn(neben, N).join(', '));
+    pruef('beta.4: Löschknöpfe stehen in der Regel Gefahr', fehltIn(gefahr, G).length === 0, fehltIn(gefahr, G).join(', '));
+    const rumpf = kopf => { const i = stil.indexOf(kopf); const j = stil.indexOf('{', i); return stil.slice(j, stil.indexOf('}', j)); };
+    pruef('beta.4: Haupt ist gefüllt im Akzent, nicht in Petrol', /background:var\(--fl-akzent\)/.test(rumpf('/* Haupt */')) && !/--water|--wasser/.test(rumpf('/* Haupt */')));
+    pruef('beta.4: Gefahr ist ein roter Umriss', /border:1\.5px solid var\(--alarm\)/.test(rumpf('/* Gefahr */')));
+
+    /* Keine alte Regel zeichnet diese Knöpfe noch in Monospace, Versalien oder Petrol */
+    const betroffen = /(^|[\s,])(\.tools button|button\.haupt|\.wk-haupt|\.addbar button|\.gm-fuss \.gm-ja|\.gm-fuss button|\.bot-senden|button\.loeschen)(?![-\w])/;
+    const alt = regeln.filter(r => betroffen.test(r.sel) && /text-transform:uppercase|var\(--f-data\)|background:var\(--water\)|border-radius:100px/.test(r.rumpf)).map(r => r.sel);
+    pruef('beta.4: Keine alte Regel mit Versalien, Monospace oder Petrol für Knöpfe', alt.length === 0, alt.join(' | '));
+
+    /* Gießmodus: Haupttat breit, die übrigen in einer Reihe darunter (F90) */
+    T(`(function(){
+      S.eigene.push({id:'BS4-1', eigen:true, name:'Knopfprobe', art:'Grünlilie', botanisch:'Chlorophytum comosum', klasse:'B', sonne:'hell', quellen:{}, todo:[], log:[], seit:'2026-09-01'});
+      S.water['BS4-1'] = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 20))];
+      try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){}
+      gmListe = [allePflanzen().find(function(x){ return x.id === 'BS4-1'; })];
+      gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmBefunde = []; gmZugefragt = {}; gmDuengetag = false;
+      gmZeichnen();
+    })()`);
+    const fuss = d.getElementById('gm-knoepfe');
+    const cs = el => w.getComputedStyle(el);
+    const ja = fuss.querySelector('.gm-ja');
+    const uebrige = [...fuss.querySelectorAll('button')].filter(b => !b.classList.contains('gm-ja'));
+    const zwei = fuss.querySelector('.gm-zwei');
+    pruef('beta.4: Gießmodus-Fuß ist eine umbrechende Reihe', cs(fuss).display === 'flex' && cs(fuss).flexWrap === 'wrap', cs(fuss).display + ' ' + cs(fuss).flexWrap);
+    pruef('beta.4: „Gegossen“ nimmt die ganze Breite', !!ja && cs(ja).flexBasis === '100%', ja && cs(ja).flexBasis);
+    pruef('beta.4: Die übrigen Knöpfe teilen sich eine Reihe', uebrige.length >= 2 && uebrige.every(b => cs(b).flexGrow === '1' && cs(b).flexBasis === '0px'),
+      uebrige.map(b => b.textContent.trim() + ':' + cs(b).flexBasis).join(', '));
+    pruef('beta.4: „Noch feucht“ und „Später“ stehen beide in dieser Reihe',
+      uebrige.some(b => b.dataset.gm === 'nein') && uebrige.some(b => b.dataset.gm === 'spaeter'));
+    pruef('beta.4: Die Zweiergruppe löst sich in die Reihe auf', !zwei || cs(zwei).display === 'contents', zwei ? cs(zwei).display : 'keine');
+    T(`(function(){ try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} S.eigene = S.eigene.filter(function(x){ return x.id !== 'BS4-1'; }); delete S.water['BS4-1']; })()`);
   }
 
   console.log('\n── Ergebnis ──');
