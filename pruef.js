@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.4', w.__T('FASSUNG') === '4.0-beta.4', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.5', w.__T('FASSUNG') === '4.0-beta.5', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11162,6 +11162,86 @@ setTimeout(async () => {
       uebrige.some(b => b.dataset.gm === 'nein') && uebrige.some(b => b.dataset.gm === 'spaeter'));
     pruef('beta.4: Die Zweiergruppe löst sich in die Reihe auf', !zwei || cs(zwei).display === 'contents', zwei ? cs(zwei).display : 'keine');
     T(`(function(){ try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){} S.eigene = S.eigene.filter(function(x){ return x.id !== 'BS4-1'; }); delete S.water['BS4-1']; })()`);
+  }
+
+  /* ══ 4.0-beta.5: Grundstil S2 — Felder, Schalter, Haken ══
+     Jeder Test legt seine Daten selbst an und räumt danach auf. */
+  {
+    const T = c => w.__T(c);
+    const cs = el => w.getComputedStyle(el);
+    const quelle = fs.readFileSync('index.html', 'utf8');
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+    const regeln = stil.replace(/\/\*[\s\S]*?\*\//g, '').split('}').map(r => r.split('{')).filter(r => r.length === 2)
+      .map(r => ({sel:r[0].trim(), rumpf:r[1]}));
+
+    /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet */
+    const SCH = ['ut-langzeit','ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-vollstaerke','ck-winterpause','ck-saison',
+      'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-einfach','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
+      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an'];
+    const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
+    pruef('beta.5: Alle 21 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 21 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 21, quelle.split('type="checkbox" role="switch"').length - 1);
+    const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
+    pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
+
+    /* Haken in Listen zum Anhaken bleiben Haken */
+    T(`(function(){ S.gelernteArten = S.gelernteArten || {}; S.gelernteArten['Probeart s2 | '] = {botanisch:'Probeart s2', name:'Probe', klasse:'B', datum:'2026-10-30'}; meldeRender(); })()`);
+    const melde = d.querySelector('[data-melde-gel="Probeart s2 | "]');
+    pruef('beta.5: Arten melden hat Haken, keine Schalter', !!melde && !melde.hasAttribute('role'), melde ? melde.outerHTML.slice(0, 80) : 'fehlt');
+    const mn = T(`massnahmenAuswahlHTML('t', [{handlung:'Umtopfen'}], '')`);
+    pruef('beta.5: Maßnahmen des Doktors haben Haken, keine Schalter', /type="checkbox"/.test(mn) && !/role="switch"/.test(mn));
+    pruef('beta.5: Kartei-Auswahl und -Ergebnis haben Haken, keine Schalter',
+      !/role="switch"[^>]*data-kartei/.test(quelle) && !/data-kartei[^>]*role="switch"/.test(quelle) && quelle.indexOf('data-karteikasten="alle"') > -1);
+
+    /* Aussehen: Schalter 52 × 32 rechts neben dem Text, Haken 24 px */
+    const wp = d.getElementById('ck-winterpause');
+    pruef('beta.5: Schalter ist 52 × 32 groß', cs(wp).width === '52px' && cs(wp).height === '32px', cs(wp).width + ' × ' + cs(wp).height);
+    pruef('beta.5: Schalter steht rechts vom Text', cs(wp.closest('label')).flexDirection === 'row-reverse' && cs(wp.closest('label')).justifyContent === 'space-between',
+      cs(wp.closest('label')).flexDirection);
+    const ru = d.getElementById('ru-technik');
+    const zeileAlt = regeln.filter(r => /label\.check|\.ubox|\.vb-sch-feld\.zeile/.test(r.sel) && /flex-direction:\s*row(?!-)/.test(r.rumpf)).map(r => r.sel);
+    pruef('beta.5: In Formularen steht der Schalter rechts', !!ru.closest('.fgrid') && zeileAlt.length === 0 && cs(ru.closest('label')).flexDirection === 'row-reverse', zeileAlt.join(' | ') || cs(ru.closest('label')).flexDirection);
+    const ub = d.getElementById('url-nummern');
+    pruef('beta.5: Auch im Urlaubszettel steht der Schalter rechts', cs(ub).width === '52px' && cs(ub.closest('label')).flexDirection === 'row-reverse', cs(ub).width + ' ' + cs(ub.closest('label')).flexDirection);
+    pruef('beta.5: Haken ist 24 px groß', !!melde && cs(melde).width === '24px', melde && cs(melde).width);
+    pruef('beta.5: Schalter und Haken zeichnet die App, nicht der Browser',
+      /input\[type=checkbox\]\[role=switch\]\{[^}]*appearance:none/.test(stil) && /input\[type=checkbox\]:not\(\[role=switch\]\)\{[^}]*appearance:none/.test(stil));
+
+    /* Bedienung unverändert: Antippen ändert und speichert den Wert */
+    T(`giessEinst().winterpause = false; giessCenterZeichnen();`);
+    wp.checked = false; wp.click();
+    const wpAn = T(`giessEinst().winterpause`);
+    wp.click();
+    pruef('beta.5: Schalter Winterpause schaltet an und wieder aus', wpAn === true && T(`giessEinst().winterpause`) === false, wpAn);
+    const ein = d.getElementById('ans-einfach'); const einVorher = T('!!S.einfach');
+    ein.checked = einVorher; ein.click();
+    const einNach = T('!!S.einfach'); ein.click();
+    pruef('beta.5: Schalter Einfacher Modus schaltet um', einNach === !einVorher && T('!!S.einfach') === einVorher);
+    const opt0 = T(`ubOptionen().ohneBilder`); d.getElementById('url-ohnebilder').click(); const opt1 = T(`ubOptionen().ohneBilder`); d.getElementById('url-ohnebilder').click();
+    pruef('beta.5: Schalter im Urlaubszettel wirkt auf den Zettel', opt0 !== opt1 && T(`ubOptionen().ohneBilder`) === opt0, opt0 + ' → ' + opt1);
+    melde.click(); const aus = T(`!!MELDE_AUS['Probeart s2 | ']`); melde.click();
+    pruef('beta.5: Haken bei Arten melden nimmt aus und wieder auf', aus === true && T(`!!MELDE_AUS['Probeart s2 | ']`) === false);
+    T(`(function(){ delete S.gelernteArten['Probeart s2 | ']; meldeRender(); })()`);
+
+    /* Zähler der Sicherungserinnerung */
+    const z = d.querySelector('#sicher-takt .zaehler');
+    pruef('beta.5: Minus, Zahl und Plus stehen in einem Zähler', !!z && z.children.length === 3 && !!z.querySelector('[data-takt="-"]') && !!z.querySelector('#sicher-takt-zahl') && !!z.querySelector('[data-takt="+"]'));
+    const tageVorher = T('S.sicherTage');
+    const plus = d.querySelector('#sicher-takt [data-takt="+"]'), minus = d.querySelector('#sicher-takt [data-takt="-"]');
+    T('sicherTageSetzen(59)'); plus.click(); const t60 = T('sicherTage()'); plus.click(); const t60b = T('sicherTage()');
+    T('sicherTageSetzen(2)'); minus.click(); const t1 = T('sicherTage()'); minus.click(); const t1b = T('sicherTage()');
+    pruef('beta.5: Zähler zählt und hält die Grenzen 1 und 60', t60 === 60 && t60b === 60 && t1 === 1 && t1b === 1, [t60, t60b, t1, t1b].join(','));
+    T('S.sicherTage = ' + JSON.stringify(tageVorher) + '; sicherTakteZeichnen()');
+
+    /* Keine alte Feldregel mehr mit Papierfläche, kleinem Radius oder Monospace */
+    const feld = /(^|[\s>+~(])(input|select|textarea)(?![-\w])[^\s,]*\s*$/;
+    const altF = regeln.filter(r => r.sel.split(',').some(s => feld.test(s.trim())) &&
+      /background:var\(--paper\)|background:var\(--fl-karte, var\(--paper\)\)|border-radius:var\(--r-klein\)|var\(--f-data\)|accent-color:var\(--(water|terra|moss)\)/.test(r.rumpf)).map(r => r.sel);
+    pruef('beta.5: Keine alte Feldregel mit Papierfläche, kleinem Radius oder alter Farbe', altF.length === 0, altF.join(' | '));
+    const lab = regeln.filter(r => /(^|,)\s*(\.fgrid span\.lab|\.al-feld>\.lab|\.raummass \.rm-f span)\s*(,|$)/.test(r.sel) && /uppercase|var\(--f-data\)/.test(r.rumpf)).map(r => r.sel);
+    pruef('beta.5: Beschriftungen über Feldern sind nicht mehr in Versalien', lab.length === 0, lab.join(' | '));
+    pruef('beta.5: Felder haben die getönte Fläche der Vorschau', /select, textarea\{[^}]*background:var\(--fl-tief\)[^}]*border-radius:var\(--r-mittel\)|select, textarea\{[^}]*border-radius:var\(--r-mittel\);background:var\(--fl-tief\)/.test(stil.replace(/\s*\n\s*/g, '')));
+    pruef('beta.5: Felder im Anlegen-Formular stehen hell auf der getönten Fläche', /:is\(\.formwrap, \.zustand[^{]*\{background-color:var\(--fl-karte\)\}/.test(stil.replace(/\s*\n\s*/g, ' ')));
   }
 
   console.log('\n── Ergebnis ──');

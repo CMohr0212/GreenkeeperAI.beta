@@ -403,8 +403,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]){
 .tick-btn::before{content:'';position:absolute;inset:-12px}
 html[data-design="klartext"] .chip,
 html[data-design="klartext"] label.check{min-height:var(--tap)}
-html[data-design="klartext"] input[type="checkbox"],
-html[data-design="klartext"] input[type="radio"]{width:26px;height:26px}
+
 html[data-design="klartext"] .tick-btn{width:26px;height:26px}
 
 /* Klartext: eine Schriftfamilie, kein Versalienetikett, ruhigere
@@ -443,9 +442,8 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.4rem,8vw,4.2re
 
 
 .controls{padding:20px 0 18px;border-bottom:1px solid var(--line);background:var(--paper);z-index:30}
-.search{width:100%;padding:11px 14px;border:1.5px solid var(--ink);border-radius:var(--r-klein);background:transparent;font-family:var(--f-body);font-size:var(--t-l);color:var(--ink)}
-.search::placeholder{color:var(--peat);opacity:.75}
-.search:focus{outline:2px solid var(--water);outline-offset:1px}
+.search{width:100%}
+
 .ctrl-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:11px}
 .ctrl-lab{font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--peat);margin-right:2px}
 .chip{font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.05em;text-transform:uppercase;
@@ -582,11 +580,8 @@ footer{padding:30px 0 60px;color:var(--peat);font-size:var(--t-m);border-top:1px
 .done-wrap.closed .caret{transform:rotate(-90deg)}
 .done-wrap.closed .tasks{display:none}
 .addbar{display:flex;gap:7px;margin-top:9px}
-.addbar input{
-  flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:var(--r-klein);background:transparent;
-  font-family:var(--f-body);font-size:var(--t-l);color:var(--ink)
-}
-.addbar input:focus{outline:2px solid var(--water);outline-offset:-1px;border-color:var(--water)}
+.addbar input{flex:1;min-width:0}
+
 .tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 /* Knopfarten (Haupt, Neben, Gefahr): Grundstil am Ende des Stils, 4.0-beta.4 */
 
@@ -712,13 +707,10 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 .fgrid{display:grid;gap:12px}
 @media(min-width:640px){.fgrid{grid-template-columns:1fr 1fr}}
 .fgrid label{display:block}
-.fgrid span.lab,.zslider span.lab{font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--peat);display:block;margin-bottom:4px}
-.fgrid input,.fgrid select,.fgrid textarea{
-  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);
-  font-family:var(--f-body);font-size:var(--t-l);color:var(--ink)
-}
+.fgrid span.lab,.zslider span.lab{font-family:var(--f-body);font-size:var(--t-s);font-weight:600;letter-spacing:0;text-transform:none;color:var(--schrift-2);display:block;margin:0 2px 6px}
+.fgrid input,.fgrid select,.fgrid textarea{width:100%}
 .fgrid textarea{min-height:74px;resize:vertical}
-.fgrid input:focus,.fgrid select:focus,.fgrid textarea:focus{outline:2px solid var(--water);outline-offset:-1px}
+
 .fspan{grid-column:1/-1}
 /* Lange Beschriftungen und kurze Zahlenfelder verkeilen sich sonst
    nebeneinander. Untereinander bleibt es auf jedem Handy lesbar. */
@@ -740,7 +732,7 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 /* ── Bibliothek, Zustände, Melden ─────────────────────────── */
 .bibbox{border:1px solid var(--line);border-radius:var(--r-mittel);padding:14px;margin-bottom:18px;background:var(--sand)}
 .bibfeld{display:flex;gap:8px;align-items:stretch}
-.bibfeld input{flex:1;min-width:0;font:inherit;font-size:var(--t-l);padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.bibfeld input{flex:1;min-width:0}
 .bibfeld button{white-space:nowrap;flex:0 0 auto}
 .biblist{margin-top:8px;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper)}
 .biblist .bibgrp{position:sticky;top:0;background:var(--sand);font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-bottom:1px solid var(--line);color:var(--ink-2)}
@@ -760,7 +752,7 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 .bibpick .verw p{margin:0 0 5px;font-size:var(--t-s)}
 .bibpick .verw button{display:block;text-align:left;margin:0 0 4px}
 .pastebox{margin-top:11px}
-.pastebox textarea{width:100%;min-height:130px;font:inherit;font-size:var(--t-md);padding:10px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink);resize:vertical}
+.pastebox textarea{width:100%;min-height:130px;resize:vertical}
 .pastemeld{margin:8px 0 0;font-size:var(--t-m);color:var(--moss)}
 .pastemeld.warn{color:var(--terra)}
 .fhint{display:block;font-size:var(--t-s);color:var(--ink-2);line-height:1.5;margin-top:5px}
@@ -772,7 +764,7 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 .zbadge.good{color:var(--moss);border-color:var(--moss)}
 .zustand{border:1px solid var(--line);border-radius:var(--r-klein);padding:12px;margin:8px 0 4px;background:var(--sand)}
 .zsel{display:block}
-.zsel select{width:100%;margin-top:4px;font:inherit;font-size:var(--t-l);padding:9px 10px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.zsel select{width:100%;margin-top:4px}
 .ztext{font-size:var(--t-m);line-height:1.6;margin:9px 0 0;color:var(--ink-2)}
 .zstopp{font-size:var(--t-m);line-height:1.55;margin:9px 0 0;color:var(--terra)}
 .zvor,.zbis{font-size:var(--t-s);margin:8px 0 0;color:var(--ink-2)}
@@ -1080,10 +1072,8 @@ html[data-design="klartext"] .dg-zeile{border-width:2px;font-size:var(--t-md)}
 .sb-suche svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);
   width:17px;height:17px;stroke:var(--schrift-2);fill:none;stroke-width:1.8;
   stroke-linecap:round;pointer-events:none}
-.sb-suche input{width:100%;min-height:var(--tap);padding:0 14px 0 38px;
-  border-radius:var(--r-mittel);border:1px solid var(--linie);
-  background:var(--fl-karte);color:var(--schrift);font:inherit}
-html[data-design="klartext"] .sb-suche input{border-width:2px;font-size:var(--t-md)}
+.sb-suche input{width:100%;min-height:var(--tap)}
+
 .sb-liste{display:flex;flex-direction:column}
 .sb-linie{display:flex;align-items:center;gap:12px;width:100%;padding:12px 2px;
   border:0;border-bottom:1px solid var(--linie);background:none;
@@ -1464,12 +1454,10 @@ html[data-design="klartext"] .ver-k{border-width:2px}
   color:var(--schrift-2);margin-top:3px;line-height:1.45}
 .al-weg.on{border-color:var(--fl-akzent);box-shadow:inset 0 0 0 1px var(--fl-akzent)}
 .al-feld{margin:0 0 15px}
-.al-feld>.lab{display:block;margin-bottom:5px;font-family:var(--f-data);
-  font-size:var(--t-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--schrift-2)}
-.al-feld input:not([type=file]),.al-feld select,.al-feld textarea{width:100%;font:inherit;
-  font-size:var(--t-l);padding:11px 12px;border:1px solid var(--linie);
-  border-radius:var(--r-klein);background:var(--fl-karte);color:var(--schrift)}
-.al-feld textarea{min-height:74px;font-size:var(--t-m);line-height:1.5;resize:vertical}
+.al-feld>.lab{display:block;margin:0 2px 6px;font-family:var(--f-body);
+  font-size:var(--t-s);font-weight:600;letter-spacing:0;text-transform:none;color:var(--schrift-2)}
+.al-feld input:not([type=file]),.al-feld select,.al-feld textarea{width:100%}
+.al-feld textarea{min-height:74px;line-height:1.5;resize:vertical}
 .as-knoepfe,.al-knoepfe,.ut-gruende,.ut-formen{display:grid;
   grid-template-columns:repeat(2,1fr);gap:8px}
 .ut-gruende{margin:0 0 12px}
@@ -1693,7 +1681,7 @@ html[data-design="klartext"] .kz-feld em{font-size:var(--t-md)}
 
 /* ── Zonenplan ────────────────────────────────────────────── */
 .zslider{display:block;margin-bottom:9px}
-.zslider input[type=range]{width:100%;margin-top:5px;accent-color:var(--water)}
+.zslider input[type=range]{width:100%;margin-top:5px}
 .zchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .zchip{font:inherit;font-size:var(--t-xs);padding:3px 7px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink);cursor:pointer;max-width:100%;overflow-wrap:anywhere}
 .zchip.gift{border-color:var(--terra);color:var(--terra)}
@@ -1708,12 +1696,11 @@ html[data-design="klartext"] .kz-feld em{font-size:var(--t-md)}
 
 /* ── Grundriss ───────────────────────────────────────────── */
 .raumleiste{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.raumleiste select{flex:1;min-width:120px;font:inherit;font-size:var(--t-l);padding:9px 10px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.raumleiste select{flex:1;min-width:120px}
 .raumgrid{margin-bottom:14px}
-.fgrid label.check{display:flex;flex-direction:row;align-items:center;gap:9px}
-.fgrid label.check input[type=checkbox]{width:19px;height:19px;flex:0 0 auto;margin:0;accent-color:var(--moss)}
+.fgrid label.check input[type=checkbox]{flex:0 0 auto;margin:0}
 .fgrid label.check .lab{margin:0}
-.raumgrid input[type=range]{width:100%;accent-color:var(--terra);margin-top:5px}
+.raumgrid input[type=range]{width:100%;margin-top:5px}
 .pleiste{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
 .mgruppe-titel{display:flex;width:100%;align-items:center;justify-content:space-between;
   gap:10px;font:inherit;font-size:var(--t-mono);font-family:var(--f-data);
@@ -1938,8 +1925,7 @@ body[data-ansicht="botaniker"] #fab-neu{display:none!important}
   border:1.5px solid var(--line);background:var(--fl-karte, var(--paper));color:var(--ink)}
 .bot-rund svg{width:20px;height:20px}
 .bot-senden{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers)}
-#bot-text{flex:1;min-width:0;font:inherit;font-size:16px;line-height:1.35;resize:none;max-height:120px;
-  border:1.5px solid var(--line);border-radius:22px;padding:11px 14px;background:var(--fl-karte, var(--paper));color:var(--ink)}
+#bot-text{flex:1;min-width:0;line-height:1.35;resize:none;max-height:120px}
 .bot-bilder{display:flex;gap:6px;max-width:760px;margin:0 auto 6px;flex-wrap:wrap}
 .bot-bilder span{position:relative}
 .bot-bilder img{width:48px;height:48px;border-radius:10px;object-fit:cover;display:block}
@@ -2050,7 +2036,7 @@ body.gm-offen #fab-neu{display:none}
 .mn-zeile{display:flex;align-items:flex-start;gap:10px;padding:9px 0;
   border-top:1px solid var(--line);cursor:pointer;min-height:44px}
 .mn-zeile:first-of-type{border-top:0}
-.mn-zeile input{flex:0 0 auto;margin-top:3px;width:20px;height:20px}
+.mn-zeile input{flex:0 0 auto;margin-top:3px}
 .mn-text{flex:1;min-width:0;font-size:var(--t-m);line-height:1.45}
 .mn-text b{display:block;font-weight:600;overflow-wrap:anywhere}
 .mn-sub{display:block;font-size:var(--t-xs);color:var(--ink-2);margin-top:2px;overflow-wrap:anywhere}
@@ -2141,7 +2127,7 @@ body.gm-offen #fab-neu{display:none}
 .url-nr{font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.1em;
   text-transform:uppercase;color:var(--peat);margin:0 0 10px}
 .ubox{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;cursor:pointer}
-.ubox input{flex:0 0 auto;width:20px;height:20px;margin:2px 0 0}
+
 .ubox span{flex:1;min-width:0}
 .ubox b{display:block;font-size:var(--t-md);font-weight:600}
 .ubox i{display:block;font-style:normal;font-size:var(--t-s);color:var(--ink-2);line-height:1.5;margin-top:2px}
@@ -2353,14 +2339,14 @@ html[data-design="klartext"] .nt i{color:var(--schrift);white-space:normal}
 html[data-design="terrarium"] .nt{box-shadow:var(--glanz)}
 .kibox{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
 .kizeile{display:flex;gap:8px;align-items:stretch}
-.kizeile select{flex:1;min-width:0;font:inherit;font-size:var(--t-md);padding:9px 10px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.kizeile select{flex:1;min-width:0}
 .kizeile button{white-space:nowrap}
 .kihinweis{margin:8px 0 0;font-size:var(--t-s);line-height:1.5;color:var(--ink-2)}
 .kihinweis.ok{color:var(--moss)}
 .kihinweis.warn{color:var(--terra)}
 .kiprompt{margin-top:10px}
 .kiprompt summary{font-size:var(--t-m);color:var(--water);cursor:pointer}
-.kiprompt textarea{width:100%;min-height:150px;margin-top:8px;font:inherit;font-size:var(--t-s);line-height:1.5;padding:9px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink);resize:vertical}
+.kiprompt textarea{width:100%;min-height:150px;margin-top:8px;line-height:1.5;resize:vertical}
 /* ── KI direkt: Schluessel, Modell, Bilder ── */
 /* Der Copy-Paste-Weg frisst viel Platz — Einfuegefeld, Prompt,
    Abgleich. Ist der Direktweg aktiv, wandert er unter eine Klappe.
@@ -2507,7 +2493,7 @@ body.gm-offen{overflow:hidden}
 /* ── Bearbeiten ──────────────────────────────────────────── */
 .bearb{border:1px solid var(--peat);border-radius:var(--r-klein);padding:13px;margin-top:10px;background:var(--sand)}
 .bearb[hidden]{display:none!important}
-.bearb textarea{width:100%;font:inherit;font-size:var(--t-md);padding:9px;border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink);resize:vertical}
+.bearb textarea{width:100%;resize:vertical}
 
 /* ── Suchleiste beim Scrollen ausblenden ─────────────────── */
 /* Angeheftet wird die Leiste festgesetzt; ein Platzhalter hält die
@@ -2699,8 +2685,7 @@ body.einfach #zonen-sec{display:none!important}
 .ktab-pane[hidden]{display:none}
 .lagebox{display:grid;gap:10px;margin-bottom:12px}
 .lagebox label{display:block}
-.lagebox select{width:100%;font:inherit;font-size:var(--t-m);padding:9px 10px;
-  border:1px solid var(--line);border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.lagebox select{width:100%}
 .lage-jetzt{font-size:var(--t-m);color:var(--peat);margin:0 0 10px;line-height:1.45}
 .lage-tier{font-size:var(--t-m);line-height:1.45;margin:0 0 10px}
 .lage-tier.warn{color:var(--terra);font-weight:600}
@@ -2713,7 +2698,7 @@ body.einfach #zonen-sec{display:none!important}
 .ver-eig.geraten{opacity:.75}
 .raummass .rm-zeile{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
 .raummass .rm-f{display:flex;align-items:center;gap:5px;margin:0}
-.raummass .rm-f span{font-size:var(--t-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--peat)}
+.raummass .rm-f span{font-size:var(--t-s);font-weight:600;letter-spacing:0;text-transform:none;color:var(--schrift-2)}
 .raummass .rm-f input{width:76px;text-align:right}
 .raummass .rm-f i{font-style:normal;font-size:var(--t-s);color:var(--peat)}
 /* ── Gießplan als Häufungsgrafik ──────────────────────────── */
@@ -2958,11 +2943,10 @@ html[data-design="terrarium"] .sam-raster .card .bar{box-shadow:var(--glanz)}
 .aqua-liste li{margin-bottom:7px;font-size:var(--t-m);line-height:1.55}
 .aqua-takt{margin:0 0 10px;font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.04em}
 .takt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
-.takt .lab{font-size:var(--t-s);color:var(--peat)}
+.takt .lab{font-size:var(--t-m);font-weight:400;color:var(--schrift)}
 .takt-pm{width:38px;height:38px;font-size:1.15rem;line-height:1;padding:0;flex:0 0 auto}
-.takt-zahl{width:64px;text-align:center;font:inherit;font-size:var(--t-l);padding:7px 4px;
-  border:1px solid var(--line);border-radius:var(--r-mittel);background:var(--paper);color:var(--ink)}
-.takt-zahl:focus{outline:2px solid var(--water);outline-offset:-1px}
+.takt-zahl{width:64px;text-align:center}
+
 
 /* ── Substrat ────────────────────────────────────────────── */
 #sub-ziel,#sub-topf{width:100%;margin-top:4px;font:inherit;font-size:var(--t-l);padding:9px 10px;
@@ -3023,7 +3007,7 @@ html[data-design="klartext"] .vgl-punkt{width:12px;height:12px}
 .topf-hinweis{font-size:var(--t-s);color:var(--peat);margin:2px 0 14px;line-height:1.5}
 .topf-schieber{display:block;margin:0 0 10px}
 .topf-schieber .lab{display:block;margin-bottom:6px}
-.topf-schieber input[type=range]{width:100%;accent-color:var(--water)}
+.topf-schieber input[type=range]{width:100%}
 .topf-ergebnis{font-family:var(--f-display);font-size:var(--t-l);margin:0;line-height:1.4}
 .topf-ergebnis b{font-weight:600}
 .topf-ergebnis span{display:block;font-family:var(--f-body);font-size:var(--t-s);
@@ -3106,8 +3090,7 @@ html[data-design="klartext"] .vgl-punkt{width:12px;height:12px}
 .az-gruppe .tools{margin-top:10px}
 .az-notiz{display:flex;gap:8px;margin-top:8px}
 .az-notiz[hidden]{display:none!important}
-.az-notiz input{flex:1;min-width:0;font:inherit;padding:8px 10px;border:1px solid var(--linie);
-  border-radius:var(--r-klein);background:var(--paper);color:var(--ink)}
+.az-notiz input{flex:1;min-width:0}
 .az-notiz button{font:inherit;padding:0 12px;min-height:var(--tap);border:1px solid var(--linie);
   border-radius:var(--r-klein);background:none;color:inherit;cursor:pointer}
 .az-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin:6px 0 10px}
@@ -3219,8 +3202,8 @@ body.vollbild .plan-svg{width:100%;height:100%;display:block}
   margin-left:-1px;background:currentColor;transform:rotate(35deg)}
 .vb-sch-feld{flex:0 0 100%;display:flex;flex-direction:column;gap:4px;
   font-size:var(--t-xs);color:var(--schrift-2)}
-.vb-sch-feld input[type=range]{width:100%;accent-color:var(--terra)}
-.vb-sch-feld.zeile{flex-direction:row;align-items:center;gap:8px}
+.vb-sch-feld input[type=range]{width:100%}
+.vb-sch-feld.zeile{align-items:center;gap:8px}
 .vb-schublade{position:absolute;left:52px;top:0;bottom:0;width:min(46vw,240px);z-index:2;
   background:var(--paper);border-right:1px solid var(--line);padding:var(--a-2);
   display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;overflow-y:auto}
@@ -3249,7 +3232,7 @@ body:not(.vollbild) .vb-schublade{display:none}
 .vb-fuss label{display:flex;align-items:center;gap:var(--a-2);flex:1 1 180px;min-width:0}
 .vb-fuss label span{font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.1em;
   text-transform:uppercase;color:var(--peat);white-space:nowrap}
-.vb-fuss input[type=range]{flex:1;min-width:0;accent-color:var(--water)}
+.vb-fuss input[type=range]{flex:1;min-width:0}
 .vb-licht{display:flex;gap:4px}
 .vb-licht button{font:inherit;font-size:var(--t-xs);padding:6px 9px;border:1px solid var(--line);
   border-radius:var(--r-klein);background:var(--paper);color:var(--ink);cursor:pointer}
@@ -3308,10 +3291,8 @@ body.vollbild #moebel-bearb.on{position:absolute;left:52px;right:0;bottom:0;z-in
 .dok-schritte li.jetzt{border-top-color:var(--ink);color:var(--ink);font-weight:700}
 .dok-stufe{margin-bottom:var(--a-5)}
 .dok-eigen{display:block;margin:0 0 var(--a-4)}
-.dok-eigen textarea{width:100%;min-height:76px;padding:10px 11px;border-radius:var(--r-klein);
-  border:1px solid var(--line);background:var(--fl-karte);color:var(--ink);
-  font:inherit;font-size:var(--t-s);resize:vertical}
-.dok-eigen textarea:focus{outline:2px solid var(--water);outline-offset:1px}
+.dok-eigen textarea{width:100%;min-height:76px;resize:vertical}
+
 .dok-antwort{margin:0 0 var(--a-3);padding:11px 12px;border-radius:var(--r-klein);
   background:var(--ton-blatt);border-left:3px solid var(--water)}
 .dok-antwort b{display:block;font-family:var(--f-data);font-size:var(--t-mono);
@@ -3359,8 +3340,7 @@ body.vollbild #moebel-bearb.on{position:absolute;left:52px;right:0;bottom:0;z-in
 .task-desc{display:block;margin-top:var(--a-2);font-size:var(--t-m);line-height:1.6;color:var(--ink-2);
   border-left:2px solid var(--line);padding-left:var(--a-3)}
 .task-desc[hidden]{display:none}
-.add-wann{flex:0 0 auto;font:inherit;font-size:var(--t-s);padding:8px 6px;border:1px solid var(--line);
-  border-radius:var(--r-klein);background:var(--paper);color:var(--ink);max-width:38%}
+.add-wann{flex:0 0 auto;max-width:38%;font-size:var(--t-m)}
 @media(max-width:420px){.addbar{flex-wrap:wrap}.add-wann{max-width:none;flex:1 1 100%}}
 
 /* ── Aktualisierung und Installation ─────────────────────── */
@@ -3408,7 +3388,7 @@ body.ks-platz{padding-bottom:calc(76px + var(--ks-h, 96px) + var(--a-3))}
 #kartei-such{width:100%;margin-bottom:var(--a-2)}
 .kartei-kaesten{display:flex;flex-wrap:wrap;gap:var(--a-2) var(--a-4);margin:var(--a-3) 0 var(--a-2)}
 .kartei-kaesten label{display:flex;align-items:center;gap:9px;min-height:var(--tap);font-size:var(--t-m);cursor:pointer}
-.kartei-kaesten input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;margin:0;accent-color:var(--moss)}
+.kartei-kaesten input[type=checkbox]{flex:0 0 auto;margin:0}
 .kartei-kaesten input[type=checkbox]:disabled + span{color:var(--matt)}
 .kartei-balken{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:var(--a-3) 0 var(--a-2)}
 .kartei-balken i{display:block;height:100%;background:var(--moss);transition:width var(--dauer)}
@@ -3426,7 +3406,7 @@ html[data-design="klartext"] .kartei-zeile{border-width:2px}
   font:inherit;color:inherit;cursor:pointer;min-height:var(--tap);justify-content:center}
 .kartei-zeile .kz-durch{flex:0 0 auto;min-height:var(--tap);padding:0 12px;white-space:nowrap}
 .kartei-zeile.kz-wahl{cursor:pointer}
-.kartei-zeile input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;margin:0;accent-color:var(--moss)}
+.kartei-zeile input[type=checkbox]{flex:0 0 auto;margin:0}
 .kartei-zeile.kz-wahl .kz-txt{flex:1}
 #f-sorte-hint .sorte-ki,#f-sorte-hint .sorte-merk{display:block}
 #f-sorte-hint .sorte-nimm{display:inline-block;margin-top:4px;min-height:var(--tap)}
@@ -3650,9 +3630,7 @@ html[data-design="botanisch"] #karte-rumpf .zustand .zsel .lab{flex:1;font-famil
    gekacheltes Bild im Stylesheet, und genau das soll hier keins mehr
    geben. Geaendert werden nur Flaeche, Radius und Hoehe. */
 html[data-design="botanisch"] #karte-rumpf .zustand .zsel select,
-html[data-design="botanisch"] #karte-rumpf .lagebox select{flex:0 1 58%;min-width:0;max-width:58%;width:auto;min-height:var(--tap);
-  margin:0;padding:0 10px;border:0;border-radius:var(--r-mittel);
-  background:var(--fl-tief);color:var(--schrift);font-size:var(--t-md)}
+html[data-design="botanisch"] #karte-rumpf .lagebox select{flex:0 1 58%;min-width:0;max-width:58%;width:auto;min-height:var(--tap);margin:0}
 html[data-design="botanisch"] #karte-rumpf .lagebox{margin:0}
 html[data-design="botanisch"] #karte-rumpf .lagebox select{width:100%;max-width:none}
 html[data-design="botanisch"] #karte-rumpf .w-plus{min-height:var(--tap);padding:0 16px;border:1px solid var(--linie-stark);
@@ -3699,7 +3677,7 @@ button.haupt, .wk-haupt, .km-haupt,
 .gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
 .km-neben button, .dokwahl-gewaehlt button,
 .gm-fuss button, .gm-zfrage-btns button,
-.sich-hinweis button, .wt-zeile button, .kimodell button{
+.sich-hinweis button, .wt-zeile button, .kimodell button, .raummass .rm-zeile > button{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   min-height:var(--knopf-h);padding:0 18px;
   font-family:var(--f-body);font-size:var(--t-l);font-weight:600;font-style:normal;
@@ -3718,7 +3696,7 @@ button.haupt:active, .wk-haupt:active, .km-haupt:active,
 .gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
 .km-neben button, .dokwahl-gewaehlt button,
 .gm-fuss button, .gm-zfrage-btns button,
-.sich-hinweis button, .wt-zeile button, .kimodell button, .takt-pm{
+.sich-hinweis button, .wt-zeile button, .kimodell button, .takt-pm, .raummass .rm-zeile > button{
   background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift)}
 
 /* Haupt */
@@ -3762,6 +3740,96 @@ html[data-design="klartext"] .gm-fuss > button, html[data-design="klartext"] .gm
 .bot-senden{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers)}
 .sekm-raus:active, .kopf-zahnrad:active, .bot-rund:active{transform:scale(.96)}
 .sekm-kopf .sekm-i[aria-expanded="true"]{background:var(--ton-tipp);border-color:var(--linie-stark)}
+
+/* ══ Grundstil S2 — Felder, Schalter, Haken (4.0-beta.5) ═════════
+   Form wie Vorschau Grundstil (.f-in): getönte Fläche, runde Ecken,
+   mindestens 48 px, große Schrift, Akzentrand beim Tippen.
+   Anordnung (Breite, flex, Abstände) bleibt bei den Regeln der
+   jeweiligen Ansicht; Aussehen steht nur hier.
+   Auswahllisten behalten den Pfeil des Systems (appearance bleibt).
+   Häkchen mit role="switch" sind Schalter, alle übrigen sind Haken
+   in Listen zum Anhaken. */
+:root{--feld-h:max(48px, var(--tap));--haken-bild:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+html[data-design="botanisch"]{--haken-bild:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDF0E6' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+html[data-design="terrarium"]{--haken-bild:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230C1810' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+
+:is(input:not([type]), input[type=text], input[type=number], input[type=search], input[type=date],
+  input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel]),
+select, textarea{
+  box-sizing:border-box;min-height:var(--feld-h);padding:0 14px;
+  border:1.5px solid var(--linie);border-radius:var(--r-mittel);
+  background:var(--fl-tief);color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-l);font-weight:400;line-height:1.3;
+  outline:0;transition:border-color .15s, background-color .15s}
+textarea{padding:12px 14px;line-height:1.5}
+html[data-design="botanisch"] :is(input:not([type]), input[type=text], input[type=number], input[type=search],
+  input[type=date], input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel]),
+html[data-design="botanisch"] select, html[data-design="botanisch"] textarea{border-color:transparent}
+html[data-design="klartext"] :is(input:not([type]), input[type=text], input[type=number], input[type=search],
+  input[type=date], input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel]),
+html[data-design="klartext"] select, html[data-design="klartext"] textarea{border-width:2px}
+input::placeholder, textarea::placeholder{color:var(--schrift-3);opacity:1}
+:is(input:not([type]), input[type=text], input[type=number], input[type=search], input[type=date],
+  input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel]):focus,
+select:focus, textarea:focus,
+html[data-design] :is(input:not([type]), input[type=text], input[type=number], input[type=search], input[type=date],
+  input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel]):focus,
+html[data-design] select:focus, html[data-design] textarea:focus{border-color:var(--fl-akzent);background-color:var(--fl-erhoben)}
+/* Felder auf getönten Flächen (Formulare, Zustand, Bibliothek, Bearbeiten)
+   stehen hell, sonst verschwinden sie in der Fläche */
+:is(.formwrap, .zustand, .bibbox, .bearb, .quar-anbieten, .aqua, .dok-rueck)
+  :is(input:not([type]), input[type=text], input[type=number], input[type=search], input[type=date],
+  input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel], select, textarea){background-color:var(--fl-karte)}
+html[data-design="botanisch"] #karte-rumpf .ktab-pane>.zustand :is(select, input, textarea){background-color:var(--fl-tief)}
+/* Beschriftung über einem Feld (Vorschau .f-lab) */
+span.lab{font-family:var(--f-body);font-size:var(--t-s);font-weight:600;letter-spacing:0;
+  text-transform:none;color:var(--schrift-2)}
+:not(.fgrid) > label.fspan.zeile{margin:0 0 14px}
+:not(.fgrid) > label.fspan.zeile > .lab{margin:0 2px 6px}
+:not(.fgrid) > label.fspan.check{min-height:var(--feld-h);margin:0 0 4px}
+/* Sonderformen */
+.zustand .zsel + *{margin-top:12px}
+.sb-suche input{padding-left:38px}
+.raummass .rm-f input{padding:0 10px}
+
+/* Zähler „− 14 +“ (Sicherungserinnerung) */
+.zaehler{display:inline-flex;align-items:center;flex:0 0 auto;background:var(--fl-tief);
+  border:1.5px solid var(--linie);border-radius:var(--r-mittel)}
+html[data-design="botanisch"] .zaehler{border-color:transparent}
+.zaehler .takt-pm{width:var(--feld-h);height:var(--feld-h);min-height:var(--feld-h);padding:0;
+  background:transparent;border:0;border-radius:var(--r-mittel);color:var(--schrift);
+  font:500 1.4rem/1 var(--f-body)}
+.zaehler .takt-zahl, html[data-design] .zaehler .takt-zahl{width:3.2em;min-width:0;padding:0;text-align:center;
+  border:0;background:transparent;font-weight:600;-moz-appearance:textfield}
+.zaehler .takt-zahl::-webkit-inner-spin-button, .zaehler .takt-zahl::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.zaehler:focus-within{border-color:var(--fl-akzent)}
+
+/* Schalter: Häkchen mit role="switch", Text links, Schalter rechts */
+label.check, label.ubox, label.vb-sch-feld.zeile{display:flex;flex-direction:row-reverse;
+  justify-content:space-between;align-items:center;gap:14px;cursor:pointer}
+label.check > span, label.ubox > span, label.vb-sch-feld.zeile > span{flex:1 1 auto;min-width:0}
+label.check > .lab, .fgrid label.check > .lab{margin:0;font-family:var(--f-body);font-size:var(--t-l);font-weight:500;
+  letter-spacing:0;text-transform:none;color:var(--schrift);line-height:1.3}
+input[type=checkbox][role=switch]{-webkit-appearance:none;appearance:none;flex:0 0 auto;
+  width:52px;height:32px;min-height:0;margin:0;border-radius:99px;cursor:pointer;
+  border:1.5px solid var(--linie-stark);
+  background:var(--fl-tief) radial-gradient(circle at 14.5px 50%, var(--schrift-3) 10.5px, transparent 11.5px) no-repeat;
+  transition:background-color .15s, border-color .15s}
+input[type=checkbox][role=switch]:checked{border-color:var(--fl-akzent);
+  background:var(--fl-akzent) radial-gradient(circle at 34.5px 50%, var(--schrift-invers) 10.5px, transparent 11.5px) no-repeat}
+input[type=checkbox][role=switch]:disabled{opacity:.45;cursor:default}
+
+/* Haken in Listen zum Anhaken: Arten melden, Doktor, Kartei */
+input[type=checkbox]:not([role=switch]){-webkit-appearance:none;appearance:none;flex:0 0 auto;
+  width:24px;height:24px;min-height:0;margin:0;border-radius:7px;cursor:pointer;
+  border:2px solid var(--linie-stark);background:var(--fl-tief) center/18px 18px no-repeat;
+  transition:background-color .15s, border-color .15s}
+input[type=checkbox]:not([role=switch]):checked{border-color:var(--fl-akzent);
+  background-color:var(--fl-akzent);background-image:var(--haken-bild)}
+input[type=checkbox]:not([role=switch]):disabled{opacity:.45;cursor:default}
+
+/* Schieberegler im Akzent (Petrol bleibt Wasser, F88) */
+input[type=range]{accent-color:var(--fl-akzent)}
 
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
@@ -9836,7 +9904,7 @@ function pflanzeEntfernen(id){
         <label><span class="lab">Durchmesser in cm</span>
           <input id="ut-topf" type="number" min="5" max="80" step="1" value="18"></label>
         <label class="fspan check">
-          <input type="checkbox" id="ut-langzeit"> <span class="lab" style="display:inline">Langzeitdünger untergemischt</span></label>
+          <input type="checkbox" role="switch" id="ut-langzeit"> <span class="lab" style="display:inline">Langzeitdünger untergemischt</span></label>
         <p class="fhint">Dann ist ein halbes Jahr Ruhe — die App schlägt in dieser Zeit kein Düngen vor.</p>
         <p class="fhint" id="ut-volumen"></p>
         <p class="fhint" id="ut-sprung"></p>
@@ -9867,7 +9935,7 @@ function pflanzeEntfernen(id){
         <p class="ut-frage">Sind dabei Stecklinge abgegangen?</p>
         <p class="ut-unter">Beim Teilen oder Auslichten fällt oft etwas ab, das sich bewurzeln lässt. Was du hier einträgst, wird als eigene Pflanze angelegt und im Stammbaum mit der Mutter verbunden.</p>
         <label class="fspan check">
-          <input type="checkbox" id="ut-hat-stecklinge"> <span class="lab" style="display:inline">Ja, Stecklinge gezogen</span></label>
+          <input type="checkbox" role="switch" id="ut-hat-stecklinge"> <span class="lab" style="display:inline">Ja, Stecklinge gezogen</span></label>
         <div id="ut-steckling-feld" hidden>
           <label><span class="lab">Wie viele</span>
             <input id="ut-steckling-zahl" type="number" min="1" max="12" step="1" value="1"></label>
@@ -10267,14 +10335,14 @@ function pflanzeEntfernen(id){
           </select></label>
         <label><span class="lab">Breite in cm</span><input id="mb-breite" type="number" min="15" step="5"></label>
         <label><span class="lab">Tiefe in cm</span><input id="mb-tiefe" type="number" min="15" step="5"></label>
-        <label class="fspan check" id="mb-katze-feld"><input type="checkbox" id="mb-katze"> <span class="lab" style="display:inline">Katzen kommen hier ran</span></label>
+        <label class="fspan check" id="mb-katze-feld"><input type="checkbox" role="switch" id="mb-katze"> <span class="lab" style="display:inline">Katzen kommen hier ran</span></label>
         <!-- Nur für Lampen. Beides wirkt sofort, wie das Drehen: ein
              Regler, dessen Wirkung erst nach dem Speichern zu sehen
              wäre, ließe sich nicht einstellen. -->
         <label class="fspan" id="mb-reich-feld" hidden><span class="lab">Wie weit das Licht reicht</span>
           <input type="range" id="mb-reich" min="30" max="400" step="10">
           <span class="fhint" id="mb-reich-wert"></span></label>
-        <label class="fspan check" id="mb-an-feld" hidden><input type="checkbox" id="mb-an"> <span class="lab" style="display:inline">Licht an</span></label>
+        <label class="fspan check" id="mb-an-feld" hidden><input type="checkbox" role="switch" id="mb-an"> <span class="lab" style="display:inline">Licht an</span></label>
       </div>
       <div class="tools"><button id="btn-mb-save" class="haupt">Speichern</button><button id="btn-mb-dreh">Drehen</button><button id="btn-mb-weg" class="loeschen">Möbel löschen</button><button id="btn-mb-zu">Schließen</button></div>
     </div>
@@ -10308,7 +10376,7 @@ function pflanzeEntfernen(id){
       <label><span class="lab">Drehung auf dem Kompass</span>
         <input type="range" id="r-drehung" min="0" max="345" step="15">
         <span class="fhint">Dreht den ganzen Raum. Der rote Zeiger oben rechts zeigt nach Norden.</span></label>
-      <label class="fspan check"><input type="checkbox" id="r-dach"> <span class="lab" style="display:inline">Offener Himmel — Balkon, Terrasse, Dachgarten</span></label>
+      <label class="fspan check"><input type="checkbox" role="switch" id="r-dach"> <span class="lab" style="display:inline">Offener Himmel — Balkon, Terrasse, Dachgarten</span></label>
       <div class="fspan raummass">
         <span class="lab">Raumgröße</span>
         <div class="rm-zeile">
@@ -10363,10 +10431,12 @@ function pflanzeEntfernen(id){
       vorhandene Stand beiseitegelegt. Solange er hier steht, kommst du damit zurück.</p>
     <div class="takt" id="sicher-takt">
       <span class="lab">Erinnern, wenn seit</span>
+      <span class="zaehler">
       <button class="takt-pm" data-takt="-" aria-label="Weniger Tage">−</button>
       <input class="takt-zahl" id="sicher-takt-zahl" type="number" inputmode="numeric"
              min="1" max="60" aria-label="Tage bis zur Erinnerung">
       <button class="takt-pm" data-takt="+" aria-label="Mehr Tage">+</button>
+      </span>
       <span class="lab" id="sicher-takt-wort">Tagen nicht gesichert wurde</span>
     </div>
     <input type="file" id="import-file" accept="application/json,.json" aria-label="Sicherungsdatei wählen" hidden>
@@ -10538,7 +10608,7 @@ function pflanzeEntfernen(id){
       <label class="fspan zeile"><span class="lab">Auf der Flasche: ml je Liter</span>
         <input type="number" id="ein-dosis" min="0.5" max="50" step="0.5" inputmode="decimal"></label>
       <label class="fspan check">
-        <input type="checkbox" id="ck-vollstaerke"> <span class="lab" style="display:inline">Volle Dosis statt halber</span></label>
+        <input type="checkbox" role="switch" id="ck-vollstaerke"> <span class="lab" style="display:inline">Volle Dosis statt halber</span></label>
       <label class="fspan zeile"><span class="lab">Düngetag ab wie vielen Pflanzen</span>
         <input type="number" id="ein-schwelle" min="1" max="99" step="1" inputmode="numeric"></label>
       <label class="fspan zeile"><span class="lab">Am liebsten an diesem Wochentag</span>
@@ -10557,7 +10627,7 @@ function pflanzeEntfernen(id){
 
       <p class="ein-abschnitt">Winterpause</p>
       <label class="fspan check">
-        <input type="checkbox" id="ck-winterpause"> <span class="lab" style="display:inline">Von Oktober bis Februar nicht düngen</span></label>
+        <input type="checkbox" role="switch" id="ck-winterpause"> <span class="lab" style="display:inline">Von Oktober bis Februar nicht düngen</span></label>
       <p class="fhint" id="winterpause-text"></p>
     </div>
   </section>
@@ -10574,7 +10644,7 @@ function pflanzeEntfernen(id){
       <p class="wz-hilfe" hidden>Im Winter verdunstet eine Pflanze deutlich weniger. Wer dann weitergießt wie im Juli, ersäuft sie — der häufigste Fehler überhaupt. Die App rechnet die Abstände von selbst größer, sobald die kalte Hälfte des Jahres beginnt. Abschalten kannst du das, wenn du in einem Wintergarten oder unter Lampen hältst, wo sich über das Jahr wenig ändert.</p>
 
       <label class="fspan check">
-        <input type="checkbox" id="ck-saison"> <span class="lab" style="display:inline">Im Winter größere Abstände ansetzen</span></label>
+        <input type="checkbox" role="switch" id="ck-saison"> <span class="lab" style="display:inline">Im Winter größere Abstände ansetzen</span></label>
       <p class="fhint" id="saison-text"></p>
 
       <p class="ein-abschnitt">Wie stark</p>
@@ -10622,11 +10692,11 @@ function pflanzeEntfernen(id){
 
       <li>
         <p class="url-nr">Schritt 3 — Was soll mit auf den Zettel</p>
-        <label class="ubox"><input type="checkbox" id="url-nummern" checked>
+        <label class="ubox"><input type="checkbox" role="switch" id="url-nummern" checked>
           <span><b>Nummernstreifen zum Ausschneiden</b><i>Eine Extraseite mit Nummer und Name zum Ankleben an die Töpfe.</i></span></label>
-        <label class="ubox"><input type="checkbox" id="url-ohneplan">
+        <label class="ubox"><input type="checkbox" role="switch" id="url-ohneplan">
           <span><b>Ohne Raumplan drucken</b><i>Spart Seiten. Ohne Plan gibt es keine Nummern — der Nummernstreifen entfällt dann mit.</i></span></label>
-        <label class="ubox"><input type="checkbox" id="url-ohnebilder">
+        <label class="ubox"><input type="checkbox" role="switch" id="url-ohnebilder">
           <span><b>Ohne Bilder drucken</b><i>Deutlich weniger Farbe und Papier, dafür schwerer zu erkennen.</i></span></label>
       </li>
 
@@ -10720,7 +10790,7 @@ function pflanzeEntfernen(id){
       </select></label>
       <label><span class="lab">Foto jedes wievielte Mal</span><input id="rg-fotojedes" type="number" min="1" max="12" step="1">
         <span class="fhint">Gilt nur für die Bestandsaufnahme.</span></label>
-      <label class="fspan check"><input type="checkbox" id="rg-saison">
+      <label class="fspan check"><input type="checkbox" role="switch" id="rg-saison">
         <span class="lab" style="display:inline">Im Winter größere Abstände</span></label>
     </div>
     <h3>Welche Knöpfe erscheinen</h3>
@@ -10741,9 +10811,9 @@ function pflanzeEntfernen(id){
     <div class="dsn-wahl" role="group" aria-label="Design wählen" id="dsn-wahl"></div>
     <div class="mh-spalte">
       <label class="fspan check">
-        <input type="checkbox" id="ans-einfach"> <span class="lab" style="display:inline">Einfacher Modus</span></label>
+        <input type="checkbox" role="switch" id="ans-einfach"> <span class="lab" style="display:inline">Einfacher Modus</span></label>
       <label class="fspan check">
-        <input type="checkbox" id="ans-hinweise"> <span class="lab" style="display:inline">Pflegehinweise auf den Karten</span></label>
+        <input type="checkbox" role="switch" id="ans-hinweise"> <span class="lab" style="display:inline">Pflegehinweise auf den Karten</span></label>
     </div>
     <p class="fhint" id="einfach-text" hidden></p>
     <p class="fhint" id="hinweise-text" hidden></p>
@@ -10784,9 +10854,9 @@ function pflanzeEntfernen(id){
       <p class="fhint">Zusatzzeilen über den Aufgaben. Beides lässt sich jederzeit wieder einblenden.</p>
       <div class="mh-spalte">
         <label class="fspan check">
-          <input type="checkbox" id="ck-wetterzeile"> <span class="lab" style="display:inline">Wetter und Standortklima</span></label>
+          <input type="checkbox" role="switch" id="ck-wetterzeile"> <span class="lab" style="display:inline">Wetter und Standortklima</span></label>
         <label class="fspan check">
-          <input type="checkbox" id="ck-kennzahlen"> <span class="lab" style="display:inline">Kennzahlen</span></label>
+          <input type="checkbox" role="switch" id="ck-kennzahlen"> <span class="lab" style="display:inline">Kennzahlen</span></label>
       </div>
       <p class="fhint">Kennzahlen zeigen Gesundheit, Gießtreue und Zuwachs als Zahlenleiste.</p>
 
@@ -10889,7 +10959,7 @@ function pflanzeEntfernen(id){
         <button id="btn-tour-alle">Alle Kapitel zurücksetzen</button>
       </div>
       <label class="fspan check">
-        <input type="checkbox" id="tour-aus"> <span class="lab" style="display:inline">App Tour abschalten</span></label>
+        <input type="checkbox" role="switch" id="tour-aus"> <span class="lab" style="display:inline">App Tour abschalten</span></label>
       <p class="fhint" id="tour-aus-text"></p>
     </div>
   </section>
@@ -10914,7 +10984,7 @@ function pflanzeEntfernen(id){
         <textarea id="ru-text" rows="5" placeholder="Was ist passiert, was hattest du erwartet?"></textarea></label>
       <label class="fspan"><span class="lab">Empfänger</span><input id="ru-mail" type="email" placeholder="name@beispiel.de">
         <span class="fhint">Wird gemerkt. Leer lassen, wenn du den Text lieber nur kopieren willst.</span></label>
-      <label class="fspan check"><input type="checkbox" id="ru-technik" checked>
+      <label class="fspan check"><input type="checkbox" role="switch" id="ru-technik" checked>
         <span class="lab" style="display:inline">Technische Angaben anhängen</span></label>
     </div>
     <div class="tools">
@@ -11512,7 +11582,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.4';
+const FASSUNG = '4.0-beta.5';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -22541,7 +22611,7 @@ function schubladeFuellen(){
          <input id="vb-r-name" value="${esc(r.name || '')}"></label>
        <label class="vb-sch-feld"><span>Drehung auf dem Kompass · ${r.drehung}°</span>
          <input type="range" id="vb-r-drehung" min="0" max="345" step="15" value="${r.drehung}"></label>
-       <label class="vb-sch-feld zeile"><input type="checkbox" id="vb-r-dach"${r.dach ? ' checked' : ''}>
+       <label class="vb-sch-feld zeile"><input type="checkbox" role="switch" id="vb-r-dach"${r.dach ? ' checked' : ''}>
          <span>Offener Himmel</span></label>
        <label class="vb-sch-feld"><span>Deckenhöhe in cm</span>
          <input type="number" id="vb-r-decke" min="150" max="500" step="5" value="${r.deckeH || 250}"></label>
@@ -28692,7 +28762,7 @@ function azGefaessFelderHTML(g){
     + '<input type="number" id="az-f-abstand" min="1" max="60" step="1" inputmode="numeric" value="'
     + (abst || AZ_MEDIEN[med].vorgabe) + '"></label>'
     + '<label class="check" id="az-f-aus-zeile"' + (med === 'wasser' ? ' hidden' : '') + '>'
-    + '<input type="checkbox" id="az-f-aus"' + (g && !g.abstand && med !== 'wasser' ? ' checked' : '') + '>'
+    + '<input type="checkbox" role="switch" id="az-f-aus"' + (g && !g.abstand && med !== 'wasser' ? ' checked' : '') + '>'
     + '<span class="lab">Befeuchten aus</span></label>'
     + '<label><span class="lab">Start</span><input type="date" id="az-f-start" value="' + esc(g ? g.start : iso(HEUTE)) + '"></label>'
     + '</div>';
@@ -28745,7 +28815,7 @@ function azBereichHTML(id){
     + 'Eintrag im Gießplan. Wassergläser darin behalten ihren eigenen Wechsel.</p>'
     + '<div class="fgrid az-form">'
     + '<label><span class="lab">Name</span><input id="az-b-name" value="' + esc(b ? b.name : (hatHaus ? '' : 'Anzuchthaus')) + '"></label>'
-    + '<label class="check"><input type="checkbox" id="az-b-an"' + (!b || b.rhythmus ? ' checked' : '') + '>'
+    + '<label class="check"><input type="checkbox" role="switch" id="az-b-an"' + (!b || b.rhythmus ? ' checked' : '') + '>'
     + '<span class="lab">Eigener Rhythmus</span></label>'
     + '<label><span class="lab">Befeuchten alle … Tage</span><input type="number" id="az-b-tage" min="1" max="60" step="1"'
     + ' inputmode="numeric" value="' + ((b && b.rhythmus) || AZ_BEREICH_VORGABE) + '"></label></div>'
