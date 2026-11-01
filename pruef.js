@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.7', w.__T('FASSUNG') === '4.0-beta.7', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.8', w.__T('FASSUNG') === '4.0-beta.8', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -7099,12 +7099,16 @@ setTimeout(async () => {
       w.__T('KI_BILDER.anlegen.length') === 0,
       String(w.__T('KI_BILDER.anlegen.length')));
 
-    /* Auf der KI-Stufe fragt der Hauptknopf, statt weiterzuschieben. */
+    /* Auf der KI-Stufe fragt der Hauptknopf, statt weiterzuschieben.
+       Seit 4.0-beta.8 nur mit Schlüssel; ohne heißt er „Weiter“ (eigener Test im Block beta.8). */
+    const hkKey = w.__T('kiSchluessel()');
+    w.__T("kiSchluesselSetzen('AIzaTESTTESTTESTTEST')");
     w.__T("(function(){ neuWeg = 'ki'; alStufe = 2; alStufeZeigen(2); })()");
     const hk = d.getElementById('al-weiter');
     pruef('Auf der KI-Stufe heißt der Hauptknopf „Fragen“',
       hk.textContent === 'Fragen' && hk.dataset.fragt === '1',
       hk.textContent);
+    w.__T('kiSchluesselSetzen(' + JSON.stringify(hkKey) + ')');
     w.__T("(function(){ neuWeg = 'suche'; alStufeZeigen(2); })()");
     pruef('Auf den anderen Wegen bleibt er „Weiter“',
       hk.textContent === 'Weiter' && !hk.dataset.fragt, hk.textContent);
@@ -11414,6 +11418,107 @@ setTimeout(async () => {
     pruef('beta.7: Zettel: Felder in voller Breite, Schalter ausgenommen', /\.url-karte :is\(input:not\(\[type="checkbox"\]\), select\)\{width:100%/.test(stil));
     pruef('beta.7: Zettel: Pflanzen stehen als runde Etiketten', /\.url-mini > li\{[^}]*border-radius:99px/.test(stil));
   } catch(e) { pruef('beta.7: Block läuft ohne Laufzeitfehler', false, e.message); }
+
+  /* ══ 4.0-beta.8: Grundstil S4c — Anlegen, Pflanzenkarte, BOTaniker, Gießmodus ══
+     Jeder Test legt seine Daten selbst an und stellt sie danach zurück.
+     Ein Laufzeitfehler im Block zählt als Fehlschlag statt ihn abzubrechen. */
+  try {
+    const T = c => w.__T(c);
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
+    const q = sel => d.querySelector(sel);
+    const hat = re => re.test(stil);
+
+    /* Anlegen: Kopf, Fortschritt, Schritt-Zeile */
+    T("alStart(); neuWegSetzen('bib'); alStufeZeigen(2)");
+    const spans = [...d.querySelectorAll('#al-fortschritt > li > span')];
+    pruef('beta.8: Anlegen: Stufennamen der Leiste nur für Vorleser', spans.length === 5 && spans.every(x => x.classList.contains('vh')) && !q('#al-fortschritt .nurlesbar'), spans.map(x => x.className).join(','));
+    pruef('beta.8: Anlegen: Titel heißt nur „Pflanze anlegen“', d.getElementById('al-titel').textContent === 'Pflanze anlegen', d.getElementById('al-titel').textContent);
+    pruef('beta.8: Anlegen: Stufe steht als Zeile „Schritt 2 von 5 · Art“', (d.getElementById('al-schritt') || {}).textContent === 'Schritt 2 von 5 · Art', (d.getElementById('al-schritt') || {}).textContent);
+    pruef('beta.8: Anlegen: kein Kasten um die Stufe', hat(/#anleg-modal #form-neu\.formwrap\{margin:0;padding:0;border:0;[^}]*background:none/));
+    pruef('beta.8: Anlegen: Wahlkacheln als helle Karten, gewählt mit Akzentrand',
+      hat(/html\[data-design\] \.al-knopf\{background:var\(--fl-karte\)/) && hat(/\.al-knopf\[aria-pressed="true"\]\{background:var\(--fl-karte\);border-color:var\(--fl-akzent\)/));
+    pruef('beta.8: Anlegen: „Alle ansehen“ ist ein Nebenknopf', hat(/#btn-bib\{[^}]*min-height:var\(--knopf-h\)[^}]*border:1\.5px solid var\(--linie-stark\)/));
+    pruef('beta.8: Anlegen: Etiketten der Bibliothekstreffer sind rund', hat(/\.bibrow \.tag\{[^}]*border-radius:99px/));
+    pruef('beta.8: Anlegen: Hauptknopf der Fußleiste ist breiter', hat(/\.al-fuss > button\.haupt\{flex:1\.7 1 0\}/));
+    pruef('beta.8: Anlegen: „Wichtig zu wissen“ ist drei Zeilen hoch', d.getElementById('f-wichtig').getAttribute('rows') === '3' && hat(/#f-wichtig\{min-height:calc\(4\.5em/));
+
+    /* KI-Stufe: ein „Fragen“ */
+    const altKey = T('kiSchluessel()');
+    try {
+      T("kiSchluesselSetzen('AIzaTESTTESTTESTTEST'); kiModusZeigen(); neuWegSetzen('ki'); alStufeZeigen(2)");
+      const wei = d.getElementById('al-weiter');
+      const zeile = d.getElementById('btn-gemini').closest('.kizeile-haupt');
+      pruef('beta.8: KI-Stufe mit Schlüssel: „Fragen“ nur in der Fußleiste', zeile.hidden === true && wei.textContent === 'Fragen' && wei.dataset.fragt === '1', zeile.hidden + ' ' + wei.textContent);
+      T("kiLaufZeigen('anlegen', true)");
+      const lauf = wei.textContent + '|' + wei.disabled;
+      T("kiLaufZeigen('anlegen', false)");
+      pruef('beta.8: KI-Stufe: Fußleiste zeigt „Läuft …“ und sperrt, solange gefragt wird', lauf === 'Läuft …|true' && wei.textContent === 'Fragen' && !wei.disabled, lauf + ' / ' + wei.textContent);
+      T("kiSchluesselSetzen(''); kiModusZeigen()");
+      pruef('beta.8: KI-Stufe ohne Schlüssel: Knopf im Inhalt sichtbar, Fußleiste „Weiter“', zeile.hidden === false && wei.textContent === 'Weiter' && wei.dataset.fragt === '', zeile.hidden + ' ' + wei.textContent);
+    } finally {
+      T('kiSchluesselSetzen(' + JSON.stringify(altKey) + '); kiModusZeigen(); modalZu("anleg-modal")');
+    }
+    pruef('beta.8: Anlegen: „empfohlen“ unter der Modellliste, Liste ohne Überhöhe',
+      hat(/#ki-direkt-anlegen \.kimodell\{display:flex;flex-direction:column/) && hat(/:is\(#ki-direkt-anlegen, #ki-direkt-doktor\) \.kimodell > select\{flex:0 0 auto\}/));
+    pruef('beta.8: „Öffnen“ neben der Dienstwahl ist ein Nebenknopf', hat(/\.kizeile:not\(\.kizeile-haupt\) > button:not\(\.haupt\)\{[^}]*min-height:var\(--knopf-h\)[^}]*border:1\.5px solid var\(--linie-stark\)/));
+
+    /* Pflanzenkarte */
+    pruef('beta.8: Karte: Blätterknöpfe rund', hat(/#karte-modal :is\(#karte-vor, #karte-zurueck\)\{[^}]*border-radius:50%/));
+    pruef('beta.8: Karte: Titel bleibt einzeilig', hat(/#karte-titel\{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\}/));
+    pruef('beta.8: Karte: Steckbriefwerte brechen um', hat(/dl\.spec dd\{min-width:0;overflow-wrap:anywhere/) && hat(/dl\.spec\{grid-template-columns:auto minmax\(0, 1fr\)\}/));
+    const altPl = T('JSON.stringify(S.eigene || [])');
+    const altDes = T('S.design');
+    try {
+      T("S.eigene = (S.eigene || []).concat([{id:'kb8a', name:'Ohnefoto', art:'Monstera', klasse:'B'}])");
+      const reihe = ['klartext', 'terrarium', 'botanisch'].map(dz => {
+        T('S.design = ' + JSON.stringify(dz) + "; karteOeffnen('kb8a')");
+        const r = d.getElementById('karte-rumpf');
+        const n = r.querySelectorAll('.km-held-leer').length + '/' + r.querySelectorAll('.foto-add.breit').length + '/' + r.querySelectorAll('.foto-add').length;
+        T('modalZu("karte-modal")');
+        return n;
+      });
+      pruef('beta.8: Karte ohne Foto: ein Platzhalter „Foto hinzufügen“ in jeder Ansicht', reihe.every(x => x === '0/1/1'), reihe.join(' '));
+      const hv = T("giessVerlaufHTML(S.eigene.find(p => p.id === 'kb8a'))");
+      pruef('beta.8: Karte: Umschalter „Balken | Zeitstrahl“ im Segment-Aussehen', /class="sam-ansicht hist-um segment"/.test(hv));
+    } finally {
+      T('S.eigene = ' + altPl + '; S.design = ' + JSON.stringify(altDes));
+    }
+
+    /* BOTaniker */
+    pruef('beta.8: BOTaniker: „offline“ ohne Versalien und Monospace', hat(/\.bot-aktion small\.bot-off\{font-family:var\(--f-body\);letter-spacing:0;text-transform:none/));
+    pruef('beta.8: BOTaniker: Kacheln in Klartext einspaltig', hat(/html\[data-design="klartext"\] \.bot-aktionen\{grid-template-columns:1fr\}/));
+    pruef('beta.8: BOTaniker: erkannte Pflanze und Absicht als runde Etiketten', hat(/html\[data-design\] \.bot-erk\{border-radius:99px/));
+
+    /* Gießmodus */
+    const nachAuf = T("String(MODAL['giessmodus'].nachAuf)");
+    pruef('beta.8: Gießmodus: Fokus geht beim Öffnen auf den Namen der Pflanze', /#gm-inhalt h3/.test(nachAuf) && /h\.focus\(/.test(nachAuf));
+    pruef('beta.8: Runde Symbolknöpfe: Ring im Akzent nur mit Tastatur', hat(/#gm-abbruch, \.sb-blatt-zu\):focus-visible\{ outline:2px solid var\(--fl-akzent\)/));
+
+    /* Rest aus dem Backlog */
+    T("dokStufeZeigen(2)");
+    pruef('beta.8: Doktor: Zeile „Schritt 2 von 4 · Weg“', (d.getElementById('dok-schritt-zeile') || {}).textContent === 'Schritt 2 von 4 · Weg', (d.getElementById('dok-schritt-zeile') || {}).textContent);
+    T("dokStufeZeigen(1)");
+    pruef('beta.8: Doktor in Klartext: nur Balken, Zeile sichtbar', hat(/html\[data-design="klartext"\] \.dok-schritte li\{height:0;padding:0;font-size:0/) && hat(/html\[data-design="klartext"\] \.dok-schritt-zeile\{display:block/));
+    pruef('beta.8: Satzerkennung: Punkt hinter einer Zahl ist kein Satzende',
+      T("erklSatzEnde('Wasser · ohne Bereich · seit 6. Okt.')") === -1 && T("erklSatzEnde('Am 6. Mai war es. Danach nicht.')") === 'Am 6. Mai war es.'.length,
+      T("erklSatzEnde('Am 6. Mai war es. Danach nicht.')"));
+    pruef('beta.8: Anzucht: Rücklink in Schriftfarbe, Datum ohne Monospace', hat(/html\[data-design\] \.az-zurueck\{color:var\(--schrift\)\}/) && hat(/html\[data-design\] \.az-verlauf span\{font-family:var\(--f-body\)\}/));
+    pruef('beta.8: Gießplan: erste Säule so breit wie „heute“', hat(/\.gp-tag:first-child\{flex:0 0 auto;min-width:max\(32px, max-content\)/));
+    pruef('beta.8: Sicherung: „Erinnern nach“ in eigener Zeile', hat(/#sicher-takt > \.lab:first-child\{flex:1 1 100%/));
+
+    /* Nach dem Anlegen: Karte erst, wenn das Formular zu ist (sonst schloss das verspätete Zurück die Karte) */
+    const altPl8 = T('JSON.stringify(S.eigene || [])');
+    try {
+      T("S.eigene = (S.eigene || []).concat([{id:'kb8b', name:'Neuling', art:'Monstera', klasse:'B'}])");
+      const vorher = T("(function(){ let m, i = 0; while((m = modalOben()) && i++ < 6) _modalWeg(m); modalAuf('anleg-modal'); alKarteNachAnlegen('kb8b'); return modalOffen('karte-modal'); })()");
+      T("(function(){ let m, i = 0; while((m = modalOben()) && i++ < 6) _modalWeg(m); })()");
+      const offen = T("(function(){ alKarteNachAnlegen('kb8b'); return modalOffen('karte-modal') && alAnstoss === 'kb8b'; })()");
+      T("(function(){ let m, i = 0; while((m = modalOben()) && i++ < 6) _modalWeg(m); alAnstoss = null; })()");
+      pruef('beta.8: Anlegen: Karte öffnet erst, wenn das Formular geschlossen ist', vorher === false && offen === true && /alKarteNachAnlegen\(id\)/.test(T('String(alSpeichern)')), vorher + ' / ' + offen);
+    } finally {
+      T('S.eigene = ' + altPl8);
+    }
+  } catch(e) { pruef('beta.8: Block läuft ohne Laufzeitfehler', false, e.message); }
 
   console.log('\n── Ergebnis ──');
   console.log('  ' + zahl + ' Prüfungen, ' + (zahl - fehler.length) + ' bestanden');

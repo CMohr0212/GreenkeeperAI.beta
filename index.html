@@ -4081,6 +4081,116 @@ html[data-design] .url-mini > li{margin:0;padding:5px 12px;border:0;border-radiu
   color:var(--schrift);font-family:var(--f-body);font-size:var(--t-s);line-height:1.3}
 html[data-design="klartext"] .url-mini > li{border:1.5px solid var(--schrift);font-size:var(--t-m)}
 html[data-design] .tools.ein-knoepfe.url-knoepfe > button:not(.haupt){flex:1 1 100%}
+
+/* ══ Grundstil S4c — Anlegen, Pflanzenkarte, BOTaniker, Gießmodus (4.0-beta.8) ══
+   Letzter Nachzug des Grundstils. Alle Regeln tragen html[data-design]
+   wie in S3 und S4 (T36). */
+
+/* Anlegen: Stufe steht als Zeile unter der Leiste, Titel einzeilig */
+html[data-design] #al-titel, html[data-design] #karte-titel{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-design] .al-schritt{margin:0;padding:6px var(--rand) 0;font-family:var(--f-body);font-size:var(--t-s);
+  font-weight:500;letter-spacing:0;text-transform:none;color:var(--schrift-2)}
+html[data-design="klartext"] .al-schritt{font-size:var(--t-m);color:var(--schrift)}
+/* Kein Kasten um die Stufe: sie steht auf dem Grund wie Umtopfen und Substrat */
+html[data-design] #anleg-modal #form-neu.formwrap{margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+/* Wahlkacheln wie in S4 */
+html[data-design] .al-knopf{background:var(--fl-karte);border:1.5px solid var(--linie);border-radius:var(--r-mittel);
+  box-shadow:none;color:var(--schrift);font-family:var(--f-body);font-size:var(--t-s);text-transform:none;letter-spacing:0}
+html[data-design="botanisch"] .al-knopf{border-color:transparent}
+html[data-design="klartext"] .al-knopf{border:2px solid var(--schrift);font-size:var(--t-md)}
+html[data-design] .al-knopf[aria-pressed="true"]{background:var(--fl-karte);border-color:var(--fl-akzent);
+  box-shadow:inset 0 0 0 1.5px var(--fl-akzent)}
+html[data-design] .al-knopf b{font-family:var(--f-body);font-size:var(--t-m);font-weight:600;color:var(--schrift)}
+html[data-design] .al-knopf i{font-family:var(--f-body);font-style:normal;color:var(--schrift-2)}
+html[data-design] .al-weg{border-width:1.5px}
+html[data-design="botanisch"] .al-weg{border-color:transparent}
+html[data-design="klartext"] .al-weg{border:2px solid var(--schrift)}
+/* „Alle ansehen“ als Nebenknopf */
+html[data-design] #btn-bib{display:inline-flex;align-items:center;justify-content:center;min-height:var(--knopf-h);padding:0 18px;
+  background:var(--fl-karte);border:1.5px solid var(--linie-stark);border-radius:var(--r-mittel);color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-m);font-weight:600;font-style:normal;text-transform:none;letter-spacing:0;cursor:pointer}
+html[data-design="klartext"] #btn-bib{border:2px solid var(--schrift);font-size:var(--t-md)}
+/* Bibliothekstreffer: runde Etiketten */
+html[data-design] .bibrow .tag{padding:3px 10px;border-radius:99px;font-family:var(--f-body);font-weight:500;
+  letter-spacing:0;text-transform:none}
+/* KI-Modellwahl mit „empfohlen“ darunter, wie im Doktor */
+html[data-design] #ki-direkt-anlegen .kimodell{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+html[data-design] #ki-direkt-anlegen .kimodell > select{width:100%}
+/* Die Liste wuchs in der Spalte auf 130 px Höhe (flex-basis aus der Zeilenform); gilt auch im Doktor */
+html[data-design] :is(#ki-direkt-anlegen, #ki-direkt-doktor) .kimodell > select{flex:0 0 auto}
+/* „Öffnen“ neben der Dienstwahl als Nebenknopf */
+html[data-design] .kizeile:not(.kizeile-haupt) > button:not(.haupt){display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;min-height:var(--knopf-h);padding:0 18px;background:var(--fl-karte);border:1.5px solid var(--linie-stark);
+  border-radius:var(--r-mittel);color:var(--schrift);font-family:var(--f-body);font-size:var(--t-m);font-weight:600;
+  font-style:normal;text-transform:none;letter-spacing:0;cursor:pointer}
+html[data-design="klartext"] .kizeile:not(.kizeile-haupt) > button:not(.haupt){border:2px solid var(--schrift);font-size:var(--t-md)}
+html[data-design] #ki-direkt-anlegen .kimodell > .ki-empf{align-self:flex-start;margin:0 4px}
+/* Fußleiste: Hauptknopf breiter, „Pflanze anlegen“ in einer Zeile (wie S4) */
+html[data-design] .al-fuss > button{flex:1 1 0;min-width:0;padding:0 12px}
+html[data-design] .al-fuss > button.haupt{flex:1.7 1 0}
+html[data-design="klartext"] .al-fuss > button.haupt{flex:2.3 1 0}
+/* Stufe 5: „Wichtig zu wissen“ drei Zeilen hoch */
+html[data-design] #f-wichtig{min-height:calc(4.5em + 24px);padding-top:10px;padding-bottom:10px}
+
+/* Pflanzenkarte: Blätterknöpfe rund wie der Zurück-Knopf */
+html[data-design] #karte-modal :is(#karte-vor, #karte-zurueck){width:var(--tap);height:var(--tap);min-width:var(--tap);
+  padding:0;border-radius:50%;display:grid;place-items:center}
+/* Steckbrief: lange Werte brechen um statt rechts hinauszulaufen */
+html[data-design] dl.spec{grid-template-columns:auto minmax(0, 1fr)}
+html[data-design] dl.spec dd{min-width:0;overflow-wrap:anywhere;hyphens:auto}
+html[data-design="botanisch"] #karte-rumpf dl.spec{grid-template-columns:34% minmax(0, 1fr)}
+/* Ohne Foto: eine Zeile „Foto hinzufügen“ auch in Klartext und Terrarium */
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit{flex:1 1 auto;width:auto;height:auto;min-height:0;display:flex;
+  align-items:center;justify-content:flex-start;gap:14px;padding:14px 16px;text-align:left;line-height:1.35;
+  border:1.5px solid var(--linie);border-radius:var(--r-gross);background:var(--fl-karte);color:var(--schrift);
+  font-family:var(--f-body);cursor:pointer}
+html[data-design="botanisch"] #karte-rumpf .km-fotoband .foto-add.breit{border:0}
+html[data-design="klartext"] #karte-rumpf .km-fotoband .foto-add.breit{border:2px solid var(--schrift)}
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit .fa-kreis{flex:0 0 auto;width:44px;height:44px;border-radius:50%;
+  background:var(--fl-tief);display:flex;align-items:center;justify-content:center}
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit .fa-kreis svg{width:22px;height:22px}
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit .fa-txt b{display:block;font-family:var(--f-body);font-weight:600;font-size:var(--t-l)}
+html[data-design] #karte-rumpf .km-fotoband .foto-add.breit .fa-txt span{display:block;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design="botanisch"] #karte-rumpf .km-fotoband .foto-add.breit .fa-kreis{background:var(--fl-grund)}
+html[data-design="botanisch"] #karte-rumpf .km-fotoband .foto-add.breit .fa-txt b{font-family:var(--f-display);font-weight:500}
+/* Verlauf: Umschalter wie die Segmente aus S3 */
+html[data-design] .sam-ansicht.hist-um.segment{width:auto;max-width:320px;overflow:visible}
+html[data-design] .sam-ansicht.hist-um.segment > button{border-right:0}
+
+/* BOTaniker: „offline“ in normaler Schrift, Klartext einspaltig */
+html[data-design] .bot-aktion small.bot-off{font-family:var(--f-body);letter-spacing:0;text-transform:none;font-weight:600}
+html[data-design="klartext"] .bot-aktionen{grid-template-columns:1fr}
+html[data-design="klartext"] .bot-aktion b{overflow-wrap:anywhere}
+/* Chat: erkannte Pflanze und Absicht als runde Etiketten */
+html[data-design] .bot-erk{border-radius:99px;padding:6px 16px;background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift)}
+html[data-design="klartext"] .bot-erk{border:2px solid var(--schrift)}
+html[data-design] .bot-erk small{color:var(--schrift-2)}
+
+/* Gießmodus: kein Ring am Namen, der den Fokus beim Öffnen trägt;
+   mit Tastatur bekommen die runden Symbolknöpfe einen Ring im Akzent */
+html[data-design] #gm-inhalt :is(h2, h3):focus{outline:none}
+html[data-design] :is(.kopf-zahnrad, .bot-rund, .sekm-raus, .sekm-kopf .sekm-i, #gm-abbruch, .sb-blatt-zu):focus{outline:none}
+html[data-design] :is(.kopf-zahnrad, .bot-rund, .sekm-raus, .sekm-kopf .sekm-i, #gm-abbruch, .sb-blatt-zu):focus-visible{
+  outline:2px solid var(--fl-akzent);outline-offset:2px}
+
+/* Rest aus dem Backlog */
+/* Doktor in Klartext: nur Balken, darunter „Schritt N von 4 · Name“ */
+html[data-design] .dok-schritt-zeile{display:none}
+html[data-design="klartext"] .dok-schritte{flex-wrap:nowrap;margin-bottom:0}
+html[data-design="klartext"] .dok-schritte li{height:0;padding:0;font-size:0;line-height:0;border-top-width:4px;overflow:hidden}
+html[data-design="klartext"] .dok-schritt-zeile{display:block;margin:8px 0 var(--a-4);font-family:var(--f-body);
+  font-size:var(--t-m);font-weight:600;color:var(--schrift)}
+/* Anzucht: Rücklink in Schriftfarbe, Datum ohne Monospace */
+html[data-design] .az-zurueck{color:var(--schrift)}
+html[data-design] .az-verlauf span{font-family:var(--f-body)}
+/* Gießplan: erste Säule so breit wie „heute“ */
+html[data-design] .gp-tag:first-child{flex:0 0 auto;min-width:max(32px, max-content);padding:0 4px}
+/* Sicherung: „Erinnern nach“ in eigener Zeile, darunter Zähler und „Tagen“ */
+html[data-design] #sicher-takt{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+html[data-design] #sicher-takt > .lab:first-child{flex:1 1 100%;margin:0}
+html[data-design] #sicher-takt > .zaehler{flex:0 0 auto}
+html[data-design] #sicher-takt > #sicher-takt-wort{flex:0 0 auto;margin:0}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9967,6 +10077,7 @@ function pflanzeEntfernen(id){
     <div class="wz-in" id="wz-in-doktor" hidden>
       <p class="wz-hilfe" hidden>Schritt für Schritt zur wahrscheinlichsten Ursache. Am schnellsten mit Foto und einer KI — die App rechnet aber auch ohne, dann über deine Angaben. Die App sieht dein Bild nicht, eine KI schon: Dienst wählen, öffnen, Foto anhängen, abschicken, Antwort zurück ins Feld. Zustand, Befund und Maßnahmen wandern dann in die gewählte Pflanze; fehlende oder veraltete Angaben im Steckbrief bietet die App dir danach zum Übernehmen an.</p>
     <ol class="dok-schritte" id="dok-fortschritt"></ol>
+    <p class="dok-schritt-zeile" id="dok-schritt-zeile" aria-hidden="true"></p>
 
     <div class="dok-stufe" id="dok-s1">
       <h3><span class="dok-nr">1</span> Um welche Pflanze geht es?</h3>
@@ -11451,6 +11562,7 @@ function pflanzeEntfernen(id){
     <button class="sekm-zu" id="btn-neu-cancel" aria-label="Anlegen abbrechen">Abbrechen</button>
   </div>
   <ol class="al-fortschritt" id="al-fortschritt" aria-label="Fortschritt"></ol>
+  <p class="al-schritt" id="al-schritt"></p>
   <div class="sekm-rumpf">
     <div class="formwrap" id="form-neu">
 
@@ -11695,7 +11807,7 @@ function pflanzeEntfernen(id){
         </div>
         <div class="al-feld">
           <span class="lab">Wichtig zu wissen</span>
-          <textarea id="f-wichtig" rows="2" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie"></textarea>
+          <textarea id="f-wichtig" rows="3" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie"></textarea>
           <span class="fhint">Pflegehinweise, die über Leben und Tod entscheiden.</span>
         </div>
         <div class="al-feld">
@@ -11848,6 +11960,8 @@ function erklSatzEnde(t){
   while((m = re.exec(t))){
     const wort = (t.slice(0, m.index).match(/(\S+)$/) || ['', ''])[1] + '.';
     if(ERKL_KUERZEL.indexOf(wort) !== -1) continue;
+    /* 4.0-beta.8: „seit 6. Okt.“ — ein Punkt direkt hinter einer Zahl ist eine Ordnungszahl */
+    if(m[0] === '.' && /^\d+\.$/.test(wort)) continue;
     return m.index + 1;
   }
   return -1;
@@ -11921,7 +12035,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.7';
+const FASSUNG = '4.0-beta.8';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13450,7 +13564,7 @@ function histAnsicht(){ return S.histAnsicht === 'strahl' ? 'strahl' : 'balken';
 function giessVerlaufHTML(p){
   const a = histAnsicht();
   const knopf = (v, t) => `<button type="button" data-do="hist-um" data-v="${v}" aria-pressed="${a === v ? 'true' : 'false'}">${t}</button>`;
-  const leiste = `<div class="sam-ansicht hist-um" role="group" aria-label="Ansicht der Historie">${
+  const leiste = `<div class="sam-ansicht hist-um segment" role="group" aria-label="Ansicht der Historie">${
     knopf('balken', 'Balken')}${knopf('strahl', 'Zeitstrahl')}</div>`;
   return leiste + (a === 'strahl' ? zeitstrahlHTML(p) : verlaufHTML(p));
 }
@@ -14306,11 +14420,11 @@ function kartenKopfHTML(p){
 
   /* Ohne Foto steht der Name nicht auf einer leeren Flaeche, sondern
      darunter — heller Text auf hellem Platzhalter waere unlesbar. */
+  /* 4.0-beta.8: Ohne Foto kein großer Platzhalter mehr neben dem
+     Plusfeld, sondern wie in Botanisch eine Zeile „Foto hinzufügen“. */
   const bild = pf
     ? `<div class="km-held-bild"><img src="${pf.src}" alt="${esc(nice(p))}" decoding="async"></div>`
-    : `<div class="km-held-bild"><div class="km-held-leer">
-         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><circle cx="9" cy="10" r="2"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg>
-         <span>Noch kein Foto</span></div></div>`;
+    : '';
   return `<div class="km-held${pf?'':' leer'}">
       ${bild}
       <div class="km-held-schleier">
@@ -14318,7 +14432,7 @@ function kartenKopfHTML(p){
         ${unter?`<p class="km-held-art">${unter}</p>`:''}
       </div>
     </div>
-    <div class="km-fotoband">${galerieHTML(p)}</div>
+    <div class="km-fotoband">${galerieHTML(p, !pf)}</div>
     ${rest}`;
 }
 
@@ -17281,7 +17395,17 @@ document.addEventListener('click', e=>{
 modalAnmelden('giessmodus', {
   groesse:'voll', schleier:false,
   nachAuf: ()=>{ document.body.classList.add('gm-offen');
-    if(gmListe && gmListe.length && typeof gmZeichnen==='function') gmZeichnen(); },
+    if(gmListe && gmListe.length && typeof gmZeichnen==='function') gmZeichnen();
+    /* 4.0-beta.8: Beim Öffnen ist der Inhalt noch leer, der Fokus fiel
+       deshalb aufs ×. Jetzt geht er auf den Namen der ersten Pflanze. */
+    setTimeout(()=>{
+      const el = document.getElementById('giessmodus');
+      if(!el || el.hidden) return;
+      const h = el.querySelector('#gm-inhalt h3, #gm-inhalt h2');
+      if(!h) return;
+      if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+      try{ h.focus({preventScroll:true}); }catch(e){}
+    }, 0); },
   nachZu:  ()=>{ document.body.classList.remove('gm-offen'); if(typeof render==='function') render(); }
 });
 
@@ -17690,7 +17814,10 @@ function alStufeZeigen(nr){
   const bahn = document.getElementById('al-fortschritt');
   if(bahn) bahn.innerHTML = AL_STUFEN.map((n, i) =>
     '<li class="' + (i + 1 === alStufe ? 'jetzt' : '') + (i + 1 < alStufe ? ' fertig' : '') + '">'
-    + '<span class="nurlesbar">' + esc(n) + '</span></li>').join('');
+    + '<span class="vh">' + esc(n) + '</span></li>').join('');
+  /* 4.0-beta.8: Stufe als eigene Zeile unter der Leiste, der Titel bleibt kurz */
+  const schritt = document.getElementById('al-schritt');
+  if(schritt) schritt.textContent = 'Schritt ' + alStufe + ' von ' + AL_STUFEN.length + ' · ' + AL_STUFEN[alStufe - 1];
   const zurueck = document.getElementById('al-zurueck');
   const weiter = document.getElementById('al-weiter');
   const letzte = alStufe === AL_STUFEN.length;
@@ -17706,12 +17833,13 @@ function alStufeZeigen(nr){
        tippen, damit die Antwort ankommt. Zwei Knoepfe fuer einen
        Schritt. Der Hauptknopf fragt jetzt selbst, und sobald die
        Antwort da ist, geht es von allein weiter. */
-    const kiStufe = alStufe === 2 && typeof neuWeg !== 'undefined' && neuWeg === 'ki';
-    weiter.textContent = letzte ? 'Pflanze anlegen' : kiStufe ? 'Fragen' : 'Weiter';
-    weiter.dataset.fragt = kiStufe ? '1' : '';
+    weiter.textContent = letzte ? 'Pflanze anlegen' : 'Weiter';
+    weiter.dataset.fragt = '';
+    weiter.disabled = false;
+    alFussKi();
   }
   const titel = document.getElementById('al-titel');
-  if(titel) titel.textContent = 'Pflanze anlegen · ' + AL_STUFEN[alStufe - 1];
+  if(titel) titel.textContent = 'Pflanze anlegen';
 
   if(alStufe === 2) alStufe2Zeichnen();
   if(alStufe === 3){ alKnoepfeAlle(); }
@@ -17719,6 +17847,26 @@ function alStufeZeigen(nr){
   if(alStufe === 5){ alFotosZeichnen(); alZsfZeichnen(); }
   const rumpf = document.querySelector('#anleg-modal .sekm-rumpf');
   if(rumpf) rumpf.scrollTop = 0;
+}
+/* 4.0-beta.8: Auf der KI-Stufe trägt nur die Fußleiste „Fragen“; der
+   Knopf im Inhalt bleibt im Dokument (die Fußleiste löst ihn aus) und
+   ist nur ohne Schlüssel sichtbar, dann als „API-Schlüssel einfügen“.
+   Ohne Schlüssel heißt die Fußleiste „Weiter“ — der Weg geht dann
+   über Kopieren und Einfügen. Während eine Frage läuft, zeigt die
+   Fußleiste dasselbe wie der innere Knopf. */
+function alFussKi(){
+  const weiter = document.getElementById('al-weiter');
+  const innen = document.getElementById('btn-gemini');
+  const zeile = innen ? innen.closest('.kizeile-haupt') : null;
+  const kiStufe = alStufe === 2 && typeof neuWeg !== 'undefined' && neuWeg === 'ki';
+  const an = typeof kiDirektAn === 'function' && kiDirektAn();
+  if(zeile) zeile.hidden = an;
+  if(!weiter || !kiStufe) return;
+  if(!an){ weiter.textContent = 'Weiter'; weiter.dataset.fragt = ''; weiter.disabled = false; return; }
+  const laeuft = !!(innen && innen.disabled);
+  weiter.textContent = laeuft ? 'Läuft …' : 'Fragen';
+  weiter.dataset.fragt = '1';
+  weiter.disabled = laeuft;
 }
 function alStufe2Zeichnen(){
   const weg = (typeof neuWeg !== 'undefined') ? neuWeg : null;
@@ -19023,6 +19171,7 @@ function kiLaufZeigen(wo, laeuft, m){
   }
   /* Der Fussknopf im Doktor zeigt dasselbe an wie der innere. */
   if(wo === 'doktor' && typeof dokZeigen === 'function') dokZeigen();
+  if(wo === 'anlegen' && typeof alFussKi === 'function') alFussKi();
   document.querySelectorAll('.ki-modell-wahl').forEach(sel => {
     sel.disabled = laeuft ? true : !kiModelle().length;
   });
@@ -19077,6 +19226,7 @@ function kiModusZeigen(){
   if(s2 && S.kiDienst && s2.value !== S.kiDienst) s2.value = S.kiDienst;
   if(typeof kiHinweis === 'function') kiHinweis();
   if(typeof dokKiHinweis === 'function' && !an) dokKiHinweis('');
+  if(typeof alFussKi === 'function') alFussKi();
 }
 
 /* Ohne Schlüssel führt der Hauptknopf dorthin, wo man einen einträgt.
@@ -20809,9 +20959,26 @@ async function alSpeichern(){
   }
   /* Bestimmt ist sie — bewertet noch nicht. Die Karte fragt gleich,
      ob der Doktor übernehmen soll. */
-  alAnstoss = id;
-  render();
-  karteOeffnen(id);
+  alKarteNachAnlegen(id);
+}
+/* 4.0-beta.8: modalZu schließt über history.back(), das kommt erst
+   später an. Öffnete die Karte vorher, schloss das verspätete Zurück
+   die neue Karte statt des Formulars — das Formular blieb auf Stufe 5
+   stehen. Jetzt öffnet die Karte erst, wenn das Formular zu ist. */
+function alKarteNachAnlegen(id){
+  const auf = ()=>{ alAnstoss = id; render(); karteOeffnen(id); };
+  if(!modalOffen('anleg-modal')){ auf(); return; }
+  let fertig = false;
+  const los = ()=>{
+    if(fertig) return;
+    fertig = true;
+    window.removeEventListener('popstate', bei);
+    if(modalOffen('anleg-modal')) _modalWeg('anleg-modal');
+    auf();
+  };
+  const bei = ()=>setTimeout(los, 0);
+  window.addEventListener('popstate', bei);
+  setTimeout(los, 800);
 }
 
 /* ── Zustandsbedienung auf den Karten ────────────────────── */
@@ -25635,6 +25802,8 @@ function dokZeigen(){
     const fertig = nr < dokSchritt || (nr===4 && (dokSymptome.size || dokKiFertig));
     return `<li class="${nr===dokSchritt?'jetzt':''}${fertig?' fertig':''}">${esc(n)}</li>`;
   }).join('');
+  const dokZeile = document.getElementById('dok-schritt-zeile');
+  if(dokZeile) dokZeile.textContent = 'Schritt ' + dokSchritt + ' von ' + DOK_SCHRITTE.length + ' · ' + DOK_SCHRITTE[dokSchritt - 1];
   document.querySelectorAll('[data-dokweg]').forEach(b=>b.classList.toggle('on', b.dataset.dokweg===dokWeg));
   const zur = document.getElementById('dok-zurueck-f');
   const wei = document.getElementById('dok-weiter-f');
