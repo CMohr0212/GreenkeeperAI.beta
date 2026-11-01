@@ -3989,6 +3989,98 @@ html[data-design] .tier-arten > button.chip{min-height:var(--tap);padding:0 18px
 html[data-design] .tier-arten > button.chip[aria-pressed="true"]{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers);font-weight:600}
 html[data-design] #tier-arten-block > p.fhint{margin:0 4px 4px}
 
+
+/* ══ Grundstil S4 — Werkzeuge, Vertretungszettel, Nachschlagen, Kartei (4.0-beta.7) ══
+   Merkmale und Zutaten als runde Etiketten wie die Tierknöpfe aus S3,
+   Wahlkacheln als helle Karten mit Akzentrand, Fußleisten ohne
+   Durchblick nach unten, Gießplan in Blöcken, Zettel in Gruppenkarten.
+   Alle Regeln tragen html[data-design] wie in S3 (T36). */
+
+/* Merkmale und Zutaten: runde Etiketten */
+html[data-design] .sym-liste{display:flex;flex-wrap:wrap;gap:8px}
+html[data-design] .sym-liste > .sym{min-height:40px;max-width:100%;margin:0;padding:8px 16px;border-radius:99px;
+  background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-m);font-weight:500;line-height:1.3;letter-spacing:0;text-transform:none;text-align:left}
+html[data-design] .sym-liste > .sym.on{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers);font-weight:600}
+html[data-design="klartext"] .sym-liste > .sym{min-height:var(--tap);border:2px solid var(--schrift);font-size:var(--t-md)}
+html[data-design="klartext"] .sym-liste > .sym.on{border-color:var(--fl-akzent)}
+
+/* Wahlkacheln: Grund, Topfform, Topf, Weg im Doktor */
+html[data-design] :is(.ut-grund, .ut-form, .as-knopf, .dok-weg){
+  background:var(--fl-karte);border:1.5px solid var(--linie);border-left-width:1.5px;border-radius:var(--r-mittel);
+  box-shadow:none;color:var(--schrift);font-family:var(--f-body);text-align:left;text-transform:none;letter-spacing:0}
+html[data-design="botanisch"] :is(.ut-grund, .ut-form, .as-knopf, .dok-weg){border-color:transparent}
+html[data-design="klartext"] :is(.ut-grund, .ut-form, .as-knopf, .dok-weg){border:2px solid var(--schrift)}
+html[data-design] :is(.ut-grund, .ut-form, .as-knopf)[aria-pressed="true"], html[data-design] .dok-weg.on{
+  background:var(--fl-karte);border-color:var(--fl-akzent);box-shadow:inset 0 0 0 1.5px var(--fl-akzent)}
+html[data-design] :is(.ut-grund, .ut-form, .as-knopf, .dok-weg) b{font-family:var(--f-body);font-size:var(--t-m);font-weight:600;color:var(--schrift)}
+html[data-design] .dok-weg b{font-size:var(--t-l);margin-bottom:3px}
+html[data-design] :is(.ut-grund, .ut-form, .as-knopf, .dok-weg) i{font-family:var(--f-body);font-style:normal;color:var(--schrift-2)}
+html[data-design] .dok-weg{display:block;width:100%;padding:14px 16px}
+
+/* Fußleisten der Werkzeuge: Hauptknopf breiter, unten nichts mehr durchscheinend */
+html[data-design] :is(.as-fuss, .ut-fuss) > button{flex:1 1 0;min-width:0;padding:0 12px}
+html[data-design] :is(.as-fuss, .ut-fuss) > button.haupt{flex:1.7 1 0}
+html[data-design] .sekm-rumpf :is(.as-fuss, .ut-fuss){
+  box-shadow:0 -10px 14px -12px rgba(0,0,0,.35), 0 40px 0 0 var(--fl-grund)}
+html[data-design] .dok-leeren{margin:12px 0 0}
+html[data-design="klartext"] :is(.as-fuss, .ut-fuss) > button.haupt{flex:2.3 1 0}
+
+/* Umtopfen Stufe 6 und Formfelder: untereinander in voller Breite */
+html[data-design] .fgrid.ut-steck{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+html[data-design] .fgrid.ut-steck > label{display:flex;flex-direction:column;gap:6px;margin:0}
+html[data-design] .fgrid.ut-steck > label > :is(input, select){width:100%}
+
+/* Doktor: Fotoknöpfe wie Nebenknöpfe, KI-Modell mit „empfohlen“ darunter */
+html[data-design] .dok-foto-zeile{gap:8px}
+html[data-design] .dok-foto-zeile > .dok-foto.klein{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;
+  min-height:var(--knopf-h);margin:0;padding:0 18px;border-radius:var(--r-mittel);
+  background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-l);font-weight:600;font-style:normal;text-align:center}
+html[data-design] #ki-direkt-doktor .kimodell{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+html[data-design] #ki-direkt-doktor .kimodell > select{width:100%}
+html[data-design] #ki-direkt-doktor .kimodell > .ki-empf{align-self:flex-start;margin:0 4px}
+
+/* Gießplan: Klassen und Alarme als Blöcke */
+html[data-design] .gp-liste{margin:8px 0 18px}
+html[data-design] .gp-liste > :is(.gp-k, .gp-a) p{margin:0}
+html[data-design] .gp-kopf{font-family:var(--f-body);font-size:var(--t-l);line-height:1.3;color:var(--schrift)}
+html[data-design] .gp-kopf b{font-weight:600}
+html[data-design] .gp-kopf .cls-key{display:inline-block;min-width:1.4em;font-family:var(--f-body);font-weight:700}
+html[data-design] .gp-txt{margin-top:4px !important;font-family:var(--f-body);font-size:var(--t-m);line-height:1.45;color:var(--schrift)}
+html[data-design] .gp-werte{display:flex;gap:18px;margin:8px 0 0;padding:0}
+html[data-design] .gp-werte > div{flex:1 1 0;min-width:0}
+html[data-design] .gp-werte dt{font-family:var(--f-body);font-size:var(--t-s);font-weight:600;color:var(--schrift-2)}
+html[data-design] .gp-werte dd{margin:2px 0 0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.4;color:var(--schrift)}
+html[data-design] .gp-wer{margin-top:6px !important;font-family:var(--f-body);font-size:var(--t-s);line-height:1.45;color:var(--schrift-2)}
+
+/* Steckbriefe: Suchfeld in voller Breite; Rezepte: Pfeil neben dem Namen */
+html[data-design] .bib-such-feld{display:flex;flex-direction:column;gap:6px;width:100%;margin:0}
+html[data-design] .bib-such-feld > input{width:100%}
+html[data-design] .bib-art summary > :is(b, i){order:0}
+html[data-design] .bib-art summary::after{order:1}
+html[data-design] .bib-art summary > .bib-bahn{order:2}
+
+/* Wetter: „Ort“ wie die übrigen Beschriftungen */
+html[data-design] .wt-suche > label.fspan{display:block;margin:0 0 6px}
+
+/* Vertretungszettel: Schritte in Gruppenkarten */
+html[data-design] .url-schritte > li{padding:0;margin:0 0 6px;border:0}
+html[data-design] .url-schritte .url-nr{margin:22px 4px 8px}
+html[data-design] .url-schritte > li:first-child .url-nr{margin-top:6px}
+html[data-design] .url-karte > .fgrid.url-felder{display:grid;grid-template-columns:1fr;gap:12px}
+html[data-design] .url-karte > .fgrid.url-felder > label{display:flex;flex-direction:column;gap:6px;margin:0}
+html[data-design] .url-karte :is(input:not([type="checkbox"]), select){width:100%;max-width:100%}
+html[data-design] .url-karte > .url-feld{display:flex;flex-direction:column;gap:6px;margin:0}
+html[data-design] .url-karte > #url-vorschau:empty{display:none}
+html[data-design] .url-karte .url-lage{margin:0}
+html[data-design] .url-karte > label.ubox{min-height:var(--feld-h);align-items:center;margin:0}
+html[data-design] .url-karte > label.ubox b{font-family:var(--f-body);font-size:var(--t-l);font-weight:500;color:var(--schrift)}
+html[data-design] .url-mini{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+html[data-design] .url-mini > li{margin:0;padding:5px 12px;border:0;border-radius:99px;background:var(--fl-tief);
+  color:var(--schrift);font-family:var(--f-body);font-size:var(--t-s);line-height:1.3}
+html[data-design="klartext"] .url-mini > li{border:1.5px solid var(--schrift);font-size:var(--t-m)}
+html[data-design] .tools.ein-knoepfe.url-knoepfe > button:not(.haupt){flex:1 1 100%}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9907,8 +9999,7 @@ function pflanzeEntfernen(id){
       <h3><span class="dok-nr">3</span> Wo fällt es dir auf?</h3>
       <div class="dok-gruppen" id="dok-gruppen"></div>
       <div id="dok-symptome"></div>
-      <div class="tools">
-        <button data-do="dok-zurueck">Zurück</button>
+      <div class="tools dok-leeren">
         <button data-do="dok-zuruecksetzen">Auswahl leeren</button>
       </div>
     </div>
@@ -10034,7 +10125,7 @@ function pflanzeEntfernen(id){
       <!-- 1 Pflanze -->
       <div class="ut-stufe an" data-ut-stufe="1">
         <p class="ut-frage">Welche Pflanze wird umgetopft?</p>
-        <p class="ut-unter">Die Auswahl bestimmt, wo Topfgröße, Zustand und Verlaufseintrag am Ende landen.</p>
+        <p class="ut-unter" data-erkl>Die Auswahl bestimmt, wo Topfgröße, Zustand und Verlaufseintrag am Ende landen.</p>
         <div class="dokwahl-gewaehlt" id="ut-gewaehlt" hidden></div>
         <div class="pwahl" id="ut-wahl">
           <div class="sb-suche">
@@ -10049,7 +10140,7 @@ function pflanzeEntfernen(id){
       <!-- 2 Grund -->
       <div class="ut-stufe" data-ut-stufe="2">
         <p class="ut-frage">Warum wird umgetopft?</p>
-        <p class="ut-unter">Mehrfach wählbar. Der Grund landet im Verlauf und entscheidet mit, was im Schritt „So gehst du vor“ steht.</p>
+        <p class="ut-unter" data-erkl>Mehrfach wählbar. Der Grund landet im Verlauf und entscheidet mit, was im Schritt „So gehst du vor“ steht.</p>
         <div class="ut-gruende" id="ut-gruende"></div>
         <p class="fhint" id="ut-grund-text"></p>
       </div>
@@ -10057,7 +10148,7 @@ function pflanzeEntfernen(id){
       <!-- 3 Topf -->
       <div class="ut-stufe" data-ut-stufe="3">
         <p class="ut-frage">Der neue Topf</p>
-        <p class="ut-unter">Zwei bis vier Zentimeter mehr als bisher reichen. Ein zu großer Topf bleibt lange nass — das ist die häufigste Ursache für Wurzelfäule nach dem Umtopfen.</p>
+        <p class="ut-unter" data-erkl>Zwei bis vier Zentimeter mehr als bisher reichen. Ein zu großer Topf bleibt lange nass — das ist die häufigste Ursache für Wurzelfäule nach dem Umtopfen.</p>
         <div class="ut-formen" id="ut-formen"></div>
         <label><span class="lab">Durchmesser in cm</span>
           <input id="ut-topf" type="number" min="5" max="80" step="1" value="18"></label>
@@ -10071,7 +10162,7 @@ function pflanzeEntfernen(id){
       <!-- 4 Vorrat: nur ankreuzen, was da ist -->
       <div class="ut-stufe" data-ut-stufe="4">
         <p class="ut-frage">Womit füllst du auf?</p>
-        <p class="ut-unter">Pflanze und Topf stehen oben schon fest — hier fehlt nur noch, was du zu Hause hast. Die Menge ist auf den neuen Topf gerechnet.</p>
+        <p class="ut-unter" data-erkl>Pflanze und Topf stehen oben schon fest — hier fehlt nur noch, was du zu Hause hast. Die Menge ist auf den neuen Topf gerechnet.</p>
         <div class="al-bibzsf" id="ut-sub-gruppe">
           <h4>Zielmischung</h4>
           <p class="as-zsf" id="ut-sub-gruppe-name" style="margin:0"></p>
@@ -10083,7 +10174,7 @@ function pflanzeEntfernen(id){
       <!-- 5 Mischung: die Rechnung, in einer eigenen Stufe -->
       <div class="ut-stufe" data-ut-stufe="5">
         <p class="ut-frage">Die Mischung</p>
-        <p class="ut-unter">Links, was du heute anrühren kannst. Rechts, wie es optimal wäre — mit dem, was dafür noch fehlt.</p>
+        <p class="ut-unter" data-erkl>Links, was du heute anrühren kannst. Rechts, wie es optimal wäre — mit dem, was dafür noch fehlt.</p>
         <div id="ut-sub-mischung"></div>
         <div id="ut-sub-warnungen"></div>
       </div>
@@ -10091,10 +10182,10 @@ function pflanzeEntfernen(id){
       <!-- 6 Stecklinge -->
       <div class="ut-stufe" data-ut-stufe="6">
         <p class="ut-frage">Sind dabei Stecklinge abgegangen?</p>
-        <p class="ut-unter">Beim Teilen oder Auslichten fällt oft etwas ab, das sich bewurzeln lässt. Was du hier einträgst, wird als eigene Pflanze angelegt und im Stammbaum mit der Mutter verbunden.</p>
+        <p class="ut-unter" data-erkl>Beim Teilen oder Auslichten fällt oft etwas ab, das sich bewurzeln lässt. Was du hier einträgst, wird als eigene Pflanze angelegt und im Stammbaum mit der Mutter verbunden.</p>
         <label class="fspan check">
           <input type="checkbox" role="switch" id="ut-hat-stecklinge"> <span class="lab" style="display:inline">Ja, Stecklinge gezogen</span></label>
-        <div id="ut-steckling-feld" hidden>
+        <div id="ut-steckling-feld" class="fgrid ut-steck" hidden>
           <label><span class="lab">Wie viele</span>
             <input id="ut-steckling-zahl" type="number" min="1" max="12" step="1" value="1"></label>
           <label><span class="lab">Methode</span>
@@ -10127,9 +10218,9 @@ function pflanzeEntfernen(id){
       <p class="wz-hilfe" hidden>Die Grafik zeigt, an welchen Tagen wie viel zusammenkommt — nützlich, um vor einer Reise nichts zu übersehen. Die Intervalle darunter sind Richtwerte. Entscheidend ist die Fingerprobe, außer bei Klasse S, dort gilt das Anstauprinzip.</p>
     <div id="gp-grafik"></div>
     <h4>Klassen</h4>
-    <div class="t-scroll"><table class="plan-t"><thead><tr><th>Klasse</th><th>Prinzip</th><th>Sommer</th><th>Winter</th></tr></thead><tbody id="klassen"></tbody></table></div>
+    <div class="ein-karte gp-liste" id="klassen"></div>
     <h4>Jahreszeiten-Alarme</h4>
-    <div class="t-scroll"><table class="plan-t"><thead><tr><th>Zeitpunkt</th><th>Was passieren muss</th><th>Betrifft</th></tr></thead><tbody id="alarme"></tbody></table></div>
+    <div class="ein-karte gp-liste" id="alarme"></div>
     </div>
   </section>
 
@@ -10150,7 +10241,7 @@ function pflanzeEntfernen(id){
     <!-- 1 Pflanze -->
     <div class="as-stufe an" data-sub-stufe="1">
       <p class="as-frage">Für welche Pflanze?</p>
-      <p class="as-unter">Aus der Art ergibt sich die Gruppe — die legt fest, wie luftig und wie sauer die Mischung werden soll.</p>
+      <p class="as-unter" data-erkl>Aus der Art ergibt sich die Gruppe — die legt fest, wie luftig und wie sauer die Mischung werden soll.</p>
       <div class="dokwahl-gewaehlt" id="sub-gewaehlt" hidden></div>
       <div class="pwahl" id="sub-wahl">
         <div class="sb-suche">
@@ -10172,7 +10263,7 @@ function pflanzeEntfernen(id){
     <!-- 2 Topf -->
     <div class="as-stufe" data-sub-stufe="2">
       <p class="as-frage">Welcher Topf?</p>
-      <p class="as-unter">Form und Durchmesser ergeben das Volumen. Ein Kegelstumpf fasst deutlich weniger als ein Zylinder gleicher Höhe — deshalb wird gerechnet und nicht geschätzt.</p>
+      <p class="as-unter" data-erkl>Form und Durchmesser ergeben das Volumen. Ein Kegelstumpf fasst deutlich weniger als ein Zylinder gleicher Höhe — deshalb wird gerechnet und nicht geschätzt.</p>
       <input id="sub-topf" class="topf-num" type="number" min="5" max="80" step="1" aria-label="Topfdurchmesser in cm">
       <div class="as-knoepfe" id="topf-formen" role="radiogroup" aria-label="Topfform"></div>
       <p class="fhint" id="topf-hinweis"></p>
@@ -10186,7 +10277,7 @@ function pflanzeEntfernen(id){
     <!-- 3 Vorrat -->
     <div class="as-stufe" data-sub-stufe="3">
       <p class="as-frage">Was hast du da?</p>
-      <p class="as-unter">Hak an, was zu Hause steht. Gerechnet wird nur mit dem, was du wirklich hast.</p>
+      <p class="as-unter" data-erkl>Hak an, was zu Hause steht. Gerechnet wird nur mit dem, was du wirklich hast.</p>
       <div id="sub-vorrat"></div>
       <div class="tools"><button data-do="sub-leeren">Auswahl leeren</button></div>
     </div>
@@ -10194,7 +10285,7 @@ function pflanzeEntfernen(id){
     <!-- 4 Mischung -->
     <div class="as-stufe" data-sub-stufe="4">
       <p class="as-frage">Die Mischung</p>
-      <p class="as-unter">Das Beste, was sich aus deinem Vorrat bauen lässt — und wo es am Ziel vorbeischrammt.</p>
+      <p class="as-unter" data-erkl>Das Beste, was sich aus deinem Vorrat bauen lässt — und wo es am Ziel vorbeischrammt.</p>
       <div id="sub-mischung"></div>
       <div id="sub-warnungen"></div>
     </div>
@@ -10225,7 +10316,7 @@ function pflanzeEntfernen(id){
       <!-- 1 Pflanze -->
       <div class="as-stufe an" data-ver-stufe="1">
         <p class="as-frage">Welche Pflanze wird vermehrt?</p>
-        <p class="as-unter">Die Ableger erben Art, Gießklasse, Licht und Giftigkeit von ihr — und hängen im Stammbaum unter ihr.</p>
+        <p class="as-unter" data-erkl>Die Ableger erben Art, Gießklasse, Licht und Giftigkeit von ihr — und hängen im Stammbaum unter ihr.</p>
         <div class="dokwahl-gewaehlt" id="ver-gewaehlt" hidden></div>
         <div class="pwahl" id="ver-wahl">
           <div class="sb-suche">
@@ -10239,7 +10330,7 @@ function pflanzeEntfernen(id){
       <!-- 2 Weg -->
       <div class="as-stufe" data-ver-stufe="2">
         <p class="as-frage">Welcher Weg?</p>
-        <p class="as-unter">Die Aussicht gilt für die Art, nicht für dein Exemplar. Tipp einen Weg an, die Anleitung steht darunter.</p>
+        <p class="as-unter" data-erkl>Die Aussicht gilt für die Art, nicht für dein Exemplar. Tipp einen Weg an, die Anleitung steht darunter.</p>
         <div id="ver-kikurz"></div>
         <div class="kibox" id="ver-kibox" hidden>
           <h3>Bei einer KI nachfragen</h3>
@@ -10298,7 +10389,7 @@ function pflanzeEntfernen(id){
           <div id="ver-az"></div>
           <div id="ver-pfl" hidden>
           <p class="as-frage">Wie viele Ableger?</p>
-          <p class="as-unter">Jeder wird eine eigene Pflanze mit eigenem Namen, eigenem Bild und eigenem Gießrhythmus. Alle hängen im Stammbaum unter der Mutter. Für schon bewurzelte Ableger.</p>
+          <p class="as-unter" data-erkl>Jeder wird eine eigene Pflanze mit eigenem Namen, eigenem Bild und eigenem Gießrhythmus. Alle hängen im Stammbaum unter der Mutter. Für schon bewurzelte Ableger.</p>
           <div class="ver-zahl" id="ver-zahl"></div>
           <div id="ver-ableger"></div>
           </div>
@@ -10646,7 +10737,7 @@ function pflanzeEntfernen(id){
     </div>
     <div class="wz-in" id="mh-in-bib-arten" hidden>
       <p class="wz-hilfe" hidden>Alle Arten, die die App kennt — auch die, die du nicht besitzt. Gedacht zum Nachschlagen vor einem Kauf: Licht, Gießklasse, Giftigkeit für Tiere und Frosthärte stehen hier, bevor die Pflanze bei dir steht.</p>
-      <label><span class="lab">Art suchen</span>
+      <label class="fspan bib-such-feld"><span class="lab">Art suchen</span>
         <input id="bib-such" placeholder="Name, botanisch oder Familie" autocomplete="off"></label>
       <p class="fhint" id="bib-such-zahl"></p>
       <div id="bib-treffer"></div>
@@ -10843,43 +10934,50 @@ function pflanzeEntfernen(id){
     <ol class="url-schritte">
       <li>
         <p class="url-nr">Schritt 1 — Zeitraum</p>
-        <div class="fgrid">
-          <label><span class="lab">Weg ab</span><input type="date" id="url-von"></label>
-          <label><span class="lab">Zurück am</span><input type="date" id="url-bis"></label>
+        <div class="ein-karte url-karte">
+        <div class="fgrid url-felder">
+          <label class="fspan"><span class="lab">Weg ab</span><input type="date" id="url-von"></label>
+          <label class="fspan"><span class="lab">Zurück am</span><input type="date" id="url-bis"></label>
           <label class="fspan"><span class="lab">Wer gießt? (steht oben auf dem Zettel)</span>
             <input id="url-wer" placeholder="z. B. Anna von nebenan" autocomplete="off"></label>
         </div>
         <div id="url-vorschau"></div>
+        </div>
       </li>
 
       <li>
         <p class="url-nr">Schritt 2 — Sicherheitspuffer</p>
-        <label class="fspan"><span class="lab">Termine vorziehen</span>
+        <div class="ein-karte url-karte">
+        <label class="fspan url-feld"><span class="lab">Termine vorziehen</span>
           <select id="url-puffer">
             <option value="0">Genau am errechneten Tag</option>
             <option value="1" selected>Einen Tag früher</option>
             <option value="2">Zwei Tage früher</option>
-          </select>
-          <span class="fhint">Eine Vertretung kommt selten auf den Tag genau. Einen Tag zu früh schadet weniger als drei zu spät.</span></label>
+          </select></label>
+        <p class="fhint" data-erkl>Eine Vertretung kommt selten auf den Tag genau. Einen Tag zu früh schadet weniger als drei zu spät.</p>
+        </div>
       </li>
 
       <li>
         <p class="url-nr">Schritt 3 — Was soll mit auf den Zettel</p>
+        <div class="ein-karte url-karte">
         <label class="ubox"><input type="checkbox" role="switch" id="url-nummern" checked>
-          <span><b>Nummernstreifen zum Ausschneiden</b><i>Eine Extraseite mit Nummer und Name zum Ankleben an die Töpfe.</i></span></label>
+          <span><b>Nummernstreifen zum Ausschneiden</b></span></label>
+        <p class="fhint" data-erkl-kurz="Zum Ankleben an die Töpfe.">Eine Extraseite mit Nummer und Name zum Ankleben an die Töpfe.</p>
         <label class="ubox"><input type="checkbox" role="switch" id="url-ohneplan">
-          <span><b>Ohne Raumplan drucken</b><i>Spart Seiten. Ohne Plan gibt es keine Nummern — der Nummernstreifen entfällt dann mit.</i></span></label>
+          <span><b>Ohne Raumplan drucken</b></span></label>
+        <p class="fhint" data-erkl>Spart Seiten. Ohne Plan gibt es keine Nummern — der Nummernstreifen entfällt dann mit.</p>
         <label class="ubox"><input type="checkbox" role="switch" id="url-ohnebilder">
-          <span><b>Ohne Bilder drucken</b><i>Deutlich weniger Farbe und Papier, dafür schwerer zu erkennen.</i></span></label>
+          <span><b>Ohne Bilder drucken</b></span></label>
+        <p class="fhint" data-erkl-kurz="Spart Farbe und Papier.">Deutlich weniger Farbe und Papier, dafür schwerer zu erkennen.</p>
+        </div>
       </li>
 
       <li>
         <p class="url-nr">Schritt 4 — Ausgeben</p>
-        <div class="tools">
+        <div class="tools ein-knoepfe url-knoepfe">
           <button id="btn-url-druck" class="haupt">Drucken / als PDF sichern</button>
           <button id="btn-url-blatt">Erst ansehen</button>
-        </div>
-        <div class="tools" style="margin-top:6px">
           <button id="btn-url-text">Kurzfassung als Nachricht kopieren</button>
           <button id="btn-url-teilen" hidden>Kurzfassung teilen</button>
         </div>
@@ -10899,7 +10997,7 @@ function pflanzeEntfernen(id){
     <div class="wz-in" id="mh-in-wetter" hidden>
       <p class="wz-hilfe" hidden>Wer Pflanzen auf dem Balkon stehen hat, gießt bei angesagtem Regen umsonst — und bei dreißig Grad reicht der übliche Rhythmus oft nicht. Trägst du hier einen Ort ein, zeigt „Heute“ eine Zeile mit Temperatur und Regen. Die App ändert damit nichts an deinen Gießabständen; sie sagt nur Bescheid. Die Daten kommen von Open-Meteo, einem freien Wetterdienst ohne Anmeldung. Übertragen wird nur der Ortsname beim Suchen und danach die Koordinaten — keine Angaben zu dir oder deinen Pflanzen. Ohne eingetragenen Ort fragt die App nichts ab und die Zeile bleibt aus. Unten stehen der Tagesverlauf bis Mitternacht und ein Ausblick über sieben Tage; geht es darin unter null, wird der Tag als Frosttag benannt. Alles davon steckt in derselben einen Anfrage — sie läuft nur beim Start und nur, wenn der letzte Wert älter als eine Stunde ist.</p>
       <div class="wt-suche">
-        <label class="fspan" for="wt-ort">Ort</label>
+        <label class="fspan" for="wt-ort"><span class="lab">Ort</span></label>
         <div class="wt-zeile feld-knopf">
           <input type="text" id="wt-ort" placeholder="z. B. Leipzig" autocomplete="address-level2">
           <button type="button" id="wt-such">Suchen</button>
@@ -11823,7 +11921,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.6';
+const FASSUNG = '4.0-beta.7';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -17726,12 +17824,17 @@ modalAnmelden('willkommen', {
 
 /* ══════════════════ Plan & Skala ══════════════════ */
 function planTabellen(){
+  /* 4.0-beta.7: Blöcke untereinander statt Tabellen — die liefen am
+     Handy rechts aus dem Bild und wollten seitlich gewischt werden. */
   $('#klassen').innerHTML = Object.entries(KLASSEN).map(([k,v])=>{
     const wer = allePflanzen().filter(p=>p.klasse===k).map(nice).join(', ')||'—';
-    return `<tr><td><span class="cls-key">${k}</span> ${esc(v.name)}<br><span style="color:var(--peat);font-size:.75rem">${esc(wer)}</span></td>
-      <td>${esc(v.kurz)}</td><td>${esc(v.sommer)}</td><td>${esc(v.winter)}</td></tr>`;
+    return `<div class="gp-k"><p class="gp-kopf"><span class="cls-key">${k}</span> <b>${esc(v.name)}</b></p>
+      <p class="gp-txt">${esc(v.kurz)}</p>
+      <dl class="gp-werte"><div><dt>Sommer</dt><dd>${esc(v.sommer)}</dd></div><div><dt>Winter</dt><dd>${esc(v.winter)}</dd></div></dl>
+      <p class="gp-wer">${esc(wer)}</p></div>`;
   }).join('');
-  $('#alarme').innerHTML = ALARME.map(([a,b,c])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join('');
+  $('#alarme').innerHTML = ALARME.map(([a,b,c])=>`<div class="gp-a"><p class="gp-kopf"><b>${esc(a)}</b></p>
+      <p class="gp-txt">${esc(b)}</p><p class="gp-wer">${esc(c)}</p></div>`).join('');
 }
 
 statusText();
@@ -29184,6 +29287,8 @@ function azZeichnen(){
     : azListeHTML();
   if(AZ_MELDUNG){ h = '<div class="alert info az-meldung">' + AZ_MELDUNG + '</div>' + h; AZ_MELDUNG = ''; }
   ziel.innerHTML = h;
+  /* 4.0-beta.7: Einleitungen wie in den übrigen Werkzeugen — erster Satz, Rest hinter „Mehr dazu“ */
+  ziel.querySelectorAll('.az-unter').forEach(p=>erklSetzen(p, p.textContent));
 }
 function azZeigen(sicht){
   const vorher = AZ_SICHT.art;
@@ -29231,6 +29336,7 @@ function verWohinZeichnen(){
     + '<div class="fgrid az-form">' + azGefWahlHTML('ver-az', VER_AZ.gef, null)
     + '<label><span class="lab">Wie viele Stecklinge?</span><input type="number" id="ver-az-zahl" min="1" max="500" step="1"'
     + ' inputmode="numeric" value="' + VER_AZ.anzahl + '"></label></div>';
+  az.querySelectorAll('.as-unter').forEach(p=>erklSetzen(p, p.textContent));
   const gn = document.getElementById('ver-az-gname');
   if(gn && VER_AZ.gname) gn.value = VER_AZ.gname;
   const gm = document.getElementById('ver-az-gmed');
@@ -31422,7 +31528,7 @@ function karteiAbschnittBauen(){
     + '<input id="kartei-such" type="search" placeholder="Suchen" aria-label="Pflanze suchen">'
     + '<div class="pwahl-gitter" id="kartei-liste"></div></div>'
     + (ohneFoto.length
-       ? '<p class="fhint">Ohne Foto wird nur gefragt, was sich aus dem Namen ergibt — kein Zustand, '
+       ? '<p class="fhint" id="kartei-ohnefoto">Ohne Foto wird nur gefragt, was sich aus dem Namen ergibt — kein Zustand, '
          + 'kein Topfurteil, keine Merkmale. Betroffen: '
          + esc(ohneFoto.slice(0, 8).map(nice).join(', '))
          + (ohneFoto.length > 8 ? ' und ' + (ohneFoto.length - 8) + ' weitere' : '') + '.</p>'
@@ -31430,6 +31536,10 @@ function karteiAbschnittBauen(){
     + '<div class="tools"><button type="button" class="haupt" data-do="kartei-los">'
     + 'Auffrischen starten (' + menge.length + ')</button></div>'
     + '<p class="kihinweis" id="kartei-meld"></p>';
+  const ohneFotoEl = document.getElementById('kartei-ohnefoto');
+  if(ohneFotoEl) erklSetzen(ohneFotoEl, ohneFotoEl.textContent,
+    ohneFoto.length === 1 ? '1 Pflanze ohne Foto: nur Angaben aus dem Namen.'
+                          : ohneFoto.length + ' Pflanzen ohne Foto: nur Angaben aus dem Namen.');
   karteiGitter('');
   karteiKaestchen();
 }

@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.6', w.__T('FASSUNG') === '4.0-beta.6', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.7', w.__T('FASSUNG') === '4.0-beta.7', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11327,6 +11327,93 @@ setTimeout(async () => {
     T('designSetzen(' + JSON.stringify(dv || 'botanisch') + ', false)');
     pruef('beta.6: Zeile „Ansicht“ nennt das gewählte Design', uT === 'Terrarium' && uK === 'Klartext', uT + ' / ' + uK);
   } catch(e) { pruef('beta.6: Block läuft ohne Laufzeitfehler', false, e.message); }
+
+  /* ══ 4.0-beta.7: Grundstil S4 — Werkzeuge, Vertretungszettel, Nachschlagen, Kartei ══
+     Jeder Test legt seine Daten selbst an und stellt sie danach zurück.
+     Ein Laufzeitfehler im Block zählt als Fehlschlag statt ihn abzubrechen. */
+  try {
+    const T = c => w.__T(c);
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
+    const restVon = el => { const r = el && el.querySelector('.erkl-rest'); return r ? r.textContent : null; };
+    const vornVon = el => el && el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild.textContent.trim() : '';
+    const q = sel => d.querySelector(sel);
+
+    /* Etiketten und Wahlkacheln */
+    pruef('beta.7: Merkmale und Zutaten sind runde Etiketten', /\.sym-liste > \.sym\{[^}]*border-radius:99px/.test(stil));
+    pruef('beta.7: Gewähltes Merkmal ist im Akzent gefüllt', /\.sym-liste > \.sym\.on\{[^}]*background:var\(--fl-akzent\)/.test(stil));
+    pruef('beta.7: Gewählte Wahlkachel hat den Akzentrand', /\.dok-weg\.on\{[^}]*border-color:var\(--fl-akzent\)/.test(stil));
+    pruef('beta.7: Wahlkacheln sind helle Karten ohne Farbstreifen links', /:is\(\.ut-grund, \.ut-form, \.as-knopf, \.dok-weg\)\{[^}]*background:var\(--fl-karte\)[^}]*border-left-width:1\.5px/.test(stil));
+
+    /* Fußleisten */
+    pruef('beta.7: Fußleiste deckt den Streifen unter sich ab', /\.sekm-rumpf :is\(\.as-fuss, \.ut-fuss\)\{[^}]*0 40px 0 0 var\(--fl-grund\)/.test(stil));
+    pruef('beta.7: Hauptknopf der Fußleiste ist breiter als „Zurück“', /:is\(\.as-fuss, \.ut-fuss\) > button\.haupt\{flex:1\.7 1 0\}/.test(stil));
+
+    /* Doktor */
+    pruef('beta.7: Doktor Stufe 3 hat nur noch das „Zurück“ der Fußleiste', !q('#dok-s3 [data-do="dok-zurueck"]') && !!q('#dok-s3 [data-do="dok-zuruecksetzen"]') && !!q('#dok-zurueck-f'));
+    pruef('beta.7: Fotoknöpfe im Doktor sind Nebenknöpfe', /\.dok-foto-zeile > \.dok-foto\.klein\{[^}]*min-height:var\(--knopf-h\)[^}]*border:1\.5px solid var\(--linie-stark\)/.test(stil));
+    pruef('beta.7: „empfohlen“ steht im Doktor unter dem Modell', /#ki-direkt-doktor \.kimodell\{display:flex;flex-direction:column/.test(stil));
+
+    /* Umtopfen Stufe 6 */
+    const steck = d.getElementById('ut-steckling-feld');
+    pruef('beta.7: Umtopfen Stufe 6 stellt „Wie viele“ und „Methode“ untereinander',
+      !!steck && steck.classList.contains('ut-steck') && /\.fgrid\.ut-steck\{[^}]*grid-template-columns:1fr/.test(stil));
+
+    /* Einleitungen der Stufen */
+    const unter = [...d.querySelectorAll('#wz-in-umtopfen .ut-unter, #wz-in-substrat .as-unter, #wz-in-vermehren .as-unter')];
+    pruef('beta.7: Einleitungen der Stufen sind Erklärtexte', unter.length >= 12 && unter.every(p => p.classList.contains('erkl')), unter.filter(p => !p.classList.contains('erkl')).length + ' von ' + unter.length);
+    const grund = unter.find(p => /^Mehrfach wählbar/.test(p.textContent));
+    pruef('beta.7: Erster Satz bleibt stehen, der Rest steht wortgleich hinter „Mehr dazu“',
+      !!grund && vornVon(grund) === 'Mehrfach wählbar.' && /^Der Grund landet im Verlauf/.test(restVon(grund) || ''), grund && grund.textContent.slice(0, 50));
+
+    T("azZeigen({art:'neuGefaess'})");
+    const azu = d.querySelector('#az-ansicht .az-unter');
+    pruef('beta.7: Anzucht: Einleitung „Neues Gefäß“ zeigt den ersten Satz, den Rest hinter „Mehr dazu“',
+      !!azu && azu.classList.contains('erkl') && vornVon(azu) === 'Glas, Schale oder Topf.' && /^Bei Wasser steht der Wechsel/.test(restVon(azu) || ''), azu && azu.textContent.slice(0, 40));
+    T("azZeigen({art:'liste'})");
+
+    /* Gießplan: Blöcke statt Tabellen */
+    T('planTabellen()');
+    const kl = [...d.querySelectorAll('#klassen > .gp-k')];
+    const kk = T('Object.keys(KLASSEN)');
+    const werteOk = kl.length === kk.length && kl.every((b, i) => {
+      const dd = b.querySelectorAll('.gp-werte dd');
+      return dd.length === 2 && dd[0].textContent === T('KLASSEN[' + JSON.stringify(kk[i]) + '].sommer') && dd[1].textContent === T('KLASSEN[' + JSON.stringify(kk[i]) + '].winter');
+    });
+    pruef('beta.7: Gießplan zeigt Klassen als Blöcke mit Sommer und Winter', !q('#wz-in-giessplan table') && werteOk, kl.length + ' / ' + kk.length);
+    pruef('beta.7: Gießplan zeigt jeden Jahreszeiten-Alarm als Block', d.querySelectorAll('#alarme > .gp-a').length === T('ALARME.length') && d.querySelectorAll('#alarme > .gp-a .gp-txt').length === T('ALARME.length'));
+
+    /* Nachschlagen */
+    const bibL = d.getElementById('bib-such') && d.getElementById('bib-such').closest('label');
+    pruef('beta.7: Suchfeld der Steckbriefe in voller Breite', !!bibL && bibL.classList.contains('bib-such-feld') && /\.bib-such-feld > input\{width:100%\}/.test(stil));
+    pruef('beta.7: Pfeil der Rezepte steht neben dem Namen, der Balken darunter', /\.bib-art summary::after\{order:1\}/.test(stil) && /\.bib-art summary > \.bib-bahn\{order:2\}/.test(stil));
+
+    /* Wetter */
+    pruef('beta.7: „Ort“ ist eine normale Feldbeschriftung', !!q('label[for="wt-ort"] > span.lab'));
+
+    /* Kartei: eigene Pflanzen ohne Foto */
+    const altPl = T('JSON.stringify(S.eigene || [])');
+    try {
+      T("S.eigene = [{id:'kb7a', name:'Erster', art:'Monstera', klasse:'B'}, {id:'kb7b', name:'Zweiter', art:'Pilea', klasse:'B'}]; KARTEI_WAHL_BEREIT = false; karteiAbschnittBauen()");
+      const kf = d.getElementById('kartei-ohnefoto');
+      pruef('beta.7: Kartei: Erklärtext unter den Kacheln ist eine Zeile mit „Mehr dazu“',
+        !!kf && kf.classList.contains('erkl') && vornVon(kf) === '2 Pflanzen ohne Foto: nur Angaben aus dem Namen.' && /^Ohne Foto wird nur gefragt, was sich aus dem Namen ergibt — kein Zustand, kein Topfurteil, keine Merkmale\. Betroffen: Erster, Zweiter\.$/.test(restVon(kf) || ''),
+        kf ? vornVon(kf) + ' | ' + restVon(kf) : 'fehlt');
+    } finally {
+      T('S.eigene = ' + altPl + '; KARTEI_WAHL_BEREIT = false; karteiAbschnittBauen()');
+    }
+
+    /* Vertretungszettel */
+    const vz = d.getElementById('mh-in-urlaub');
+    const karten = vz ? [...vz.querySelectorAll('.url-schritte > li > .ein-karte')] : [];
+    pruef('beta.7: Zettel: Schritte 1 bis 3 stehen in Gruppenkarten', karten.length === 3 && ['url-von', 'url-bis', 'url-wer', 'url-vorschau', 'url-puffer', 'url-nummern', 'url-ohneplan', 'url-ohnebilder'].every(id => d.getElementById(id).closest('.ein-karte')), karten.length);
+    const ub = vz ? [...vz.querySelectorAll('label.ubox')] : [];
+    pruef('beta.7: Zettel: Unter jedem Schalter steht eine Erklärzeile mit „Mehr dazu“', ub.length === 3 && ub.every(l => { const p = l.nextElementSibling; return p && p.matches('p.fhint.erkl') && !!p.querySelector('.mehr-dazu'); }) && ub.every(l => !l.querySelector('i')), ub.length);
+    const nr = ub[0] && ub[0].nextElementSibling;
+    pruef('beta.7: Zettel: Der alte Text steht wortgleich hinter „Mehr dazu“', !!nr && restVon(nr) === 'Eine Extraseite mit Nummer und Name zum Ankleben an die Töpfe.', nr && restVon(nr));
+    pruef('beta.7: Zettel: Alle Knöpfe stehen in einer Knopfgruppe', !!q('#mh-in-urlaub .tools.ein-knoepfe > #btn-url-druck.haupt + #btn-url-blatt + #btn-url-text') && d.querySelectorAll('#mh-in-urlaub .tools').length === 1);
+    pruef('beta.7: Zettel: Felder in voller Breite, Schalter ausgenommen', /\.url-karte :is\(input:not\(\[type="checkbox"\]\), select\)\{width:100%/.test(stil));
+    pruef('beta.7: Zettel: Pflanzen stehen als runde Etiketten', /\.url-mini > li\{[^}]*border-radius:99px/.test(stil));
+  } catch(e) { pruef('beta.7: Block läuft ohne Laufzeitfehler', false, e.message); }
 
   console.log('\n── Ergebnis ──');
   console.log('  ' + zahl + ' Prüfungen, ' + (zahl - fehler.length) + ' bestanden');
