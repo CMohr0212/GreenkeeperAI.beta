@@ -4191,6 +4191,61 @@ html[data-design] #sicher-takt{display:flex;flex-wrap:wrap;align-items:center;ga
 html[data-design] #sicher-takt > .lab:first-child{flex:1 1 100%;margin:0}
 html[data-design] #sicher-takt > .zaehler{flex:0 0 auto}
 html[data-design] #sicher-takt > #sicher-takt-wort{flex:0 0 auto;margin:0}
+/* ══ Gießmodus F (4.0-beta.9): Übersicht, Gießweg, Untersetzer, Abschluss ══
+   Knöpfe nutzen vorhandene Klassen aus S1 (.gm-fuss, .gm-zfrage-btns),
+   Listen die Zeilen der Einstellungen (.ein-karte, .ein-liste). */
+html[data-design] .gm-mitte{align-items:flex-start}
+html[data-design] #gm-inhalt{margin-block:auto}
+html[data-design] .gm-rueck-platz{display:flex;flex:0 0 auto}
+html[data-design] .gm-rueck-platz > #gm-rueck{flex:0 0 auto;min-height:var(--tap);padding:0 14px;font-size:var(--t-s)}
+html[data-design] .gm-rueck-platz > #gm-rueck[hidden]{display:none}
+html[data-design="klartext"] .gm-rueck-platz > #gm-rueck{font-size:var(--t-m)}
+html[data-design] .gm-ue{text-align:left}
+html[data-design] #gm-inhalt .gm-ue > h3, html[data-design] #gm-inhalt .gm-ut > h3{margin:0 0 var(--a-4, 16px);font-size:1.2rem;line-height:1.3}
+html[data-design] #gm-inhalt .gm-ut > h3{margin-bottom:4px}
+html[data-design] .gm-ue .gm-ue-etikett{margin:var(--a-4, 16px) 4px 6px}
+html[data-design] .gm-ue .gm-ue-etikett:first-of-type{margin-top:0}
+html[data-design] .gm-ue-k{margin:0}
+html[data-design] .gm-ue-zeile > p{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0;
+  font-family:var(--f-body);font-size:var(--t-m);line-height:1.45;color:var(--schrift)}
+html[data-design] .gm-ue-zeile b{font-weight:600}
+html[data-design] .gm-ue-wert{flex:0 0 auto;font-variant-numeric:tabular-nums;font-weight:600;color:var(--wasser)}
+html[data-design] .gm-ue-klein{margin:4px 0 0;font-family:var(--f-body);font-size:var(--t-s);line-height:1.5;color:var(--schrift-2);overflow-wrap:anywhere}
+html[data-design="klartext"] .gm-ue-klein{font-size:var(--t-m);color:var(--schrift)}
+html[data-design] .gm-ue-knopf{display:flex}
+html[data-design] .gm-ue-pfl{display:flex;align-items:center;gap:12px}
+html[data-design] .gm-ue-bild, html[data-design] .gm-ut-bild{flex:0 0 44px;width:44px;height:44px;border-radius:50%;overflow:hidden;
+  background:var(--fl-tief)}
+html[data-design] .gm-ue-bild img, html[data-design] .gm-ut-bild img{width:100%;height:100%;object-fit:cover;display:block}
+html[data-design] .gm-ue-pfl-t, html[data-design] .gm-ut-text{flex:1 1 auto;min-width:0}
+html[data-design] :is(.gm-ue-pfl-t, .gm-ut-text) b{display:block;font-family:var(--f-body);font-weight:600;font-size:var(--t-m);overflow-wrap:anywhere}
+html[data-design] :is(.gm-ue-pfl-t, .gm-ut-text) i{display:block;font-style:normal;font-size:var(--t-s);color:var(--schrift-2);overflow-wrap:anywhere}
+html[data-design] .gm-ue-mit{flex:0 0 auto}
+html[data-design] .gm-ue-mit > button[aria-pressed="true"]{border-color:var(--fl-akzent);color:var(--schrift)}
+html[data-design="klartext"] .gm-ue-pfl{flex-wrap:wrap}
+html[data-design="klartext"] .gm-ue-mit{flex:1 1 100%}
+html[data-design="klartext"] .gm-ue-mit > button{width:100%}
+/* Raum über der Karte, Gießweg auf der Karte */
+html[data-design] .gm-raum{margin:-8px 0 10px;font-family:var(--f-body);font-size:var(--t-m);font-weight:600;color:var(--schrift)}
+html[data-design] .gm-weg{margin:0 0 10px;padding:8px 12px;border-radius:var(--r-mittel);background:var(--ton-wasser);
+  font-family:var(--f-body);font-size:var(--t-m);line-height:1.5;color:var(--schrift)}
+html[data-design] .gm-weg.anders, html[data-design] .gm-weg.spuelen{font-weight:600}
+html[data-design="klartext"] .gm-weg{border:2px solid var(--schrift);background:none;font-size:var(--t-md)}
+html[data-design] .gm-weg-dg{margin:-4px 0 10px;font-size:var(--t-s);line-height:1.5;color:var(--schrift-2)}
+html[data-design="klartext"] .gm-weg-dg{font-size:var(--t-m);color:var(--schrift)}
+/* Untersetzer-Karte */
+html[data-design] .gm-ut-zeile{padding:12px 0;border-top:1px solid var(--linie)}
+html[data-design="klartext"] .gm-ut-zeile{border-top:2px solid var(--schrift)}
+html[data-design] .gm-ut-kopf{display:flex;align-items:center;gap:12px}
+html[data-design] .gm-ut-erg{flex:0 0 auto;font-size:var(--t-s);font-weight:600;color:var(--fl-akzent)}
+html[data-design] .gm-ut-knoepfe{flex-wrap:wrap;margin-top:10px}
+html[data-design] .gm-ut-knoepfe > button{flex:1 1 30%;min-width:0;padding:4px 8px;hyphens:auto}
+html[data-design="klartext"] .gm-ut-knoepfe > button{flex-basis:100%}
+html[data-design] .gm-ut-zeile.fertig .gm-ut-text b{color:var(--schrift-2)}
+/* Abschlusskarte */
+html[data-design] .gm-ende{margin:var(--a-4, 16px) 0 10px}
+html[data-design] .gm-ende-liste{margin:0}
+html[data-design] .gm-ende .gm-ue-klein{margin:8px 4px 0}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9597,9 +9652,9 @@ const GIESSARTEN = {
   durch:   {name:'Durchdringend',
     kurz:'Gießen, bis unten Wasser austritt. Nach 15 Minuten den Untersetzer ausleeren.'},
   tauchen: {name:'Tauchen',
-    kurz:'Topf 10 Minuten in einen Eimer Wasser stellen, danach gut abtropfen lassen.'},
+    kurz:'Topf bis knapp unter den Rand ins Wasser stellen, bis keine Luftblasen mehr aufsteigen (5 bis 10 Minuten), danach gut abtropfen lassen.'},
   unten:   {name:'Von unten',
-    kurz:'Wasser nur in den Untersetzer. Nichts auf Blätter oder Blattherz gießen.'},
+    kurz:'Wasser in Untersetzer oder Schale, etwa ein Viertel der Topfhöhe hoch. Stehen lassen, bis die Oberfläche dunkel und feucht ist (10 bis 30 Minuten), dann abtropfen. Nichts auf Blätter oder Blattherz.'},
   anstau:  {name:'Anstau',
     kurz:'Untersetzer dauerhaft 1–2 cm gefüllt halten. Nie ganz austrocknen lassen.'},
   /* Kein Gießen, sondern ein Wechsel. Der Rhythmus hängt nicht an der
@@ -10939,6 +10994,14 @@ function pflanzeEntfernen(id){
       </div>
       <p class="fhint" id="wasser-text"></p>
 
+      <p class="ein-abschnitt">So gieße ich meistens</p>
+      <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Gießweise wählen" id="weise-wahl">
+        <button data-weise="oben"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von oben mit der Kanne</b><i>Der ganze Ballen wird nass, Salze werden ausgespült</i></span></button>
+        <button data-weise="unten"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von unten im Gefäß (Eimer, Wanne)</b><i>Die Erde zieht nur, was sie aufnehmen kann</i></span></button>
+        <button data-weise="pflanze"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wie es jede Pflanze braucht</b><i>Die Gießart jeder Pflanze gilt</i></span></button>
+      </div>
+      <p class="fhint" id="weise-text"></p>
+
       <p class="ein-abschnitt">Härte deines Leitungswassers</p>
       <p class="fhint" data-erkl-kurz="Steht auf der Wasserrechnung.">Steht auf der Rechnung des Wasserwerks oder auf dessen Netzseite. Unbekannt ist in Ordnung — dann warnt die App nur bei Arten, die grundsätzlich kein Leitungswasser vertragen.</p>
       <div class="ein-wahl segment" role="group" aria-label="Wasserhärte wählen" id="haerte-wahl">
@@ -11462,6 +11525,7 @@ function pflanzeEntfernen(id){
 
 <div id="giessmodus" role="dialog" aria-modal="true" aria-label="Gießmodus" hidden>
   <div class="gm-leiste">
+    <span class="gm-zfrage-btns gm-rueck-platz"><button type="button" id="gm-rueck" hidden></button></span>
     <div class="gm-fort-bahn"><span id="gm-fort"></span></div>
     <button id="gm-abbruch" aria-label="Gießmodus beenden">×</button>
   </div>
@@ -11752,6 +11816,16 @@ function pflanzeEntfernen(id){
             </select>
             <div class="al-knoepfe" id="f-klasse-knoepfe"></div>
           </div>
+          <div class="al-feld" id="al-anstau" hidden>
+            <span class="lab">Wie lange hält das Wasser im Untersetzer?</span>
+            <select id="f-anstau" hidden>
+              <option value="">Weiß ich nicht — die App fängt mit 3 Tagen an</option>
+              <option value="2">1–2 Tage</option>
+              <option value="3">3–4 Tage</option>
+              <option value="7">Etwa eine Woche</option>
+            </select>
+            <div class="al-knoepfe" id="f-anstau-knoepfe"></div>
+          </div>
           <div class="al-feld">
             <span class="lab">Licht</span>
             <select id="f-sonne" hidden>
@@ -11782,8 +11856,8 @@ function pflanzeEntfernen(id){
                 <option value="">automatisch aus Klasse und Typ</option>
                 <option value="durch">Durchdringend — bis unten Wasser austritt</option>
                 <option value="schluck">Schluck — nur die Erde anfeuchten</option>
-                <option value="tauchen">Tauchen — 10 Minuten ins Wasserbad</option>
-                <option value="unten">Von unten — nur in den Untersetzer</option>
+                <option value="tauchen">Tauchen — bis keine Blasen mehr aufsteigen</option>
+                <option value="unten">Von unten — bis die Oberfläche feucht ist</option>
                 <option value="anstau">Anstau — Untersetzer dauerhaft gefüllt</option>
                 <!-- Die beiden setzt die Kulturform oben. Ohne Eintrag hier
                      hätte das Auswahlfeld keinen gültigen Wert dafür und
@@ -12035,7 +12109,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.8';
+const FASSUNG = '4.0-beta.9';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -12275,6 +12349,9 @@ const LEERSTAND = () => ({
      `duengLangzeit` hält das Datum, an dem Langzeitdünger untergemischt
      wurde; danach ist ein halbes Jahr Ruhe. */
   dueng:{}, duengLangzeit:{},
+  /* 4.0-beta.9: gelernter Untersetzer-Abstand je Anstau-Pflanze (Tage)
+     und Zahl der Gaben von unten seit dem letzten Durchspülen. */
+  anstau:{}, spuelen:{},
   /* Gießcenter: was fuer alle Pflanzen gilt. `art` ist das Wasser aus
      dem Hahn oder der Tonne, `haerte` bleibt leer, solange es niemand
      nachgeschlagen hat — raten waere hier schlechter als schweigen. */
@@ -13028,6 +13105,24 @@ function jahresMischung(sommerWert, winterWert, lage){
 
    Ein eigener Rhythmus von Hand geht vor: wer selbst etwas einträgt,
    hat einen Grund. */
+/* 4.0-beta.9 (Plan F, G): Im Anstau wird nicht mehr täglich
+   nachgesehen. Der Abstand lernt aus dem Untersetzer: „Noch Wasser
+   drin“ einen Tag länger, „War schon leer“ einen kürzer, Grenzen 1 bis
+   14 Tage. Start 3 Tage oder die Antwort beim Anlegen. Steht in
+   S.anstau, nicht in S.zustand — ein Zustandswechsel löscht dort den
+   Eintrag der Pflanze. */
+const ANSTAU_START = 3, ANSTAU_MIN = 1, ANSTAU_MAX = 14;
+function anstauTage(p){
+  const v = p && S.anstau ? S.anstau[p.id] : null;
+  return (typeof v === 'number' && v > 0)
+    ? Math.max(ANSTAU_MIN, Math.min(ANSTAU_MAX, Math.round(v))) : ANSTAU_START;
+}
+function anstauSchritt(p, d){
+  if(!p) return;
+  if(!S.anstau || typeof S.anstau !== 'object') S.anstau = {};
+  S.anstau[p.id] = Math.max(ANSTAU_MIN, Math.min(ANSTAU_MAX, anstauTage(p) + d));
+  sichern();
+}
 function anstauLage(p){
   if(!p || p.klasse !== 'S' || p.intervallEigen === true) return null;
   if(wechselIntervall(p)) return null;
@@ -13044,7 +13139,7 @@ function intervallVon(p){
        des Zustands träte hier zum zweiten Mal an: der Winterwert ist
        bereits der Ruherhythmus, nicht der Sommerwert mit Zuschlag. */
     const iv = intervallBasis(p);
-    const basis = anstau === 'ruhe' ? Math.max(1, Math.round(iv[1])) : 1;
+    const basis = anstau === 'ruhe' ? Math.max(1, Math.round(iv[1])) : anstauTage(p);
     const schub = (S.zustand[p.id] && S.zustand[p.id].giessSchub) || 0;
     return basis + Math.min(4, Math.max(0, schub));
   }
@@ -13484,6 +13579,8 @@ function duengFaellig(p){
 const FEUCHT_FRIST = {S:1, A:1, B:2, C:5};
 
 function feuchtFrist(p){
+  /* 4.0-beta.9: Im Anstau gilt die Meldung bis zum nächsten Blick. */
+  if(p && typeof anstauLage === 'function' && anstauLage(p) === 'anstau') return anstauTage(p);
   const k = (p && p.klasse) || 'B';
   return FEUCHT_FRIST[k] != null ? FEUCHT_FRIST[k] : 2;
 }
@@ -14506,7 +14603,7 @@ function giessAbschnitt(p){
     ? `<p class="kb-klein">Wegen „${esc(zz.def.name)}“ weicht der Rhythmus gerade vom Normalwert ab.</p>` : '';
   const q = rhythmusQuelle(p);
   const zeilen = `<dl class="spec kb-werte">
-      <dt>Rhythmus</dt><dd>${ivWort(st.iv)} <span class="kb-marke${q.ton?' '+q.ton:''}">${esc(q.wort)}</span></dd>
+      <dt>Rhythmus</dt><dd>${anstauLage(p) === 'anstau' ? 'Untersetzer: ' + ivWort(st.iv) + ' nachsehen' : ivWort(st.iv)} <span class="kb-marke${q.ton?' '+q.ton:''}">${esc(q.wort)}</span></dd>
       <dt>Gießart</dt><dd>${esc(giessartName(p))} — ${esc(giessartText(p))}</dd>
     </dl>`;
   return lage + zuletzt + ab + zeilen + ivVorschlagHTML(p) + ivEditorHTML(p)
@@ -16664,7 +16761,7 @@ function formularLeeren(){
   const sortHint = document.getElementById('f-sorte-hint');
   if(sortHint){ sortHint.innerHTML = ''; sortHint.hidden = true; }
   ['f-klasse','f-sonne','f-giftig','f-giessart','f-raum','f-stellplatz',
-   'f-topfform','f-substrat','f-ablauf'].forEach(x=>{
+   'f-topfform','f-substrat','f-ablauf','f-anstau'].forEach(x=>{
     const el = $('#'+x); if(el) el.selectedIndex = 0;
   });
   if(typeof alTopfZuruecksetzen === 'function') alTopfZuruecksetzen();
@@ -17395,7 +17492,7 @@ document.addEventListener('click', e=>{
 modalAnmelden('giessmodus', {
   groesse:'voll', schleier:false,
   nachAuf: ()=>{ document.body.classList.add('gm-offen');
-    if(gmListe && gmListe.length && typeof gmZeichnen==='function') gmZeichnen();
+    if(gmListe && gmListe.length && typeof gmAnzeigen==='function') gmAnzeigen();
     /* 4.0-beta.8: Beim Öffnen ist der Inhalt noch leer, der Fokus fiel
        deshalb aufs ×. Jetzt geht er auf den Namen der ersten Pflanze. */
     setTimeout(()=>{
@@ -17570,9 +17667,19 @@ document.addEventListener('input', e => {
 });
 function alKnoepfeAlle(){
   alListenFuellen();
-  ['f-zustand', 'f-kultur', 'f-klasse', 'f-sonne', 'f-giftig',
+  ['f-zustand', 'f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
    'f-topfform', 'f-substrat', 'f-ablauf'].forEach(alKnopfGruppe);
+  alAnstauFeld();
 }
+/* 4.0-beta.9: Die Frage nach dem Untersetzer nur bei Klasse S. */
+function alAnstauFeld(){
+  const f = document.getElementById('al-anstau');
+  const kl = document.getElementById('f-klasse');
+  if(f) f.hidden = !kl || kl.value !== 'S';
+}
+document.addEventListener('change', e => {
+  if(e.target && e.target.id === 'f-klasse') alAnstauFeld();
+});
 
 /* Die Kulturform ist keine Feinheit der Gießart, sondern die Frage
    davor: eine Pflanze im Wasserglas wird nicht gegossen, ihr Wasser
@@ -17811,6 +17918,8 @@ function alStufeZeigen(nr){
   document.querySelectorAll('#form-neu .al-stufe').forEach(el => {
     el.classList.toggle('an', Number(el.dataset.al) === alStufe);
   });
+  /* 4.0-beta.9: Die Klasse kann aus KI oder Bibliothek kommen. */
+  if(typeof alAnstauFeld === 'function') alAnstauFeld();
   const bahn = document.getElementById('al-fortschritt');
   if(bahn) bahn.innerHTML = AL_STUFEN.map((n, i) =>
     '<li class="' + (i + 1 === alStufe ? 'jetzt' : '') + (i + 1 < alStufe ? ' fertig' : '') + '">'
@@ -20923,6 +21032,9 @@ async function alSpeichern(){
   if(AW && AW.bibUebernommen && p.frostMin != null) p.quellen.frostMin = 'bib';
   awLernen(p);
   S.eigene.push(p);
+  /* 4.0-beta.9: Antwort auf „Wie lange hält das Wasser im Untersetzer?“ */
+  const anst = Number(($('#f-anstau') || {}).value || 0);
+  if(kl === 'S' && anst > 0){ if(!S.anstau) S.anstau = {}; S.anstau[id] = anst; }
   const zc = $('#f-zustand').value;
   if(zc && zc !== 'gesund') zustandSetzen(id, zc);
   if(!a) neueArtMerken({art: art, bot: $('#f-bot').value.trim(), notiz: lageVon(p)});
@@ -23315,14 +23427,180 @@ function giessListe(){
 
 let gmListe = [], gmIndex = 0, gmErledigt = 0, gmUebersprungen = 0, gmAzErledigt = 0;
 
+/* ══ 4.0-beta.9 (Plan F): Übersicht, Laufweg, Rückgängig, Abschluss ══
+   gmPhase: 'uebersicht' vor der ersten Pflanze, 'karte' unterwegs,
+   'ende' auf der Abschlusskarte. gmListe hält den Laufweg: Pflanzen in
+   Raumfolge, dann eine Untersetzer-Karte, dann die Anzucht.
+   gmVerlauf sammelt jede Meldung mit dem Stand davor (snap) und danach
+   (nach). Rückgängig und „neu melden“ setzen nur die Fächer der einen
+   Pflanze zurück, nie den ganzen Speicher — spätere Meldungen anderer
+   Pflanzen bleiben stehen. */
+let gmPhase = 'karte';
+let gmVerlauf = [];
+let gmSnaps = {};
+let gmMit = {};
+let gmNeuMelden = null;
+let gmDgAuto = null;
+let gmDgWahl = null;
+
+/* Was ein Tipp an einer Pflanze schreiben kann. Ein Fach mehr im
+   Gießmodus heißt: hier eintragen, sonst bleibt nach Rückgängig ein
+   Rest stehen. */
+const GM_SNAP_FAECHER = ['water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen'];
+function gmSnapPflanze(id){
+  const o = {id, f:{}};
+  GM_SNAP_FAECHER.forEach(k => {
+    const t = S[k];
+    o.f[k] = (t && typeof t === 'object' && Object.prototype.hasOwnProperty.call(t, id) && t[id] !== undefined)
+      ? JSON.stringify(t[id]) : null;
+  });
+  return o;
+}
+function gmSnapAz(e){
+  const o = e.typ === 'bereich' ? azBereich(e.ref) : azGefaess(e.ref);
+  const k = e.typ === 'bereich' ? 'befeuchtet' : 'gewechselt';
+  return {az:{typ:e.typ, ref:e.ref, k, wert:(o && o[k] !== undefined) ? JSON.stringify(o[k]) : null}};
+}
+function gmSnapZurueck(sn){
+  if(!sn) return;
+  if(sn.az){
+    const o = sn.az.typ === 'bereich' ? azBereich(sn.az.ref) : azGefaess(sn.az.ref);
+    if(o){ if(sn.az.wert === null) delete o[sn.az.k]; else o[sn.az.k] = JSON.parse(sn.az.wert); }
+    sichern();
+    return;
+  }
+  GM_SNAP_FAECHER.forEach(k => {
+    const v = sn.f[k];
+    if(v === null){ if(S[k] && typeof S[k] === 'object') delete S[k][sn.id]; }
+    else {
+      if(!S[k] || typeof S[k] !== 'object') S[k] = {};
+      S[k][sn.id] = JSON.parse(v);
+    }
+  });
+  sichern();
+}
+
+/* Nur die Pflanzen eines Durchgangs, ohne Anzucht, die Untersetzer-
+   Karte aufgefächert. */
+function gmPflanzenVonListe(liste){
+  const raus = [];
+  (liste || []).forEach(x => {
+    if(!x) return;
+    if(x.untersetzer) x.pflanzen.forEach(p => raus.push(p));
+    else if(!x.anzucht) raus.push(x);
+  });
+  return raus;
+}
+
+/* ── Laufweg (B) ───────────────────────────────────────────────
+   Räume in der Reihenfolge der Raumliste, im Raum nach Stellplatz in
+   der Reihenfolge des Raums, im selben Stellplatz gesunde vor kranken
+   und Quarantäne. Ohne Raum ans Ende. giessListe() bleibt, wie sie
+   ist; sortiert wird nur hier (Entscheidung 27.09.). */
+function gmRaumVon(p){
+  const o = typeof pflanzenOrt === 'function' ? pflanzenOrt(p.id) : null;
+  return p.raum || (o && o.raum) || '';
+}
+function gmKrankRang(p){
+  const z = zustandVon(p);
+  if(!z || z.code === 'gesund' || !z.def) return 0;
+  if(z.def.trennen) return 2;
+  return (z.def.ton === 'warn' || z.def.ton === 'alarm') ? 1 : 0;
+}
+function gmLaufweg(liste){
+  const rPos = {};
+  raumListe().forEach((r, i) => { rPos[r.id] = i; });
+  const spListen = {};
+  const spPos = (rid, sp) => {
+    if(!sp) return 99999;
+    if(!spListen[rid]) spListen[rid] = (rid && rPos[rid] != null && typeof stellplaetzeFuer === 'function')
+      ? stellplaetzeFuer(rid) : [];
+    const i = spListen[rid].indexOf(sp);
+    return i < 0 ? 90000 : i;
+  };
+  return (liste || []).map((p, i) => ({p, i, r:gmRaumVon(p)}))
+    .sort((a, b) => {
+      const ra = rPos[a.r] != null ? rPos[a.r] : 999999;
+      const rb = rPos[b.r] != null ? rPos[b.r] : 999999;
+      if(ra !== rb) return ra - rb;
+      const sa = spPos(a.r, a.p.stellplatz), sb = spPos(b.r, b.p.stellplatz);
+      if(sa !== sb) return sa - sb;
+      const ta = String(a.p.stellplatz || ''), tb = String(b.p.stellplatz || '');
+      if(ta !== tb) return ta.localeCompare(tb, 'de');
+      return gmKrankRang(a.p) - gmKrankRang(b.p) || a.i - b.i;
+    })
+    .map(x => x.p);
+}
+function gmRaumName(p){
+  const r = gmRaumVon(p);
+  return (r && raumNameVon(r)) || 'Ohne Raum';
+}
+
+/* Anstau-Pflanzen werden nicht bewegt, man geht zu ihnen hin (F105).
+   Sie stehen deshalb gesammelt auf einer eigenen Karte. */
+function gmAnstauHeute(p){
+  return !!p && !p.anzucht && !p.untersetzer && giessartVon(p) === 'anstau' && anstauLage(p) !== 'ruhe';
+}
+function gmListeBauen(){
+  const heute = giessListe();
+  const da = {};
+  heute.forEach(p => { da[p.id] = true; });
+  const mit = allePflanzen().filter(p => gmMit[p.id] && !da[p.id]);
+  const alle = heute.concat(mit);
+  const unter = alle.filter(gmAnstauHeute);
+  const laufweg = gmLaufweg(alle.filter(p => !gmAnstauHeute(p)));
+  gmListe = laufweg
+    .concat(unter.length ? [{untersetzer:true, pflanzen:gmLaufweg(unter)}] : [])
+    .concat(typeof azFaellig === 'function' ? azFaellig() : []);
+  gmSnaps = {};
+}
+/* Wer morgen dran wäre und heute mitkommen kann. */
+function gmMorgen(){
+  const heute = {};
+  giessListe().forEach(p => { heute[p.id] = true; });
+  return allePflanzen().filter(p => {
+    if(heute[p.id]) return false;
+    const st = giessStatus(p);
+    return !st.feuchtHeute && st.stand === 'soon' && st.rest === 1;
+  });
+}
+
 function gmStarten(){
   /* 3.28.0: fällige Gläser und Anzuchthäuser hinten dran. Sie sind
      keine Pflanzen und laufen durch einen eigenen Zweig. */
-  gmListe = giessListe().concat(typeof azFaellig === 'function' ? azFaellig() : []);
+  gmMit = {};
+  gmListeBauen();
   if(!gmListe.length){ alert('Gerade ist nichts fällig. Schön.'); return; }
   gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = []; gmZugefragt = {};
-  gmDuengetag = false;
+  gmVerlauf = []; gmSnaps = {}; gmNeuMelden = null; gmDgWahl = null; gmDgAuto = null;
+  gmDuengEntscheiden();
+  gmPhase = 'uebersicht';
   modalAuf('giessmodus');
+}
+/* Die Düngetag-Rechnung läuft einmal beim Start. Sie trägt den Tag
+   ein, und ein zweiter Lauf am selben Tag fände ihn deshalb schon
+   vergeben. Nach „Mitnehmen“ wird nur neu gerechnet, solange noch kein
+   Düngetag feststeht. */
+function gmDuengEntscheiden(){
+  if(gmDgAuto && gmDgAuto.tag === iso(HEUTE)){ gmDuengetagSetzen(); return; }
+  gmDgAuto = null;
+  if(duengImGiesswasser()){
+    const kand = gmDuengKandidaten(gmListe);
+    const durchSchwelle = kand.length >= duengSchwelleHeute();
+    const durchNotbremse = !durchSchwelle && notbremseFrei()
+      && kand.some(p => duengFaellig(p).dringend);
+    if(durchSchwelle || durchNotbremse){
+      const g = giessEinst();
+      g.dgZuletzt = iso(HEUTE);
+      if(durchNotbremse) g.dgNot = iso(HEUTE);
+      sichern();
+      gmDgAuto = {tag:iso(HEUTE), not:durchNotbremse};
+    }
+  }
+  gmDuengetagSetzen();
+}
+function gmDuengetagSetzen(){
+  gmDuengetag = (gmDgAuto && gmDgWahl !== 'ohne') ? 'ja' : 'nein';
 }
 /* Ob heute mit Duenger gegossen wird. Der Duengetag gilt fuer den
    ganzen Durchgang, nicht fuer einzelne Pflanzen — sonst ruehrt man
@@ -23333,7 +23611,7 @@ let gmDuengetag = false;
    sie noch feucht. Der Zaehler wird nur bei denen zurueckgesetzt, die
    tatsaechlich etwas bekommen haben. */
 function gmDuengKandidaten(liste){
-  return (liste || []).filter(p => !p.anzucht && !!duengFaellig(p));
+  return gmPflanzenVonListe(liste).filter(p => !!duengFaellig(p));
 }
 let gmBefunde = [];
 /* Wer im Rundgang schon geantwortet hat, wird nicht noch einmal
@@ -23344,9 +23622,299 @@ function gmWeiter(){
   gmIndex++;
   if(gmIndex >= gmListe.length) gmZeichnenEnde(); else gmZeichnen();
 }
+/* Nach einer Meldung: weiter, oder beim Neu-Melden zurück zur
+   Abschlusskarte. */
+function gmNach(){
+  if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+  gmWeiter();
+}
+function gmAnzeigen(){
+  if(gmPhase === 'uebersicht') gmZeichnenUebersicht();
+  else if(gmPhase === 'ende') gmZeichnenEnde();
+  else gmZeichnen();
+}
+let gmUErledigt = 0;
+function gmZaehlen(){
+  let erl = 0, ueb = 0, az = 0, u = 0;
+  gmVerlauf.forEach(e => {
+    if(e.typ === 'az'){ if(e.a === 'azja') az++; else ueb++; }
+    else if(e.typ === 'urest') ueb += e.ids.length;
+    else if(e.typ === 'u') u++;
+    else if(e.a === 'ja' || e.a === 'trocken') erl++;
+    else ueb++;
+  });
+  gmErledigt = erl; gmUebersprungen = ueb; gmAzErledigt = az; gmUErledigt = u;
+}
+function gmFort(){
+  const f = document.getElementById('gm-fort');
+  if(!f) return;
+  f.style.width = (gmPhase === 'ende' || gmNeuMelden) ? '100%'
+    : gmPhase === 'uebersicht' ? '0%'
+    : ((gmIndex) / Math.max(1, gmListe.length) * 100).toFixed(1) + '%';
+}
+/* Der Knopf links in der Leiste: auf der ersten Karte zurück zur
+   Übersicht, danach Rückgängig, beim Neu-Melden Abbrechen. */
+function gmLeiste(){
+  const b = document.getElementById('gm-rueck');
+  if(!b) return;
+  let t = '';
+  if(gmPhase === 'karte') t = gmNeuMelden ? 'Abbrechen' : (gmVerlauf.length ? 'Rückgängig' : 'Übersicht');
+  else if(gmPhase === 'ende') t = gmVerlauf.length ? 'Rückgängig' : '';
+  b.textContent = t;
+  b.hidden = !t;
+  b.dataset.gmRueck = t === 'Abbrechen' ? 'abbrechen' : t === 'Übersicht' ? 'uebersicht' : 'rueck';
+  gmFort();
+}
+function gmEintragZuruecknehmen(e){
+  if(e.snap) gmSnapZurueck(e.snap);
+  if(e.befund) gmBefunde = (gmBefunde || []).filter(b => b !== e.befund);
+  if(e.typ === 'p'){ delete gmZugefragt[e.id]; delete gmSnaps[e.index]; }
+}
+function gmRueckgaengig(){
+  if(gmNeuMelden){ gmNeuAbbrechen(); return; }
+  const e = gmVerlauf.pop();
+  if(!e){ gmPhase = 'uebersicht'; gmZeichnenUebersicht(); return; }
+  gmEintragZuruecknehmen(e);
+  gmIndex = e.index;
+  gmZaehlen();
+  gmZeichnen();
+}
+/* Abschlusskarte: eine Zeile neu melden. Die Pflanze steht danach auf
+   dem Stand vor ihrer Meldung; die Meldung selbst wird gemerkt, damit
+   „Abbrechen“ sie unverändert zurückholt. */
+function gmNeuStarten(vi, id){
+  const e = gmVerlauf[vi];
+  if(!e) return;
+  if(e.typ === 'urest'){
+    gmNeuMelden = {vi, e:null, urest:e, id, alt:e.ids.slice()};
+    e.ids = e.ids.filter(x => x !== id);
+    if(!e.ids.length) gmVerlauf.splice(vi, 1);
+  } else {
+    gmNeuMelden = {vi, e};
+    gmVerlauf.splice(vi, 1);
+    gmEintragZuruecknehmen(e);
+  }
+  gmIndex = e.index;
+  gmZaehlen();
+  gmZeichnen();
+}
+function gmNeuAbbrechen(){
+  const n = gmNeuMelden;
+  gmNeuMelden = null;
+  if(n && n.urest){
+    n.urest.ids = n.alt;
+    if(gmVerlauf.indexOf(n.urest) < 0) gmVerlauf.splice(n.vi, 0, n.urest);
+  } else if(n && n.e){
+    if(n.e.nach) gmSnapZurueck(n.e.nach);
+    if(n.e.befund && gmBefunde.indexOf(n.e.befund) < 0) gmBefunde.push(n.e.befund);
+    if(n.e.typ === 'p') gmZugefragt[n.e.id] = true;
+    gmVerlauf.splice(n.vi, 0, n.e);
+  }
+  gmZeichnenEnde();
+}
+
+/* ── Gießweise (H) ─────────────────────────────────────────────
+   Die Gewohnheit gilt nur, wo die Pflanze Durchdringend oder Schluck
+   verträgt. Zwingend bleibt: Anstau, Tauchbad, von unten, Trichter,
+   Wasser- und Hydrokultur; die Kannenpflanze steht nie in Wasser. Eine
+   Gießart von Hand geht immer vor. */
+const GIESS_WEISEN = {
+  oben:    {name:'Von oben mit der Kanne'},
+  unten:   {name:'Von unten im Gefäß (Eimer, Wanne)'},
+  pflanze: {name:'Wie es jede Pflanze braucht'}
+};
+function giessWeise(){
+  const w = giessEinst().weise;
+  return (w === 'oben' || w === 'unten') ? w : 'pflanze';
+}
+function gmWeg(p){
+  const roh = giessartVon(p);
+  const hand = !!(p.giessart && GIESSARTEN[p.giessart]);
+  if(hand) return roh;
+  const g = gruppeVon(p);
+  if(g.id === 'bromelie' && roh !== 'wasser' && roh !== 'hydro') return 'trichter';
+  if(roh !== 'durch' && roh !== 'schluck') return roh;
+  if(g.id === 'nepenthes') return roh;
+  return giessWeise() === 'unten' ? 'unten' : roh;
+}
+const GM_WEGE = {
+  durch:    {name:'Von oben', wie:'gießen, bis unten Wasser austritt, Untersetzer nach 15 Minuten leeren'},
+  schluck:  {name:'Von oben, ein Schluck', wie:'nur die Erde anfeuchten, kein Wasser im Untersetzer'},
+  unten:    {name:'Von unten', wie:'etwa 15 Minuten, bis die Oberfläche feucht ist, dann abtropfen'},
+  tauchen:  {name:'Tauchbad', wie:'bis knapp unter den Rand, bis keine Blasen mehr kommen'},
+  trichter: {name:'In den Trichter', wie:'Trichter füllen, die Erde nur leicht anfeuchten'},
+  anstau:   {name:'Anstau', wie:'Untersetzer 1 bis 2 cm hoch auffüllen'},
+  wasser:   {name:'Wasserkultur', wie:'Wasser wechseln, Gefäß ausspülen'},
+  hydro:    {name:'Hydrokultur', wie:'Wasserstand bis „Optimal“ auffüllen'},
+  spuelen:  {name:'Heute einmal von oben durchspülen', wie:'gießen, bis unten klares Wasser austritt'}
+};
+/* Durchspülen (J): Wer von unten gegossen wird, bekommt beim fünften
+   Mal seit dem letzten Durchspülen den Hinweis, einmal von oben zu
+   gießen. Von unten steigen Salze nach oben. */
+const GM_SPUEL_AB = 4;
+function gmSpuelZahl(id){ return (S.spuelen && S.spuelen[id]) || 0; }
+function gmWegHeute(p){
+  const w = gmWeg(p);
+  return (w === 'unten' && gmSpuelZahl(p.id) >= GM_SPUEL_AB) ? 'spuelen' : w;
+}
+function gmBlattHerz(p){
+  return /usambara|alpenveilchen|saintpaulia|cyclamen|streptocarpus/i.test(String((p.art || '') + ' ' + (p.botanisch || '')));
+}
+function gmSpuelBuchen(p, weg){
+  if(weg !== 'unten' && weg !== 'spuelen' && weg !== 'durch') return;
+  if(!S.spuelen) S.spuelen = {};
+  if(weg === 'unten') S.spuelen[p.id] = gmSpuelZahl(p.id) + 1;
+  else if(S.spuelen[p.id] != null) delete S.spuelen[p.id];
+  sichern();
+}
+/* Menge (C): ein Fünftel des Topfvolumens, auf 50 ml gerundet. */
+function gmMengeMl(p, weg){
+  if(weg === 'anstau' || weg === 'wasser' || weg === 'hydro') return 0;
+  const ml = Math.max(50, Math.round(wasserBedarf(p) * 1000 / 50) * 50);
+  return weg === 'spuelen' ? ml * 2 : ml;
+}
+function gmMengeText(p, weg){
+  const ml = gmMengeMl(p, weg);
+  if(!ml) return '';
+  return 'ca. ' + ml + ' ml' + (topfBekannt(p) ? '' : ', geschätzt');
+}
+function gmAnders(weg){
+  const w = giessWeise();
+  /* Das Durchspülen gehört zur Gewohnheit von unten, es ist kein Abweichen. */
+  if(w === 'pflanze' || weg === 'spuelen') return false;
+  if(w === 'oben') return !(weg === 'durch' || weg === 'schluck' || weg === 'spuelen');
+  return weg !== 'unten';
+}
+/* Gießweg sichtbar auf der Karte (I). */
+function gmWegZeile(p){
+  const weg = gmWegHeute(p);
+  const W = GM_WEGE[weg] || GM_WEGE.durch;
+  let wie = W.wie;
+  if((weg === 'unten' || weg === 'spuelen') && gmBlattHerz(p)) wie += weg === 'spuelen'
+    ? ', auf die Erde, nicht auf Blätter und Herz' : ', nichts auf Blätter und Herz';
+  const teile = [W.name, wie];
+  const m = gmMengeText(p, weg);
+  if(m) teile.push(m);
+  const anders = gmAnders(weg);
+  return {weg, anders, text:(anders ? 'Anders als sonst: ' : '') + teile.join(' · ')};
+}
+function gmDuengOhne(p){
+  if(gmDuengetag !== 'ja' || duengFaellig(p)) return null;
+  const r = [duengSperre(p), duengGrenze(p)].find(x => x && x.code !== 'winter');
+  return r || null;
+}
+
+/* ── Knöpfe je Gießgruppe (F) ─────────────────────────────────
+   „Später“ steht überall. „War staubtrocken“ fällt dort weg, wo
+   staubtrocken das Ziel ist (Fehler F2). */
+const GM_KNOEPFE = {
+  wuestenkaktus:   {trocken:'War schrumpelig oder weich'},
+  blattsukkulent:  {trocken:'War schrumpelig oder weich'},
+  sommerruhe:      {trocken:'War schrumpelig oder weich'},
+  knollenspeicher: {trocken:'War schrumpelig oder weich'},
+  trockenruhe:     {trocken:null},
+  epiphyt:         {trocken:'Wurzeln waren lange silbrig'},
+  bromelie:        {ja:'Trichter gefüllt', trocken:null, nein:'Trichter noch voll'},
+  sumpf:           {ja:'Untersetzer aufgefüllt', trocken:'War schon leer', nein:'Noch Wasser drin'},
+  nepenthes:       {trocken:'Oberfläche war trocken', nein:'Noch klamm'}
+};
+function gmKnopfSatz(p){
+  const weg = gmWeg(p);
+  if(weg === 'wasser' || weg === 'hydro') return {ja:giessTat(p), trocken:null, nein:'Noch nicht nötig'};
+  const o = Object.assign({ja:giessTat(p), trocken:'War staubtrocken', nein:'Noch feucht'},
+    GM_KNOEPFE[gruppeVon(p).id] || {});
+  if(!gruppeLernt(p)) o.trocken = null;
+  return o;
+}
+
+/* ── Untersetzer-Rhythmus (G) ─────────────────────────────────── */
+function gmGeprueft(p){
+  if(!S.feuchtRueck) S.feuchtRueck = {};
+  const b = Object.assign({zahl:0, zuletzt:null}, S.feuchtRueck[p.id] || {});
+  b.zuletzt = iso(HEUTE);
+  S.feuchtRueck[p.id] = b;
+  sichern();
+}
+
+/* ── Meldungen ─────────────────────────────────────────────────── */
+function gmMeldenPflanze(p, a, tat){
+  const index = gmIndex;
+  const snap = gmSnaps[index] || gmSnapPflanze(p.id);
+  const weg = gmWegHeute(p);
+  let duenger = false;
+  /* „War staubtrocken" ist auch gegossen — nur mit der Meldung, dass
+     der Abstand zu lang war. Deshalb derselbe Weg wie „Gegossen",
+     davor der Lernschritt nach unten. */
+  if(a === 'trocken') lernSchritt(p, 'runter');
+  if(a === 'ja' || a === 'trocken'){
+    if(giessLog(p.id)[0] !== iso(HEUTE)) giessen(p.id);
+    /* Gedüngt wird nur, was heute wirklich Wasser bekommen hat: „Noch
+       feucht“ und „Später“ kommen hier gar nicht an, und auf einen
+       staubtrockenen Ballen gehört kein Dünger. */
+    if(gmDuengetag === 'ja' && a === 'ja' && duengFaellig(p) && typeof duengen === 'function')
+      duenger = !!duengen(p.id);
+    gmSpuelBuchen(p, weg);
+  }
+  if(a === 'nein') lernSchritt(p, 'hoch');
+  /* Was am Ende auf der Karte steht, wird hier gesammelt: unterwegs
+     unterbricht eine Umtopfmeldung genau die Bewegung, die der
+     Durchgang herstellen soll. */
+  let befund = null;
+  if(a === 'ja' || a === 'trocken' || a === 'nein'){
+    const v = (typeof umtopfVerdacht === 'function') ? umtopfVerdacht(p) : null;
+    if(v && !gmBefunde.some(b => b.id === p.id)){
+      befund = {id:p.id, name:nice(p), text:v.text};
+      gmBefunde.push(befund);
+    }
+  }
+  /* „Noch feucht" ist eine echte Rückmeldung über die Pflanze und wird
+     gespeichert. „Später" sagt nur etwas über den Moment aus. */
+  if(a === 'nein') feuchtGemeldet(p);
+  gmVerlauf.push({index, typ:'p', id:p.id, name:nice(p), a, tat:tat || '', duenger,
+    snap, nach:gmSnapPflanze(p.id), befund});
+  gmZaehlen();
+  gmNach();
+}
+function gmMeldenUntersetzer(p, a, tat){
+  const snap = gmSnapPflanze(p.id);
+  const lernt = anstauLage(p) === 'anstau';
+  if(a === 'auf' || a === 'leer'){
+    if(giessLog(p.id)[0] !== iso(HEUTE)) giessen(p.id);
+    if(a === 'leer'){ if(lernt) anstauSchritt(p, -1); else lernSchritt(p, 'runter'); }
+  } else if(a === 'voll'){
+    if(lernt){ anstauSchritt(p, 1); gmGeprueft(p); }
+    else { lernSchritt(p, 'hoch'); feuchtGemeldet(p); }
+  }
+  gmVerlauf.push({index:gmIndex, typ:'u', id:p.id, name:nice(p), a, tat:tat || '',
+    snap, nach:gmSnapPflanze(p.id), befund:null});
+  gmZaehlen();
+  if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+  gmZeichnen();
+}
+function gmMeldenAz(e, a){
+  const snap = gmSnapAz(e);
+  if(a === 'azja') azErledigen(e.typ, e.ref);
+  gmVerlauf.push({index:gmIndex, typ:'az', id:'az:' + e.typ + ':' + e.ref, name:e.name, a,
+    tat:a === 'azja' ? e.tat : '', snap, nach:gmSnapAz(e), befund:null});
+  gmZaehlen();
+  gmNach();
+}
+/* Meldungen der Untersetzer-Karte, je Pflanze die letzte. */
+function gmUMeldung(index, id){
+  for(let i = gmVerlauf.length - 1; i >= 0; i--){
+    const e = gmVerlauf[i];
+    if(e.index !== index) continue;
+    if(e.typ === 'u' && e.id === id) return e;
+    if(e.typ === 'urest' && e.ids.indexOf(id) > -1) return e;
+  }
+  return null;
+}
 
 function gmZeichnen(){
-  /* Vor der ersten Pflanze: lohnt sich heute eine Kanne? */
+  gmPhase = 'karte';
+  /* Vor der ersten Pflanze: lohnt sich heute eine Kanne? Seit 4.0-beta.9
+     rechnet das die Übersicht (gmDuengEntscheiden); diese Karte bleibt
+     nur für Aufrufe ohne Übersicht. */
   if(gmIndex === 0 && gmDuengetag === false && duengImGiesswasser()){
     const kand = gmDuengKandidaten(gmListe);
     /* Die Notbremse: wer das Doppelte seines Zaehlers ueberschritten
@@ -23366,7 +23934,10 @@ function gmZeichnen(){
     }
   }
   const p = gmListe[gmIndex];
+  if(p && p.untersetzer){ gmZeichnenUntersetzer(p); return; }
   if(p && p.anzucht){ gmZeichnenAnzucht(p); return; }
+  if(!p){ gmZeichnenEnde(); return; }
+  if(!gmSnaps[gmIndex]) gmSnaps[gmIndex] = gmSnapPflanze(p.id);
   const st = giessStatus(p);
   const z = zustandVon(p);
   const kl = KLASSEN[p.klasse] || {};
@@ -23415,8 +23986,12 @@ function gmZeichnen(){
          </div>
        </div>` : '';
 
+  /* 4.0-beta.9: Gießweg, Menge und Dünger stehen sichtbar auf der
+     Karte (I); der Satz zur Probe bleibt hinter dem Streifen. */
+  const wz = stopp > 0 ? null : gmWegZeile(p);
+  const ohneDg = stopp > 0 ? null : gmDuengOhne(p);
   $('#gm-inhalt').innerHTML = `
-    <p class="gm-zaehler">${gmIndex+1} von ${gmListe.length}</p>
+    ${gmKopf(p)}
     <div class="gm-karte">
     <div class="gm-kopf">
       <div class="gm-bild klein">${foto?`<img src="${foto}" alt="">`:'<span class="gm-kein">kein Foto</span>'}</div>
@@ -23426,26 +24001,92 @@ function gmZeichnen(){
       </div>
     </div>
     <p class="gm-lage ${st.stand==='over'||st.stand==='stopp'?'warn':''}">${esc(lage)}${st.letzte?` · zuletzt vor ${st.tage} ${st.tage===1?'Tag':'Tagen'}`:''}</p>
+    ${wz ? `<p class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}">${esc(wz.text)}</p>` : ''}
+    ${ohneDg ? `<p class="gm-weg-dg">Heute ohne Dünger: ${esc(ohneDg.text)}</p>` : ''}
     <button type="button" class="gm-chip" data-gm-probe="1" aria-expanded="false">${esc(p.klasse + ' · ' + gr.name)}${gr.geraten?' <i>geschätzt</i>':''}</button>
-    <p class="gm-probe" hidden>${esc(giessHinweisFuer(p).text)}</p>
+    <p class="gm-probe" hidden>${esc(giessHinweisFuer(p, true).text)}</p>
     ${zFrage}
     ${(gmDuengetag === 'ja' && duengFaellig(p))
       ? `<p class="gm-hinweis gm-dueng-vermerk">Mit Dünger — die Kanne steht bereit.</p>` : ''}
     ${kasten.map(k=>`<p class="gm-hinweis${k.warn?' warn':''}">${esc(k.text)}</p>`).join('')}
     </div>`;
 
+  const ks = gmKnopfSatz(p);
   $('#gm-knoepfe').innerHTML = stopp > 0
     ? `<button class="gm-nein" data-gm="nein">Verstanden, nicht gegossen</button>`
     : `
-       <button class="gm-ja" data-gm="ja">${giessTat(p)}</button>
-       ${gruppeLernt(p) ? `<div class="gm-zwei">
-         <button class="gm-nein" data-gm="trocken">War staubtrocken</button>
-         <button class="gm-nein" data-gm="nein">Noch feucht</button>
-       </div>` : `<button class="gm-nein" data-gm="nein">Noch feucht${
-         (typeof feuchtFrist === 'function' && feuchtFrist(p) > 1)
+       <button class="gm-ja" data-gm="ja">${esc(ks.ja)}</button>
+       ${ks.trocken ? `<div class="gm-zwei">
+         <button class="gm-nein" data-gm="trocken">${esc(ks.trocken)}</button>
+         <button class="gm-nein" data-gm="nein">${esc(ks.nein)}</button>
+       </div>` : `<button class="gm-nein" data-gm="nein">${esc(ks.nein)}${
+         (!gruppeLernt(p) && typeof feuchtFrist === 'function' && feuchtFrist(p) > 1)
            ? ` <i>· ${feuchtFrist(p)} Tage Ruhe</i>` : ''}</button>`}
        <button class="gm-spaeter" data-gm="spaeter">Später</button>`;
-  $('#gm-fort').style.width = ((gmIndex)/gmListe.length*100).toFixed(1)+'%';
+  gmLeiste();
+}
+
+/* Zähler und, wo ein neuer Raum beginnt, „Wohnzimmer · 4 Pflanzen“. */
+function gmKopf(p){
+  if(gmNeuMelden) return '<p class="gm-zaehler">Neu melden</p>';
+  let raum = '';
+  if(p && !p.anzucht && !p.untersetzer){
+    const vor = gmListe[gmIndex - 1];
+    const name = gmRaumName(p);
+    const neu = !vor || vor.anzucht || vor.untersetzer || gmRaumName(vor) !== name;
+    if(neu){
+      let n = 0;
+      for(let i = gmIndex; i < gmListe.length; i++){
+        const x = gmListe[i];
+        if(!x || x.anzucht || x.untersetzer || gmRaumName(x) !== name) break;
+        n++;
+      }
+      raum = `<p class="gm-raum">${esc(name)} · ${n} ${n === 1 ? 'Pflanze' : 'Pflanzen'}</p>`;
+    }
+  } else if(p && p.untersetzer){
+    const n = p.pflanzen.length;
+    raum = `<p class="gm-raum">Untersetzer · ${n} ${n === 1 ? 'Pflanze' : 'Pflanzen'}</p>`;
+  } else if(p && p.anzucht){
+    const vor = gmListe[gmIndex - 1];
+    if(!vor || !vor.anzucht) raum = '<p class="gm-raum">Anzucht</p>';
+  }
+  return `<p class="gm-zaehler">${gmIndex + 1} von ${gmListe.length}</p>${raum}`;
+}
+
+/* Die Untersetzer-Karte (G): alle Anstau-Pflanzen von heute
+   untereinander, je Zeile drei Knöpfe. */
+const GM_U_KNOEPFE = [['auf', 'Aufgefüllt'], ['leer', 'War schon leer'], ['voll', 'Noch Wasser drin']];
+function gmZeichnenUntersetzer(e){
+  gmPhase = 'karte';
+  const nurId = gmNeuMelden ? gmNeuMelden.id || (gmNeuMelden.e && gmNeuMelden.e.id) : null;
+  const zeilen = e.pflanzen.map(p => {
+    const m = gmUMeldung(gmIndex, p.id);
+    const f = profilFoto(p.id);
+    const offen = !m && (!nurId || nurId === p.id);
+    const tage = anstauLage(p) === 'anstau' ? anstauTage(p) : null;
+    const ergebnis = m ? (m.typ === 'urest' ? 'Später' : m.tat) : (nurId && nurId !== p.id ? 'unverändert' : '');
+    return `<div class="gm-ut-zeile${m ? ' fertig' : ''}" data-gm-ut="${esc(p.id)}">
+      <div class="gm-ut-kopf">
+        <div class="gm-ut-bild">${f && f.src ? `<img src="${f.src}" alt="">` : ''}</div>
+        <div class="gm-ut-text"><b>${esc(nice(p))}</b><i>${esc(gmStandort(p))}${tage ? ' · alle ' + tage + ' Tage nachsehen' : ''}</i></div>
+        ${ergebnis ? `<span class="gm-ut-erg">${m ? '✓ ' : ''}${esc(ergebnis)}</span>` : ''}
+      </div>
+      ${offen ? `<div class="gm-zfrage-btns gm-ut-knoepfe">${GM_U_KNOEPFE.map(([a, t]) =>
+        `<button type="button" data-gm-u="${a}" data-id="${esc(p.id)}">${esc(t)}</button>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+  const offenZahl = e.pflanzen.filter(p => !gmUMeldung(gmIndex, p.id)).length;
+  $('#gm-inhalt').innerHTML = `
+    ${gmKopf(e)}
+    <div class="gm-karte gm-ut">
+      <h3>Untersetzer nachsehen</h3>
+      <p class="gm-art">Wasserstand ansehen, nicht gießen, solange noch Wasser drin ist.</p>
+      ${zeilen}
+    </div>`;
+  $('#gm-knoepfe').innerHTML = offenZahl
+    ? (nurId ? '' : `<button class="gm-spaeter" data-gm="urest">${offenZahl === e.pflanzen.length ? 'Alle später' : 'Rest später'}</button>`)
+    : `<button class="gm-ja" data-gm="uweiter">Weiter</button>`;
+  gmLeiste();
 }
 
 /* 3.28.0: ein Glas oder ein Anzuchthaus im Rundgang. Wie eine Pflanze
@@ -23453,8 +24094,9 @@ function gmZeichnen(){
 function gmZeichnenAnzucht(e){
   const lage = e.rest < 0 ? `${-e.rest} ${-e.rest===1?'Tag':'Tage'} überfällig` : 'Heute dran';
   const f = (e.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(e.ref) : null;
+  gmPhase = 'karte';
   $('#gm-inhalt').innerHTML = `
-    <p class="gm-zaehler">${gmIndex+1} von ${gmListe.length}</p>
+    ${gmKopf(e)}
     <div class="gm-karte">
     <div class="gm-kopf">
       <div class="gm-bild klein">${f && f.src ? `<img src="${f.src}" alt="">` : '<span class="gm-kein">kein Foto</span>'}</div>
@@ -23467,13 +24109,13 @@ function gmZeichnenAnzucht(e){
   $('#gm-knoepfe').innerHTML = `
     <button class="gm-ja" data-gm="azja">${esc(e.tat)}</button>
     <button class="gm-spaeter" data-gm="spaeter">Später</button>`;
-  $('#gm-fort').style.width = ((gmIndex)/gmListe.length*100).toFixed(1)+'%';
+  gmLeiste();
 }
 
 /* Ein Satz, der zu genau dieser Pflanze passt. Reihenfolge nach
    Dringlichkeit: was gerade verboten ist, dann die Probe für ihre
    Klasse, dann die Art der Wassergabe, dann der Standort. */
-function giessHinweisFuer(p){
+function giessHinweisFuer(p, ohneArt){
   const kl = (typeof KLASSEN !== 'undefined' && KLASSEN[p.klasse]) || {};
   const z  = (typeof zustandVon === 'function') ? zustandVon(p) : null;
   const winter = (typeof sommer === 'function') ? !sommer() : false;
@@ -23505,7 +24147,9 @@ function giessHinweisFuer(p){
 
   /* Anstau-Text nur, wenn die Pflanze auch wirklich Klasse S ist.
      Sonst stünde bei einer Kannenpflanze die Anleitung zum Dauerstau. */
-  if(art && typeof GIESSARTEN !== 'undefined' && GIESSARTEN[art]
+  /* 4.0-beta.9: Im Gießmodus steht der Weg in eigener Zeile; dort fiele
+     sonst der Satz der Gießart neben eine abweichende Gewohnheit. */
+  if(!ohneArt && art && typeof GIESSARTEN !== 'undefined' && GIESSARTEN[art]
      && p.klasse !== 'S' && art !== 'anstau')
     teile.push(GIESSARTEN[art].kurz);
 
@@ -23541,9 +24185,8 @@ function gmZeichnenDueng(perNotbremse){
   const e = duengEinst();
   const liter = duengKanneLiter(kand);
   const geschaetzt = kand.filter(p => !topfBekannt(p)).length;
-  const nPfl = gmListe.filter(p => !p.anzucht).length;
-  const gesperrt = gmListe.filter(p => {
-    if(p.anzucht) return false;
+  const nPfl = gmPflanzenVonListe(gmListe).length;
+  const gesperrt = gmPflanzenVonListe(gmListe).filter(p => {
     const g = duengGrenze(p);
     return g && g.code === 'karnivore';
   });
@@ -23561,9 +24204,147 @@ function gmZeichnenDueng(perNotbremse){
   $('#gm-knoepfe').innerHTML = `
     <button class="gm-ja" data-gm="dgja">Kanne ist fertig</button>
     <button class="gm-spaeter" data-gm="dgnein">Heute ohne Dünger</button>`;
+  gmLeiste();
+}
+
+/* ── Übersicht vor der ersten Pflanze (A) ─────────────────────── */
+function gmLiter(l){ return String(Math.max(0.5, Math.ceil(l * 2) / 2)).replace('.', ',') + ' l'; }
+function gmUeAbschnitt(titel, kinder){
+  return kinder ? `<p class="ein-abschnitt gm-ue-etikett">${esc(titel)}</p><div class="ein-karte gm-ue-k">${kinder}</div>` : '';
+}
+function gmUeZeile(links, rechts, klein){
+  return `<div class="gm-ue-zeile"><p><span>${links}</span>${rechts != null ? `<span class="gm-ue-wert">${rechts}</span>` : ''}</p>${
+    klein ? `<p class="gm-ue-klein">${klein}</p>` : ''}</div>`;
+}
+function gmZeichnenUebersicht(){
+  gmPhase = 'uebersicht';
+  const pfl = gmPflanzenVonListe(gmListe);
+  const unter = gmListe.find(x => x && x.untersetzer);
+  const nU = unter ? unter.pflanzen.length : 0;
+  const az = gmListe.filter(x => x && x.anzucht);
+  const nP = pfl.length - nU;
+  const pW = n => n + ' ' + (n === 1 ? 'Pflanze' : 'Pflanzen');
+  const kopf = [];
+  if(nP) kopf.push(pW(nP));
+  if(nU) kopf.push(nU + ' Untersetzer');
+  if(az.length) kopf.push(az.length + ' Anzucht');
+
+  /* Was du brauchst: Wasser je Art. Karnivoren brauchen weiches Wasser,
+     alle übrigen bekommen die Wasserart aus dem Gießcenter. */
+  const artKey = giessEinst().art;
+  const artName = (WASSER_ART[artKey] || WASSER_ART.leitung).name;
+  const weich = artKey === 'regen' || artKey === 'osmose';
+  const wz = [];
+  let ohneTopf = 0;
+  pfl.forEach(p => {
+    const g = gruppeVon(p);
+    const karn = g.id === 'moorbeet' || g.id === 'nepenthes';
+    const name = (karn && !weich) ? 'Osmose oder Regenwasser' : artName;
+    let z = wz.find(x => x.name === name);
+    if(!z){ z = {name, l:0, n:0}; wz.push(z); }
+    const weg = gmWegHeute(p);
+    z.l += (weg === 'spuelen' ? 2 : 1) * wasserBedarf(p);
+    z.n++;
+    if(gmMengeMl(p, weg) && !topfBekannt(p)) ohneTopf++;
+  });
+  const brauch = wz.map(z => gmUeZeile('<b>' + esc(z.name) + '</b>', esc(gmLiter(z.l)), esc(pW(z.n)))).join('')
+    + (ohneTopf ? `<p class="gm-ue-klein">Bei ${ohneTopf} ${ohneTopf === 1 ? 'Pflanze fehlt' : 'Pflanzen fehlt'} die Topfgröße, dort geschätzt.</p>` : '');
+
+  /* Dünger: die Frage nach dem Düngetag als Zeile statt als Fenster. */
+  let dg = '';
+  if(gmDgAuto){
+    const kand = gmDuengKandidaten(gmListe);
+    if(gmDuengetag === 'ja'){
+      dg = gmUeZeile('<b>Heute mit Dünger</b>', esc(pW(kand.length)),
+          esc(String(duengKanneLiter(kand)).replace('.', ',') + ' l anrühren · '
+            + String(duengMengeFuer(kand)).replace('.', ',') + ' ml Dünger hinein'
+            + (gmDgAuto.not ? ' · eigentlich kein Düngetag, eine Pflanze wartet aber deutlich zu lange' : '')))
+        + `<p class="gm-ue-klein">${kand.map(p => esc(nice(p))).join(', ')}</p>`
+        + `<div class="gm-zfrage-btns gm-ue-knopf"><button type="button" data-gm="dgohne">Heute ohne Dünger</button></div>`;
+    } else {
+      dg = gmUeZeile('<b>Heute ohne Dünger</b>', null,
+          esc('Fällig wären ' + pW(kand.length) + '. Sie warten bis zum nächsten Mal.'))
+        + `<div class="gm-zfrage-btns gm-ue-knopf"><button type="button" data-gm="dgmit">Doch mit Dünger</button></div>`;
+    }
+  }
+
+  /* Gießwege von heute, beim Gefäß Wasserstand und Menge. */
+  const wege = {}, reihe = [];
+  pfl.filter(p => !gmAnstauHeute(p)).forEach(p => {
+    const w = gmWegHeute(p);
+    if(!wege[w]){ wege[w] = []; reihe.push(w); }
+    wege[w].push(p);
+  });
+  const krankZuletzt = l => l.some(p => gmKrankRang(p) > 0) ? ' · kranke und Pflanzen in Quarantäne zuletzt hinein' : '';
+  const aufnahme = l => gmLiter(l.reduce((s, p) => s + gmMengeMl(p, gmWegHeute(p)), 0) / 1000);
+  let wegHtml = reihe.map(w => {
+    const l = wege[w];
+    let extra = '';
+    if(w === 'unten'){
+      const ds = l.map(p => Number(p.topf || 0)).filter(Boolean);
+      const d = ds.length ? Math.min.apply(null, ds) : 12;
+      const cm = Math.max(2, Math.min(6, Math.round(d * 0.8 / 4)));
+      extra = 'Wasserstand ca. ' + cm + ' cm, nachgießen, wenn er sinkt · die Pflanzen nehmen zusammen ca. '
+        + aufnahme(l) + ' auf' + krankZuletzt(l);
+    } else if(w === 'tauchen'){
+      extra = 'Bis knapp unter den Rand · die Pflanzen nehmen zusammen ca. ' + aufnahme(l) + ' auf' + krankZuletzt(l);
+    }
+    return gmUeZeile('<b>' + esc((GM_WEGE[w] || GM_WEGE.durch).name) + '</b>', esc(String(l.length)),
+      (extra ? esc(extra) + '<br>' : '') + l.map(p => esc(nice(p))).join(', '));
+  }).join('');
+  if(nU) wegHtml += gmUeZeile('<b>Anstau</b>', esc(String(nU)),
+    'Am Ende auf einer eigenen Karte<br>' + unter.pflanzen.map(p => esc(nice(p))).join(', '));
+
+  /* Dein Weg: Räume in Laufreihenfolge. */
+  const rr = [];
+  gmListe.forEach(x => {
+    if(!x || x.anzucht || x.untersetzer) return;
+    const n = gmRaumName(x);
+    const l = rr[rr.length - 1];
+    if(l && l.name === n) l.n++; else rr.push({name:n, n:1});
+  });
+  if(nU) rr.push({name:'Untersetzer', n:nU});
+  if(az.length) rr.push({name:'Anzucht', n:az.length});
+  const weg = rr.map((r, i) => gmUeZeile(esc((i + 1) + '. ' + r.name), esc(String(r.n)))).join('');
+
+  /* Morgen dran: einzeln mitnehmen. */
+  const morgen = gmMorgen().map(p => {
+    const f = profilFoto(p.id);
+    const an = !!gmMit[p.id];
+    return `<div class="gm-ue-pfl">
+      <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : ''}</span>
+      <span class="gm-ue-pfl-t"><b>${esc(nice(p))}</b><i>${esc(gmRaumName(p))}</i></span>
+      <span class="gm-zfrage-btns gm-ue-mit"><button type="button" data-gm-mit="${esc(p.id)}" aria-pressed="${an}">${an ? 'Mitgenommen' : 'Mitnehmen'}</button></span>
+    </div>`;
+  }).join('');
+
+  const azHtml = az.map(e => {
+    const f = (e.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(e.ref) : null;
+    return `<div class="gm-ue-pfl">
+      <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : ''}</span>
+      <span class="gm-ue-pfl-t"><b>${esc(e.name)}</b><i>${esc(e.tat)} · ${esc(typeof azFaelligText === 'function' ? azFaelligText(e) : '')}</i></span>
+    </div>`;
+  }).join('');
+
+  $('#gm-inhalt').innerHTML = `
+    <div class="gm-ue">
+      <p class="gm-zaehler">Vor dem Gießen</p>
+      <h3>Heute: ${esc(kopf.join(' · ') || 'nichts fällig')}</h3>
+      ${gmUeAbschnitt('Was du brauchst', brauch)}
+      ${gmUeAbschnitt('Dünger', dg)}
+      ${gmUeAbschnitt('Gießwege', wegHtml)}
+      ${gmUeAbschnitt('Dein Weg', weg)}
+      ${gmUeAbschnitt('Morgen dran', morgen)}
+      ${gmUeAbschnitt('Anzucht', azHtml)}
+    </div>`;
+  $('#gm-knoepfe').innerHTML = `<button class="gm-ja" data-gm="los">Los</button>`;
+  gmLeiste();
 }
 
 function gmZeichnenEnde(){
+  gmPhase = 'ende';
+  gmNeuMelden = null;
+  gmZaehlen();
   const rest = gmUebersprungen;
   /* Was unterwegs aufgefallen ist, steht hier — mit Begruendung und
      mit dem Knopf, der das Gelernte zuruecksetzt. Neue Erde ist eine
@@ -23574,15 +24355,39 @@ function gmZeichnenEnde(){
       <p class="gm-befund-text">${esc(b.text)}</p>
       <button type="button" class="gm-klein" data-gm="umgetopft" data-id="${esc(b.id)}">Umgetopft</button>
     </div>`).join('');
+  /* 4.0-beta.9 (E): alle Meldungen nach Ergebnis. Jede Zeile lässt
+     sich antippen und neu melden. */
+  const G = {gegossen:[], feucht:[], unter:[], az:[], spaeter:[]};
+  const pName = id => { const p = allePflanzen().find(x => x.id === id); return p ? nice(p) : id; };
+  let mitDg = 0;
+  gmVerlauf.forEach((e, vi) => {
+    if(e.typ === 'urest'){ e.ids.forEach(id => G.spaeter.push({vi, id, name:pName(id), tat:'Untersetzer'})); return; }
+    if(e.typ === 'u'){ G.unter.push({vi, id:e.id, name:e.name, tat:e.tat}); return; }
+    if(e.typ === 'az'){ (e.a === 'azja' ? G.az : G.spaeter).push({vi, id:e.id, name:e.name, tat:e.a === 'azja' ? e.tat : 'Anzucht'}); return; }
+    if(e.a === 'ja' || e.a === 'trocken'){
+      if(e.duenger) mitDg++;
+      G.gegossen.push({vi, id:e.id, name:e.name,
+        tat:[e.a === 'trocken' ? e.tat : '', e.duenger ? 'mit Dünger' : ''].filter(Boolean).join(' · ')});
+    }
+    else if(e.a === 'nein') G.feucht.push({vi, id:e.id, name:e.name, tat:e.tat === 'Noch feucht' ? '' : e.tat});
+    else G.spaeter.push({vi, id:e.id, name:e.name, tat:''});
+  });
+  const liste = (titel, z, zusatz) => z.length ? `<p class="ein-abschnitt gm-ue-etikett">${esc(titel)} · ${z.length}${zusatz || ''}</p>
+    <div class="ein-liste gm-ende-liste">${z.map(r => `<button type="button" class="ein-zeile" data-gm-neu="${r.vi}" data-id="${esc(r.id)}">
+      <span class="ein-txt"><b>${esc(r.name)}</b>${r.tat ? `<i>${esc(r.tat)}</i>` : ''}</span><span class="ein-p" aria-hidden="true">›</span></button>`).join('')}</div>` : '';
+  const meldungen = liste('Gegossen', G.gegossen, mitDg ? ', davon ' + mitDg + ' mit Dünger' : '')
+    + liste('Noch feucht', G.feucht) + liste('Untersetzer', G.unter)
+    + liste('Anzucht', G.az) + liste('Später', G.spaeter);
   $('#gm-inhalt').innerHTML = `
     <p class="gm-zaehler">Fertig</p>
     <div class="gm-fertig">✓</div>
     <h3>Durch</h3>
-    <p class="gm-art">${gmErledigt} ${gmErledigt===1?'Pflanze':'Pflanzen'} gegossen${gmAzErledigt?`, ${gmAzErledigt} ${gmAzErledigt===1?'Anzucht':'Anzuchten'} versorgt`:''}${rest?`, ${rest} übersprungen`:''}.</p>
+    <p class="gm-art">${gmErledigt} ${gmErledigt===1?'Pflanze':'Pflanzen'} gegossen${gmUErledigt?`, ${gmUErledigt} Untersetzer nachgesehen`:''}${gmAzErledigt?`, ${gmAzErledigt} ${gmAzErledigt===1?'Anzucht':'Anzuchten'} versorgt`:''}${rest?`, ${rest} übersprungen`:''}.</p>
+    ${meldungen ? `<div class="gm-ue gm-ende">${meldungen}<p class="gm-ue-klein">Eine Zeile antippen, um sie neu zu melden.</p></div>` : ''}
     ${befunde ? `<p class="gm-hinweis">${gmBefunde.length===1?'Eine Pflanze ist aufgefallen':gmBefunde.length + ' Pflanzen sind aufgefallen'}:</p>${befunde}` : ''}
-    <p class="gm-hinweis">Übersprungene bleiben in der Liste und tauchen morgen wieder auf.</p>`;
+    ${rest ? '<p class="gm-hinweis">Übersprungene bleiben in der Liste und tauchen morgen wieder auf.</p>' : ''}`;
   $('#gm-knoepfe').innerHTML = `<button class="gm-ja" data-gm="zu">Schließen</button>`;
-  $('#gm-fort').style.width = '100%';
+  gmLeiste();
 }
 
 document.addEventListener('click', e=>{
@@ -23606,9 +24411,50 @@ document.addEventListener('click', e=>{
     if(t){ t.hidden = !t.hidden; c.setAttribute('aria-expanded', t.hidden ? 'false' : 'true'); }
     return;
   }
+  /* 4.0-beta.9: Leiste, Übersicht, Untersetzer und Abschlusskarte. */
+  const rb = e.target.closest('#gm-rueck');
+  if(rb){
+    if(rb.dataset.gmRueck === 'uebersicht'){ gmPhase = 'uebersicht'; gmZeichnenUebersicht(); }
+    else gmRueckgaengig();
+    return;
+  }
+  const mb = e.target.closest('[data-gm-mit]');
+  if(mb){
+    const id = mb.dataset.gmMit;
+    gmMit[id] = !gmMit[id];
+    gmListeBauen();
+    gmDuengEntscheiden();
+    gmZeichnenUebersicht();
+    return;
+  }
+  const nb = e.target.closest('[data-gm-neu]');
+  if(nb){ gmNeuStarten(Number(nb.dataset.gmNeu), nb.dataset.id); return; }
+  const ub = e.target.closest('[data-gm-u]');
+  if(ub){
+    const up = allePflanzen().find(x => x.id === ub.dataset.id);
+    if(up) gmMeldenUntersetzer(up, ub.dataset.gmU, ub.textContent.trim());
+    return;
+  }
   const b = e.target.closest('[data-gm]'); if(!b) return;
   const a = b.dataset.gm;
   if(a === 'zu'){ gmBeenden(); return; }
+  if(a === 'los'){ gmIndex = 0; gmZeichnen(); return; }
+  if(a === 'dgohne' || a === 'dgmit'){
+    gmDgWahl = a === 'dgohne' ? 'ohne' : null;
+    gmDuengetagSetzen();
+    gmZeichnenUebersicht();
+    return;
+  }
+  if(a === 'uweiter'){ gmWeiter(); return; }
+  if(a === 'urest'){
+    const u = gmListe[gmIndex];
+    if(!u || !u.untersetzer) return;
+    const ids = u.pflanzen.filter(p => !gmUMeldung(gmIndex, p.id)).map(p => p.id);
+    gmVerlauf.push({index:gmIndex, typ:'urest', ids, snap:null, nach:null, befund:null});
+    gmZaehlen();
+    gmWeiter();
+    return;
+  }
   if(a === 'dgja' || a === 'dgnein'){
     /* Ein „nein" verschiebt den ganzen Duengetag auf den naechsten
        Durchgang. Die Zaehler laufen weiter, niemand wird nachdosiert —
@@ -23626,41 +24472,12 @@ document.addEventListener('click', e=>{
   }
   if(a === 'probe'){ return; }
   const pa = gmListe[gmIndex];
-  if(pa && pa.anzucht){
-    if(a === 'azja'){ azErledigen(pa.typ, pa.ref); gmAzErledigt++; }
-    else gmUebersprungen++;
-    gmWeiter();
-    return;
-  }
-  const p = gmListe[gmIndex];
-  /* „War staubtrocken" ist auch gegossen — nur mit der Meldung, dass
-     der Abstand zu lang war. Deshalb derselbe Weg wie „Gegossen",
-     davor der Lernschritt nach unten. */
-  if(a === 'trocken' && p) lernSchritt(p, 'runter');
-  if(a === 'ja' || a === 'trocken'){
-    if(giessLog(p.id)[0] !== iso(HEUTE)) giessen(p.id);
-    /* Ein Antippen, zwei Einträge. Gedüngt wird nur, was heute
-       wirklich Wasser bekommen hat: „Noch feucht“ und „Später“ kommen
-       hier gar nicht an, und auf einen staubtrockenen Ballen gehört
-       kein Dünger — der wartet bis zum nächsten Mal. */
-    if(gmDuengetag === 'ja' && a === 'ja' && duengFaellig(p)
-       && typeof duengen === 'function') duengen(p.id);
-    gmErledigt++;
-  }
-  if(a === 'nein' || a === 'spaeter') gmUebersprungen++;
-  if(a === 'nein' && p) lernSchritt(p, 'hoch');
-  /* Was am Ende auf der Karte steht, wird hier gesammelt: unterwegs
-     unterbricht eine Umtopfmeldung genau die Bewegung, die der
-     Rundgang herstellen soll. */
-  if(p && (a === 'ja' || a === 'trocken' || a === 'nein')){
-    const v = (typeof umtopfVerdacht === 'function') ? umtopfVerdacht(p) : null;
-    if(v && !gmBefunde.some(b=>b.id === p.id)) gmBefunde.push({id:p.id, name:nice(p), text:v.text});
-  }
-  /* „Noch feucht" ist eine echte Rückmeldung über die Pflanze und wird
-     gespeichert. „Später" sagt nur etwas über den Moment aus und zählt
-     deshalb nicht mit. */
-  if(a === 'nein' && p) feuchtGemeldet(p);
-  gmWeiter();
+  if(pa && pa.anzucht){ gmMeldenAz(pa, a === 'azja' ? 'azja' : 'spaeter'); return; }
+  if(!pa || pa.untersetzer) return;
+  if(['ja', 'trocken', 'nein', 'spaeter'].indexOf(a) < 0) return;
+  /* Die Beschriftung ohne die kleine Zeile darunter („· 2 Tage Ruhe“). */
+  const tat = (b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild.textContent : b.textContent).trim();
+  gmMeldenPflanze(pa, a, tat);
 });
 $('#gm-abbruch').onclick = gmBeenden;
 $('#btn-giessmodus').onclick = gmStarten;
@@ -24476,6 +25293,13 @@ const WASSER_ART = {
   osmose:      {name:'Osmose oder destilliert',
     text:'Nährstofffrei und kalkfrei. Notwendig für Karnivoren, für alle anderen unnötig teuer — die brauchen die Mineralien.'}
 };
+/* 4.0-beta.9 (Plan F, H): Die Gewohnheit gilt nur dort, wo eine
+   Pflanze Durchdringend oder Schluck verträgt. */
+const WEISE_TEXT = {
+  oben:    'Gilt für alle, die von oben gegossen werden dürfen. Anstau, Tauchbad bei Orchideen, von unten bei Usambara und Alpenveilchen, Trichter bei Bromelien sowie Wasser- und Hydrokultur bleiben, wie die Pflanze es braucht.',
+  unten:   'Gilt für alle, die das vertragen. Wasserstand etwa ein Viertel der Topfhöhe, stehen lassen, bis die Oberfläche feucht ist, dann abtropfen. Beim fünften Mal sagt die Karte, dass einmal von oben durchgespült wird. Kannenpflanzen, Anstau, Tauchbad und Trichter bleiben, wie die Pflanze es braucht.',
+  pflanze: 'Jede Pflanze wird so gegossen, wie es ihre Gießart sagt. Der Gießmodus nennt den Weg auf jeder Karte.'
+};
 const HAERTE_TEXT = {
   weich:  'Unter 8 °dH. Du kannst fast alles direkt aus dem Hahn gießen.',
   mittel: '8 bis 14 °dH. Für die meisten unproblematisch, empfindliche Arten danken Regenwasser.',
@@ -24524,6 +25348,7 @@ function giessCenterZeichnen(){
       b.setAttribute('aria-pressed', String(b.getAttribute(attr) === wert)));
   };
   setz('wasser-wahl', 'data-wasser', g.art);
+  setz('weise-wahl', 'data-weise', typeof giessWeise === 'function' ? giessWeise() : 'pflanze');
   setz('haerte-wahl', 'data-haerte', g.haerte || '');
   setz('dgart-wahl',  'data-dgart',  g.dgArt);
   setz('saison-wahl', 'data-saison', g.saisonStaerke);
@@ -24531,6 +25356,7 @@ function giessCenterZeichnen(){
   const txt = (id, t)=>{ const e = document.getElementById(id); if(e) e.textContent = t || ''; };
   const ek = (id, t, kurz)=>erklSetzen(document.getElementById(id), t || '', kurz);
   ek('wasser-text', (WASSER_ART[g.art] || {}).text, '');
+  ek('weise-text', WEISE_TEXT[typeof giessWeise === 'function' ? giessWeise() : 'pflanze'], '');
   ek('haerte-text', HAERTE_TEXT[g.haerte || '']);
   ek('dgart-text',  DGART_TEXT[g.dgArt], '');
   /* Die Kanne. Aus ihr folgen zwei Zahlen, die sonst niemand ausrechnen
@@ -24644,6 +25470,14 @@ document.addEventListener('change', e=>{
   }
 });
 document.addEventListener('click', e=>{
+  const wb = e.target.closest('#weise-wahl [data-weise]');
+  if(wb){
+    giessEinst().weise = wb.getAttribute('data-weise');
+    sichern();
+    giessCenterZeichnen();
+    mehrNebenzeilen();
+    return;
+  }
   const paare = [['[data-wasser]','wasser','art'], ['[data-haerte]','haerte','haerte'],
                  ['[data-dgart]','dgart','dgArt'], ['[data-saison]','saison','saisonStaerke']];
   for(const [wahl, attr, feld] of paare){
