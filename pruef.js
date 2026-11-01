@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.5', w.__T('FASSUNG') === '4.0-beta.5', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.6', w.__T('FASSUNG') === '4.0-beta.6', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11243,6 +11243,90 @@ setTimeout(async () => {
     pruef('beta.5: Felder haben die getönte Fläche der Vorschau', /select, textarea\{[^}]*background:var\(--fl-tief\)[^}]*border-radius:var\(--r-mittel\)|select, textarea\{[^}]*border-radius:var\(--r-mittel\);background:var\(--fl-tief\)/.test(stil.replace(/\s*\n\s*/g, '')));
     pruef('beta.5: Felder im Anlegen-Formular stehen hell auf der getönten Fläche', /:is\(\.formwrap, \.zustand[^{]*\{background-color:var\(--fl-karte\)\}/.test(stil.replace(/\s*\n\s*/g, ' ')));
   }
+
+  /* ══ 4.0-beta.6: Grundstil S3 — Einstellungen ══
+     Jeder Test legt seine Daten selbst an und stellt sie danach zurück.
+     Ein Laufzeitfehler im Block zählt als Fehlschlag statt ihn abzubrechen. */
+  try {
+    const T = c => w.__T(c);
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
+    const restVon = el => { const r = el && el.querySelector('.erkl-rest'); return r ? r.textContent : null; };
+    const vornVon = el => el && el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild.textContent.trim() : '';
+
+    /* Liste „Einstellungen“: jede Gruppe in einer Karte */
+    const gruppen = [...d.querySelectorAll('.mh-gruppe')];
+    const ohneKarte = [...d.querySelectorAll('.mh-gruppe section[data-mh]')].filter(x => !x.parentElement.classList.contains('mh-karte')).map(x => x.dataset.mh);
+    pruef('beta.6: Jede Gruppe der Einstellungen steht in einer Karte', gruppen.length === 4 && gruppen.every(g => g.querySelectorAll(':scope > .mh-karte').length === 1) && ohneKarte.length === 0, ohneKarte.join(', '));
+    pruef('beta.6: Karten haben die helle Fläche', /\.mh-karte, \.ein-liste, \.ein-karte, \.wahl-liste\)\{[^}]*background:var\(--fl-karte\)/.test(stil));
+    const sichSvg = (d.querySelector('section[data-mh="sicherung"] .mh-ikon svg') || {}).innerHTML || '';
+    pruef('beta.6: Sicherung hat ein Schild statt des Bild-Symbols', /M8\.8 12\.2/.test(sichSvg) && !/M3 15l4-4/.test(sichSvg), sichSvg.slice(0, 60));
+
+    /* Erklärtexte: erster Satz, Rest hinter „Mehr dazu“ */
+    pruef('beta.6: Satzende nach Einheit, nicht nach Abkürzung',
+      T(`erklSatzEnde('Unter 8 °dH. Du kannst fast alles gießen.')`) === 12 && T(`erklSatzEnde('Etwa z. B. Leipzig ist schön. Danach mehr.')`) === 29,
+      T(`erklSatzEnde('Unter 8 °dH. Du kannst fast alles gießen.')`) + ' / ' + T(`erklSatzEnde('Etwa z. B. Leipzig ist schön. Danach mehr.')`));
+    T('statusText()');
+    const st = d.getElementById('storage-state');
+    pruef('beta.6: Speicherzeile ist kurz, der alte Text steht wortgleich dahinter',
+      vornVon(st) === 'Alles liegt nur auf diesem Gerät.' && restVon(st) === 'Haken, Bearbeitungen, Gießeinträge, eigene Fotos und selbst angelegte Pflanzen werden in diesem Browser gespeichert und sind beim nächsten Öffnen wieder da.',
+      vornVon(st) + ' | ' + restVon(st));
+    const ki = d.querySelector('#mh-in-kidienst p.fhint.erkl');
+    pruef('beta.6: Feste Erklärtexte bekommen ihren kurzen Satz', !!ki && vornVon(ki) === 'Nur kostenlose Flash-Modelle.' && /^Die Liste kommt von Google/.test(restVon(ki)), ki && ki.textContent.slice(0, 60));
+    T(`giessCenterZeichnen()`);
+    const kt = d.getElementById('kanne-text');
+    pruef('beta.6: Mengenzeile zeigt nur den ersten Satz', /^\d+(,\d+)? ml in die [\d,]+-Liter-Kanne\.$/.test(vornVon(kt)), vornVon(kt));
+    const knopf = kt.querySelector('.mehr-dazu');
+    const zuVorher = kt.querySelector('.erkl-rest').hidden;
+    knopf.click();
+    const aufNach = !kt.querySelector('.erkl-rest').hidden && knopf.getAttribute('aria-expanded') === 'true';
+    T(`giessCenterZeichnen()`);
+    const bleibtAuf = !kt.querySelector('.erkl-rest').hidden && kt.querySelector('.mehr-dazu').textContent === 'Weniger';
+    kt.querySelector('.mehr-dazu').click();
+    const wiederZu = kt.querySelector('.erkl-rest').hidden && kt.querySelector('.mehr-dazu').textContent === 'Mehr dazu';
+    pruef('beta.6: „Mehr dazu“ klappt auf und wieder zu', zuVorher && aufNach && wiederZu, [zuVorher, aufNach, wiederZu].join(','));
+    pruef('beta.6: Ein geöffneter Text bleibt beim Neuschreiben offen', bleibtAuf);
+
+    /* Auswahlliste mit Erklärung */
+    const g0 = T('JSON.stringify(giessEinst())');
+    const zeilen = [...d.querySelectorAll('#dgart-wahl > button, #wasser-wahl > button')];
+    pruef('beta.6: Jede Wasser- und Düngerart hat Punkt, Namen und eine Erklärzeile', zeilen.length === 8 && zeilen.every(b => !!b.querySelector('.wl-punkt') && ((b.querySelector('.wl-txt b') || {}).textContent || '').length > 3 && ((b.querySelector('.wl-txt i') || {}).textContent || '').length > 8),
+      zeilen.map(b => (b.querySelector('.wl-txt i') || {}).textContent).join(' | '));
+    d.querySelector('#dgart-wahl [data-dgart="stab"]').click();
+    pruef('beta.6: Antippen in der Liste wählt die Düngerart', T('giessEinst().dgArt') === 'stab' && d.querySelector('#dgart-wahl [data-dgart="stab"]').getAttribute('aria-pressed') === 'true');
+    pruef('beta.6: Der volle Text der gewählten Art steht hinter „Mehr dazu“', restVon(d.getElementById('dgart-text')) === T('DGART_TEXT.stab') && vornVon(d.getElementById('dgart-text')) === '', restVon(d.getElementById('dgart-text')));
+    T('S.giess = ' + g0 + '; giessCenterZeichnen()');
+
+    /* Sicherung: Gefahrenbereich ganz unten, Zähler in einer Zeile */
+    const sichKn = [...d.querySelectorAll('#mh-in-sicherung button:not(.mehr-dazu):not(.takt-pm)')];
+    pruef('beta.6: „Alles zurücksetzen“ ist der letzte Knopf der Sicherung und steht unter „Vorsicht“',
+      sichKn.length > 2 && sichKn[sichKn.length - 1].id === 'btn-reset' && !!d.getElementById('btn-reset').closest('.ein-gefahr')
+      && d.querySelector('.ein-gefahr .ein-abschnitt').textContent === 'Vorsicht', sichKn.map(b => b.id).join(','));
+    pruef('beta.6: Neben den Sicherungsknöpfen steht nichts Gefährliches', !d.querySelector('#mh-in-sicherung .ein-knoepfe .loeschen'));
+    const tv = T('S.sicherTage');
+    T('sicherTageSetzen(1); sicherTakteZeichnen()'); const w1 = d.getElementById('sicher-takt-wort').textContent;
+    T('sicherTageSetzen(5); sicherTakteZeichnen()'); const w5 = d.getElementById('sicher-takt-wort').textContent;
+    pruef('beta.6: Zähler sagt „Tag“ oder „Tagen“', w1 === 'Tag' && w5 === 'Tagen', w1 + ' / ' + w5);
+    T('S.sicherTage = ' + JSON.stringify(tv) + '; sicherTakteZeichnen()');
+    pruef('beta.6: Der Zähler steht in einer Gruppenkarte', !!d.querySelector('.ein-karte > #sicher-takt'));
+
+    /* Segmente, Feldzeilen, Feld mit Knopf, Tour */
+    const seg = ['dichte-wahl', 'haerte-wahl', 'saison-wahl', 'tier-anaus'].filter(id => !d.getElementById(id).classList.contains('segment'));
+    pruef('beta.6: Kartendichte, Härte, Stärke und Haustiere sind Segmente', seg.length === 0, seg.join(', '));
+    pruef('beta.6: Gewähltes Segment ist gefüllt', /\.segment > button\[aria-pressed="true"\]\{[^}]*background:var\(--fl-akzent\)/.test(stil));
+    const felder = ['ein-kanne', 'ein-dosis', 'ein-schwelle', 'ein-dgtag', 'ck-vollstaerke', 'ck-winterpause', 'ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'ans-einfach', 'ans-hinweise', 'tour-aus']
+      .filter(id => !d.getElementById(id).closest('.ein-karte'));
+    pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
+    pruef('beta.6: Ort und Modell stehen als Feld mit Knopf', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select + #btn-ki-modelle'));
+    pruef('beta.6: „empfohlen“ steht unter dem Modell, nicht zwischen Feld und Knopf', !d.querySelector('#mh-in-kidienst .kimodell .ki-modell-abz') && !!d.querySelector('#mh-in-kidienst .kimodell + .ki-modell-abz'));
+    T('tourListeZeichnen()');
+    const tz = [...d.querySelectorAll('#tour-liste [data-tourgo]')];
+    pruef('beta.6: Kapitel der App Tour stehen als Zeilen in Karten', tz.length > 3 && tz.every(b => b.closest('.ein-liste > .tour-z')), tz.length);
+    const dv = T('S.design');
+    T(`designSetzen('terrarium', false)`); const uT = d.getElementById('ein-u-ansicht').textContent;
+    T(`designSetzen('klartext', false)`); const uK = d.getElementById('ein-u-ansicht').textContent;
+    T('designSetzen(' + JSON.stringify(dv || 'botanisch') + ', false)');
+    pruef('beta.6: Zeile „Ansicht“ nennt das gewählte Design', uT === 'Terrarium' && uK === 'Klartext', uT + ' / ' + uK);
+  } catch(e) { pruef('beta.6: Block läuft ohne Laufzeitfehler', false, e.message); }
 
   console.log('\n── Ergebnis ──');
   console.log('  ' + zahl + ' Prüfungen, ' + (zahl - fehler.length) + ' bestanden');
