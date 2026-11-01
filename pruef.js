@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.9', w.__T('FASSUNG') === '4.0-beta.9', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.10', w.__T('FASSUNG') === '4.0-beta.10', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11586,9 +11586,10 @@ setTimeout(async () => {
       pruef('beta.9: Übersicht: Karnivoren stehen unter Osmose oder Regenwasser', /Osmose oder Regenwasser<\/b><\/span><span class="gm-ue-wert">[0-9,]+ l<\/span><\/p><p class="gm-ue-klein">2 Pflanzen/.test(inh()));
       pruef('beta.9: Übersicht: fehlende Topfgrößen werden genannt', /Bei 2 Pflanzen fehlt die Topfgröße, dort geschätzt\./.test(inh()), (inh().match(/Bei \d+ Pflanze[^<]*/) || [''])[0]);
       pruef('beta.9: Übersicht: nur die Gießwege von heute', /Tauchbad/.test(inh()) && /Von unten/.test(inh()) && /In den Trichter/.test(inh()) && /<b>Anstau<\/b>/.test(inh()) && !/Hydrokultur/.test(inh()));
-      pruef('beta.9: Übersicht: Namen je Gießweg durch Komma getrennt (Namen enthalten selbst „·“)', /F4, F3, F2/.test(inh()));
-      pruef('beta.9: Übersicht: beim Gefäß Wasserstand und aufgenommene Menge', /Wasserstand ca\. 2 cm, nachgießen, wenn er sinkt · die Pflanzen nehmen zusammen ca\. [0-9,]+ l auf/.test(inh()));
-      pruef('beta.9: Übersicht: Dein Weg nennt die Räume in Laufreihenfolge', inh().indexOf('1. Prüf-Küche F9') !== -1 && inh().indexOf('2. Prüf-Bad F9') !== -1 && inh().indexOf('Ohne Raum') !== -1);
+      /* seit beta.10 (Plan G1) nur noch der Wasserstand */
+      pruef('beta.9: Übersicht: beim Gefäß der Wasserstand', /<i>Wasserstand ca\. 2 cm<\/i>/.test(inh()));
+      /* seit beta.10 (Plan G1): „Heute dran“ ersetzt „Dein Weg“ */
+      pruef('beta.9: Übersicht: Räume in Laufreihenfolge', inh().indexOf('Prüf-Küche F9 · 3') !== -1 && inh().indexOf('Prüf-Küche F9 · 3') < inh().indexOf('Prüf-Bad F9 · 2') && inh().indexOf('Prüf-Bad F9 · 2') < inh().indexOf('Ohne Raum ·'));
       pruef('beta.9: Übersicht: Morgen dran mit Mitnehmen', /data-gm-mit="F12"/.test(inh()) && ix('F12') === -1);
       klick('[data-gm-mit="F12"]');
       pruef('beta.9: Mitnehmen nimmt die Pflanze in den heutigen Weg', T("gmListe.some(function(x){ return x.id === 'F12'; })") === true && /data-gm-mit="F12" aria-pressed="true">Mitgenommen/.test(inh()));
@@ -11619,10 +11620,10 @@ setTimeout(async () => {
       /* I Gießweg-Zeile und C Menge */
       const karte = id => { T(`gmListeBauen(); gmIndex = gmListe.findIndex(function(x){ return x.id === '${id}'; }); gmZeichnen()`); return inh(); };
       let h = karte('F8');
-      pruef('beta.9: Karte: Gießweg sichtbar, „Anders als sonst“ bei Abweichung', /class="gm-weg anders">Anders als sonst: Tauchbad · bis knapp unter den Rand, bis keine Blasen mehr kommen · ca\. \d+ ml</.test(h), (h.match(/class="gm-weg[^<]*/) || [''])[0]);
+      pruef('beta.9: Karte: Gießweg sichtbar, „Anders als sonst“ bei Abweichung', /class="gm-weg anders"[^>]*>.*?class="gm-weg-t">Anders als sonst: Tauchbad · ca\. \d+ ml</.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F1');
       const ml1 = T("Math.round(wasserBedarf(allePflanzen().find(function(x){ return x.id === 'F1'; })) * 1000 / 50) * 50");
-      pruef('beta.9: Karte: Menge auf 50 ml gerundet', new RegExp('class="gm-weg">Von unten · etwa 15 Minuten, bis die Oberfläche feucht ist, dann abtropfen · ca\\. ' + ml1 + ' ml<').test(h), (h.match(/class="gm-weg[^<]*/) || [''])[0]);
+      pruef('beta.9: Karte: Menge auf 50 ml gerundet', new RegExp('class="gm-weg-t">Von unten · ca\\. ' + ml1 + ' ml<').test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F5');
       pruef('beta.9: Karte: ohne Topfgröße „geschätzt“', /ca\. 250 ml, geschätzt</.test(h), (h.match(/class="gm-weg[^<]*/) || [''])[0]);
       pruef('beta.9: Karte: Fingerprobe bleibt hinter dem Streifen, ohne Satz der Gießart', /class="gm-probe" hidden/.test(h) && !/Kleine Menge, nur die Erde anfeuchten/.test(h));
@@ -11651,9 +11652,9 @@ setTimeout(async () => {
       /* J Durchspülen */
       T("S.spuelen = {F1:4, F9:4}");
       h = karte('F1');
-      pruef('beta.9: Durchspülen beim fünften Mal von unten', /class="gm-weg spuelen">Heute einmal von oben durchspülen · gießen, bis unten klares Wasser austritt/.test(h), (h.match(/class="gm-weg[^<]*/) || [''])[0]);
+      pruef('beta.9: Durchspülen beim fünften Mal von unten', /class="gm-weg spuelen"[^>]*>.*?class="gm-weg-t">Heute von oben durchspülen · ca\. \d+ ml/.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F9');
-      pruef('beta.9: Durchspülen bei Usambara: auf die Erde, nicht auf Blätter und Herz', /auf die Erde, nicht auf Blätter und Herz/.test(h));
+      pruef('beta.9: Durchspülen bei Usambara: auf die Erde, nicht auf Blätter und Herz', T("gmWieZeilen('spuelen', allePflanzen().find(function(x){ return x.id === 'F9'; })).join('|')").indexOf('Auf die Erde, nicht auf Blätter und Herz') !== -1);
       T("S.spuelen = {F1:2}");
       karte('F1'); klick('#gm-knoepfe [data-gm="ja"]');
       pruef('beta.9: Gegossen von unten zählt mit', T('S.spuelen.F1') === 3, String(T('S.spuelen.F1')));
@@ -11776,6 +11777,86 @@ setTimeout(async () => {
     } finally {
       T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         var a = ${alt9}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
+        gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
+        sichern(); })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.10: Plan G1 — Icons, Hinweiskärtchen, „Heute dran“, Beta-Testwerkzeug ══ */
+  {
+    const T = c => w.__T(c);
+    const alt10 = T("JSON.stringify({eigene:S.eigene, water:S.water, zustand:S.zustand, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, anzucht:S.anzucht === undefined ? null : S.anzucht})");
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
+    try {
+      T(`(function(){
+        let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        S.anzucht = null; S.feuchtRueck = {}; S.giess = Object.assign({}, giessEinst(), {weise:'unten'});
+        var r = raumAnlegen('Prüfraum G10');
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        S.eigene = [
+          {id:'G1', eigen:true, name:'Anna', art:'Monstera', botanisch:'Monstera deliciosa', klasse:'B', raum:r, topf:'16'},
+          {id:'G2', eigen:true, name:'Bert', art:'Phalaenopsis', botanisch:'Phalaenopsis amabilis', typ:'Orchidee', klasse:'B', raum:r, topf:'12'},
+          {id:'G3', eigen:true, name:'Carla', art:'Monstera', botanisch:'Monstera deliciosa', klasse:'B', topf:'14'}
+        ];
+        S.water = {G1:[vor(2)], G2:[vor(2)], G3:[vor(2)]};
+        S.zustand = {};
+        sichern();
+      })()`);
+
+      /* Beta-Testwerkzeug */
+      pruef('beta.10: Abschnitt „Beta-Test“ in den Einstellungen (Sicherung, vor „Vorsicht“)', !!d.querySelector('section[data-mh="sicherung"] #betatest-sec #btn-beta-faellig') && !!d.querySelector('#betatest-sec + .ein-gefahr'));
+      pruef('beta.10: Ohne Beta-Schlüssel fällt der Abschnitt weg', /if\(KEY !== 'gk-beta'\)\{ const s = document\.getElementById\('betatest-sec'\); if\(s\) s\.remove\(\); \}/.test(d.documentElement.innerHTML) && /if\(KEY !== 'gk-beta'\) return 0;/.test(T('String(betaAlleFaellig)')));
+      pruef('beta.10: Vorher ist nichts fällig', T('giessListe().length') === 0, String(T('giessListe().length')));
+      const n = T('betaAlleFaellig()');
+      pruef('beta.10: „Alle Pflanzen fällig machen“ macht alle fällig', n === 3 && T('giessListe().length') === 3 && T("giessLog('G1').length") === 1, n + ' / ' + T('giessListe().length'));
+      const azOk = T(`(function(){ var g = azGefaessAnlegen({name:'Glas G10', medium:'wasser', start:iso(HEUTE)}); azGruppeAnlegen({gefaess:g.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'}); g.start = iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 30)); g.gewechselt = [iso(HEUTE)];
+        var vorher = azFaellig().length; betaAlleFaellig(); return vorher === 0 && azFaellig().length === 1; })()`);
+      pruef('beta.10: Auch Anzucht-Gläser werden fällig', azOk === true);
+      T('S.anzucht = null; sichern()');
+
+      /* Übersicht: Heute dran und Gießwege mit Icon */
+      T('gmStarten()');
+      const ue = inh();
+      const reihe = [...d.querySelectorAll('#gm-inhalt .gm-ue-pfl .gm-ue-pfl-t b')].map(x => x.textContent);
+      pruef('beta.10: „Heute dran“ listet die Pflanzen in Laufreihenfolge', reihe.join(',') === T('gmPflanzenVonListe(gmListe).map(function(p){ return nice(p); }).join(",")') && /Heute dran/.test(ue) && !/Dein Weg/.test(ue), reihe.join(','));
+      pruef('beta.10: Raumzeilen mit Zahl', /class="gm-ue-raum">Prüfraum G10 · 2</.test(ue) && /class="gm-ue-raum">Ohne Raum · 1</.test(ue));
+      pruef('beta.10: Ohne Foto ein Platzhalter mit Anfangsbuchstaben', /class="gm-ue-init" aria-hidden="true">A</.test(ue));
+      const ml1 = T("gmMengeMl(allePflanzen().find(function(x){ return x.id === 'G1'; }), 'unten')");
+      pruef('beta.10: Jede Zeile trägt Icon und Menge', !!d.querySelector('#gm-inhalt .gm-ue-pfl [data-gm-wie="unten"][data-id="G1"] svg.gm-ico') && new RegExp('gm-wie-zusatz">' + ml1 + ' ml<').test(ue));
+      const gw = [...d.querySelectorAll('#gm-inhalt .gm-gw-zeile')];
+      pruef('beta.10: Gießwege mit Icon, ohne Namen der Pflanzen', gw.length === 2 && gw.every(z => z.querySelector('svg.gm-ico')) && !gw.some(z => /Anna|Bert|Carla/.test(z.textContent)), gw.map(z => z.textContent.trim().replace(/\s+/g, ' ')).join(' | '));
+      pruef('beta.10: Ein Icon je Gießweg', T("Object.keys(GM_WEGE).every(function(k){ return !!GM_ICONS[k]; }) && Object.keys(GM_ICONS).length === Object.keys(GM_WEGE).length") === true);
+      pruef('beta.10: Klartext zeigt das Wort statt des Icons', /html\[data-design="klartext"\] \.gm-ico\{display:none\}/.test(stil) && /html\[data-design="klartext"\] \.gm-wort\{display:inline\}/.test(stil));
+
+      /* Hinweiskärtchen aus der Übersicht, ohne Pflanze */
+      const gwKnopf = d.querySelector('#gm-inhalt .gm-gw-zeile[data-gm-wie="unten"]');
+      if(gwKnopf) gwKnopf.click();
+      const allg = (d.getElementById('gm-wie-inhalt') || {}).textContent || '';
+      pruef('beta.10: Icon in der Übersicht öffnet das Hinweiskärtchen', T("modalOffen('gm-wie')") === true && /Wasser etwa ein Viertel der Topfhöhe hoch/.test(allg) && !/bei diesem Topf/.test(allg), allg.slice(0, 120));
+      const zu = d.getElementById('gm-wie-zu'); if(zu) zu.click();
+      await new Promise(r => setTimeout(r, 60));   /* schließt über history.back(), popstate kommt später (T42) */
+      pruef('beta.10: × schließt das Kärtchen, der Gießmodus bleibt', T("modalOffen('gm-wie')") === false && T("modalOffen('giessmodus')") === true);
+
+      /* Karte: Balken mit Icon, antippbar, Kärtchen mit dem Wie dieser Pflanze */
+      T("gmIndex = gmListe.findIndex(function(x){ return x.id === 'G1'; }); gmZeichnen()");
+      const balken = d.querySelector('#gm-inhalt button.gm-weg[data-gm-wie="unten"][data-id="G1"]');
+      pruef('beta.10: Kartenbalken: Icon links, Weg und Menge, Pfeil rechts', !!balken && balken.firstElementChild && balken.firstElementChild.tagName.toLowerCase() === 'svg'
+        && (balken.querySelector('.gm-weg-t') || {}).textContent === 'Von unten · ca. ' + ml1 + ' ml' && !!balken.querySelector('.gm-weg-p'), balken ? balken.textContent : 'kein Balken');
+      if(balken) balken.click();
+      const wie = (d.getElementById('gm-wie-inhalt') || {}).textContent || '';
+      const cm = T('gmWasserstandCm(16)');
+      pruef('beta.10: Balken öffnet das Kärtchen mit Wasserstand und Menge für diesen Topf', T("modalOffen('gm-wie')") === true && wie.indexOf('bei diesem Topf ca. ' + cm + ' cm') !== -1 && wie.indexOf('Nimmt ca. ' + ml1 + ' ml auf') !== -1, wie.slice(0, 200));
+      T("modalZu('gm-wie')");
+      await new Promise(r => setTimeout(r, 60));
+      pruef('beta.10: Der Streifen behält nur die Fingerprobe', !/etwa 15 Minuten|bis die Oberfläche/.test(d.querySelector('#gm-inhalt .gm-probe').textContent));
+      pruef('beta.10: Wasserstand ein Viertel der Topfhöhe, 2 bis 6 cm', T('gmWasserstandCm(8)') === 2 && T('gmWasserstandCm(20)') === 4 && T('gmWasserstandCm(60)') === 6);
+      T("modalZu('giessmodus')");
+    } catch(e) {
+      pruef('beta.10: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        var a = ${alt10}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
         gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
         sichern(); })()`);
     }

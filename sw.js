@@ -9,7 +9,7 @@
    die Zwischenspeicher. Die Beta löscht deshalb nur ihre eigenen alten
    Stände (Präfix `greenkeeperai-beta-`), nie den der echten App. */
 const PRAEFIX = 'greenkeeperai-beta-';
-const VERSION = PRAEFIX + '9';
+const VERSION = PRAEFIX + '10';
 const DATEIEN = [
   './',
   './index.html',

@@ -4227,10 +4227,58 @@ html[data-design="klartext"] .gm-ue-mit{flex:1 1 100%}
 html[data-design="klartext"] .gm-ue-mit > button{width:100%}
 /* Raum über der Karte, Gießweg auf der Karte */
 html[data-design] .gm-raum{margin:-8px 0 10px;font-family:var(--f-body);font-size:var(--t-m);font-weight:600;color:var(--schrift)}
-html[data-design] .gm-weg{margin:0 0 10px;padding:8px 12px;border-radius:var(--r-mittel);background:var(--ton-wasser);
-  font-family:var(--f-body);font-size:var(--t-m);line-height:1.5;color:var(--schrift)}
-html[data-design] .gm-weg.anders, html[data-design] .gm-weg.spuelen{font-weight:600}
+html[data-design] .gm-weg{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);margin:0 0 10px;padding:6px 12px;
+  border:0;border-radius:var(--r-mittel);background:var(--ton-wasser);font-family:var(--f-body);font-size:var(--t-m);line-height:1.4;
+  color:var(--schrift);text-align:left;cursor:pointer}
+html[data-design] .gm-weg .gm-ico{flex:0 0 32px;width:32px;height:32px}
+html[data-design] .gm-weg-t{flex:1 1 auto;min-width:0}
+html[data-design] .gm-weg-p{flex:0 0 auto;opacity:.55;font-size:1.15rem}
+html[data-design] .gm-weg.anders .gm-weg-t, html[data-design] .gm-weg.spuelen .gm-weg-t{font-weight:600}
 html[data-design="klartext"] .gm-weg{border:2px solid var(--schrift);background:none;font-size:var(--t-md)}
+/* 4.0-beta.10 (Plan G1): Icons je Gießweg und Hinweiskärtchen */
+html[data-design="botanisch"]{--gi-topf:#B9754E;--gi-erde:#8A6A4F;--gi-blatt:#4F7A55;--gi-wasser-fl:rgba(44,90,107,.22)}
+html[data-design="klartext"]{--gi-topf:#9A5A34;--gi-erde:#6B4A2F;--gi-blatt:#2E6B34;--gi-wasser-fl:rgba(0,61,92,.18)}
+html[data-design="terrarium"]{--gi-topf:#D08A5E;--gi-erde:#B08A66;--gi-blatt:#7FCB8A;--gi-wasser-fl:rgba(124,198,224,.25)}
+html[data-design] .gm-ico{fill:none;stroke:var(--schrift);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+html[data-design] .gm-ico .gi-l{stroke:var(--schrift)}
+html[data-design] .gm-ico .gi-w{fill:var(--gi-wasser-fl);stroke:none}
+html[data-design] .gm-ico .gi-wl{stroke:var(--wasser)}
+html[data-design] .gm-ico .gi-tr{fill:var(--wasser);stroke:none}
+html[data-design] .gm-ico .gi-bb{fill:none;stroke:var(--wasser);stroke-width:1}
+html[data-design] .gm-ico .gi-tp{fill:var(--gi-topf);stroke:var(--schrift)}
+html[data-design] .gm-ico .gi-er{fill:var(--gi-erde);stroke:none}
+html[data-design] .gm-ico .gi-bl{stroke:var(--gi-blatt);stroke-width:1.8}
+html[data-design] .gm-ico .gi-blf{fill:var(--gi-blatt);stroke:none}
+html[data-design] .gm-ico .gi-kg{fill:var(--gi-erde);stroke:none}
+html[data-design] .gm-ico .gi-pf{fill:var(--schrift);stroke:none}
+html[data-design] .gm-wort{display:none}
+html[data-design="klartext"] .gm-ico{display:none}
+html[data-design="klartext"] .gm-wort{display:inline}
+html[data-design] .gm-wie-knopf{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);min-width:var(--tap);
+  margin:-6px 0;padding:4px 6px;border:0;border-radius:var(--r-mittel);background:none;color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-s);font-weight:600;cursor:pointer}
+html[data-design] .gm-wie-knopf .gm-ico{width:30px;height:30px}
+html[data-design] .gm-wie-zusatz{font-variant-numeric:tabular-nums}
+html[data-design="klartext"] .gm-wie-knopf{border:2px solid var(--schrift);font-size:var(--t-m)}
+html[data-design] .gm-ue-k > .gm-gw-zeile{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);border:0;border-radius:0;
+  background:none;color:var(--schrift);text-align:left;cursor:pointer;font:inherit}
+html[data-design] .gm-gw-zeile .gm-ico{flex:0 0 30px;width:30px;height:30px}
+html[data-design] .gm-gw-t{flex:1 1 auto;min-width:0;margin:0;font-family:var(--f-body);font-size:var(--t-m)}
+html[data-design] .gm-gw-t b{display:block;font-weight:600}
+html[data-design] .gm-gw-t i{display:block;font-style:normal;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .gm-ue .gm-ue-raum{padding-top:10px;padding-bottom:2px;font-family:var(--f-body);font-size:var(--t-s);font-weight:600;color:var(--schrift-2)}
+html[data-design] .gm-ue-k > .gm-ue-raum + *{border-top:0}
+html[data-design] .gm-ue-init{display:grid;place-items:center;width:100%;height:100%;font-family:var(--f-body);font-weight:700;color:var(--schrift-2)}
+html[data-design="klartext"] .gm-ue-pfl .gm-wie-knopf{margin-left:auto}
+html[data-design] .gm-wie-box{position:relative;text-align:left;padding:20px 18px 18px}
+html[data-design] #gm-wie-zu{position:absolute;top:10px;right:10px;width:var(--tap);height:var(--tap);border-radius:50%;
+  border:1px solid var(--linie);background:var(--fl-karte);color:var(--schrift);font-size:1.35rem;line-height:1;cursor:pointer}
+html[data-design] .gm-wie-kopf{display:flex;align-items:center;gap:14px;margin:0 52px 10px 0}
+html[data-design] .gm-wie-kopf .gm-ico.gross{flex:0 0 56px;width:56px;height:56px}
+html[data-design] .gm-wie-kopf h3{margin:0;font-size:1.2rem}
+html[data-design] .gm-wie-pfl{margin:0 0 8px;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .gm-wie-liste{margin:0;padding-left:20px;font-family:var(--f-body);font-size:var(--t-m);line-height:1.5}
+html[data-design] .gm-wie-liste li{margin:0 0 6px}
 html[data-design] .gm-weg-dg{margin:-4px 0 10px;font-size:var(--t-s);line-height:1.5;color:var(--schrift-2)}
 html[data-design="klartext"] .gm-weg-dg{font-size:var(--t-m);color:var(--schrift)}
 /* Untersetzer-Karte */
@@ -10856,6 +10904,14 @@ function pflanzeEntfernen(id){
         <span class="lab" id="sicher-takt-wort">Tagen</span>
       </div>
     </div>
+    <!-- Beta-Test: nur in der Beta (4.0-beta.10, Plan G1) -->
+    <div id="betatest-sec">
+      <p class="ein-abschnitt">Beta-Test</p>
+      <div class="ein-karte">
+        <div class="tools"><button type="button" class="haupt" id="btn-beta-faellig">Alle Pflanzen fällig machen</button></div>
+        <p class="fhint" id="beta-faellig-text" data-erkl>Trägt bei jeder Pflanze ein Gießdatum ein, das einen Tag über ihrem Abstand liegt, und macht Anzucht-Gläser fällig. Feucht-Meldungen werden gelöscht. Nur für Testdaten.</p>
+      </div>
+    </div>
     <div class="ein-gefahr">
       <p class="ein-abschnitt">Vorsicht</p>
       <div class="ein-karte">
@@ -11533,6 +11589,13 @@ function pflanzeEntfernen(id){
   <div class="gm-fuss" id="gm-knoepfe"></div>
 </div>
 
+<div id="gm-wie" class="modal" role="dialog" aria-modal="true" aria-labelledby="gm-wie-titel" hidden>
+  <div class="modal-box gm-wie-box">
+    <button type="button" id="gm-wie-zu" aria-label="Schließen">×</button>
+    <div id="gm-wie-inhalt"></div>
+  </div>
+</div>
+
 <div id="rundgang" role="dialog" aria-modal="true" aria-label="Rundgang" hidden>
   <div class="gm-leiste">
     <div class="gm-fort-bahn"><span id="rg-fort"></span></div>
@@ -12090,6 +12153,9 @@ document.querySelectorAll('[data-erkl], [data-erkl-kurz]').forEach(el=>{
 
 /* ══════════════════ Zustand ══════════════════ */
 const KEY = 'gk-beta';
+/* 4.0-beta.10: Der Abschnitt „Beta-Test“ gibt es nur mit dem
+   Beta-Schlüssel. Wandert die Datei in die echte App, fällt er weg. */
+(function(){ if(KEY !== 'gk-beta'){ const s = document.getElementById('betatest-sec'); if(s) s.remove(); } })();
 
 /* Wohin Rückmeldungen gehen. Beides ist vorbelegt, damit niemand erst
    etwas eintragen muss — die Mailadresse lässt sich hinter dem Zahnrad
@@ -12109,7 +12175,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.9';
+const FASSUNG = '4.0-beta.10';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -17505,6 +17571,48 @@ modalAnmelden('giessmodus', {
     }, 0); },
   nachZu:  ()=>{ document.body.classList.remove('gm-offen'); if(typeof render==='function') render(); }
 });
+
+/* 4.0-beta.10: Beta-Testwerkzeug. Jede Pflanze bekommt einen Gießtag,
+   der einen Tag über ihrem Abstand liegt; spätere Einträge fallen weg,
+   damit der letzte Eintrag dieser Tag ist. Nur mit Beta-Schlüssel. */
+function betaAlleFaellig(){
+  if(KEY !== 'gk-beta') return 0;
+  const tagVor = n => iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n));
+  let n = 0;
+  if(!S.water) S.water = {};
+  allePflanzen().forEach(p => {
+    const d = tagVor(intervallVon(p) + 1);
+    S.water[p.id] = giessTermine(p.id).filter(x => x < d).concat([d]);
+    n++;
+  });
+  S.feuchtRueck = {};
+  if(typeof anzuchtDaten === 'function'){
+    const A = anzuchtDaten();
+    A.gefaesse.forEach(g => {
+      if(!g.abstand) return;
+      const d = tagVor(g.abstand + 1);
+      g.gewechselt = (Array.isArray(g.gewechselt) ? g.gewechselt : []).filter(x => x < d).concat([d]);
+      if(g.start && g.start > d) g.start = d;
+    });
+    A.bereiche.forEach(b => {
+      if(!b.rhythmus) return;
+      const d = tagVor(b.rhythmus + 1);
+      b.befeuchtet = (Array.isArray(b.befeuchtet) ? b.befeuchtet : []).filter(x => x < d).concat([d]);
+    });
+  }
+  sichern();
+  return n;
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('#btn-beta-faellig')) return;
+  if(!confirm('Alle Pflanzen fällig machen?\n\nDas ändert den Gießverlauf der Testdaten.')) return;
+  const n = betaAlleFaellig();
+  render();
+  erklSetzen(document.getElementById('beta-faellig-text'), n + ' ' + (n === 1 ? 'Pflanze ist' : 'Pflanzen sind') + ' jetzt fällig. Der Gießmodus auf Heute startet mit ihnen.');
+});
+
+/* 4.0-beta.10: Hinweiskärtchen zum Gießweg, über dem Gießmodus. */
+modalAnmelden('gm-wie', {groesse:'blatt', schleier:true});
 
 modalAnmelden('rundgang', {
   groesse:'voll', schleier:false,
@@ -23746,7 +23854,7 @@ const GM_WEGE = {
   anstau:   {name:'Anstau', wie:'Untersetzer 1 bis 2 cm hoch auffüllen'},
   wasser:   {name:'Wasserkultur', wie:'Wasser wechseln, Gefäß ausspülen'},
   hydro:    {name:'Hydrokultur', wie:'Wasserstand bis „Optimal“ auffüllen'},
-  spuelen:  {name:'Heute einmal von oben durchspülen', wie:'gießen, bis unten klares Wasser austritt'}
+  spuelen:  {name:'Heute von oben durchspülen', wie:'gießen, bis unten klares Wasser austritt'}
 };
 /* Durchspülen (J): Wer von unten gegossen wird, bekommt beim fünften
    Mal seit dem letzten Durchspülen den Hinweis, einmal von oben zu
@@ -23789,14 +23897,99 @@ function gmAnders(weg){
 function gmWegZeile(p){
   const weg = gmWegHeute(p);
   const W = GM_WEGE[weg] || GM_WEGE.durch;
-  let wie = W.wie;
-  if((weg === 'unten' || weg === 'spuelen') && gmBlattHerz(p)) wie += weg === 'spuelen'
-    ? ', auf die Erde, nicht auf Blätter und Herz' : ', nichts auf Blätter und Herz';
-  const teile = [W.name, wie];
+  /* 4.0-beta.10 (Plan G1): nur Weg und Menge; das Wie steht im
+     Hinweiskärtchen (gmWieZeigen). */
+  const teile = [W.name];
   const m = gmMengeText(p, weg);
   if(m) teile.push(m);
   const anders = gmAnders(weg);
   return {weg, anders, text:(anders ? 'Anders als sonst: ' : '') + teile.join(' · ')};
+}
+
+/* ── Icons je Gießweg (Plan G1, F126: nach Chris' Bild vom 01.11.) ──
+   Seitenansicht, Gefäße aufgeschnitten, 48 × 48. Farben aus den Tokens
+   des Blocks „Gießmodus F“. In Klartext steht statt des Icons das Wort. */
+const GM_KANNE = '<path class="gi-l" d="M28 6h11v10a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z"/><path class="gi-l" d="M39 8.5c3 0 4.2 2 4.2 4.5S42 17.5 39 17.5"/><path class="gi-l" d="M28 15l-8-6"/><path class="gi-l" d="M17.4 10.6l4.6-3.8" style="stroke-width:2.4"/>';
+const GM_TOPF = (y, oben) => '<path class="gi-tp" d="M12 ' + y + 'h24l-2.8 ' + (44 - y) + 'H14.8z"/>'
+  + (oben === false ? '' : '<path class="gi-er" d="M13.2 ' + (y + 1.2) + 'h21.6l-.3 2.2H13.5z"/>');
+const GM_ICONS = {
+  durch: GM_KANNE + GM_TOPF(30)
+    + ['14,18', '18,16.5', '22,18', '12,22.5', '16,21.5', '20,22.5', '24,21.5', '14,26.5', '18,25.5', '22,26.5']
+      .map(xy => '<circle class="gi-tr" cx="' + xy.split(',')[0] + '" cy="' + xy.split(',')[1] + '" r="1.25"/>').join(''),
+  schluck: GM_KANNE + GM_TOPF(30) + '<path class="gi-tr" d="M18 17c1.6 2.4 2.4 3.6 2.4 4.8a2.4 2.4 0 0 1-4.8 0c0-1.2.8-2.4 2.4-4.8z"/>',
+  unten: '<path class="gi-w" d="M5.4 36h37.2l-1.6 8H7z"/><path class="gi-l" d="M4 31l3 13h34l3-13"/><path class="gi-wl" d="M5.2 36h37.6"/>'
+    + '<path class="gi-tp" d="M14 22h20l-2.6 20H16.6z"/><path class="gi-er" d="M15.1 23.2h17.8l-.3 2.2H15.4z"/>'
+    + '<path class="gi-pf" d="M24 28l-4.4 5h2.8v6h3.2v-6h2.8z"/>'
+    + '<path class="gi-bl" d="M24 23c0-4-2.6-7-6.6-8M24 23c0-5 3.4-8 7.6-8.6"/>',
+  tauchen: '<path class="gi-w" d="M9.4 15h29.2l-1.9 29H11.3z"/><path class="gi-l" d="M8.8 8l2.4 36h25.6l2.4-36"/><path class="gi-wl" d="M9.3 15h29.4"/>'
+    + '<path class="gi-tp" d="M15 25h18l-2.3 16H17.3z"/><path class="gi-er" d="M15.9 26h16.2l-.2 1.8H16.1z"/>'
+    + '<path class="gi-bl" d="M24 26c0-3-2.2-5.4-5.4-6.2M24 26c0-3.4 2.4-5.8 5.8-6.4M24 26v-6"/>'
+    + '<circle class="gi-bb" cx="34" cy="21" r="1.2"/><circle class="gi-bb" cx="14" cy="22" r="1"/><circle class="gi-bb" cx="31" cy="18" r=".9"/><circle class="gi-bb" cx="17" cy="18.5" r=".9"/>',
+  trichter: GM_TOPF(32)
+    + '<path class="gi-blf" d="M24 33c-4-6-9-9-15-9 4 4 8 7 15 9zM24 33c4-6 9-9 15-9-4 4-8 7-15 9zM24 33c-2-7-6-12-10-14 1 6 5 10 10 14zM24 33c2-7 6-12 10-14-1 6-5 10-10 14z"/>'
+    + '<path class="gi-tr" d="M24 8c2.2 3.2 3.2 4.8 3.2 6.4a3.2 3.2 0 0 1-6.4 0c0-1.6 1-3.2 3.2-6.4z"/>',
+  anstau: '<path class="gi-w" d="M6.8 37h34.4l-1.4 7H8.2z"/><path class="gi-l" d="M5 33l2.6 11h32.8L43 33"/><path class="gi-wl" d="M6.4 37h35.2"/>'
+    + '<path class="gi-tp" d="M13 24h20l-2.6 18H15.6z"/><path class="gi-er" d="M14.1 25.2h17.8l-.3 2.2H14.4z"/>'
+    + '<path class="gi-bl" d="M18 25V11M23 25V7M28 25V12M18 11c1-1.2 2.4-1.2 3.4 0M23 7c1-1.2 2.4-1.2 3.4 0M28 12c1-1.2 2.4-1.2 3.4 0"/>'
+    + '<path class="gi-wl" d="M36 24c1-1 2-1 3 0s2 1 3 0M36 28c1-1 2-1 3 0s2 1 3 0"/>',
+  wasser: '<path class="gi-w" d="M15.5 20h17l-1.4 24H16.9z"/><path class="gi-l" d="M14 8l3 36h14l3-36"/><path class="gi-wl" d="M15.4 20h17.2"/>'
+    + '<path class="gi-bl" d="M24 26V6M24 11c-4.4 0-6.6-2.2-6.6-5.4 4.4 0 6.6 2.2 6.6 5.4zM24 15c4.4 0 6.6-2.2 6.6-5.4-4.4 0-6.6 2.2-6.6 5.4z"/>'
+    + '<path class="gi-l" style="stroke-width:1" d="M24 26c-2 4-4 7-4 13M24 26c-.6 5 0 9-1 14M24 26c1 4 2 6 2 12M24 26c2 3 4 6 5 10"/>',
+  hydro: '<path class="gi-w" d="M13.3 35h21.4l-1.3 9H14.6z"/><path class="gi-l" d="M11 18l3.6 26h18.8L37 18z"/><path class="gi-wl" d="M13.3 35h21.4"/>'
+    + '<g class="gi-kg"><circle cx="17" cy="23" r="2.2"/><circle cx="22" cy="22.4" r="2.2"/><circle cx="27" cy="23" r="2.2"/><circle cx="31.6" cy="22.6" r="2.2"/><circle cx="19" cy="28" r="2.2"/><circle cx="24" cy="27.4" r="2.2"/><circle cx="29" cy="28" r="2.2"/><circle cx="21" cy="33" r="2.2"/><circle cx="26.6" cy="33" r="2.2"/></g>'
+    + '<path class="gi-bl" d="M24 19c0-6-3-10-8-11M24 19c0-6 4-10 9-11"/>'
+    + '<rect class="gi-l" x="38.4" y="12" width="3.6" height="24" rx="1.8"/><path class="gi-w" d="M38.9 26h2.6v9.5h-2.6z"/><path class="gi-wl" d="M38.4 26h3.6"/>',
+  spuelen: '<path class="gi-l" d="M28 4h11v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z"/><path class="gi-l" d="M28 12l-7-5"/><path class="gi-l" d="M17.8 9.6l4.6-3.8" style="stroke-width:2.4"/>'
+    + '<path class="gi-wl" d="M18 12l-4 7M19.5 12.6l-2 7.4M21 13.2l0 7"/>'
+    + '<path class="gi-tp" d="M12 24h24l-2.4 14H14.4z"/><path class="gi-er" d="M13.2 25.2h21.6l-.3 2.2H13.5z"/>'
+    + '<circle class="gi-tr" cx="19" cy="42" r="1.3"/><circle class="gi-tr" cx="24" cy="44.5" r="1.3"/><circle class="gi-tr" cx="29" cy="42" r="1.3"/>'
+};
+function gmIcon(weg, cls){
+  const d = GM_ICONS[weg] || GM_ICONS.durch;
+  return '<svg class="gm-ico' + (cls ? ' ' + cls : '') + '" viewBox="0 0 48 48" aria-hidden="true" focusable="false">' + d + '</svg>';
+}
+/* Knopf mit Icon (Klartext: das Wort), öffnet das Hinweiskärtchen. */
+function gmWieKnopf(weg, id, zusatz){
+  const W = GM_WEGE[weg] || GM_WEGE.durch;
+  return '<button type="button" class="gm-wie-knopf" data-gm-wie="' + esc(weg) + '"' + (id ? ' data-id="' + esc(id) + '"' : '')
+    + ' aria-label="' + esc(W.name + (zusatz ? ', ' + zusatz : '') + ', Hinweis öffnen') + '">'
+    + gmIcon(weg) + '<span class="gm-wort">' + esc(W.name) + '</span>'
+    + (zusatz ? '<span class="gm-wie-zusatz">' + esc(zusatz) + '</span>' : '') + '</button>';
+}
+/* Das Wie eines Wegs, für das Hinweiskärtchen. Mit Pflanze stehen
+   Wasserstand und Menge für ihren Topf dabei. */
+function gmWasserstandCm(d){ return Math.max(2, Math.min(6, Math.round((Number(d) || 12) * 0.8 / 4))); }
+function gmWieZeilen(weg, p){
+  const ml = p ? gmMengeMl(p, weg) : 0;
+  const herz = p && gmBlattHerz(p);
+  const z = {
+    durch:    ['Gießen, bis unten Wasser austritt', 'Nach 15 Minuten den Untersetzer leeren'],
+    schluck:  ['Nur die Erde anfeuchten', 'Kein Wasser im Untersetzer'],
+    unten:    [p ? 'Wasser etwa ein Viertel der Topfhöhe hoch, bei diesem Topf ca. ' + gmWasserstandCm(p.topf) + ' cm'
+                 : 'Wasser etwa ein Viertel der Topfhöhe hoch',
+               'Stehen lassen, bis die Oberfläche dunkel und feucht ist, meist 10 bis 30 Minuten',
+               'Herausnehmen und abtropfen lassen'],
+    tauchen:  ['Topf bis knapp unter den Rand ins Wasser stellen', 'Warten, bis keine Luftblasen mehr aufsteigen, meist 5 bis 10 Minuten', 'Gut abtropfen lassen'],
+    trichter: ['Den Trichter in der Mitte mit Wasser füllen', 'Die Erde nur leicht anfeuchten'],
+    anstau:   ['Untersetzer 1 bis 2 cm hoch auffüllen', 'Erst nachfüllen, wenn er leer ist'],
+    wasser:   [GIESSARTEN.wasser.kurz],
+    hydro:    [GIESSARTEN.hydro.kurz],
+    spuelen:  ['Von oben gießen, bis unten klares Wasser austritt', 'Spült die Salze aus, die beim Gießen von unten nach oben steigen', 'Beim nächsten Mal wieder von unten']
+  }[weg] || [];
+  const raus = z.slice();
+  if(herz && (weg === 'unten' || weg === 'spuelen')) raus.push(weg === 'spuelen' ? 'Auf die Erde, nicht auf Blätter und Herz' : 'Nichts auf Blätter und Herz');
+  if(ml) raus.push('Nimmt ca. ' + ml + ' ml auf' + (topfBekannt(p) ? '' : ', geschätzt'));
+  return raus;
+}
+function gmWieZeigen(weg, id){
+  const p = id ? allePflanzen().find(x => x.id === id) : null;
+  const W = GM_WEGE[weg] || GM_WEGE.durch;
+  const box = document.getElementById('gm-wie-inhalt');
+  if(!box) return;
+  box.innerHTML = '<div class="gm-wie-kopf">' + gmIcon(weg, 'gross') + '<h3 id="gm-wie-titel">' + esc(W.name) + '</h3></div>'
+    + (p ? '<p class="gm-wie-pfl">' + esc(nice(p)) + '</p>' : '')
+    + '<ul class="gm-wie-liste">' + gmWieZeilen(weg, p).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>';
+  modalAuf('gm-wie');
 }
 function gmDuengOhne(p){
   if(gmDuengetag !== 'ja' || duengFaellig(p)) return null;
@@ -24001,7 +24194,7 @@ function gmZeichnen(){
       </div>
     </div>
     <p class="gm-lage ${st.stand==='over'||st.stand==='stopp'?'warn':''}">${esc(lage)}${st.letzte?` · zuletzt vor ${st.tage} ${st.tage===1?'Tag':'Tagen'}`:''}</p>
-    ${wz ? `<p class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}">${esc(wz.text)}</p>` : ''}
+    ${wz ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
     ${ohneDg ? `<p class="gm-weg-dg">Heute ohne Dünger: ${esc(ohneDg.text)}</p>` : ''}
     <button type="button" class="gm-chip" data-gm-probe="1" aria-expanded="false">${esc(p.klasse + ' · ' + gr.name)}${gr.geraten?' <i>geschätzt</i>':''}</button>
     <p class="gm-probe" hidden>${esc(giessHinweisFuer(p, true).text)}</p>
@@ -24275,37 +24468,57 @@ function gmZeichnenUebersicht(){
     if(!wege[w]){ wege[w] = []; reihe.push(w); }
     wege[w].push(p);
   });
-  const krankZuletzt = l => l.some(p => gmKrankRang(p) > 0) ? ' · kranke und Pflanzen in Quarantäne zuletzt hinein' : '';
-  const aufnahme = l => gmLiter(l.reduce((s, p) => s + gmMengeMl(p, gmWegHeute(p)), 0) / 1000);
+  /* 4.0-beta.10 (Plan G1): je Weg Icon, Name und Zahl, ohne Namen der
+     Pflanzen; nur beim Gefäß von unten der Wasserstand. */
+  /* Die ganze Zeile öffnet das Kärtchen, auch in Klartext ohne Icon. */
+  const gwZeile = (w, n, klein) => `<button type="button" class="gm-gw-zeile" data-gm-wie="${esc(w)}">${gmIcon(w)}<span class="gm-gw-t"><b>${esc((GM_WEGE[w] || GM_WEGE.durch).name)}</b>${
+    klein ? `<i>${esc(klein)}</i>` : ''}</span><span class="gm-ue-wert">${n}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>`;
   let wegHtml = reihe.map(w => {
     const l = wege[w];
-    let extra = '';
+    let klein = '';
     if(w === 'unten'){
       const ds = l.map(p => Number(p.topf || 0)).filter(Boolean);
-      const d = ds.length ? Math.min.apply(null, ds) : 12;
-      const cm = Math.max(2, Math.min(6, Math.round(d * 0.8 / 4)));
-      extra = 'Wasserstand ca. ' + cm + ' cm, nachgießen, wenn er sinkt · die Pflanzen nehmen zusammen ca. '
-        + aufnahme(l) + ' auf' + krankZuletzt(l);
-    } else if(w === 'tauchen'){
-      extra = 'Bis knapp unter den Rand · die Pflanzen nehmen zusammen ca. ' + aufnahme(l) + ' auf' + krankZuletzt(l);
+      klein = 'Wasserstand ca. ' + gmWasserstandCm(ds.length ? Math.min.apply(null, ds) : 12) + ' cm';
     }
-    return gmUeZeile('<b>' + esc((GM_WEGE[w] || GM_WEGE.durch).name) + '</b>', esc(String(l.length)),
-      (extra ? esc(extra) + '<br>' : '') + l.map(p => esc(nice(p))).join(', '));
+    return gwZeile(w, l.length, klein);
   }).join('');
-  if(nU) wegHtml += gmUeZeile('<b>Anstau</b>', esc(String(nU)),
-    'Am Ende auf einer eigenen Karte<br>' + unter.pflanzen.map(p => esc(nice(p))).join(', '));
+  if(nU) wegHtml += gwZeile('anstau', nU, '');
 
-  /* Dein Weg: Räume in Laufreihenfolge. */
-  const rr = [];
-  gmListe.forEach(x => {
+  /* Heute dran: die Pflanzen in Laufreihenfolge, je Raum eine Zeile. */
+  const pflZeile = (p, w, ml) => {
+    const f = profilFoto(p.id);
+    const name = nice(p);
+    return `<div class="gm-ue-pfl">
+      <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : `<span class="gm-ue-init" aria-hidden="true">${esc((name.trim()[0] || '?').toUpperCase())}</span>`}</span>
+      <span class="gm-ue-pfl-t"><b>${esc(name)}</b></span>
+      ${gmWieKnopf(w, p.id, ml ? ml + ' ml' : '')}
+    </div>`;
+  };
+  let heute = '', raumVor = null;
+  gmListe.forEach((x, i) => {
     if(!x || x.anzucht || x.untersetzer) return;
     const n = gmRaumName(x);
-    const l = rr[rr.length - 1];
-    if(l && l.name === n) l.n++; else rr.push({name:n, n:1});
+    if(n !== raumVor){
+      let zahl = 0;
+      for(let k = i; k < gmListe.length && gmListe[k] && !gmListe[k].anzucht && !gmListe[k].untersetzer && gmRaumName(gmListe[k]) === n; k++) zahl++;
+      heute += `<p class="gm-ue-raum">${esc(n)} · ${zahl}</p>`;
+      raumVor = n;
+    }
+    const w = gmWegHeute(x);
+    heute += pflZeile(x, w, gmMengeMl(x, w));
   });
-  if(nU) rr.push({name:'Untersetzer', n:nU});
-  if(az.length) rr.push({name:'Anzucht', n:az.length});
-  const weg = rr.map((r, i) => gmUeZeile(esc((i + 1) + '. ' + r.name), esc(String(r.n)))).join('');
+  if(nU){
+    heute += `<p class="gm-ue-raum">Untersetzer · ${nU}</p>` + unter.pflanzen.map(p => pflZeile(p, 'anstau', 0)).join('');
+  }
+  if(az.length){
+    heute += `<p class="gm-ue-raum">Anzucht · ${az.length}</p>` + az.map(e => {
+      const f = (e.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(e.ref) : null;
+      return `<div class="gm-ue-pfl">
+        <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : `<span class="gm-ue-init" aria-hidden="true">${esc((String(e.name).trim()[0] || '?').toUpperCase())}</span>`}</span>
+        <span class="gm-ue-pfl-t"><b>${esc(e.name)}</b><i>${esc(e.tat)}</i></span>
+      </div>`;
+    }).join('');
+  }
 
   /* Morgen dran: einzeln mitnehmen. */
   const morgen = gmMorgen().map(p => {
@@ -24318,13 +24531,6 @@ function gmZeichnenUebersicht(){
     </div>`;
   }).join('');
 
-  const azHtml = az.map(e => {
-    const f = (e.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(e.ref) : null;
-    return `<div class="gm-ue-pfl">
-      <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : ''}</span>
-      <span class="gm-ue-pfl-t"><b>${esc(e.name)}</b><i>${esc(e.tat)} · ${esc(typeof azFaelligText === 'function' ? azFaelligText(e) : '')}</i></span>
-    </div>`;
-  }).join('');
 
   $('#gm-inhalt').innerHTML = `
     <div class="gm-ue">
@@ -24333,9 +24539,8 @@ function gmZeichnenUebersicht(){
       ${gmUeAbschnitt('Was du brauchst', brauch)}
       ${gmUeAbschnitt('Dünger', dg)}
       ${gmUeAbschnitt('Gießwege', wegHtml)}
-      ${gmUeAbschnitt('Dein Weg', weg)}
+      ${gmUeAbschnitt('Heute dran', heute)}
       ${gmUeAbschnitt('Morgen dran', morgen)}
-      ${gmUeAbschnitt('Anzucht', azHtml)}
     </div>`;
   $('#gm-knoepfe').innerHTML = `<button class="gm-ja" data-gm="los">Los</button>`;
   gmLeiste();
@@ -24411,6 +24616,10 @@ document.addEventListener('click', e=>{
     if(t){ t.hidden = !t.hidden; c.setAttribute('aria-expanded', t.hidden ? 'false' : 'true'); }
     return;
   }
+  /* 4.0-beta.10: Icon oder Balken öffnet das Hinweiskärtchen. */
+  const wb = e.target.closest('[data-gm-wie]');
+  if(wb){ gmWieZeigen(wb.dataset.gmWie, wb.dataset.id || null); return; }
+  if(e.target.closest('#gm-wie-zu')){ modalZu('gm-wie'); return; }
   /* 4.0-beta.9: Leiste, Übersicht, Untersetzer und Abschlusskarte. */
   const rb = e.target.closest('#gm-rueck');
   if(rb){
