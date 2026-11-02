@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.13', w.__T('FASSUNG') === '4.0-beta.13', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.14', w.__T('FASSUNG') === '4.0-beta.14', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -6324,8 +6324,10 @@ setTimeout(async () => {
     pruef('„Vorbei“ räumt den Zustand weg',
       w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code") === 'gesund',
       String(w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code")));
+    /* seit 4.0-beta.14 steht ohne Topfgröße die Topffrage im selben
+       Kasten (.gm-zfrage); die Zustandsfrage erkennt man an data-gm-z. */
     pruef('Und die Frage steht nicht noch einmal da',
-      d.getElementById('gm-inhalt').innerHTML.indexOf('gm-zfrage') === -1);
+      d.getElementById('gm-inhalt').innerHTML.indexOf('data-gm-z=') === -1);
     /* „Bleibt" verschiebt den Stichtag und fragt in diesem Durchgang
        nicht weiter. */
     w.__T(`(function(){
@@ -6336,7 +6338,7 @@ setTimeout(async () => {
     await tick();
     pruef('„Bleibt“ lässt den Zustand stehen',
       w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code") === 'hunger'
-      && d.getElementById('gm-inhalt').innerHTML.indexOf('gm-zfrage') === -1);
+      && d.getElementById('gm-inhalt').innerHTML.indexOf('data-gm-z=') === -1);
     w.__T("zustandSetzen('GMT1', 'gesund'); gmZugefragt = {}; gmZeichnen();");
 
     /* Das Bild traegt die Karte — zu klein wirkte sie verloren. */
@@ -6961,8 +6963,9 @@ setTimeout(async () => {
     pruef('Die Karte nennt Liter und Milliliter',
       html.indexOf('Liter</b> anrühren') !== -1
       && html.indexOf('ml</b> Dünger hinein') !== -1);
-    pruef('Und weist auf geschaetzte Topfgroessen hin',
-      html.indexOf('ist die Topfgröße geschätzt') !== -1);
+    /* seit 4.0-beta.14 (F156): kein Hinweis „geschätzt“ mehr (html ist der Quelltext) */
+    pruef('Und nennt keine geschätzte Topfgröße mehr',
+      html.indexOf('ist die Topfgröße geschätzt') === -1);
   }
 
   /* ══════════ Scrollprotokoll ══════════
@@ -11586,7 +11589,8 @@ setTimeout(async () => {
       /* seit beta.11 (Plan G3): Wasser als eine Zeile */
       pruef('beta.9: Übersicht: Liter je Wasserart, auf 0,5 l aufgerundet', inh().indexOf('<span class="gm-ue-wert">' + literLeitung + '</span> Leitungswasser') !== -1, literLeitung);
       pruef('beta.9: Übersicht: Karnivoren stehen unter Osmose oder Regenwasser', /<span class="gm-ue-wert">[0-9,]+ l<\/span> Osmose oder Regenwasser/.test(inh()));
-      pruef('beta.9: Übersicht: fehlende Topfgrößen werden genannt', /<span class="gm-ue-geschaetzt">2 Töpfe geschätzt<\/span>/.test(inh()), (inh().match(/\d+ T[öo]pfe? geschätzt/) || [''])[0]);
+      /* seit 4.0-beta.14 (Plan Schritt 3): kein „geschätzt“ mehr in der Übersicht */
+      pruef('beta.9: Übersicht: kein „geschätzt“ bei fehlenden Topfgrößen', !/geschätzt/.test(inh()) && !/gm-ue-geschaetzt/.test(inh()), (inh().match(/[^>]{0,30}geschätzt/) || [''])[0]);
       pruef('beta.9: Übersicht: nur die Gießwege von heute', /Tauchbad/.test(inh()) && /Von unten/.test(inh()) && /In den Trichter/.test(inh()) && /<b>Anstau<\/b>/.test(inh()) && !/Hydrokultur/.test(inh()));
       /* seit beta.10 (Plan G1) nur noch der Wasserstand */
       pruef('beta.9: Übersicht: beim Gefäß der Wasserstand', /<i>Wasserstand ca\. 2 cm<\/i>/.test(inh()));
@@ -11627,7 +11631,8 @@ setTimeout(async () => {
       const ml1 = T("Math.round(wasserBedarf(allePflanzen().find(function(x){ return x.id === 'F1'; })) * 1000 / 50) * 50");
       pruef('beta.9: Karte: Menge auf 50 ml gerundet', new RegExp('class="gm-weg-t">Von unten · ca\\. ' + ml1 + ' ml<').test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F5');
-      pruef('beta.9: Karte: ohne Topfgröße „geschätzt“', /ca\. 250 ml, geschätzt</.test(h), (h.match(/class="gm-weg[^<]*/) || [''])[0]);
+      /* seit 4.0-beta.14 (F156): ohne Topfgröße keine ml */
+      pruef('beta.9: Karte: ohne Topfgröße keine Menge', /class="gm-weg-t">[^<]+</.test(h) && !/class="gm-weg-t">[^<]*ml</.test(h) && !/geschätzt/.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       pruef('beta.9: Karte: ohne Satz der Gießart (seit beta.13 auch ohne Fingerprobe)', !/class="gm-probe"/.test(h) && !/Kleine Menge, nur die Erde anfeuchten/.test(h));
       T("gmDuengetag = 'ja'");
       h = karte('F7');
@@ -11951,7 +11956,12 @@ setTimeout(async () => {
       const lk = d.querySelector('#al-bibzsf [data-aw="luecke"]');
       pruef('beta.11: Der Knopf nennt das stärkste schnelle Modell ohne Lite', !!lk && lk.textContent === 'Mit 3.6 Flash gezielt nachfragen', lk ? lk.textContent : 'kein Knopf');
 
-      /* „Weiter“ mit Lücken: erst Hinweis, dann weiter */
+      /* „Weiter“ mit Lücken: erst Hinweis, dann weiter. Seit 4.0-beta.14
+         sind Raum und Topf Pflicht; der Test setzt beide, damit nur die
+         Lücken entscheiden. */
+      const pflicht14 = () => T(`(function(){ formLageZeichnen(raumAnlegen('Prüfraum L11'), ''); var t = document.getElementById('f-topf');
+        t.value = '16'; t.dataset.gesetzt = '1'; alTopfZeichnen(); return 1; })()`);
+      pflicht14();
       T('alWeiter()');
       pruef('beta.11: Erstes „Weiter“ bleibt auf Stufe 4 mit rotem Rahmen und Hinweis', T('alStufe') === 4 && kasten.classList.contains('aw-rot')
         && d.getElementById('al-luecke').hidden === false && /Es fehlen noch Angaben/.test(d.getElementById('al-luecke').textContent)
@@ -11979,14 +11989,14 @@ setTimeout(async () => {
       w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lueckenzwei'}; w.__art = {FROST:'unbekannt'};
       start('Lücke2');
       await anlegen();
-      T('alStufeZeigen(4); alWeiter()');
+      T('alStufeZeigen(4)'); pflicht14(); T('alWeiter()');
       const st1 = T('alStufe');
       T('alWeiter()');
       pruef('beta.11: Beim zweiten „Weiter“ geht es trotz Lücke weiter', st1 === 4 && T('alStufe') === 5, st1 + ' → ' + T('alStufe'));
       w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lueckendrei'}; w.__art = {FROST:'unbekannt'};
       start('Lücke3');
       await anlegen();
-      T('alStufeZeigen(4); alWeiter()');
+      T('alStufeZeigen(4)'); pflicht14(); T('alWeiter()');
       klick('#al-luecke [data-aw="ohne"]');
       pruef('beta.11: „Ohne weiter“ geht auf die letzte Stufe', T('alStufe') === 5, String(T('alStufe')));
 
@@ -12109,8 +12119,9 @@ setTimeout(async () => {
       const iW = ue.indexOf('gm-ue-wasser'), iG = ue.indexOf('gm-gw-sammel'), iH = ue.indexOf('>Heute dran<');
       pruef('beta.11: Übersicht: Wasser, dann Gießwege, dann „Heute dran“', iW > -1 && iG > iW && iH > iG && ue.indexOf('Was du brauchst') === -1, [iW, iG, iH].join(','));
       const wz = (d.querySelector('#gm-inhalt .gm-ue-wasser') || {}).textContent || '';
-      pruef('beta.11: Wasser als eine Zeile mit Liter je Wasserart und Schätzung am Ende',
-        /^Wasser: [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser) · [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser) ?\d+ T(ö|o)pfe? geschätzt$/.test(wz.replace(/\s+/g, ' ').trim())
+      /* seit 4.0-beta.14 (Plan Schritt 3) ohne „N Töpfe geschätzt“ */
+      pruef('beta.11: Wasser als eine Zeile mit Liter je Wasserart',
+        /^Wasser: [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser) · [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser)$/.test(wz.replace(/\s+/g, ' ').trim())
         && /Leitungswasser/.test(wz) && /Osmose/.test(wz) && d.querySelectorAll('#gm-inhalt .gm-ue-wasser').length === 1, wz.replace(/\s+/g, ' ').trim());
       const gl = () => d.getElementById('gm-gw-liste');
       const gs = () => d.querySelector('#gm-inhalt [data-gm-gw]');
@@ -12605,6 +12616,181 @@ setTimeout(async () => {
         var a = ${alt13}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
         gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
         sichern(); render(); })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.14: Plan Schritt 3 — Pflichtangaben im Anlegen, Topffrage
+     auf der Gießkarte, kein „geschätzt“, Fingerprobe im Kärtchen.
+     Jeder Test legt seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'raeume'];
+    const alt14 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
+    const heute14 = T('HEUTE.getTime()');
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const vor = n => T(`iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - (${n})))`);
+    const pfl = (id, o) => Object.assign({id, name:'Probe ' + id, art:'Probeart ' + id, botanisch:'Testgattung probe' + id.toLowerCase(), sorte:'',
+      klasse:'B', intervallEigen:true, intervall:[10, 10], topf:'12', eigen:true}, o || {});
+    const setzen = (liste, water) => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.zustand = {};
+      S.feuchtRueck = {}; S.dueng = {}; S.gesehen = {}; S.anstau = {}; S.spuelen = {};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:false, saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
+      gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte'; sichern(); return 1; })()`);
+    const zuKarte = id => { klick('[data-gm="los"]'); let g = 0;
+      while(T(`gmListe[gmIndex] && gmListe[gmIndex].id`) !== id && g++ < 6) klick('[data-gm="spaeter"]'); };
+    const fehlt = k => d.getElementById('al-feld-' + k).classList.contains('al-fehlt') && d.getElementById('al-pflicht-' + k).hidden === false;
+    const frei = k => !d.getElementById('al-feld-' + k).classList.contains('al-fehlt') && d.getElementById('al-pflicht-' + k).hidden === true;
+    const auf4 = () => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+      alStart(); neuWegSetzen('hand'); alStufeZeigen(4); return alStufe; })()`);
+    const raumWaehlen = name => { T(`formLageZeichnen(raumAnlegen(${JSON.stringify(name)}), ''); 1`);
+      d.getElementById('f-raum').dispatchEvent(new w.Event('change', {bubbles:true})); };
+    try {
+      const stil = Array.from(d.querySelectorAll('style')).map(x => x.textContent).join('\n');
+      /* ── A Pflichtangaben ── */
+      setzen([]);
+      T(`S.raeume = []; sichern(); 1`);
+      auf4();
+      pruef('beta.14: Anlegen: Raumliste beginnt mit „— Raum wählen —“', d.getElementById('f-raum').options[0].textContent === '— Raum wählen —' && d.getElementById('f-raum').value === '');
+      T('alWeiter()');
+      pruef('beta.14: Anlegen: ohne Raum und Topf bleibt „Weiter“ auf Stufe 4', T('alStufe') === 4, String(T('alStufe')));
+      pruef('beta.14: Anlegen: beide Felder rot mit Zeile darunter', fehlt('raum') && fehlt('topf'),
+        d.getElementById('al-feld-raum').className + ' / ' + d.getElementById('al-feld-topf').className);
+      pruef('beta.14: Anlegen: Zeilen nennen, was fehlt', d.getElementById('al-pflicht-raum').textContent === 'Bitte einen Raum wählen.'
+        && d.getElementById('al-pflicht-topf').textContent === 'Bitte den Topfdurchmesser einstellen.');
+      raumWaehlen('Prüfraum P14');
+      pruef('beta.14: Anlegen: Raum gewählt — sein Rahmen geht, der Topf bleibt rot', frei('raum') && fehlt('topf'));
+      T('alWeiter()');
+      pruef('beta.14: Anlegen: mit Raum, ohne Topf geht es nicht weiter', T('alStufe') === 4 && fehlt('topf') && frei('raum'));
+      /* Antippen zählt: click ohne Verschieben */
+      const sl = d.getElementById('f-topf');
+      pruef('beta.14: Anlegen: Schieber steht vor dem Antippen ungesetzt', sl.dataset.gesetzt !== '1' && T('alTopfWert()') === '');
+      sl.click();
+      pruef('beta.14: Anlegen: Antippen des Schiebers setzt den Topf', sl.dataset.gesetzt === '1' && T('alTopfWert()') === '14'
+        && d.getElementById('f-topf-wert').textContent === '14 cm', String(sl.dataset.gesetzt) + ' ' + T('alTopfWert()'));
+      pruef('beta.14: Anlegen: danach ist kein Feld mehr rot', frei('raum') && frei('topf'));
+      T('alWeiter()');
+      pruef('beta.14: Anlegen: mit Raum und Topf geht es auf Stufe 5', T('alStufe') === 5, String(T('alStufe')));
+      /* Neues Anlegen räumt die Rahmen weg */
+      auf4(); T('alWeiter()');
+      pruef('beta.14: Anlegen: zweiter Versuch ohne Angaben zeigt die Rahmen wieder', fehlt('raum') && fehlt('topf'));
+      T(`alStart(); 1`);
+      pruef('beta.14: Anlegen: neues Anlegen beginnt ohne rote Rahmen', frei('raum') && frei('topf'));
+      /* Wasserglas: kein Topf nötig, Raum schon */
+      auf4();
+      T(`(function(){ var k = document.getElementById('f-kultur'); k.value = 'wasser'; k.dispatchEvent(new Event('change', {bubbles:true})); return 1; })()`);
+      T('alWeiter()');
+      pruef('beta.14: Anlegen: im Wasserglas fehlt nur der Raum', T('alStufe') === 4 && fehlt('raum') && frei('topf'));
+      raumWaehlen('Prüfraum P14');
+      T('alWeiter()');
+      pruef('beta.14: Anlegen: im Wasserglas geht es ohne Topf weiter', T('alStufe') === 5, String(T('alStufe')));
+      /* „Ohne weiter“ aus dem Lücken-Hinweis sperrt ebenso */
+      auf4();
+      const ohne = d.createElement('button'); ohne.type = 'button'; ohne.dataset.aw = 'ohne'; ohne.textContent = 'Ohne weiter';
+      d.getElementById('al-feld-raum').appendChild(ohne);
+      ohne.click();
+      pruef('beta.14: Anlegen: „Ohne weiter“ bleibt ohne Pflichtangaben auf Stufe 4', T('alStufe') === 4 && fehlt('raum') && fehlt('topf'), String(T('alStufe')));
+      raumWaehlen('Prüfraum P14'); d.getElementById('f-topf').click();
+      ohne.click();
+      pruef('beta.14: Anlegen: „Ohne weiter“ mit Pflichtangaben geht auf Stufe 5', T('alStufe') === 5, String(T('alStufe')));
+      ohne.remove();
+      const hint = d.querySelector('#al-feld-topf .fhint').textContent;
+      pruef('beta.14: Anlegen: kein Satz mehr vom Mittelwert', !/Mittelwert/.test(hint) && /antippst/.test(hint), hint);
+      pruef('beta.14: Stil: roter Rahmen und Zeile im Block „Plan Schritt 3“', /html\[data-design\] #form-neu \.al-feld\.al-fehlt\{[^}]*border:2px solid var\(--alarm\)/.test(stil)
+        && /html\[data-design\] #form-neu \.al-pflicht\{[^}]*color:var\(--alarm\)/.test(stil));
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); formularLeeren(); return 1; })()`);
+      await warte(60);
+
+      /* ── B Topffrage auf der Gießkarte ── */
+      setzen([pfl('T1', {topf:''}), pfl('T2', {topf:''}), pfl('T3', {topf:''}), pfl('T4'), pfl('T5', {topf:'', giessart:'wasser'})],
+        {T1:[vor(11)], T2:[vor(11)], T3:[vor(11)], T4:[vor(11)], T5:[vor(11)]});
+      T('gmStarten()');
+      pruef('beta.14: Übersicht: kein „geschätzt“, obwohl Töpfe fehlen', !/geschätzt/.test(inh()) && !/gm-ue-geschaetzt/.test(inh()));
+      pruef('beta.14: Übersicht: ohne Topf keine ml in der Zeile der Pflanze',
+        !/gm-wie-zusatz/.test((d.querySelector('#gm-inhalt [data-gm-wie][data-id="T1"]') || {}).outerHTML || 'x')
+        && /gm-wie-zusatz">\d+ ml</.test((d.querySelector('#gm-inhalt [data-gm-wie][data-id="T4"]') || {}).outerHTML || ''));
+      zuKarte('T1');
+      const tf = () => d.querySelector('#gm-inhalt .gm-topffrage');
+      pruef('beta.14: Gießkarte ohne Topf fragt mit Schieber, „Speichern“ und „Weiß ich nicht“',
+        T(`gmListe[gmIndex].id`) === 'T1' && !!tf() && !!tf().querySelector('input#gm-topf[type="range"]')
+        && !!tf().querySelector('[data-gm-topf="ja"]') && tf().querySelector('[data-gm-topf="ja"]').textContent === 'Speichern'
+        && !!tf().querySelector('[data-gm-topf="nein"]') && tf().querySelector('[data-gm-topf="nein"]').textContent === 'Weiß ich nicht', inh().slice(-400));
+      pruef('beta.14: Gießkarte ohne Topf zeigt keine ml und kein „geschätzt“',
+        !/class="gm-weg-t">[^<]*ml</.test(inh()) && !/geschätzt/.test(inh()), (inh().match(/class="gm-weg-t">[^<]*/) || [''])[0]);
+      const gt = d.getElementById('gm-topf');
+      gt.value = '22'; gt.dispatchEvent(new w.Event('input', {bubbles:true}));
+      pruef('beta.14: Schieber zeigt den Wert', d.getElementById('gm-topf-wert').textContent === '22 cm');
+      klick('#gm-inhalt [data-gm-topf="ja"]');
+      pruef('beta.14: „Speichern“ trägt die Topfgröße an der Pflanze ein', String(T(`S.eigene.find(function(x){ return x.id === 'T1'; }).topf`)) === '22',
+        String(T(`S.eigene.find(function(x){ return x.id === 'T1'; }).topf`)));
+      /* Sollwert selbst gerechnet: Zylinder 22 cm, Höhe 0,8 × Durchmesser, ein Fünftel, auf 50 ml */
+      const soll22 = Math.max(50, Math.round(Math.max(0.1, Math.round(Math.PI * 11 * 11 * 17.6 / 1000 * 0.2 * 100) / 100) * 1000 / 50) * 50);
+      pruef('beta.14: Danach ist die Frage weg und die Menge steht da', !tf() && T(`gmListe[gmIndex].id`) === 'T1'
+        && new RegExp('class="gm-weg-t">[^<]*ca\\. ' + soll22 + ' ml<').test(inh()), (inh().match(/class="gm-weg-t">[^<]*/) || [''])[0] + ' / ' + soll22);
+      klick('[data-gm="spaeter"]');
+      pruef('beta.14: Nächste Pflanze ohne Topf fragt ebenso', T(`gmListe[gmIndex].id`) === 'T2' && !!tf());
+      klick('#gm-inhalt [data-gm-topf="nein"]');
+      pruef('beta.14: „Weiß ich nicht“ merkt sich die Pflanze und nimmt die Frage weg',
+        !!T(`S.giess.topfOhne && S.giess.topfOhne.T2`) && !tf() && T(`gmListe[gmIndex].id`) === 'T2' && !T(`S.eigene.find(function(x){ return x.id === 'T2'; }).topf`));
+      klick('[data-gm="spaeter"]');
+      pruef('beta.14: Pflanze ohne Antwort fragt weiter', T(`gmListe[gmIndex].id`) === 'T3' && !!tf());
+      T("modalZu('giessmodus')"); await warte(60);
+      T('gmStarten()');
+      zuKarte('T2');
+      pruef('beta.14: Nach „Weiß ich nicht“ fragt der nächste Durchgang nicht mehr', T(`gmListe[gmIndex].id`) === 'T2' && !tf());
+      klick('[data-gm="spaeter"]');
+      zuKarte('T3');
+      pruef('beta.14: Ohne Antwort fragt der nächste Durchgang wieder', T(`gmListe[gmIndex].id`) === 'T3' && !!tf());
+      zuKarte('T4');
+      pruef('beta.14: Mit Topf keine Frage', T(`gmListe[gmIndex].id`) === 'T4' && !tf());
+      /* Wasserkultur hat ihren eigenen Wechselrhythmus; die Karte wird direkt gezeichnet. */
+      T(`gmListe = [allePflanzen().find(function(x){ return x.id === 'T5'; })]; gmIndex = 0; gmSnaps = {}; gmZeichnen(); 1`);
+      pruef('beta.14: Wasserkultur ohne Topf: keine Frage', T(`gmListe[gmIndex].id`) === 'T5' && /Probe T5/.test(inh()) && !tf(), T(`gmListe[gmIndex] && gmListe[gmIndex].id`));
+      T("modalZu('giessmodus')"); await warte(60);
+
+      /* ── C Kärtchen: keine ml ohne Topf, Fingerprobe ── */
+      const karte = () => d.getElementById('gm-wie-inhalt');
+      const probe = () => karte().querySelector('.gm-wie-probe');
+      T(`HEUTE = new Date(2026, 6, 15, 12); 1`);
+      setzen([pfl('K1', {gruppe:'wuestenkaktus', klasse:'C'}), pfl('K2', {topf:''}), pfl('K3', {giessart:'wasser'}), pfl('K4', {klasse:'B', topf:''})]);
+      T(`gmWieZeigen('durch', 'K1')`);
+      const sommerSatz = T(`GRUPPEN.wuestenkaktus.probe`);
+      pruef('beta.14: Kärtchen mit Pflanze: „Vorher prüfen“ unter den Schritten', !!probe() && probe().querySelector('h4').textContent === 'Vorher prüfen'
+        && probe().previousElementSibling && probe().previousElementSibling.classList.contains('gm-wie-liste'), karte().innerHTML.slice(-300));
+      pruef('beta.14: Kärtchen: im Sommer der Satz der Gießgruppe', !!probe() && probe().querySelector('p').textContent === sommerSatz, probe() ? probe().textContent : '');
+      T(`modalZu('gm-wie')`); await warte(60);
+      T(`HEUTE = new Date(2026, 0, 15, 12); 1`);
+      T(`gmWieZeigen('durch', 'K1')`);
+      const winterSatz = T(`GRUPPEN.wuestenkaktus.probeWinter`);
+      pruef('beta.14: Kärtchen: im Winter der Wintersatz', !!probe() && probe().querySelector('p').textContent === winterSatz && winterSatz !== sommerSatz, probe() ? probe().textContent : '');
+      T(`modalZu('gm-wie')`); await warte(60);
+      T(`gmWieZeigen('unten', null)`);
+      pruef('beta.14: Kärtchen ohne Pflanze: keine Fingerprobe', !probe() && !!karte().querySelector('.gm-wie-liste'));
+      T(`modalZu('gm-wie')`); await warte(60);
+      T(`gmWieZeigen('wasser', 'K3')`);
+      pruef('beta.14: Kärtchen bei Wasserkultur: keine Fingerprobe', !probe());
+      T(`modalZu('gm-wie')`); await warte(60);
+      T(`HEUTE = new Date(2026, 6, 15, 12); 1`);
+      T(`gmWieZeigen('unten', 'K2')`);
+      const k2 = karte().textContent;
+      pruef('beta.14: Kärtchen ohne Topf: keine ml, kein Wasserstand für „diesen Topf“, kein „geschätzt“',
+        !/Nimmt ca\./.test(k2) && !/bei diesem Topf/.test(k2) && !/geschätzt/.test(k2) && /ein Viertel der Topfhöhe/.test(k2), k2);
+      T(`modalZu('gm-wie')`); await warte(60);
+      T(`gmWieZeigen('unten', 'K1')`);
+      pruef('beta.14: Kärtchen mit Topf: Wasserstand und ml bleiben', /bei diesem Topf ca\. \d+ cm/.test(karte().textContent) && /Nimmt ca\. \d+ ml auf/.test(karte().textContent));
+      T(`modalZu('gm-wie')`); await warte(60);
+      pruef('beta.14: Stil: Fingerprobe im Block „Plan Schritt 3“, alte Probe- und Chip-Regeln weg',
+        /html\[data-design\] \.gm-wie-probe h4\{[^}]*text-transform:uppercase/.test(stil) && stil.indexOf('.gm-probe{') === -1 && stil.indexOf('.gm-chip{') === -1);
+      pruef('beta.14: Kein Klickhandler für die alte Probe mehr', !/data-gm-probe/.test(T('document.documentElement.innerHTML')));
+    } catch(e) {
+      pruef('beta.14: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        HEUTE = new Date(${heute14});
+        var a = ${alt14}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
+        gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
+        formularLeeren(); sichern(); render(); })()`);
     }
   }
 

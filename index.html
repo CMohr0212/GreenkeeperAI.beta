@@ -1757,10 +1757,6 @@ body.vollbild .hinweis-kopf{display:none}
 .gm-karte .gm-hinweis{margin:0 0 8px;border-left:2px solid var(--line);padding-left:10px}
 .gm-karte .gm-hinweis.warn{border-left-color:var(--terra)}
 .gm-karte .gm-hinweis:last-child{margin-bottom:0}
-.gm-chip{font-size:.8rem;padding:4px 11px;border-radius:20px;border:1px solid var(--line);
-  background:transparent;color:inherit;opacity:.75;margin:0 0 12px;cursor:pointer}
-.gm-chip i{font-style:italic;opacity:.8}
-.gm-probe{font-size:.85rem;opacity:.85;margin:-4px 0 12px;line-height:1.55}
 /* Die Frage nach dem Zustand steht dort, wo man vor der Pflanze steht.
    Auf der Startseite wird sie erst nach der vollen Frist gestellt —
    bei „Ausgehungert" sind das sechs Wochen. */
@@ -4318,8 +4314,6 @@ html[data-design="klartext"] .al-bibzsf.aw-rot{border-width:3px}
 html[data-design] .gm-ue > .ein-karte.gm-ue-k{margin-bottom:var(--a-4, 16px)}
 html[data-design] .gm-ue-wasser > p{flex-wrap:wrap}
 html[data-design] .gm-ue-wasser .gm-ue-wert{font-weight:600}
-html[data-design] .gm-ue-geschaetzt{flex:0 0 auto;font-size:var(--t-s);color:var(--schrift-2)}
-html[data-design="klartext"] .gm-ue-geschaetzt{font-size:var(--t-m);color:var(--schrift)}
 html[data-design] .gm-ue-k > .gm-gw-sammel{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);border:0;border-radius:0;
   background:none;color:var(--schrift);text-align:left;cursor:pointer;font:inherit}
 html[data-design] .gm-gw-s-t{flex:0 0 auto;font-family:var(--f-body);font-size:var(--t-m)}
@@ -4359,6 +4353,22 @@ html[data-design] .bearb > .bearb-fuss > button.haupt{flex-grow:1.7}
    durch den Streifen darunter. */
 html[data-design] .sekm-rumpf .bearb > .bearb-fuss{bottom:calc(-28px - env(safe-area-inset-bottom, 0px))}
 html[data-design] .bearb > .bearb-gefahr{margin-top:18px}
+/* ══ Plan Schritt 3 (4.0-beta.14): Pflichtangaben, Topffrage, Fingerprobe ══
+   Pflicht: roter Rahmen um das ganze Feld samt Zeile darunter. */
+html[data-design] #form-neu .al-feld.al-fehlt{margin-left:-9px;margin-right:-9px;padding:8px 9px;border-radius:var(--r-mittel);
+  border:2px solid var(--alarm);background:var(--ton-alarm)}
+html[data-design="klartext"] #form-neu .al-feld.al-fehlt{border-width:3px}
+html[data-design] #form-neu .al-pflicht{margin:6px 2px 0;font-family:var(--f-body);font-size:var(--t-m);font-weight:600;line-height:1.4;color:var(--alarm)}
+html[data-design] #form-neu .al-pflicht[hidden]{display:none}
+/* Topffrage auf der Gießkarte */
+html[data-design] .gm-topffrage .topf-schieber{margin:0 0 10px}
+html[data-design] .gm-topffrage .topf-schieber .lab{font-family:var(--f-body);font-size:var(--t-m)}
+/* Fingerprobe im Hinweiskärtchen, unter den Schritten */
+html[data-design] .gm-wie-probe{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--linie)}
+html[data-design] .gm-wie-probe h4{margin:0 0 4px;font-family:var(--f-body);font-size:var(--t-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--schrift-2)}
+html[data-design] .gm-wie-probe p{margin:0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.5}
+html[data-design="klartext"] .gm-wie-probe{border-top:2px solid var(--schrift)}
+html[data-design="klartext"] .gm-wie-probe h4{font-size:var(--t-s);color:var(--schrift)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -11941,10 +11951,11 @@ function pflanzeEntfernen(id){
       <!-- Stufe 4: Platz und Pflege -->
       <div class="al-stufe" data-al="4">
         <p class="al-frage">Wo steht sie, wie wird sie gepflegt?</p>
-        <p class="al-unter">Raum und Stellplatz kannst du auch später auf der Karte setzen. Daraus rechnet die App das Licht am Platz und warnt, wenn ein Tier drankommt.</p>
-        <div class="al-feld">
+        <p class="al-unter">Raum und Topfgröße braucht die App für Laufweg und Gießmenge. Den Stellplatz kannst du auch später auf der Karte setzen.</p>
+        <div class="al-feld" id="al-feld-raum">
           <span class="lab">Raum</span>
           <select id="f-raum"></select>
+          <p class="al-pflicht" id="al-pflicht-raum" hidden>Bitte einen Raum wählen.</p>
         </div>
         <div class="al-feld">
           <span class="lab">Stellplatz</span>
@@ -12035,7 +12046,7 @@ function pflanzeEntfernen(id){
             <select id="f-topfform" data-bild="topf" hidden></select>
             <div class="al-knoepfe" id="f-topfform-knoepfe"></div>
           </div>
-          <div class="al-feld">
+          <div class="al-feld" id="al-feld-topf">
             <span class="lab">Topfdurchmesser</span>
             <label class="topf-schieber">
               <span class="lab">Oben gemessen: <b id="f-topf-wert">nicht angegeben</b></span>
@@ -12043,7 +12054,8 @@ function pflanzeEntfernen(id){
                 aria-label="Topfdurchmesser in Zentimetern">
             </label>
             <p class="topf-ergebnis" id="f-topf-ergebnis"></p>
-            <span class="fhint">Zählt erst, wenn du den Schieber bewegst. Ohne Angabe rechnet die App mit einem Mittelwert.</span>
+            <span class="fhint">Zählt, sobald du den Schieber antippst oder bewegst.</span>
+            <p class="al-pflicht" id="al-pflicht-topf" hidden>Bitte den Topfdurchmesser einstellen.</p>
           </div>
           <div class="al-feld">
             <span class="lab">Substrat</span>
@@ -12318,7 +12330,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.13';
+const FASSUNG = '4.0-beta.14';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -18038,6 +18050,56 @@ document.addEventListener('input', e => {
   e.target.dataset.gesetzt = '1';
   alTopfZeichnen();
 });
+/* 4.0-beta.14 (Plan Schritt 3): Schon das Antippen zählt. Ein Tipp auf
+   den Wert, der schon steht, löst kein „input“ aus; ein 14-cm-Topf ging
+   vorher nur über Hin- und Zurückschieben. */
+['click', 'pointerup', 'change'].forEach(typ => document.addEventListener(typ, e => {
+  if(!e.target || e.target.id !== 'f-topf' || e.target.dataset.gesetzt === '1') return;
+  e.target.dataset.gesetzt = '1';
+  alTopfZeichnen();
+  alPflichtNachziehen();
+}));
+/* ── Pflichtangaben auf Stufe 4 (Plan Schritt 3) ────────────────
+   Raum immer, Topfdurchmesser außer im Wasserglas. Fehlt etwas, bleibt
+   „Weiter“ stehen: roter Rahmen, eine Zeile darunter, die App scrollt
+   zum ersten fehlenden Feld. */
+const AL_PFLICHT = ['raum', 'topf'];
+function alPflichtFehlt(){
+  const raus = [];
+  const r = document.getElementById('f-raum');
+  if(r && (!r.value || r.value === '__neu')) raus.push('raum');
+  const kultur = (document.getElementById('f-kultur') || {}).value;
+  if(kultur !== 'wasser' && !alTopfWert()) raus.push('topf');
+  return raus;
+}
+function alPflichtZeigen(fehlt){
+  AL_PFLICHT.forEach(k => {
+    const an = fehlt.indexOf(k) !== -1;
+    const f = document.getElementById('al-feld-' + k), z = document.getElementById('al-pflicht-' + k);
+    if(f) f.classList.toggle('al-fehlt', an);
+    if(z) z.hidden = !an;
+  });
+}
+/* Nach einer Eingabe: Rahmen nur noch dort, wo weiter etwas fehlt. */
+function alPflichtNachziehen(){
+  if(!document.querySelector('#form-neu .al-fehlt')) return;
+  alPflichtZeigen(alPflichtFehlt());
+}
+function alPflichtSperre(){
+  if(alStufe !== 4) return false;
+  const fehlt = alPflichtFehlt();
+  alPflichtZeigen(fehlt);
+  if(!fehlt.length) return false;
+  const el = document.getElementById('al-feld-' + fehlt[0]);
+  try{ if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+  return true;
+}
+document.addEventListener('change', e => {
+  if(e.target && (e.target.id === 'f-raum' || e.target.id === 'f-kultur')) alPflichtNachziehen();
+});
+document.addEventListener('input', e => {
+  if(e.target && e.target.id === 'f-topf') alPflichtNachziehen();
+});
 function alKnoepfeAlle(){
   alListenFuellen();
   ['f-zustand', 'f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
@@ -18412,6 +18474,8 @@ function alWeiter(){
     if(typeof alSpeichern === 'function') alSpeichern();
     return;
   }
+  /* 4.0-beta.14 (Plan Schritt 3): Pflichtangaben gehen allem vor */
+  if(alPflichtSperre()) return;
   /* 4.0-beta.11 (F132): erst auf die Lücken zeigen, beim zweiten Tippen weiter */
   if(typeof alLueckeSperre === 'function' && alLueckeSperre()) return;
   alStufeZeigen(alStufe + 1);
@@ -18419,6 +18483,7 @@ function alWeiter(){
 
 function alStart(){
   formularLeeren();
+  alPflichtZeigen([]);
   AL_FOTOS = [];
   alStufeZeigen(1);
   modalAuf('anleg-modal');
@@ -20210,7 +20275,7 @@ document.addEventListener('click', e => {
   if(was === 'wahl'){ awWahl(k.dataset.f, k.dataset.q); return; }
   if(was === 'pflege-auf'){ alPflegeUmschalten(); return; }
   if(was === 'luecke'){ awLueckeFragen(); return; }
-  if(was === 'ohne'){ if(AW) AW.lueckeWarn = 2; alStufeZeigen(5); return; }
+  if(was === 'ohne'){ if(alPflichtSperre()) return; if(AW) AW.lueckeWarn = 2; alStufeZeigen(5); return; }
 });
 /* Ändert sich die Art von Hand, passt das alte Artwissen nicht mehr.
    Gelernte Arten und eigene Pflanzen kommen ohne Anfrage dazu, die KI
@@ -21624,7 +21689,7 @@ function formLageZeichnen(wunschRaum, wunschPlatz){
   if(stand === formLageStand) return;
   formLageStand = stand;
 
-  rs.innerHTML = ['<option value="">— kein Raum —</option>']
+  rs.innerHTML = ['<option value="">— Raum wählen —</option>']
     .concat(raumListe().map(r=>`<option value="${r.id}"${raumId===r.id?' selected':''}>${esc(r.name)}${r.roh?' · nicht eingerichtet':''}</option>`))
     .concat(['<option value="__neu">+ Neuen Raum anlegen …</option>']).join('');
   ss.innerHTML = ['<option value="">— kein Stellplatz —</option>']
@@ -24541,13 +24606,15 @@ function gmSpuelBuchen(p, weg){
 /* Menge (C): ein Fünftel des Topfvolumens, auf 50 ml gerundet. */
 function gmMengeMl(p, weg){
   if(weg === 'anstau' || weg === 'wasser' || weg === 'hydro') return 0;
+  /* 4.0-beta.14 (F156): ohne Topfgröße keine geratene Zahl */
+  if(!topfBekannt(p)) return 0;
   const ml = Math.max(50, Math.round(wasserBedarf(p) * 1000 / 50) * 50);
   return weg === 'spuelen' ? ml * 2 : ml;
 }
 function gmMengeText(p, weg){
   const ml = gmMengeMl(p, weg);
   if(!ml) return '';
-  return 'ca. ' + ml + ' ml' + (topfBekannt(p) ? '' : ', geschätzt');
+  return 'ca. ' + ml + ' ml';
 }
 function gmAnders(weg){
   const w = giessWeise();
@@ -24628,7 +24695,7 @@ function gmWieZeilen(weg, p){
   const z = {
     durch:    ['Gießen, bis unten Wasser austritt', 'Nach 15 Minuten den Untersetzer leeren'],
     schluck:  ['Nur die Erde anfeuchten', 'Kein Wasser im Untersetzer'],
-    unten:    [p ? 'Wasser etwa ein Viertel der Topfhöhe hoch, bei diesem Topf ca. ' + gmWasserstandCm(p.topf) + ' cm'
+    unten:    [p && topfBekannt(p) ? 'Wasser etwa ein Viertel der Topfhöhe hoch, bei diesem Topf ca. ' + gmWasserstandCm(p.topf) + ' cm'
                  : 'Wasser etwa ein Viertel der Topfhöhe hoch',
                'Stehen lassen, bis die Oberfläche dunkel und feucht ist, meist 10 bis 30 Minuten',
                'Herausnehmen und abtropfen lassen'],
@@ -24641,8 +24708,21 @@ function gmWieZeilen(weg, p){
   }[weg] || [];
   const raus = z.slice();
   if(herz && (weg === 'unten' || weg === 'spuelen')) raus.push(weg === 'spuelen' ? 'Auf die Erde, nicht auf Blätter und Herz' : 'Nichts auf Blätter und Herz');
-  if(ml) raus.push('Nimmt ca. ' + ml + ' ml auf' + (topfBekannt(p) ? '' : ', geschätzt'));
+  if(ml) raus.push('Nimmt ca. ' + ml + ' ml auf');
   return raus;
+}
+/* 4.0-beta.14 (F152, F154): die Probe vor dem Gießen, unter den Schritten
+   des Kärtchens. Satz der Gießgruppe, im Winter der Wintersatz; ohne
+   Pflanze oder bei Wasser- und Hydrokultur keiner. */
+function gmWieProbe(weg, p){
+  if(!p || weg === 'wasser' || weg === 'hydro') return '';
+  const art = typeof giessartVon === 'function' ? giessartVon(p) : null;
+  if(art === 'wasser' || art === 'hydro') return '';
+  const kl = KLASSEN[p.klasse] || {};
+  const g = typeof gruppeVon === 'function' ? gruppeVon(p) : null;
+  const winter = typeof sommer === 'function' ? !sommer() : false;
+  return (winter ? ((g && g.probeWinter) || kl.probeWinter || (g && g.probe) || kl.probe)
+                 : ((g && g.probe) || kl.probe)) || '';
 }
 function gmWieZeigen(weg, id){
   const p = id ? allePflanzen().find(x => x.id === id) : null;
@@ -24651,7 +24731,8 @@ function gmWieZeigen(weg, id){
   if(!box) return;
   box.innerHTML = '<div class="gm-wie-kopf">' + gmIcon(weg, 'gross') + '<h3 id="gm-wie-titel">' + esc(W.name) + '</h3></div>'
     + (p ? '<p class="gm-wie-pfl">' + esc(nice(p)) + '</p>' : '')
-    + '<ul class="gm-wie-liste">' + gmWieZeilen(weg, p).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>';
+    + '<ul class="gm-wie-liste">' + gmWieZeilen(weg, p).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>'
+    + (gmWieProbe(weg, p) ? '<div class="gm-wie-probe"><h4>Vorher prüfen</h4><p>' + esc(gmWieProbe(weg, p)) + '</p></div>' : '');
   modalAuf('gm-wie');
 }
 function gmDuengOhne(p){
@@ -24859,6 +24940,20 @@ function gmZeichnen(){
          </div>
        </div>` : '';
 
+  /* 4.0-beta.14 (Plan Schritt 3, F155): Topfgröße nachtragen, hier
+     steht man vor dem Topf. */
+  const tFrage = gmTopfFragen(p) ? `<div class="gm-zfrage gm-topffrage">
+         <p><b>Topfgröße fehlt</b> — wie breit ist der Topf oben?</p>
+         <label class="topf-schieber">
+           <span class="lab">Oben gemessen: <b id="gm-topf-wert">14 cm</b></span>
+           <input id="gm-topf" type="range" min="5" max="80" step="1" value="14" aria-label="Topfdurchmesser in Zentimetern">
+         </label>
+         <div class="gm-zfrage-btns">
+           <button type="button" data-gm-topf="ja">Speichern</button>
+           <button type="button" data-gm-topf="nein">Weiß ich nicht</button>
+         </div>
+       </div>` : '';
+
   /* 4.0-beta.9: Gießweg, Menge und Dünger stehen sichtbar auf der
      Karte (I); der Satz zur Probe bleibt hinter dem Streifen. */
   const wz = stopp > 0 ? null : gmWegZeile(p);
@@ -24877,6 +24972,7 @@ function gmZeichnen(){
     ${wz ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
     ${ohneDg ? `<p class="gm-weg-dg">Heute ohne Dünger: ${esc(ohneDg.text)}</p>` : ''}
     ${zFrage}
+    ${tFrage}
     ${(gmDuengetag === 'ja' && duengFaellig(p))
       ? `<p class="gm-hinweis gm-dueng-vermerk">Mit Dünger — die Kanne steht bereit.</p>` : ''}
     ${kasten.map(k=>`<p class="gm-hinweis${k.warn?' warn':''}">${esc(k.text)}</p>`).join('')}
@@ -24896,6 +24992,34 @@ function gmZeichnen(){
        <button class="gm-spaeter" data-gm="spaeter">Später</button>`;
   gmLeiste();
 }
+
+/* Topffrage (F155): Pflanzen außer Wasserkultur ohne Topfgröße, bis
+   „Speichern“ oder „Weiß ich nicht“. Das Nein steht in S.giess.topfOhne. */
+function gmTopfFragen(p){
+  if(!p || topfBekannt(p)) return false;
+  if(typeof giessartVon === 'function' && giessartVon(p) === 'wasser') return false;
+  const o = giessEinst().topfOhne;
+  return !(o && o[p.id]);
+}
+function gmTopfAntwort(ja){
+  const p = gmListe[gmIndex]; if(!p) return;
+  if(ja){
+    const sl = document.getElementById('gm-topf');
+    const n = Math.max(5, Math.min(80, parseInt(sl ? sl.value : '', 10) || 14));
+    aenderungSetzen(p.id, {topf:String(n)});
+    p.topf = String(n);
+  } else {
+    const g = giessEinst();
+    g.topfOhne = Object.assign({}, g.topfOhne, {[p.id]: iso(HEUTE)});
+    sichern();
+  }
+  gmZeichnen();
+}
+document.addEventListener('input', e => {
+  if(!e.target || e.target.id !== 'gm-topf') return;
+  const w = document.getElementById('gm-topf-wert');
+  if(w) w.textContent = e.target.value + ' cm';
+});
 
 /* Zähler und, wo ein neuer Raum beginnt, „Wohnzimmer · 4 Pflanzen“. */
 function gmKopf(p){
@@ -25095,7 +25219,6 @@ function gmZeichnenDueng(perNotbremse){
   const kand = gmDuengKandidaten(gmListe);
   const e = duengEinst();
   const liter = duengKanneLiter(kand);
-  const geschaetzt = kand.filter(p => !topfBekannt(p)).length;
   const nPfl = gmPflanzenVonListe(gmListe).length;
   const gesperrt = gmPflanzenVonListe(gmListe).filter(p => {
     const g = duengGrenze(p);
@@ -25108,7 +25231,6 @@ function gmZeichnenDueng(perNotbremse){
       <p class="gm-dosis"><b>${String(liter).replace('.', ',')} Liter</b> anrühren · <b>${String(duengMengeFuer(kand)).replace('.', ',')} ml</b> Dünger hinein</p>
       <p class="gm-art">Voraussichtlich ${kand.length} von ${nPfl} ${nPfl===1?'Pflanze':'Pflanzen'} — wer heute nicht gegossen wird, bekommt auch keinen Dünger.</p>
       <p class="gm-namen">${kand.map(p=>esc(nice(p))).join(' · ')}</p>
-      ${geschaetzt ? `<p class="gm-hinweis">Bei ${geschaetzt} von ${kand.length} ist die Topfgröße geschätzt — trag sie an der Pflanze nach, dann stimmt die Menge. An der Stärke ändert das nichts.</p>` : ''}
       ${perNotbremse ? `<p class="gm-hinweis">Heute ist eigentlich kein Düngetag. Eine Pflanze wartet aber deutlich zu lange, deshalb doch.</p>` : ''}
       ${gesperrt.length ? `<p class="gm-hinweis">${gesperrt.map(p=>esc(nice(p))).join(', ')} ${gesperrt.length===1?'bekommt':'bekommen'} nie Dünger — Karnivoren holen sich ihre Nährstoffe aus Insekten.</p>` : ''}
     </div>`;
@@ -25148,7 +25270,6 @@ function gmZeichnenUebersicht(){
   const artName = (WASSER_ART[artKey] || WASSER_ART.leitung).name;
   const weich = artKey === 'regen' || artKey === 'osmose';
   const wz = [];
-  let ohneTopf = 0;
   pfl.forEach(p => {
     const g = gruppeVon(p);
     const karn = g.id === 'moorbeet' || g.id === 'nepenthes';
@@ -25158,12 +25279,10 @@ function gmZeichnenUebersicht(){
     const weg = gmWegHeute(p);
     z.l += (weg === 'spuelen' ? 2 : 1) * wasserBedarf(p);
     z.n++;
-    if(gmMengeMl(p, weg) && !topfBekannt(p)) ohneTopf++;
   });
   /* 4.0-beta.11 (F134): Wasser als eine Zeile, Schätzungen am Ende */
   const brauch = wz.length ? `<div class="gm-ue-zeile gm-ue-wasser"><p><span><b>Wasser:</b> ${wz.map(z =>
-      `<span class="gm-ue-wert">${esc(gmLiter(z.l))}</span> ${esc(z.name)}`).join(' · ')}</span>${
-      ohneTopf ? `<span class="gm-ue-geschaetzt">${ohneTopf} ${ohneTopf === 1 ? 'Topf' : 'Töpfe'} geschätzt</span>` : ''}</p></div>` : '';
+      `<span class="gm-ue-wert">${esc(gmLiter(z.l))}</span> ${esc(z.name)}`).join(' · ')}</span></p></div>` : '';
 
   /* Dünger: die Frage nach dem Düngetag als Zeile statt als Fenster. */
   let dg = '';
@@ -25358,12 +25477,8 @@ document.addEventListener('click', e=>{
     gmZeichnen();
     return;
   }
-  const c = e.target.closest('[data-gm-probe]');
-  if(c){
-    const t = c.parentElement && c.parentElement.querySelector('.gm-probe');
-    if(t){ t.hidden = !t.hidden; c.setAttribute('aria-expanded', t.hidden ? 'false' : 'true'); }
-    return;
-  }
+  const tb = e.target.closest('[data-gm-topf]');
+  if(tb){ gmTopfAntwort(tb.dataset.gmTopf === 'ja'); return; }
   /* 4.0-beta.10: Icon oder Balken öffnet das Hinweiskärtchen. */
   const wb = e.target.closest('[data-gm-wie]');
   if(wb){ gmWieZeigen(wb.dataset.gmWie, wb.dataset.id || null); return; }
