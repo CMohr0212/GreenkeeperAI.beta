@@ -4325,6 +4325,14 @@ html[data-design="klartext"] .gm-gw-s-t{flex:1 1 auto}
 html[data-design] .gm-gw-liste[hidden]{display:none}
 html[data-design] .gm-gw-liste{border-top:1px solid var(--linie)}
 html[data-design="klartext"] .gm-gw-liste{border-top:2px solid var(--schrift)}
+/* ══ Plan Schritt 2 (4.0-beta.12): Gießtage, Dünger bei jedem Gießen ══ */
+html[data-design] .gt-vorschlag{margin:0 0 10px}
+html[data-design] .gt-vorschlag p, html[data-design] .al-gt p{margin:0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.45}
+html[data-design] .gt-vorschlag .gm-zfrage-btns[hidden], html[data-design] .gt-vorschlag button[hidden]{display:none}
+html[data-design] .gt-tage{margin:0 0 6px}
+html[data-design] .al-gt{margin:12px 0 0}
+html[data-design] .al-gt .gm-zfrage-btns{margin-top:10px}
+html[data-design] .gm-gt-k .gm-ue-knopf{margin-top:8px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -11139,6 +11147,13 @@ function pflanzeEntfernen(id){
       </div>
       <p class="fhint" id="dgart-text"></p>
 
+      <p class="ein-abschnitt">Wann du düngst</p>
+      <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Wann du düngst" id="dgwann-wahl">
+        <button data-dgwann="tag"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>An einem Düngetag</b><i>Die App sammelt, bis sich eine Kanne lohnt</i></span></button>
+        <button data-dgwann="jedes"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Bei jedem Gießen</b><i>Wer gegossen wird, bekommt Dünger</i></span></button>
+      </div>
+      <p class="fhint" id="dgwann-text"></p>
+
       <p class="ein-abschnitt">Deine Kanne</p>
       <div class="ein-karte">
       <label class="fspan zeile"><span class="lab">Kannengröße in Litern</span>
@@ -11147,9 +11162,9 @@ function pflanzeEntfernen(id){
         <input type="number" id="ein-dosis" min="0.5" max="50" step="0.5" inputmode="decimal"></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="ck-vollstaerke"> <span class="lab" style="display:inline">Volle Dosis statt halber</span></label>
-      <label class="fspan zeile"><span class="lab">Düngetag ab wie vielen Pflanzen</span>
+      <label class="fspan zeile" id="ein-schwelle-zeile"><span class="lab">Düngetag ab wie vielen Pflanzen</span>
         <input type="number" id="ein-schwelle" min="1" max="99" step="1" inputmode="numeric"></label>
-      <label class="fspan zeile"><span class="lab">Bevorzugter Tag</span>
+      <label class="fspan zeile" id="ein-dgtag-zeile"><span class="lab">Bevorzugter Tag</span>
         <select id="ein-dgtag">
           <option value="">Kein fester Tag</option>
           <option value="1">Montag</option>
@@ -11161,6 +11176,7 @@ function pflanzeEntfernen(id){
           <option value="0">Sonntag</option>
         </select></label>
       </div>
+      <p class="fhint" id="dgwann-dosis" hidden>Nimm die Dosis, die auf der Flasche für jedes Gießen oder für wöchentlich steht.</p>
       <p class="fhint" id="kanne-text"></p>
       <button type="button" class="knopf-leise" id="schwelle-zurueck">Vorschlag wieder verwenden</button>
 
@@ -11184,6 +11200,23 @@ function pflanzeEntfernen(id){
     <div class="wz-in" id="mh-in-rhythmus" hidden>
       <p class="wz-hilfe" hidden>Im Winter verdunstet eine Pflanze deutlich weniger. Wer dann weitergießt wie im Juli, ersäuft sie — der häufigste Fehler überhaupt. Die App rechnet die Abstände von selbst größer, sobald die kalte Hälfte des Jahres beginnt. Abschalten kannst du das, wenn du in einem Wintergarten oder unter Lampen hältst, wo sich über das Jahr wenig ändert.</p>
 
+      <p class="ein-abschnitt">Wann du gießt</p>
+      <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Wann du gießt" id="gtmodus-wahl">
+        <button data-gtmodus="faellig"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wenn eine Pflanze dran ist</b><i>Jede Pflanze nach ihrem eigenen Abstand</i></span></button>
+        <button data-gtmodus="fest"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>An festen Tagen</b><i>Die App legt jede Pflanze auf deine Gießtage</i></span></button>
+      </div>
+      <div id="gt-fest" hidden>
+        <div class="ein-karte gt-vorschlag" id="gt-vorschlag">
+          <p id="gt-vorschlag-text"></p>
+          <div class="gm-zfrage-btns"><button type="button" id="gt-uebernehmen">Übernehmen</button></div>
+        </div>
+        <div class="ein-wahl segment gt-tage" role="group" aria-label="Gießtage, 1 bis 3" id="gt-tage">
+          <button data-gt="1" aria-label="Montag">Mo</button><button data-gt="2" aria-label="Dienstag">Di</button><button data-gt="3" aria-label="Mittwoch">Mi</button><button data-gt="4" aria-label="Donnerstag">Do</button><button data-gt="5" aria-label="Freitag">Fr</button><button data-gt="6" aria-label="Samstag">Sa</button><button data-gt="0" aria-label="Sonntag">So</button>
+        </div>
+        <p class="fhint" id="gt-text"></p>
+      </div>
+
+      <p class="ein-abschnitt">Winter</p>
       <div class="ein-karte">
       <label class="fspan check">
         <input type="checkbox" role="switch" id="ck-saison"> <span class="lab" style="display:inline">Im Winter größere Abstände ansetzen</span></label>
@@ -12004,6 +12037,7 @@ function pflanzeEntfernen(id){
         <p class="al-frage" style="font-size:var(--t-l);margin-top:22px">Das wird angelegt</p>
         <div class="al-zsf" id="al-zsf"></div>
         <p class="fhint al-lern" id="al-lern" hidden></p>
+        <div class="ein-karte al-gt" id="al-gt" hidden></div>
         <div class="tools"><button id="btn-neu-leeren" type="button">Formular leeren</button></div>
       </div>
 
@@ -12238,7 +12272,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.11';
+const FASSUNG = '4.0-beta.12';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13603,6 +13637,16 @@ function duengImGiesswasser(){
   const art = (typeof giessEinst === 'function') ? giessEinst().dgArt : 'fluessig';
   return art === 'fluessig' || art === 'selbst';
 }
+/* 4.0-beta.12 (Plan Schritt 2 A): Dünger bei jedem Gießen. Gilt nur, wo
+   der Dünger im Gießwasser läuft; bei Stäbchen und Langzeit bleibt der
+   Düngetag. Die Abstandsgrenzen (jedes n-te Gießen, frühestens nach x
+   Tagen, Höchstzahl je Saison) fallen weg — außer der Höchstzahl bei
+   den vier trockenen Gruppen, die Salz am schnellsten ansammeln (F141). */
+function duengJedes(){
+  const g = (typeof giessEinst === 'function') ? giessEinst() : {};
+  return g.dgWann === 'jedes' && duengImGiesswasser();
+}
+const DUENG_SAISON_BLEIBT = ['wuestenkaktus', 'blattsukkulent', 'sommerruhe', 'knollenspeicher'];
 
 /* ══════════════════ Duengen ══════════════════
    Die Reihenfolge ist der eigentliche Schutz: Sperre, dann Grenze,
@@ -13673,15 +13717,16 @@ function duengGrenze(p){
   const d = duengGruppe(p);
   if(d.nie) return {code:'karnivore',
     text:'Karnivoren werden nicht gedüngt — Mineraldünger im Substrat tötet sie. Sie holen sich ihre Nährstoffe aus Insekten.'};
+  const jedes = duengJedes();
   const letzte = duengLog(p.id)[0];
-  if(letzte){
+  if(letzte && !jedes){
     const t = tageSeit(letzte);
     if(t != null && t < d.fruehestens)
       return {code:'zufrueh', text:'Zuletzt vor ' + t + ' ' + (t === 1 ? 'Tag' : 'Tagen')
         + ' gedüngt. Frühestens alle ' + d.fruehestens + ' Tage.'};
   }
   const zahl = duengSaisonZahl(p.id);
-  if(zahl >= d.proSaison)
+  if(zahl >= d.proSaison && (!jedes || DUENG_SAISON_BLEIBT.indexOf((typeof gruppeVon === 'function' ? gruppeVon(p) : {}).id) !== -1))
     return {code:'saison', text:'In dieser Saison schon ' + zahl + '× gedüngt — mehr verträgt sie nicht.'};
   if(d.nurImTrieb){
     const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
@@ -13699,6 +13744,8 @@ function duengGrenze(p){
 function duengFaellig(p){
   if(typeof duengSperre === 'function' && duengSperre(p)) return null;
   if(duengGrenze(p)) return null;
+  /* 4.0-beta.12: Bei jedem Gießen zählt kein Zähler. */
+  if(duengJedes()) return {ueber:0, dringend:false, jedes:true};
   const d = duengGruppe(p);
   const n = giessSeitDuenger(p.id);
   if(n < d.jedes) return null;
@@ -13723,13 +13770,115 @@ function feuchtRest(id){
   if(!p) return 0;
   const vergangen = tageSeit(e.zuletzt);
   if(vergangen == null) return 0;
-  return Math.max(0, feuchtFrist(p) - vergangen);
+  let frist = feuchtFrist(p);
+  /* 4.0-beta.12: An einem Gießtag gemeldet gilt die Meldung bis zum
+     nächsten Gießtag, wenn er innerhalb der Toleranz liegt. */
+  if(giesstageAktiv() && gtIstGiesstag(e.zuletzt)){
+    const bis = gtBisNaechster(e.zuletzt);
+    if(bis != null && bis <= gtToleranz(intervallVon(p))) frist = bis;
+  }
+  return Math.max(0, frist - vergangen);
 }
 
 function feuchtHeuteGemeldet(id){
   return feuchtRest(id) > 0;
 }
 
+/* ══ 4.0-beta.12 (Plan Schritt 2 B): feste Gießtage ═══════════════
+   Wochentage wie Date.getDay(): 0 Sonntag … 6 Samstag. Der Termin einer
+   Pflanze bleibt letztes Gießen plus Abstand. An festen Tagen liegt er
+   auf dem nächstgelegenen Gießtag nach dem letzten Gießen (Gleichstand:
+   der spätere, Gießklasse A: der frühere), verschoben höchstens um ein
+   Drittel des Abstands, mindestens 1 Tag (F142). Läge der Gießtag
+   weiter weg, gilt der eigene Termin und die Pflanze kommt zwischendurch
+   (zw). Gerechnet wird in Kalendertagen (T20). */
+const GT_NAME = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const GT_KURZ = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+function giesstage(){
+  if(typeof giessEinst !== 'function' || typeof S === 'undefined' || !S) return [];
+  const g = giessEinst();
+  if(g.tageModus !== 'fest' || !Array.isArray(g.giesstage)) return [];
+  return g.giesstage.filter(t => t >= 0 && t <= 6);
+}
+function giesstageAktiv(){ return giesstage().length > 0; }
+function gtToleranz(iv){ return Math.max(1, Math.floor((Number(iv) || 0) / 3)); }
+function gtDatum(isoTag, plus){
+  const d = new Date(String(isoTag).slice(0, 10) + 'T12:00:00');
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + (plus || 0), 12);
+}
+/* Tage ab dem letzten Gießen bis zum Termin; null ohne Gießtage. */
+function gtTermin(letzte, iv, klasse){
+  const tage = giesstage();
+  if(!tage.length || !letzte || !(iv > 0)) return null;
+  let best = null;
+  for(let k = 1; k <= iv + 7; k++){
+    if(tage.indexOf(gtDatum(letzte, k).getDay()) === -1) continue;
+    const ab = k - iv;
+    if(!best || Math.abs(ab) < Math.abs(best.ab)
+       || (Math.abs(ab) === Math.abs(best.ab) && (klasse === 'A' ? ab < best.ab : ab > best.ab))) best = {k, ab};
+  }
+  if(!best) return null;
+  if(Math.abs(best.ab) > gtToleranz(iv)) return {k:iv, ab:0, zw:true};
+  return {k:best.k, ab:best.ab, zw:false};
+}
+/* Tage bis zum nächsten Gießtag nach einem Tag (1 bis 7), sonst null. */
+function gtBisNaechster(isoTag){
+  const tage = giesstage();
+  for(let k = 1; k <= 7; k++) if(tage.indexOf(gtDatum(isoTag, k).getDay()) !== -1) return k;
+  return null;
+}
+function gtIstGiesstag(isoTag){ return giesstage().indexOf(gtDatum(isoTag, 0).getDay()) !== -1; }
+function gtNaechsterName(){
+  const k = gtBisNaechster(iso(HEUTE));
+  return k == null ? '' : GT_NAME[gtDatum(iso(HEUTE), k).getDay()];
+}
+/* Wie viele Gießtage zur Sammlung passen: Maßstab ist der kürzeste
+   Abstand zur Jahreszeit ohne Anstau. Ab 7 Tagen 1, 4 bis 6 Tage 2,
+   bis 3 Tage 3. extra nimmt eine Pflanze hinzu, die noch nicht
+   angelegt ist. */
+function gtVorschlag(extra){
+  const alle = (typeof allePflanzen === 'function' ? allePflanzen() : []).concat(extra ? [extra] : []);
+  const ivs = [];
+  alle.forEach(p => {
+    try{
+      if(typeof anstauLage === 'function' && anstauLage(p)) return;
+      const iv = intervallVon(p);
+      if(iv > 0) ivs.push({p, iv});
+    }catch(e){}
+  });
+  ivs.sort((a, b) => a.iv - b.iv);
+  const min = ivs.length ? ivs[0].iv : 7;
+  const n = min >= 7 ? 1 : (min >= 4 ? 2 : 3);
+  const tage = n === 1 ? [0] : (n === 2 ? [3, 0] : [1, 3, 5]);
+  const grenze = n === 3 ? 3 : 6;
+  const grund = n > 1 ? ivs.filter(x => x.iv <= grenze).slice(0, 2).map(x => x.p) : [];
+  return {n, tage, grund};
+}
+function gtTageText(tage){
+  const t = tage.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(x => GT_NAME[x]);
+  return t.length < 2 ? (t[0] || '') : t.slice(0, -1).join(', ') + ' und ' + t[t.length - 1];
+}
+function gtVorschlagText(v, jetzt){
+  const namen = v.grund.map(p => (p.name || p.art || '').trim() ? nice(p) : '').filter(Boolean);
+  return 'Für deine Sammlung ' + (v.n === 1 ? 'passt ' : 'passen ') + (jetzt ? 'jetzt ' : '')
+    + v.n + ' ' + (v.n === 1 ? 'Gießtag' : 'Gießtage') + ': ' + gtTageText(v.tage)
+    + (namen.length ? ' — wegen ' + namen.join(' und ') : '');
+}
+/* Ob die Übersicht eine andere Zahl Gießtage vorschlägt. Einmal je
+   neuer Zahl; die App stellt nie selbst um. */
+function gtZahlHinweis(){
+  if(!giesstageAktiv()) return null;
+  const v = gtVorschlag();
+  if(v.n === giesstage().length || giessEinst().gtHinweisN === v.n) return null;
+  return v;
+}
+function gtTageSetzen(tage, n){
+  const g = giessEinst();
+  g.giesstage = tage.slice();
+  if(n != null) g.gtHinweisN = n;
+  g.gtZwGezeigt = {};
+  sichern();
+}
 function giessStatus(p){
   const log = giessLog(p.id);
   const iv = intervallVon(p);
@@ -13737,11 +13886,13 @@ function giessStatus(p){
   if(typeof stoppRest === 'function' && stoppRest(p) > 0) return {stand:'stopp', iv, feuchtHeute, tage:log.length?tageSeit(log[0]):null, rest:null, letzte:log[0]};
   if(!log.length) return {stand:'unbekannt', iv, feuchtHeute, tage:null, rest:null};
   const t = tageSeit(log[0]);
-  const rest = iv - t;
+  /* 4.0-beta.12: an festen Gießtagen der Termin auf dem Gießtag */
+  const gt = gtTermin(log[0], iv, p.klasse);
+  const rest = (gt ? gt.k : iv) - t;
   /* Eine Stufe früher warnen: „bald fällig" greift schon zwei Tage
      vorher statt erst am Vortag. Lieber einen Tag zu früh nachsehen
      als einen zu spät. */
-  return {stand: rest<0 ? 'over' : (rest<=2 ? 'soon' : 'ok'), iv, feuchtHeute, tage:t, rest, letzte:log[0]};
+  return {stand: rest<0 ? 'over' : (rest<=2 ? 'soon' : 'ok'), iv, feuchtHeute, tage:t, rest, letzte:log[0], gt};
 }
 /* Ein zweites Antippen nahm den Eintrag früher stillschweigend zurück —
    ein Fehlgriff löschte den Gießvermerk, ohne dass man es merkte.
@@ -14604,6 +14755,9 @@ function kartenKopfHTML(p){
     : st.stand === 'unbekannt' ? 'Noch nichts eingetragen'
     : st.rest < 0 ? `Gießen: ${-st.rest} ${-st.rest===1?'Tag':'Tage'} überfällig`
     : st.rest === 0 ? 'Gießen: heute fällig'
+    /* 4.0-beta.12: an festen Tagen der Gießtag als nächster Termin */
+    : (st.gt && !st.gt.zw) ? (st.rest === 1 ? `Gießen: morgen, ${GT_NAME[gtDatum(iso(HEUTE), 1).getDay()]}`
+        : `Gießen: ${GT_NAME[gtDatum(iso(HEUTE), st.rest).getDay()]}, in ${st.rest} Tagen`)
     : `Gießen: wieder in ${st.rest} ${st.rest===1?'Tag':'Tagen'}`;
 
   /* Nach dem Anlegen steht die Bestimmung, die Bewertung fehlt. Statt
@@ -16762,14 +16916,16 @@ document.addEventListener('click', e=>{
     /* Ein zweites Antippen nimmt die Wahl zurück — dann entscheidet
        wieder das neueste Foto, das nicht aus dem Doktor stammt. */
     if(S.profil[id] === k) delete S.profil[id]; else S.profil[id] = k;
-    fotoMenuOffen = null;
+    /* 4.0-beta.12 (F144): Das schwebende Menü hängt am Dokument und
+       überlebt render(); deshalb ganz schließen, nicht nur vergessen. */
+    fotoMenuSchliessen();
     sichern(); render(); return;
   }
 
   if(a==='fotoweg'){
     e.stopPropagation();
     fotoLoeschZiel = {id: btn.dataset.p, k: btn.dataset.k};
-    fotoMenuOffen = null;
+    fotoMenuSchliessen();
     modalAuf('foto-modal', btn);
     return;
   }
@@ -18146,7 +18302,7 @@ function alStufeZeigen(nr){
   if(alStufe === 2) alStufe2Zeichnen();
   if(alStufe === 3){ alKnoepfeAlle(); }
   if(alStufe === 4){ alKnoepfeAlle(); alKulturSetzen(); alTopfZeichnen(); alBibZsfZeichnen(); }
-  if(alStufe === 5){ alFotosZeichnen(); alZsfZeichnen(); if(typeof alLernZeileZeichnen === 'function') alLernZeileZeichnen(); }
+  if(alStufe === 5){ alFotosZeichnen(); alZsfZeichnen(); if(typeof alLernZeileZeichnen === 'function') alLernZeileZeichnen(); if(typeof alGtZeichnen === 'function') alGtZeichnen(); }
   const rumpf = document.querySelector('#anleg-modal .sekm-rumpf');
   if(rumpf) rumpf.scrollTop = 0;
 }
@@ -19398,6 +19554,14 @@ document.addEventListener('change', e => {
    lebt weiter, aber unten im Kopierweg, wo sie hingehört. */
 function kiDirektAn(){ return kiBereit(); }
 
+/* 4.0-beta.12 (F138): Ein Wert, der nur sagt, dass es nichts gibt, kommt
+   nicht in die Notiz. Gibt den bereinigten Text zurück oder ''. */
+function notizWert(v){
+  const t = String(v == null ? '' : v).trim().replace(/[.\s]+$/, '');
+  if(!t || /^[-–—?\s]*$/.test(t)) return '';
+  if(/^(keine?[rs]?|nein|unbekannt|nicht bekannt|ohne|n\/?a|k\.?\s?a)(\s|$|[,.;:])/i.test(t)) return '';
+  return t;
+}
 function kiModellZeichnen(){
   const liste = kiModelle();
   const aktiv = kiModellAktiv();
@@ -19407,7 +19571,7 @@ function kiModellZeichnen(){
           + (aktiv && m.id === aktiv.id ? ' selected' : '') + '>'
           + esc(m.anzeige) + (m.langsam ? ' (langsam)' : '')
           /* 4.0-beta.11 (F132): Lite lässt öfter Angaben weg */
-          + (/lite/i.test(m.id || '') && sel.closest('.feld-knopf') ? ' · schnell, aber lückenhafter' : '')
+          + (/lite/i.test(m.id || '') && sel.closest('.feld-knopf, #ki-direkt-anlegen') ? ' · schnell, aber lückenhafter' : '')
           + (m.empfohlen ? ' \u2713' : '') + '</option>').join('')
       : '<option value="">'
         + (kiBereit() ? 'Modellliste noch nicht geholt' : 'Erst Schlüssel eintragen') + '</option>';
@@ -19893,7 +20057,7 @@ function awAnwenden(o){
     vermehrung: w.vermehrung || (letzteKiAntwort && letzteKiAntwort.vermehrung) || '',
     speicher: w.speicher || (letzteKiAntwort && letzteKiAntwort.speicher) || ''
   });
-  if(o.frostNotiz && an('frost') && w.frost && !/^winterhart$/.test(norm(w.frost))){
+  if(o.frostNotiz && an('frost') && notizWert(w.frost) && !/^winterhart$/.test(norm(w.frost))){
     const nz = document.getElementById('f-notiz');
     const zeile = 'Frostgrenze laut Bestimmung: ' + w.frost;
     if(nz && nz.value.indexOf(zeile) === -1) nz.value = (nz.value.trim() ? nz.value.trim() + '\n\n' : '') + zeile;
@@ -20244,6 +20408,33 @@ function alLernZeileZeichnen(){
     + teile.join(' · ') + (extra.length ? '; dazu ' + extra.join(', ') : '') + '.';
   el.hidden = false;
 }
+
+/* 4.0-beta.12 (Plan Schritt 2 B): Ist die neue Pflanze der Grund für eine
+   andere Zahl Gießtage, steht das auf der letzten Stufe. */
+function alGtVorschlag(){
+  if(typeof giesstageAktiv !== 'function' || !giesstageAktiv()) return null;
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  const neu = {id:'__al-neu', name:v('f-name'), art:v('f-art'), botanisch:v('f-bot'), sorte:v('f-sorte'),
+    klasse:v('f-klasse') || 'B', giessart:v('f-giessart'), topf:Number(v('f-topf')) || 0};
+  const mit = gtVorschlag(neu), ohne = gtVorschlag();
+  if(mit.n === ohne.n || mit.n === giesstage().length) return null;
+  return mit;
+}
+function alGtZeichnen(){
+  const el = document.getElementById('al-gt');
+  if(!el) return;
+  const m = alGtVorschlag();
+  el.hidden = !m;
+  el.innerHTML = m ? '<p>' + esc(gtVorschlagText(m, true)) + '</p><div class="gm-zfrage-btns"><button type="button" data-al-gt="nimm">Übernehmen</button></div>' : '';
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('[data-al-gt]')) return;
+  const m = alGtVorschlag();
+  if(m) gtTageSetzen(m.tage, m.n);
+  const el = document.getElementById('al-gt');
+  if(el){ el.innerHTML = '<p>Gießtage übernommen: ' + esc(gtTageText(giesstage())) + '.</p>'; el.hidden = false; }
+  if(typeof giessCenterZeichnen === 'function') giessCenterZeichnen();
+});
 
 /* Karte → Bearbeiten → Speichern: Artwissen der Art mitändern? (F133) */
 const AW_KARTE_FELDER = [['klasse','Gießklasse'], ['sonne','Licht'], ['giessart','Gießart'], ['typ','Typ'],
@@ -21195,8 +21386,9 @@ $('#btn-paste-los').onclick = ()=>{
   /* Pflegetexte (3.25.0) kommen mit „Anlegen“ auf die Karte. */
   if(pflegeLesen(d.pflege) || winterLesen(d.winterruhe))
     uebernommen.push('Pflegeschritte und Winterruhe gemerkt — sie kommen mit „Anlegen“ auf die Karte');
-  if(d.frost && !/^winterhart$/.test(norm(d.frost))) notiz.push('Frostgrenze laut Bestimmung: ' + d.frost);
-  if(d.verw) notiz.push('Könnte verwechselt sein mit: ' + d.verw);
+  /* 4.0-beta.12 (F138): „keine“, „unbekannt“ und „nein“ sind keine Notiz. */
+  if(notizWert(d.frost) && !/^winterhart$/.test(norm(d.frost))) notiz.push('Frostgrenze laut Bestimmung: ' + notizWert(d.frost));
+  if(notizWert(d.verw)) notiz.push('Könnte verwechselt sein mit: ' + notizWert(d.verw));
   if(notiz.length){
     const alt = $('#f-notiz').value.trim();
     $('#f-notiz').value = (alt ? alt + '\n\n' : '') + notiz.join('\n');
@@ -24053,13 +24245,51 @@ function gmStarten(){
      keine Pflanzen und laufen durch einen eigenen Zweig. */
   gmMit = {};
   gmListeBauen();
-  if(!gmListe.length){ alert('Gerade ist nichts fällig. Schön.'); return; }
+  if(!gmListe.length){
+    const gtn = (typeof gtNaechsterName === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
+    alert('Gerade ist nichts fällig. Schön.' + (gtn ? ' Nächster Gießtag: ' + gtn + '.' : ''));
+    return;
+  }
+  gmZwHinweisMerken();
   gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = []; gmZugefragt = {};
   gmVerlauf = []; gmSnaps = {}; gmNeuMelden = null; gmDgWahl = null; gmDgAuto = null;
   gmDuengEntscheiden();
   gmPhase = 'uebersicht';
   modalAuf('giessmodus');
 }
+/* 4.0-beta.12 (Plan Schritt 2 B): Wer öfter Wasser braucht, als die
+   Gießtage hergeben, steht einmal je Pflanze in der Übersicht. Gemerkt
+   wird beim Start, damit ein Neuzeichnen den Hinweis nicht verschluckt. */
+let gmZwHinweis = [];
+function gmZwHinweisMerken(){
+  gmZwHinweis = [];
+  if(!giesstageAktiv()) return;
+  const g = giessEinst();
+  const gez = g.gtZwGezeigt = g.gtZwGezeigt || {};
+  gmPflanzenVonListe(gmListe).forEach(p => {
+    const st = giessStatus(p);
+    if(st.gt && st.gt.zw && !gez[p.id]){ gmZwHinweis.push(p); gez[p.id] = iso(HEUTE); }
+  });
+  if(gmZwHinweis.length) sichern();
+}
+function gmGtHinweisHTML(){
+  const z = [];
+  const v = gtZahlHinweis();
+  if(v) z.push(gmUeZeile(esc(gtVorschlagText(v, true)), null, null)
+    + `<div class="gm-zfrage-btns gm-ue-knopf"><button type="button" data-gm-gt="nimm">Übernehmen</button><button type="button" data-gm-gt="lass">So lassen</button></div>`);
+  gmZwHinweis.forEach(p => z.push(gmUeZeile(esc(nice(p) + ' braucht öfter Wasser, als deine Gießtage hergeben: größerer Topf, Untersetzer oder zwischendurch gießen.'), null, null)));
+  return z.join('');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-gm-gt]');
+  if(!b) return;
+  const v = gtVorschlag();
+  if(b.dataset.gmGt === 'nimm') gtTageSetzen(v.tage, v.n);
+  else { giessEinst().gtHinweisN = v.n; sichern(); }
+  if(b.dataset.gmGt === 'nimm'){ gmListeBauen(); gmDuengEntscheiden(); }
+  gmZeichnenUebersicht();
+  if(typeof render === 'function') render();
+});
 /* Die Düngetag-Rechnung läuft einmal beim Start. Sie trägt den Tag
    ein, und ein zweiter Lauf am selben Tag fände ihn deshalb schon
    vergeben. Nach „Mitnehmen“ wird nur neu gerechnet, solange noch kein
@@ -24067,6 +24297,13 @@ function gmStarten(){
 function gmDuengEntscheiden(){
   if(gmDgAuto && gmDgAuto.tag === iso(HEUTE)){ gmDuengetagSetzen(); return; }
   gmDgAuto = null;
+  /* 4.0-beta.12: Bei jedem Gießen gibt es keine Düngetag-Rechnung und
+     keinen Eintrag in dgZuletzt. */
+  if(duengJedes()){
+    gmDgAuto = {tag:iso(HEUTE), jedes:true};
+    gmDuengetagSetzen();
+    return;
+  }
   if(duengImGiesswasser()){
     const kand = gmDuengKandidaten(gmListe);
     const durchSchwelle = kand.length >= duengSchwelleHeute();
@@ -24506,7 +24743,7 @@ function gmZeichnen(){
   /* Vor der ersten Pflanze: lohnt sich heute eine Kanne? Seit 4.0-beta.9
      rechnet das die Übersicht (gmDuengEntscheiden); diese Karte bleibt
      nur für Aufrufe ohne Übersicht. */
-  if(gmIndex === 0 && gmDuengetag === false && duengImGiesswasser()){
+  if(gmIndex === 0 && gmDuengetag === false && duengImGiesswasser() && !duengJedes()){
     const kand = gmDuengKandidaten(gmListe);
     /* Die Notbremse: wer das Doppelte seines Zaehlers ueberschritten
        hat, loest einen Duengetag aus, auch wenn sich sonst niemand
@@ -24888,7 +25125,21 @@ function gmZeichnenUebersicht(){
 
   /* Dünger: die Frage nach dem Düngetag als Zeile statt als Fenster. */
   let dg = '';
-  if(gmDgAuto){
+  if(gmDgAuto && gmDgAuto.jedes){
+    /* 4.0-beta.12 (Plan Schritt 2 A): Dünger bei jedem Gießen, ohne Frage.
+       Untersetzer bekommen im Gießmodus keinen Dünger und zählen nicht. */
+    const karten = gmListe.filter(x => x && !x.untersetzer && !x.anzucht);
+    const mit = karten.filter(p => !!duengFaellig(p));
+    const ohne = karten.filter(p => !duengFaellig(p));
+    const zahl = v => String(v).replace('.', ',');
+    if(mit.length) dg += gmUeZeile('<b>Mit Dünger:</b> ' + esc(pW(mit.length) + ' · '
+      + zahl(duengKanneLiter(mit)) + ' l mit ' + zahl(duengMengeFuer(mit)) + ' ml Dünger'), null, null);
+    if(ohne.length){
+      const gruende = ohne.map(p => duengSperre(p) || duengGrenze(p));
+      const winter = gruende.every(r => r && r.code === 'winter');
+      dg += gmUeZeile('<b>Ohne Dünger:</b> ' + esc(winter && !mit.length ? 'Winterpause bis März' : ohne.map(p => nice(p)).join(', ')), null, null);
+    }
+  } else if(gmDgAuto){
     const kand = gmDuengKandidaten(gmListe);
     if(gmDuengetag === 'ja'){
       dg = gmUeZeile('<b>Heute mit Dünger</b>', esc(pW(kand.length)),
@@ -24988,6 +25239,7 @@ function gmZeichnenUebersicht(){
     <div class="gm-ue">
       <p class="gm-zaehler">Vor dem Gießen</p>
       <h3>Heute: ${esc(kopf.join(' · ') || 'nichts fällig')}</h3>
+      ${gmGtHinweisHTML() ? `<div class="ein-karte gm-ue-k gm-gt-k">${gmGtHinweisHTML()}</div>` : ''}
       ${brauch ? `<div class="ein-karte gm-ue-k">${brauch}</div>` : ''}
       ${gmUeAbschnitt('Dünger', dg)}
       ${gwAlle.length ? `<div class="ein-karte gm-ue-k gm-gw-k">${wegHtml}</div>` : ''}
@@ -25185,6 +25437,8 @@ $('#btn-giessmodus').onclick = gmStarten;
    wichtig, um nur in der Karte zu stehen. */
 function duengZeileHTML(){
   if(typeof duengListe !== 'function') return '';
+  /* 4.0-beta.12: Bei jedem Gießen kommt der Dünger mit dem Wasser. */
+  if(typeof duengJedes === 'function' && duengJedes()) return '';
   const n = duengListe().length;
   if(!n) return '';
   return `<button class="dg-zeile" data-do="dueng-liste">
@@ -25203,7 +25457,9 @@ function gmKnopfAktualisieren(){
   const teile = [];
   if(n) teile.push(`${n} ${n===1?'Pflanze wartet':'Pflanzen warten'}`);
   if(m) teile.push(`${m} ${m===1?'Anzucht':'Anzuchten'}`);
-  sub.textContent = teile.length ? teile.join(' · ') : 'nichts fällig';
+  /* 4.0-beta.12: an festen Tagen der nächste Gießtag */
+  const gtn = (!teile.length && typeof giesstageAktiv === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
+  sub.textContent = teile.length ? teile.join(' · ') : (gtn ? 'Nächster Gießtag: ' + gtn : 'nichts fällig');
 }
 const _renderVorherGm = render;
 render = function(){ _renderVorherGm(); gmKnopfAktualisieren(); rasterSpannenBald(); };
@@ -25491,7 +25747,11 @@ function heuteLageText(){
   let n = 0, m = 0;
   try{ n = giessListe().length; }catch(e){ return ''; }
   try{ m = (typeof azFaellig === 'function') ? azFaellig().length : 0; }catch(e){ m = 0; }
-  if(!n && !m) return 'Heute ist nichts fällig.';
+  if(!n && !m){
+    /* 4.0-beta.12: an festen Tagen der nächste Gießtag */
+    const gtn = (typeof giesstageAktiv === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
+    return 'Heute ist nichts fällig.' + (gtn ? ' Nächster Gießtag: ' + gtn + '.' : '');
+  }
   const pfl = !n ? '' : (n === 1 ? 'Eine Pflanze ist heute dran.' : n + ' Pflanzen sind heute dran.');
   const az = !m ? '' : (m === 1 ? 'Eine Anzucht braucht Wasser.' : m + ' Anzuchten brauchen Wasser.');
   return [pfl, az].filter(Boolean).join(' ');
@@ -26029,6 +26289,29 @@ function saisonFaktor(datum){
   return 1 + (voll - 1) * (1 - lage);
 }
 
+/* 4.0-beta.12 (Plan Schritt 2 B): Gießtage in Einstellungen → Rhythmus */
+function gtEinstZeichnen(){
+  const g = giessEinst();
+  const fest = g.tageModus === 'fest';
+  const box = document.getElementById('gt-fest');
+  if(box) box.hidden = !fest;
+  if(!fest) return;
+  const tage = giesstage();
+  document.querySelectorAll('#gt-tage [data-gt]').forEach(b =>
+    b.setAttribute('aria-pressed', String(tage.indexOf(Number(b.dataset.gt)) !== -1)));
+  const v = gtVorschlag();
+  const gleich = v.tage.length === tage.length && v.tage.every(t => tage.indexOf(t) !== -1);
+  const vt = document.getElementById('gt-vorschlag-text');
+  if(vt) vt.textContent = gtVorschlagText(v, false);
+  const vk = document.getElementById('gt-uebernehmen');
+  if(vk) vk.hidden = gleich;
+  const t = document.getElementById('gt-text');
+  if(t) t.textContent = (gtNachricht || (tage.length
+    ? 'Du gießt ' + (tage.length === 1 ? 'an einem Tag' : 'an ' + tage.length + ' Tagen') + ': ' + gtTageText(tage) + '. 1 bis 3 Tage wählbar.'
+    : 'Wähle 1 bis 3 Tage.'));
+  gtNachricht = '';
+}
+let gtNachricht = '';
 function giessCenterZeichnen(){
   const g = giessEinst();
   const setz = (id, attr, wert)=>{
@@ -26041,6 +26324,19 @@ function giessCenterZeichnen(){
   setz('weise-wahl', 'data-weise', typeof giessWeise === 'function' ? giessWeise() : 'pflanze');
   setz('haerte-wahl', 'data-haerte', g.haerte || '');
   setz('dgart-wahl',  'data-dgart',  g.dgArt);
+  /* 4.0-beta.12 (Plan Schritt 2): Wann du düngst, wann du gießt */
+  const dgFrei = duengImGiesswasser();
+  setz('dgwann-wahl', 'data-dgwann', dgFrei && g.dgWann === 'jedes' ? 'jedes' : 'tag');
+  document.querySelectorAll('#dgwann-wahl [data-dgwann]').forEach(b => { b.disabled = !dgFrei; });
+  const jedes = duengJedes();
+  ['ein-schwelle-zeile', 'ein-dgtag-zeile'].forEach(id => { const z = document.getElementById(id); if(z) z.hidden = jedes; });
+  const dd = document.getElementById('dgwann-dosis'); if(dd) dd.hidden = !jedes;
+  erklSetzen(document.getElementById('dgwann-text'), !dgFrei
+    ? 'Bei Stäbchen und Langzeitdünger läuft kein Dünger im Gießwasser mit, deshalb bleibt es beim Düngetag.'
+    : jedes ? 'Jede Pflanze, die du gießt, bekommt Dünger. Ausgenommen sind Karnivoren, Arten auf „nie“, frisch Umgetopftes, Kranke, Eingezogene und die Winterpause, wenn sie an ist. Kakteen, Blattsukkulenten, Sommerruher und Knollenspeicher behalten ihre Höchstzahl je Saison.'
+    : 'Die App sammelt fällige Pflanzen, bis sich eine Kanne lohnt.', '');
+  setz('gtmodus-wahl', 'data-gtmodus', g.tageModus === 'fest' ? 'fest' : 'faellig');
+  gtEinstZeichnen();
   setz('saison-wahl', 'data-saison', g.saisonStaerke);
 
   const txt = (id, t)=>{ const e = document.getElementById(id); if(e) e.textContent = t || ''; };
@@ -26062,12 +26358,15 @@ function giessCenterZeichnen(){
   const sf = document.getElementById('ein-schwelle');
   if(sf && document.activeElement !== sf) sf.value = duengSchwelle();
   const zk = document.getElementById('schwelle-zurueck');
-  if(zk) zk.hidden = !de.schwelle;
+  if(zk) zk.hidden = !de.schwelle || duengJedes();
   const tf = document.getElementById('ein-dgtag');
   if(tf && document.activeElement !== tf)
     tf.value = duengWunschtag() === null ? '' : String(duengWunschtag());
   const duengbare = allePflanzen().filter(duengbar).length;
-  ek('kanne-text', duengMenge().toString().replace('.', ',') + ' ml in die '
+  if(duengJedes()) ek('kanne-text', duengMenge().toString().replace('.', ',') + ' ml in die '
+    + String(de.kanne).replace('.', ',') + '-Liter-Kanne. ' + duengbare + ' deiner ' + allePflanzen().length
+    + ' Pflanzen bekommen überhaupt Dünger; Karnivoren und alles auf „nie“ zählen nicht mit.');
+  else ek('kanne-text', duengMenge().toString().replace('.', ',') + ' ml in die '
     + String(de.kanne).replace('.', ',') + '-Liter-Kanne. '
     + (de.schwelle ? 'Vorgeschlagen wären ' + duengSchwelleVorschlag() + '. ' : 'Vorgeschlagen aus deiner Sammlung. ')
     + duengbare + ' deiner ' + allePflanzen().length + ' Pflanzen bekommen überhaupt Dünger; '
@@ -26107,11 +26406,11 @@ function giessCenterZeichnen(){
   u('gc-u-wasser', (WASSER_ART[g.art] || {}).name
     + (g.haerte ? ' · ' + {weich:'weich', mittel:'mittel', hart:'hart'}[g.haerte] : ''));
   u('gc-u-duenger', {fluessig:'Flüssig', stab:'Stäbchen', langzeit:'Langzeit', selbst:'Selbst angesetzt'}[g.dgArt]
-    + (duengWunschtag() === null ? '' : ' · ' + WOCHENTAG_NAME[duengWunschtag()].replace(/en$/, 's'))
+    + (duengJedes() ? ' · bei jedem Gießen' : duengWunschtag() === null ? '' : ' · ' + WOCHENTAG_NAME[duengWunschtag()].replace(/en$/, 's'))
     + (g.winterpause ? ' · Winterpause' : ''));
-  u('gc-u-rhythmus', g.saison
+  u('gc-u-rhythmus', (giesstageAktiv() ? 'Gießtage: ' + giesstage().slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(x => GT_KURZ[x]).join(', ') + ' · ' : '') + (g.saison
     ? 'Saison-Anpassung: ' + {sanft:'sanft', normal:'normal', stark:'stark'}[g.saisonStaerke]
-    : 'Ohne Saison-Anpassung');
+    : 'Ohne Saison-Anpassung'));
   const pl = document.getElementById('gc-u-plan');
   if(pl){
     const n = allePflanzen().filter(p=>giessStatus(p).stand === 'over').length;
@@ -26189,6 +26488,48 @@ document.addEventListener('click', e=>{
   }
 });
 
+/* 4.0-beta.12 (Plan Schritt 2): Wann du düngst, wann du gießt */
+document.addEventListener('click', e=>{
+  const dw = e.target.closest('#dgwann-wahl [data-dgwann]');
+  if(dw){
+    if(dw.disabled || !duengImGiesswasser()) return;
+    giessEinst().dgWann = dw.dataset.dgwann;
+    sichern(); giessCenterZeichnen(); mehrNebenzeilen(); render();
+    return;
+  }
+  const gm = e.target.closest('#gtmodus-wahl [data-gtmodus]');
+  if(gm){
+    const g = giessEinst();
+    g.tageModus = gm.dataset.gtmodus;
+    if(g.tageModus === 'fest' && !(Array.isArray(g.giesstage) && g.giesstage.length)){
+      const v = gtVorschlag();
+      gtTageSetzen(v.tage, v.n);
+    } else { g.gtZwGezeigt = {}; sichern(); }
+    giessCenterZeichnen(); mehrNebenzeilen(); render();
+    return;
+  }
+  const tb = e.target.closest('#gt-tage [data-gt]');
+  if(tb){
+    const t = Number(tb.dataset.gt);
+    const tage = giesstage();
+    const i = tage.indexOf(t);
+    if(i !== -1){
+      if(tage.length === 1){ gtNachricht = 'Mindestens ein Gießtag.'; gtEinstZeichnen(); return; }
+      tage.splice(i, 1);
+    } else {
+      if(tage.length >= 3){ gtNachricht = 'Höchstens 3 Gießtage. Nimm erst einen anderen heraus.'; gtEinstZeichnen(); return; }
+      tage.push(t);
+    }
+    gtTageSetzen(tage, null);
+    giessCenterZeichnen(); mehrNebenzeilen(); render();
+    return;
+  }
+  if(e.target.closest('#gt-uebernehmen')){
+    const v = gtVorschlag();
+    gtTageSetzen(v.tage, v.n);
+    giessCenterZeichnen(); mehrNebenzeilen(); render();
+  }
+});
 document.addEventListener('change', e=>{
   if(e.target.id === 'ck-winterpause'){
     giessEinst().winterpause = e.target.checked; sichern(); giessCenterZeichnen(); mehrNebenzeilen();
@@ -30209,7 +30550,9 @@ function azVomBereich(g){
 }
 function azEintrag(typ, obj, iv, letzte, tat, gefaesse){
   const t = Math.max(0, tageSeit(letzte));
-  const rest = iv - t;
+  /* 4.0-beta.12 (F143): Anzucht läuft mit auf den Gießtagen. */
+  const gt = (typeof gtTermin === 'function') ? gtTermin(letzte, iv, null) : null;
+  const rest = (gt ? gt.k : iv) - t;
   const unter = [];
   gefaesse.forEach(g=>azGruppenIn(g.id).forEach(r=>unter.push(azGruppeText(r))));
   return {anzucht:true, typ, ref:obj.id, id:'az:' + obj.id, name:obj.name, iv, letzte,

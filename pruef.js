@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.11', w.__T('FASSUNG') === '4.0-beta.11', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.12', w.__T('FASSUNG') === '4.0-beta.12', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -12034,9 +12034,10 @@ setTimeout(async () => {
       /* ── Modellwahl: Hinweis bei Lite nur in den Einstellungen ── */
       T('kiModellZeichnen()');
       const opt = [...d.querySelectorAll('.kimodell.feld-knopf .ki-modell-wahl option')].map(o => o.textContent);
-      const optAl = [...d.querySelectorAll('#ki-direkt-anlegen .ki-modell-wahl option, #anleg-modal .ki-modell-wahl option')].map(o => o.textContent);
+      /* 4.0-beta.12 (F139): Anlegen zeigt den Hinweis jetzt auch; Doktor und Vermehren bleiben kurz. */
+      const optAl = [...d.querySelectorAll('#ki-direkt-doktor .ki-modell-wahl option, #ki-direkt-vermehren .ki-modell-wahl option')].map(o => o.textContent);
       pruef('beta.11: Einstellungen: Lite mit „schnell, aber lückenhafter“', opt.some(t => /3\.5 Flash Lite · schnell, aber lückenhafter/.test(t)) && !opt.some(t => /3\.6 Flash ·/.test(t)), opt.join(' | '));
-      pruef('beta.11: Andere Modellwahlen bleiben kurz', optAl.length > 0 && !optAl.some(t => /lückenhafter/.test(t)), optAl.join(' | '));
+      pruef('beta.11: Doktor und Vermehren bleiben kurz', optAl.length > 0 && !optAl.some(t => /lückenhafter/.test(t)), optAl.join(' | '));
 
       /* ── Karte → Bearbeiten → Speichern: „Artwissen ändern?“ (F133) ── */
       T(`S.gelernteArten = {}; S.eigene.push({id:'G11K', eigen:true, name:'Kartenprobe', art:'Probe', botanisch:'Testgattung kartenart', sorte:'',
@@ -12219,6 +12220,286 @@ setTimeout(async () => {
         Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; });
         sichern(); })()`);
       w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    }
+  }
+
+  /* ══ 4.0-beta.12: Plan Schritt 2 — Gießtage und Dünger bei jedem Gießen,
+     dazu Notiz ohne „keine“, Lite-Hinweis beim Anlegen, Fotomenü schließt.
+     Jeder Test legt seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'anzucht', 'profil', 'duengLangzeit', 'kiModelle', 'kiModell'];
+    const alt12 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
+    const heute0 = T('HEUTE.getTime()');
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const kn = () => d.getElementById('gm-knoepfe').innerHTML;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const NAMEN = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+    const vor = n => T(`iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - (${n})))`);
+    const wt = n => T(`new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() + (${n}), 12).getDay()`);
+    const pfl = (id, o) => Object.assign({id, name:'Probe ' + id, art:'Probeart ' + id, botanisch:'Testgattung probe' + id.toLowerCase(), sorte:'',
+      klasse:'B', intervallEigen:true, intervall:[7, 7], topf:12, eigen:true}, o || {});
+    const setzen = (liste, water) => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.zustand = {}; S.feuchtRueck = {}; S.dueng = {};
+      S.gesehen = {}; S.anstau = {}; S.spuelen = {}; S.duengLangzeit = {};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:false, saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
+      gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte'; sichern(); return 1; })()`);
+    const tage = (modus, liste) => T(`(function(){ var g = giessEinst(); g.tageModus = ${JSON.stringify(modus)}; g.giesstage = ${JSON.stringify(liste)}; sichern(); return 1; })()`);
+    const termin = (letzte, iv, kl) => JSON.parse(T(`JSON.stringify(gtTermin('${letzte}', ${iv}, '${kl}'))`) || 'null');
+    try {
+      /* ── Vorneweg: Notiz nur bei echter Verwechslung (F138) ── */
+      pruef('beta.12: „keine“, „unbekannt“, „Nein.“ und „Keine bekannt“ ergeben keine Notiz',
+        T(`[notizWert('keine'), notizWert('unbekannt'), notizWert('Nein.'), notizWert('Keine bekannt'), notizWert(' - ')].join('|')`) === '||||');
+      pruef('beta.12: Ein echter Name bleibt stehen', T(`notizWert('Monstera adansonii.')`) === 'Monstera adansonii');
+      setzen([], {});
+      T(`formularLeeren(); alStart(); neuWegSetzen('ki'); 1`);
+      const notizNach = text => { d.getElementById('f-notiz').value = ''; d.getElementById('f-paste').value = text; klick('#btn-paste-los'); return d.getElementById('f-notiz').value; };
+      const n1 = notizNach('ART: Probeart\nBOTANISCH: Testgattung notizart\nVERWECHSLUNG: keine\nFROST: unbekannt');
+      pruef('beta.12: Einfügen mit „VERWECHSLUNG: keine“ und „FROST: unbekannt“ schreibt nichts in die Notiz', !/verwechselt|Frostgrenze/.test(n1), n1);
+      const n2 = notizNach('ART: Probeart\nBOTANISCH: Testgattung notizart\nVERWECHSLUNG: Testgattung andere\nFROST: 12 °C');
+      pruef('beta.12: Eine echte Verwechslung und Frostgrenze kommen weiter in die Notiz',
+        /Könnte verwechselt sein mit: Testgattung andere/.test(n2) && /Frostgrenze laut Bestimmung: 12 °C/.test(n2), n2);
+      T(`formularLeeren(); modalZu("anleg-modal"); 1`);
+      await warte(80);
+
+      /* ── Vorneweg: Lite-Hinweis auch beim Anlegen (F139) ── */
+      T(`S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}, {id:'models/gemini-3.5-flash-lite', anzeige:'3.5 Flash Lite'}];
+         S.kiModell = 'models/gemini-3.6-flash'; kiSchluesselSetzen('${ATTRAPPE_ECHT}'); kiModellZeichnen(); 1`);
+      const optA = [...d.querySelectorAll('#ki-direkt-anlegen .ki-modell-wahl option')].map(o => o.textContent);
+      pruef('beta.12: Modellwahl beim Anlegen: Lite mit „schnell, aber lückenhafter“, Flash ohne',
+        optA.some(t => /3\.5 Flash Lite · schnell, aber lückenhafter/.test(t)) && !optA.some(t => /3\.6 Flash ·/.test(t)), optA.join(' | '));
+      T(`kiSchluesselSetzen(''); 1`);
+
+      /* ── Vorneweg: Fotomenü schließt nach „Profilbild“ und „Löschen“ (F144) ── */
+      setzen([pfl('F1')], {});
+      const fk = d.createElement('button'); fk.className = 'foto-punkte'; d.body.appendChild(fk);
+      w.__fk = fk;
+      T(`fotoMenuOeffnen(window.__fk, 'F1', 'k1'); 1`);
+      const pm = d.querySelector('#foto-menu-schwebend [data-do="foto-profil"]');
+      pruef('beta.12: Vorher steht das schwebende Menü', !!pm);
+      if(pm) pm.click();
+      pruef('beta.12: „Profilbild“ schließt das Menü ganz', !d.getElementById('foto-menu-schwebend') && T(`S.profil.F1`) === 'k1' && T('fotoMenuOffen') === null);
+      T(`fotoMenuOeffnen(window.__fk, 'F1', 'k1'); 1`);
+      const pl = d.querySelector('#foto-menu-schwebend [data-do="fotoweg"]');
+      if(pl) pl.click();
+      pruef('beta.12: „Löschen“ schließt das Menü ganz und fragt nach', !!pl && !d.getElementById('foto-menu-schwebend') && T(`modalOffen('foto-modal')`) === true);
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); delete S.profil.F1; return 1; })()`);
+      fk.remove();
+
+      /* ── Teil B: Zuordnung zum Gießtag (gtTermin, letzte Gießung Sonntag 01.11.2026) ── */
+      setzen([], {});
+      tage('fest', [3, 0]);
+      let r = termin('2026-11-01', 4, 'B');
+      pruef('beta.12: Abstand 4, Gießtage Mi und So: Mittwoch (3 Tage), 1 Tag früher', r && r.k === 3 && !r.zw, JSON.stringify(r));
+      tage('fest', [5, 0]);
+      r = termin('2026-11-01', 6, 'B');
+      pruef('beta.12: Gleichstand Freitag/Sonntag: der spätere', r && r.k === 7 && !r.zw, JSON.stringify(r));
+      r = termin('2026-11-01', 6, 'A');
+      pruef('beta.12: Gleichstand bei Gießklasse A: der frühere', r && r.k === 5 && !r.zw, JSON.stringify(r));
+      tage('fest', [0]);
+      r = termin('2026-11-01', 5, 'B');
+      pruef('beta.12: Abstand 5, nur Sonntag (2 Tage weg): mehr als ein Drittel, eigener Termin, zwischendurch', r && r.k === 5 && r.zw === true, JSON.stringify(r));
+      r = termin('2026-11-01', 10, 'B');
+      pruef('beta.12: Abstand 10, nur Sonntag (3 Tage früher): genau ein Drittel, verschoben', r && r.k === 7 && !r.zw, JSON.stringify(r));
+      tage('fest', [3]);
+      r = termin('2026-11-01', 2, 'B');
+      pruef('beta.12: Abstand 2, nur Mittwoch (1 Tag später): mindestens 1 Tag Toleranz', r && r.k === 3 && !r.zw, JSON.stringify(r));
+      tage('faellig', [3]);
+      pruef('beta.12: „Wenn eine Pflanze dran ist“: keine Zuordnung', termin('2026-11-01', 4, 'B') === null);
+
+      /* ── Teil B: giessStatus, Karte, verpasst ── */
+      setzen([pfl('G1')], {G1:[vor(3)]});
+      tage('faellig', []);
+      const r0 = T(`giessStatus(allePflanzen()[0]).rest`);
+      tage('fest', [wt(5)]);
+      const st1 = JSON.parse(T(`JSON.stringify(giessStatus(allePflanzen()[0]))`));
+      pruef('beta.12: Fester Gießtag einen Tag nach dem eigenen Termin: Termin auf dem Gießtag', r0 === 4 && st1.rest === 5 && st1.gt && !st1.gt.zw, r0 + ' → ' + st1.rest);
+      const kk = T(`kartenKopfHTML(allePflanzen()[0])`);
+      pruef('beta.12: Die Karte nennt den Gießtag als nächsten Termin', kk.indexOf('Gießen: ' + NAMEN[wt(5)] + ', in 5 Tagen') > -1, (kk.match(/Gießen:[^<]*/) || [''])[0]);
+      setzen([pfl('G2')], {G2:[vor(9)]});
+      tage('fest', [wt(-2)]);
+      const st2 = JSON.parse(T(`JSON.stringify(giessStatus(allePflanzen()[0]))`));
+      pruef('beta.12: Verpasster Gießtag: überfällig ab dem Tag danach', st2.stand === 'over' && st2.rest === -2 && T(`giessListe().length`) === 1, JSON.stringify([st2.stand, st2.rest]));
+
+      /* ── Teil B: „Noch feucht“ an einem Gießtag ── */
+      setzen([pfl('N1', {klasse:'C'})], {N1:[vor(7)]});
+      T(`S.feuchtRueck = {N1:{zahl:1, zuletzt:iso(HEUTE)}}; 1`);
+      tage('faellig', []);
+      const f0 = T(`feuchtRest('N1')`);
+      tage('fest', [wt(0), wt(2)]);
+      const f1 = T(`feuchtRest('N1')`);
+      tage('fest', [wt(0), wt(3)]);
+      const f2 = T(`feuchtRest('N1')`);
+      pruef('beta.12: „Noch feucht“ an einem Gießtag schiebt auf den nächsten Gießtag in der Toleranz, sonst Frist wie heute',
+        f0 === 5 && f1 === 2 && f2 === 5, [f0, f1, f2].join(' / '));
+
+      /* ── Teil B: Untersetzer und Anzucht laufen mit (F143) ── */
+      setzen([pfl('U1', {klasse:'S', intervallEigen:false, intervall:null, gruppe:'moorbeet', art:'Probeart U1'})], {U1:[vor(2)]});
+      tage('faellig', []);
+      const ivU = T(`intervallVon(allePflanzen()[0])`), lU = T(`anstauLage(allePflanzen()[0])`);
+      const ru0 = T(`giessStatus(allePflanzen()[0]).rest`);
+      tage('fest', [wt(ivU - 2 + 1)]);
+      const ru1 = T(`giessStatus(allePflanzen()[0]).rest`);
+      pruef('beta.12: Untersetzer-Pflanze im Anstau wandert auf den Gießtag', lU === 'anstau' && ru0 === ivU - 2 && ru1 === ivU - 2 + 1, [lU, ivU, ru0, ru1].join(' / '));
+      setzen([], {});
+      T(`(function(){ S.anzucht = null; var g = azGefaessAnlegen({name:'Glas B12', medium:'wasser', start:'${vor(3)}'}); g.abstand = 7; g.gewechselt = ['${vor(3)}'];
+        azGruppeAnlegen({gefaess:g.id, anzahl:1, art:'Probeart'}); sichern(); return 1; })()`);
+      tage('faellig', []);
+      const ra0 = T(`azEintraege()[0].rest`);
+      tage('fest', [wt(5)]);
+      const ra1 = T(`azEintraege()[0].rest`);
+      pruef('beta.12: Anzucht wandert auf den Gießtag', ra0 === 4 && ra1 === 5, ra0 + ' → ' + ra1);
+      T(`S.anzucht = null; 1`);
+
+      /* ── Teil B: Vorschlag von Zahl und Tagen ── */
+      setzen([pfl('V1', {intervall:[7, 7]}), pfl('V2', {intervall:[10, 10]}), pfl('VS', {klasse:'S', intervallEigen:false, intervall:null, gruppe:'moorbeet'})], {});
+      let v = JSON.parse(T(`JSON.stringify(gtVorschlag())`));
+      pruef('beta.12: Kürzester Abstand ab 7 Tagen: 1 Gießtag, Sonntag (Anstau zählt nicht)', v.n === 1 && v.tage.join() === '0', JSON.stringify(v.tage));
+      setzen([pfl('V1', {intervall:[7, 7]}), pfl('V3', {name:'Calathea', intervall:[5, 5]}), pfl('V4', {name:'Basilikum', intervall:[4, 4]})], {});
+      const vt = T(`gtVorschlagText(gtVorschlag(), false)`);
+      pruef('beta.12: 4 bis 6 Tage: 2 Gießtage, Mittwoch und Sonntag, mit Grund', vt === 'Für deine Sammlung passen 2 Gießtage: Mittwoch und Sonntag — wegen Basilikum und Calathea', vt);
+      setzen([pfl('V1'), pfl('V5', {name:'Kresse', intervall:[3, 3]})], {});
+      v = JSON.parse(T(`JSON.stringify(gtVorschlag())`));
+      pruef('beta.12: bis 3 Tage: 3 Gießtage, Montag, Mittwoch, Freitag', v.n === 3 && v.tage.join() === '1,3,5', JSON.stringify(v));
+
+      /* ── Teil B: Übersicht — andere Zahl und „zwischendurch“, je einmal ── */
+      setzen([pfl('Z1', {name:'Minzi', intervall:[2, 2]})], {Z1:[vor(2)]});
+      tage('fest', [wt(3)]);
+      T(`giessEinst().gtHinweisN = null; 1`);
+      T('gmStarten()');
+      const ue1 = inh();
+      pruef('beta.12: Übersicht: „braucht öfter Wasser, als deine Gießtage hergeben“', /Minzi braucht öfter Wasser, als deine Gießtage hergeben: größerer Topf, Untersetzer oder zwischendurch gießen\./.test(ue1), ue1.slice(0, 300));
+      pruef('beta.12: Übersicht: „Für deine Sammlung passen jetzt 3 Gießtage“ mit Übernehmen und So lassen',
+        /Für deine Sammlung passen jetzt 3 Gießtage/.test(ue1) && !!d.querySelector('#gm-inhalt [data-gm-gt="nimm"]') && !!d.querySelector('#gm-inhalt [data-gm-gt="lass"]'));
+      T(`gmZeichnenUebersicht(); 1`);
+      pruef('beta.12: Neu gezeichnet bleibt der Hinweis in diesem Durchgang stehen', /Minzi braucht öfter Wasser/.test(inh()));
+      klick('#gm-inhalt [data-gm-gt="lass"]');
+      pruef('beta.12: „So lassen“ ändert die Gießtage nicht und blendet die Zeile aus', T(`giesstage().join()`) === String(wt(3)) && !/passen jetzt 3/.test(inh()));
+      T("modalZu('giessmodus')"); await warte(60);
+      T('gmStarten()');
+      pruef('beta.12: Beim nächsten Start kein zweiter Hinweis für dieselbe Pflanze und dieselbe Zahl', !/Minzi braucht öfter/.test(inh()) && !/passen jetzt/.test(inh()), inh().slice(0, 200));
+      T("modalZu('giessmodus')"); await warte(60);
+      T(`giessEinst().gtHinweisN = null; 1`);
+      T('gmStarten()');
+      klick('#gm-inhalt [data-gm-gt="nimm"]');
+      pruef('beta.12: „Übernehmen“ setzt Montag, Mittwoch, Freitag', T(`giesstage().slice().sort().join()`) === '1,3,5');
+      T("modalZu('giessmodus')"); await warte(60);
+
+      /* ── Teil B: Kachel und Hinweis ohne Fälliges ── */
+      setzen([pfl('K1')], {K1:[vor(0)]});
+      tage('fest', [wt(4)]);
+      T('render()');
+      const sub = d.getElementById('gm-start-sub').textContent;
+      const naechst = [1, 2, 3, 4, 5, 6, 7].find(k => wt(k) === wt(4));
+      pruef('beta.12: Kachel ohne Fälliges: „Nächster Gießtag: …“', sub === 'Nächster Gießtag: ' + NAMEN[wt(naechst)], sub);
+      const lageGt = T('heuteLageText()');
+      tage('faellig', []);
+      T('render()');
+      pruef('beta.12: Heute-Zeile ohne Fälliges nennt den nächsten Gießtag', lageGt === 'Heute ist nichts fällig. Nächster Gießtag: ' + NAMEN[wt(naechst)] + '.', lageGt);
+      pruef('beta.12: Ohne feste Tage bleibt „nichts fällig“', d.getElementById('gm-start-sub').textContent === 'nichts fällig' && T('heuteLageText()') === 'Heute ist nichts fällig.');
+
+      /* ── Teil B: Einstellungen → Rhythmus ── */
+      setzen([pfl('E1', {intervall:[5, 5]})], {});
+      T('giessCenterZeichnen()');
+      pruef('beta.12: Rhythmus: Tagesknöpfe zu bei „Wenn eine Pflanze dran ist“', d.getElementById('gt-fest').hidden === true
+        && d.querySelector('#gtmodus-wahl [data-gtmodus="faellig"]').getAttribute('aria-pressed') === 'true');
+      klick('#gtmodus-wahl [data-gtmodus="fest"]');
+      const gedr = () => [...d.querySelectorAll('#gt-tage [data-gt][aria-pressed="true"]')].map(b => b.dataset.gt).sort().join();
+      pruef('beta.12: „An festen Tagen“ übernimmt den Vorschlag (2 Tage: Mi, So) und zeigt sieben Knöpfe', d.getElementById('gt-fest').hidden === false
+        && d.querySelectorAll('#gt-tage [data-gt]').length === 7 && gedr() === '0,3' && d.getElementById('gt-uebernehmen').hidden === true, gedr());
+      klick('#gt-tage [data-gt="5"]');
+      klick('#gt-tage [data-gt="1"]');
+      pruef('beta.12: Höchstens 3 Gießtage', gedr() === '0,3,5' && /Höchstens 3/.test(d.getElementById('gt-text').textContent), gedr());
+      klick('#gt-tage [data-gt="3"]'); klick('#gt-tage [data-gt="5"]'); klick('#gt-tage [data-gt="0"]');
+      pruef('beta.12: Mindestens 1 Gießtag', gedr() === '0' && /Mindestens ein/.test(d.getElementById('gt-text').textContent), gedr());
+      pruef('beta.12: Weicht die Wahl ab, steht „Übernehmen“ beim Vorschlag', d.getElementById('gt-uebernehmen').hidden === false
+        && /passen 2 Gießtage: Mittwoch und Sonntag/.test(d.getElementById('gt-vorschlag-text').textContent));
+      klick('#gt-uebernehmen');
+      pruef('beta.12: „Übernehmen“ setzt die vorgeschlagenen Tage', gedr() === '0,3');
+
+      /* ── Teil B: Letzte Stufe beim Anlegen ── */
+      setzen([pfl('L1', {intervall:[8, 8]})], {});
+      tage('fest', [0]);
+      T(`formularLeeren(); alStart(); document.getElementById('f-name').value = 'Neuling'; document.getElementById('f-art').value = 'Probeart neu';
+         document.getElementById('f-klasse').value = 'A'; alStufeZeigen(5); 1`);
+      const ag = d.getElementById('al-gt');
+      pruef('beta.12: Anlegen, letzte Stufe: die neue Pflanze ist der Grund für mehr Gießtage', ag.hidden === false && /passen jetzt [23] Gießtage/.test(ag.textContent) && /wegen Neuling/.test(ag.textContent), ag.textContent);
+      klick('#al-gt [data-al-gt]');
+      pruef('beta.12: „Übernehmen“ beim Anlegen setzt die Gießtage', T(`giesstage().length`) >= 2 && /übernommen/.test(ag.textContent), T(`giesstage().join()`));
+      T(`document.getElementById('f-klasse').value = 'C'; 1`);
+      T(`giessEinst().giesstage = [0]; alStufeZeigen(5); 1`);
+      pruef('beta.12: Ändert die neue Pflanze nichts, bleibt die Zeile weg', ag.hidden === true);
+      T(`formularLeeren(); modalZu("anleg-modal"); 1`);
+      await warte(80);
+
+      /* ── Teil A: Einstellungen → Dünger ── */
+      setzen([pfl('D1')], {});
+      T(`giessEinst().dgArt = 'stab'; giessCenterZeichnen(); 1`);
+      klick('#dgwann-wahl [data-dgwann="jedes"]');
+      pruef('beta.12: Bei Stäbchen ist „Bei jedem Gießen“ gesperrt, mit Grund', d.querySelector('#dgwann-wahl [data-dgwann="jedes"]').disabled === true
+        && T(`giessEinst().dgWann || ''`) !== 'jedes' && /Stäbchen/.test(d.getElementById('dgwann-text').textContent));
+      T(`giessEinst().dgArt = 'fluessig'; giessCenterZeichnen(); 1`);
+      pruef('beta.12: Vorher: Düngetag-Felder sichtbar', d.getElementById('ein-schwelle-zeile').hidden === false && d.getElementById('dgwann-dosis').hidden === true);
+      klick('#dgwann-wahl [data-dgwann="jedes"]');
+      pruef('beta.12: „Bei jedem Gießen“: Schwelle, Tag und „Vorschlag wieder verwenden“ weg, Dosiszeile da',
+        T(`giessEinst().dgWann`) === 'jedes' && d.getElementById('ein-schwelle-zeile').hidden === true && d.getElementById('ein-dgtag-zeile').hidden === true
+        && d.getElementById('schwelle-zurueck').hidden === true && d.getElementById('dgwann-dosis').hidden === false
+        && /für jedes Gießen oder für wöchentlich/.test(d.getElementById('dgwann-dosis').textContent));
+
+      /* ── Teil A: Sperren und Grenzen ── */
+      setzen([pfl('A1'), pfl('A2', {duenger:'nie'}), pfl('A3', {gruppe:'moorbeet'}), pfl('A4', {gruppe:'wuestenkaktus', klasse:'C'}), pfl('A5')], {});
+      T(`S.dueng = {A1:['${vor(1)}'], A4:['2026-03-05','2026-04-05','2026-05-05','2026-06-05'], A5:['2026-03-02','2026-03-12','2026-03-22','2026-04-02','2026-04-12','2026-04-22','2026-05-02','2026-05-12','2026-05-22','2026-06-02','2026-06-12','2026-06-22']}; 1`);
+      T(`HEUTE = new Date(2026, 6, 15, 12); 1`);
+      const fae = id => T(`!!duengFaellig(allePflanzen().find(function(p){ return p.id === '${id}'; }))`);
+      T(`giessEinst().dgWann = 'tag'; 1`);
+      const vorher = ['A1', 'A5', 'A4'].map(fae).join();
+      T(`giessEinst().dgWann = 'jedes'; 1`);
+      pruef('beta.12: Bei jedem Gießen fallen „frühestens nach x Tagen“ und die Höchstzahl je Saison weg', vorher === 'false,false,false' && fae('A1') === true && fae('A5') === true, vorher + ' → ' + fae('A1') + ',' + fae('A5'));
+      pruef('beta.12: Wüstenkakteen behalten ihre Höchstzahl je Saison (F141)', fae('A4') === false && T(`duengGrenze(allePflanzen().find(function(p){ return p.id === 'A4'; })).code`) === 'saison');
+      pruef('beta.12: Sperren bleiben: Art „nie“ und Karnivore', fae('A2') === false && fae('A3') === false);
+      T(`S.dueng = {}; 1`);
+      T(`HEUTE = new Date(2027, 0, 15, 12); giessEinst().winterpause = true; 1`);
+      pruef('beta.12: Winterpause sperrt nur, wenn der Schalter an ist', fae('A1') === false && (T(`giessEinst().winterpause = false; 1`), fae('A1') === true));
+      T(`HEUTE = new Date(${heute0}); 1`);
+      T(`S.dueng = {A1:['2026-03-01'], A5:['2026-03-01']}; giessEinst().dgWann = 'tag'; 1`);
+      const zeileTag = T(`duengZeileHTML()`);
+      T(`giessEinst().dgWann = 'jedes'; 1`);
+      pruef('beta.12: Heute ohne Zeile „zum Düngen“ bei jedem Gießen', /zum Düngen/.test(zeileTag) && T(`duengZeileHTML()`) === '', zeileTag.slice(0, 80));
+
+      /* ── Teil A: Gießmodus — Übersicht, Gegossen, Rückgängig ── */
+      setzen([pfl('M1', {name:'Ficus'}), pfl('M2', {name:'Zamioculcas', duenger:'nie'})], {M1:[vor(9)], M2:[vor(9)]});
+      T(`giessEinst().dgWann = 'jedes'; 1`);
+      T('gmStarten()');
+      const ue = inh();
+      const lit = Math.max(0.1, Math.round(Math.PI * 36 * 9.6 / 1000 * 0.2 * 100) / 100);
+      const kanne = Math.min(3, Math.ceil(Math.max(0.5, lit) * 2) / 2);
+      const ml = Math.round(kanne * 5 * 0.5 * 10) / 10;
+      const soll = 'Mit Dünger:</b> 1 Pflanze';
+      pruef('beta.12: Übersicht: „Mit Dünger: 1 Pflanze · … l mit … ml Dünger“ in einer Zeile',
+        ue.indexOf(soll + ' · ' + String(kanne).replace('.', ',')) > -1 && ue.indexOf(String(kanne).replace('.', ',') + ' l mit ' + String(ml).replace('.', ',') + ' ml Dünger') > -1, (ue.match(/Mit Dünger[^]*?ml Dünger/) || ['–'])[0]);
+      pruef('beta.12: Übersicht: „Ohne Dünger: Zamioculcas“, keine Frage nach dem Düngetag',
+        /Ohne Dünger:<\/b> Zamioculcas/.test(ue) && !d.querySelector('#gm-inhalt [data-gm="dgohne"]') && !d.querySelector('#gm-inhalt [data-gm="dgmit"]'));
+      pruef('beta.12: Kein Eintrag „letzter Düngetag“', !T(`giessEinst().dgZuletzt || ''`));
+      klick('[data-gm="los"]');
+      let guard = 0;
+      while(T(`gmListe[gmIndex] && gmListe[gmIndex].id`) !== 'M1' && guard++ < 3) klick('[data-gm="spaeter"]');
+      pruef('beta.12: Karte Ficus: „Mit Dünger“', /Mit Dünger — die Kanne steht bereit/.test(inh()));
+      klick('[data-gm="ja"]');
+      const hatDg = T(`(S.dueng.M1 || []).indexOf(iso(HEUTE)) > -1`), hatW = T(`giessTermine('M1').indexOf(iso(HEUTE)) > -1`);
+      pruef('beta.12: „Gegossen“ trägt Wasser und Dünger ein', hatDg === true && hatW === true);
+      klick('#gm-rueck');
+      pruef('beta.12: „Rückgängig“ nimmt Wasser und Dünger zurück', T(`(S.dueng.M1 || []).indexOf(iso(HEUTE)) === -1`) === true
+        && T(`giessTermine('M1').indexOf(iso(HEUTE)) === -1`) === true);
+      T("modalZu('giessmodus')"); await warte(60);
+    } catch(e) {
+      pruef('beta.12: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        HEUTE = new Date(${heute0});
+        var a = ${alt12}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
+        gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
+        kiSchluesselSetzen(''); formularLeeren(); AW = null; sichern(); render(); })()`);
     }
   }
 
