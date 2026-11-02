@@ -4369,6 +4369,26 @@ html[data-design] .gm-wie-probe h4{margin:0 0 4px;font-family:var(--f-body);font
 html[data-design] .gm-wie-probe p{margin:0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.5}
 html[data-design="klartext"] .gm-wie-probe{border-top:2px solid var(--schrift)}
 html[data-design="klartext"] .gm-wie-probe h4{font-size:var(--t-s);color:var(--schrift)}
+/* ══ Plan Schritt 4a (4.0-beta.15): Substrat-Mix ══ */
+html[data-design] .mix-ed{margin-top:12px}
+html[data-design] .mix-ed:empty{display:none}
+html[data-design] .mix-ed .mix-vorlagen{margin:0 0 10px}
+html[data-design] .mix-zeilen{display:flex;flex-direction:column;gap:8px;margin:0 0 10px}
+html[data-design] .mix-zeile{display:flex;align-items:center;justify-content:space-between;gap:10px}
+html[data-design] .mix-name{flex:1 1 auto;min-width:0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.3}
+html[data-design] .mix-zeile .mix-n{display:inline-block;width:2.4em;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+html[data-design] .mix-add select{width:100%}
+html[data-design] .mix-balken{margin-top:14px}
+html[data-design] .mix-wasser{margin:8px 0 0;font-family:var(--f-body);font-size:var(--t-m);line-height:1.4}
+html[data-design] .mix-wasser b{color:var(--wasser)}
+html[data-design] .mix-haelt{display:block;margin-top:2px;font-size:var(--t-s);color:var(--wasser)}
+html[data-design] .mix-zusatz{display:block;margin-top:2px}
+html[data-design] .mix-edit{margin-top:12px;padding:12px;border-radius:var(--r-mittel);border:1px solid var(--linie)}
+html[data-design] .mix-edit[hidden]{display:none}
+html[data-design] .mix-edit .mix-ed{margin-top:0}
+html[data-design] .mix-edit .gm-zfrage-btns{margin-top:14px}
+html[data-design="klartext"] .mix-name{font-size:var(--t-l, var(--t-m))}
+html[data-design="klartext"] .mix-edit{border:2px solid var(--schrift)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -8582,7 +8602,27 @@ const ZUTATEN = [
   {id:'sphagnum', name:'Sphagnum-Moos', gruppe:'Sauer', wasser:9, luft:6, naehr:0, ph:4.0, max:0.8,
    text:'Speichert enorm viel und bleibt trotzdem luftig. Gut für Karnivoren, Anwachshilfen und Moosstangen.'},
   {id:'moorbeeterde', name:'Rhododendron- oder Moorbeeterde', gruppe:'Sauer', wasser:7, luft:4, naehr:5, ph:4.5, max:0.8,
-   text:'Saurer Boden für Heidelbeere, Kamelie, Azalee und Hortensie.'}
+   text:'Saurer Boden für Heidelbeere, Kamelie, Azalee und Hortensie.'},
+  /* 4.0-beta.15 (Plan Schritt 4a): aus Chris' Liste alles, was das
+     Wasserhalten spürbar verändert. Kalk, Dolomit, Gips und Gesteins-
+     mehl fehlen mit Absicht: sie werden löffelweise dosiert, nicht in
+     Teilen, und ändern das Wasserhalten nicht. */
+  {id:'lauberde', name:'Lauberde', gruppe:'Basis', wasser:7, luft:4, naehr:4, ph:5.8, max:0.6,
+   text:'Zersetztes Laub, leicht sauer, luftig und humusreich.'},
+  {id:'holzfaser', name:'Holzfasern', gruppe:'Basis', wasser:4, luft:7, naehr:0, ph:5.5, max:0.4,
+   text:'Torfersatz aus Holz. Locker, bindet beim Zersetzen aber Stickstoff — etwas mehr düngen.'},
+  {id:'kokosfaser', name:'Kokosfasern', gruppe:'Struktur', wasser:4, luft:8, naehr:1, ph:6.2, max:0.3,
+   text:'Lange Fasern, die das Substrat verfilzen und locker halten.'},
+  {id:'rindegrob', name:'Pinienrinde 15–25 mm', gruppe:'Struktur', wasser:2, luft:9, naehr:1, ph:5.0, max:0.9,
+   text:'Grobe Orchideenrinde. Feste Luftporen, speichert kaum Wasser.'},
+  {id:'akadama', name:'Akadama', gruppe:'Struktur', wasser:6, luft:7, naehr:1, ph:6.5,
+   text:'Gebrannte japanische Tonerde. Wird feucht dunkel — so sieht man, wann gegossen werden muss.'},
+  {id:'kanuma', name:'Kanuma', gruppe:'Sauer', wasser:6, luft:7, naehr:0, ph:5.0,
+   text:'Saure japanische Tonerde für Pflanzen, die sauren Boden brauchen.'},
+  {id:'pon', name:'Pon (Fertigmischung)', gruppe:'Struktur', wasser:4, luft:8, naehr:2, ph:7.0, neutral:true,
+   text:'Fertige mineralische Mischung aus Bims, Lava und Zeolith, meist mit Langzeitdünger.'},
+  {id:'bentonit', name:'Bentonit (Tonmehl)', gruppe:'Struktur', wasser:9, luft:1, naehr:1, ph:8.0, max:0.1,
+   text:'Quellfähiges Tonmehl. Ein kleiner Löffel macht leichte Mischungen speicherfähiger, zu viel verklebt sie.'}
 ];
 const ZUTAT = {}; ZUTATEN.forEach(z=>ZUTAT[z.id]=z);
 
@@ -9027,6 +9067,252 @@ function fehlendFuer(zielId, vorrat){
   const r = rezeptFuer(zielId);
   return r ? Object.keys(r.teile).filter(id=>!vorrat.includes(id)) : [];
 }
+
+/* ══ Substrat-Mix (4.0-beta.15, Plan Schritt 4a) ═══════════════
+   Eine Pflanze trägt ihren Mix als p.mix = {Zutat: Teile}. p.substrat
+   bleibt und folgt dem Mix, weil Doktor, KI-Aufträge und Gießweg
+   damit rechnen. Die heutigen Substrate sind Vorlagen. */
+const MIX_VORLAGEN = {
+  erde:      {name:'Erde',             teile:{pflanzerde:1}},
+  erdeRinde: {name:'Erde mit Rinde',   teile:{pflanzerde:2, rinde:1}},
+  rinde:     {name:'Rinde',            teile:{rinde:1}},
+  blaehton:  {name:'Blähton',          teile:{blaehton:1}},
+  seramis:   {name:'Seramis',          teile:{seramis:1}},
+  sphagnum:  {name:'Sphagnum',         teile:{sphagnum:1}},
+  kies:      {name:'Kies oder Sand',   teile:{kies:1}},
+  pon:       {name:'Mineralisch (Pon)', teile:{pon:1}}
+};
+/* Zu welchem Substrat ein Bestandteil zählt */
+const MIX_ART = {
+  pflanzerde:'erde', anzuchterde:'erde', kokoshum:'erde', rindenhumus:'erde', wurmhumus:'erde',
+  gartenerde:'erde', weisstorf:'erde', moorbeeterde:'erde', lauberde:'erde', holzfaser:'erde',
+  vermiculit:'erde', bentonit:'erde',
+  kokoschips:'rinde', rinde:'rinde', rindegrob:'rinde', kokosfaser:'rinde', kohle:'rinde',
+  perlit:'kies', bims:'kies', lava:'kies', kies:'kies', sand:'kies', zeolith:'kies',
+  blaehton:'blaehton', seramis:'seramis', akadama:'seramis', kanuma:'seramis', pon:'seramis',
+  sphagnum:'sphagnum'
+};
+function mixSauber(teile){
+  const r = {};
+  Object.keys(teile || {}).forEach(id=>{
+    const n = parseInt(teile[id], 10);
+    if(ZUTAT[id] && n > 0) r[id] = Math.min(20, n);
+  });
+  return r;
+}
+function mixSumme(teile){
+  return Object.keys(teile || {}).reduce((a, id)=>a + (teile[id] || 0), 0);
+}
+/* Größter Anteil gewinnt. „Erde mit Rinde“ ist selbst eine Mischung:
+   mindestens ein Fünftel Erde und ein Viertel Rinde. */
+function mixSubstratVon(teile){
+  teile = mixSauber(teile);
+  const summe = mixSumme(teile);
+  if(!summe) return '';
+  const art = {};
+  Object.keys(teile).forEach(id=>{ const a = MIX_ART[id] || 'erde'; art[a] = (art[a] || 0) + teile[id]; });
+  if((art.erde || 0) / summe >= 0.2 && (art.rinde || 0) / summe >= 0.25) return 'erdeRinde';
+  let best = '', n = -1;
+  ['erde', 'rinde', 'seramis', 'blaehton', 'sphagnum', 'kies'].forEach(a=>{
+    if((art[a] || 0) > n){ best = a; n = art[a] || 0; }
+  });
+  return best;
+}
+/* Hält Wasser viel, mittel oder wenig: Mittel der Wasserwerte nach
+   Teilen, ab 6,5 viel, ab 4,5 mittel. Richtwerte, keine Laborzahlen. */
+function mixWasserStufe(teile){
+  const w = mischungWerte(mixSauber(teile));
+  if(!w) return null;
+  const stufe = w.wasser >= 6.5 ? 'viel' : (w.wasser >= 4.5 ? 'mittel' : 'wenig');
+  return {stufe, wert:w.wasser};
+}
+function mixIstVorlage(teile, key){
+  const v = MIX_VORLAGEN[key];
+  if(!v) return false;
+  const a = mixSauber(teile), b = v.teile;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length && ka.every(id=>a[id] === b[id]);
+}
+function mixKurzText(teile){
+  teile = mixSauber(teile);
+  return Object.keys(teile).sort((a, b)=>teile[b] - teile[a])
+    .map(id=>teile[id] + ' ' + ZUTAT[id].name).join(' · ');
+}
+/* Der Mix einer Pflanze. Ohne eigenen Mix gilt die Vorlage ihres
+   Substrats — nur zum Anzeigen, gespeichert wird dabei nichts. */
+function mixVon(p){
+  if(!p) return null;
+  const m = mixSauber(p.mix);
+  if(mixSumme(m)) return {teile:m, eigen:true};
+  const v = MIX_VORLAGEN[p.substrat];
+  return v ? {teile:Object.assign({}, v.teile), eigen:false} : null;
+}
+function mixZielVon(p){
+  let z = 'standard';
+  try { z = zielFuer(p) || 'standard'; } catch(e){ z = 'standard'; }
+  if(!ZIELE[z] || ZIELE[z].ohneMischung) z = 'standard';
+  return z;
+}
+function mixEmpfehlung(p){
+  const r = rezeptFuer(mixZielVon(p));
+  return r ? Object.assign({}, r.teile) : null;
+}
+
+/* ── Der Mix-Baustein: Vorlagen, Zeilen, Balken ──────────────
+   Ein Zustand je Ort: 'anlegen' oder 'karte:<id>'. Jeder Tipp zeichnet
+   nur den Baustein neu, nicht die ganze Karte. */
+var MIX_ED = {};
+function mixEdHTML(ctx){
+  const ed = MIX_ED[ctx] || {teile:{}, alle:false};
+  const teile = mixSauber(ed.teile);
+  const p = ed.pflanze ? ed.pflanze() : null;
+  const vorl = (ed.alle ? Object.keys(MIX_VORLAGEN) : ['pon'])
+    .map(k=>`<button type="button" class="sym" data-mix-vorlage="${k}">${esc(MIX_VORLAGEN[k].name)}</button>`).join('')
+    + (mixEmpfehlung(p) ? '<button type="button" class="sym" data-mix-vorlage="empfehlung">Empfehlung für diese Art</button>' : '');
+  const ids = Object.keys(teile).sort((a, b)=>ZUTATEN.findIndex(z=>z.id===a) - ZUTATEN.findIndex(z=>z.id===b));
+  const zeilen = ids.length ? ids.map(id=>{
+    const name = esc(ZUTAT[id].name);
+    return `<div class="mix-zeile"><span class="mix-name">${name}</span><span class="zaehler">`
+      + `<button type="button" class="takt-pm" data-mix-pm="-1" data-mix-id="${id}" aria-label="Ein Teil weniger ${name}">−</button>`
+      + `<span class="takt-zahl mix-n" aria-live="polite">${teile[id]}</span>`
+      + `<button type="button" class="takt-pm" data-mix-pm="1" data-mix-id="${id}" aria-label="Ein Teil mehr ${name}">+</button>`
+      + `</span></div>`;
+  }).join('') : '<p class="fhint mix-leer">Wähle eine Vorlage oder füge Bestandteile hinzu.</p>';
+  const gruppen = {};
+  ZUTATEN.forEach(z=>{ if(!teile[z.id]) (gruppen[z.gruppe] = gruppen[z.gruppe] || []).push(z); });
+  const add = '<select data-mix-add aria-label="Bestandteil hinzufügen"><option value="">+ Bestandteil</option>'
+    + Object.keys(gruppen).map(g=>'<optgroup label="' + esc(g) + '">'
+      + gruppen[g].map(z=>'<option value="' + z.id + '">' + esc(z.name) + '</option>').join('') + '</optgroup>').join('')
+    + '</select>';
+  const zid = mixZielVon(p);
+  const ziel = ZIELE[zid];
+  const w = mischungWerte(teile);
+  const st = mixWasserStufe(teile);
+  const grafik = w ? `<div class="mix-balken">
+      ${balken('Wasserspeicher', w.wasser, ziel.wasser)}
+      ${balken('Luftporen', w.luft, ziel.luft)}
+      ${balken('Nährstoffe', w.naehr, ziel.naehr)}
+      ${balken('pH-Wert', w.ph, ziel.ph)}
+      <p class="mix-wasser">Hält Wasser <b>${st.stufe}</b> · Ziel: ${esc(ziel.name)}</p></div>` : '';
+  return `<div class="mix-vorlagen sym-liste">${vorl}</div>
+    <div class="mix-zeilen">${zeilen}</div>
+    <div class="mix-add">${add}</div>${grafik}`;
+}
+function mixEdZeichnen(ctx){
+  document.querySelectorAll('[data-mix-ctx]').forEach(el=>{
+    if(el.dataset.mixCtx === ctx) el.innerHTML = mixEdHTML(ctx);
+  });
+}
+function mixEdAendern(ctx, teile){
+  const ed = MIX_ED[ctx]; if(!ed) return;
+  ed.teile = mixSauber(teile);
+  if(ed.geaendert) ed.geaendert(ed.teile);
+  mixEdZeichnen(ctx);
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest && e.target.closest('[data-mix-pm],[data-mix-vorlage]');
+  if(!b) return;
+  const box = b.closest('[data-mix-ctx]'); if(!box) return;
+  const ctx = box.dataset.mixCtx, ed = MIX_ED[ctx]; if(!ed) return;
+  e.stopPropagation();
+  if(b.dataset.mixVorlage){
+    const k = b.dataset.mixVorlage;
+    const t = k === 'empfehlung' ? mixEmpfehlung(ed.pflanze ? ed.pflanze() : null)
+      : (MIX_VORLAGEN[k] ? MIX_VORLAGEN[k].teile : null);
+    if(t) mixEdAendern(ctx, Object.assign({}, t));
+    return;
+  }
+  const t = Object.assign({}, ed.teile);
+  const id = b.dataset.mixId;
+  t[id] = (t[id] || 0) + (parseInt(b.dataset.mixPm, 10) || 0);
+  if(t[id] <= 0) delete t[id];
+  mixEdAendern(ctx, t);
+});
+document.addEventListener('change', e=>{
+  const sel = e.target.closest && e.target.closest('[data-mix-add]');
+  if(!sel || !sel.value) return;
+  const box = sel.closest('[data-mix-ctx]'); if(!box) return;
+  const ctx = box.dataset.mixCtx, ed = MIX_ED[ctx]; if(!ed) return;
+  const t = Object.assign({}, ed.teile);
+  t[sel.value] = (t[sel.value] || 0) + 1;
+  mixEdAendern(ctx, t);
+});
+
+/* Anlegen: unter den Substrat-Knöpfen. Ein Knopf ist eine Vorlage und
+   füllt den Mix; ein geänderter Mix stellt den Knopf nach. */
+function alMixPflanze(){
+  const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  return {art:v('f-art'), botanisch:v('f-bot'), typ:v('f-typ'), klasse:v('f-klasse') || 'B',
+          giessart:v('f-giessart')};
+}
+MIX_ED.anlegen = {teile:{}, alle:false, pflanze:alMixPflanze,
+  geaendert: teile => {
+    const sb = document.getElementById('f-substrat');
+    if(!sb) return;
+    sb.value = mixSubstratVon(teile);
+    if(typeof alKnopfGruppe === 'function') alKnopfGruppe('f-substrat');
+  }};
+function alMixZeichnen(){
+  const ed = MIX_ED.anlegen;
+  const sb = document.getElementById('f-substrat');
+  if(sb && !mixSumme(ed.teile) && MIX_VORLAGEN[sb.value])
+    ed.teile = Object.assign({}, MIX_VORLAGEN[sb.value].teile);
+  mixEdZeichnen('anlegen');
+}
+document.addEventListener('change', e=>{
+  if(!e.target || e.target.id !== 'f-substrat') return;
+  const v = MIX_VORLAGEN[e.target.value];
+  MIX_ED.anlegen.teile = v ? Object.assign({}, v.teile) : {};
+  mixEdZeichnen('anlegen');
+});
+function alMixWert(){
+  const sb = document.getElementById('f-substrat');
+  const t = mixSauber(MIX_ED.anlegen.teile);
+  /* Nur speichern, was zum gewählten Substrat passt */
+  return (mixSumme(t) && sb && sb.value === mixSubstratVon(t)) ? t : null;
+}
+
+/* Pflanzenkarte: „Substrat ändern“ klappt den Baustein auf. */
+function karteMixHTML(p){
+  return `<div class="mix-edit" data-mix-box="${p.id}" hidden>
+      <div class="mix-ed" data-mix-ctx="karte:${p.id}"></div>
+      <div class="gm-zfrage-btns">
+        <button type="button" class="haupt" data-mix-do="speichern" data-p="${p.id}">Speichern</button>
+        <button type="button" data-mix-do="abbrechen" data-p="${p.id}">Abbrechen</button>
+      </div></div>`;
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest && e.target.closest('[data-mix-do]');
+  if(!b) return;
+  e.stopPropagation();
+  const id = b.dataset.p;
+  const p = allePflanzen().find(x=>x.id === id); if(!p) return;
+  const box = (b.closest('[data-kblock]') || document).querySelector('[data-mix-box="' + id + '"]');
+  const ctx = 'karte:' + id;
+  if(b.dataset.mixDo === 'auf'){
+    if(!box) return;
+    if(box.hidden){
+      const m = mixVon(p);
+      MIX_ED[ctx] = {teile: m ? m.teile : {}, alle:true, pflanze: ()=>p};
+      mixEdZeichnen(ctx);
+    }
+    box.hidden = !box.hidden;
+    b.setAttribute('aria-expanded', String(!box.hidden));
+    return;
+  }
+  if(b.dataset.mixDo === 'abbrechen'){
+    if(box) box.hidden = true;
+    delete MIX_ED[ctx];
+    return;
+  }
+  if(b.dataset.mixDo === 'speichern'){
+    const t = MIX_ED[ctx] ? mixSauber(MIX_ED[ctx].teile) : {};
+    if(!mixSumme(t)) return;
+    aenderungSetzen(id, {mix:t, substrat:mixSubstratVon(t)});
+    delete MIX_ED[ctx];
+    render();
+  }
+});
 
 /* ══════════════════════════════════════════════════════════════
    VERMEHRUNG
@@ -12061,6 +12347,7 @@ function pflanzeEntfernen(id){
             <span class="lab">Substrat</span>
             <select id="f-substrat" hidden></select>
             <div class="al-knoepfe" id="f-substrat-knoepfe"></div>
+            <div class="mix-ed" id="f-mix" data-mix-ctx="anlegen"></div>
           </div>
           <div class="al-feld">
             <span class="lab">Abzugsloch</span>
@@ -12330,7 +12617,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.14';
+const FASSUNG = '4.0-beta.15';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15055,6 +15342,12 @@ function topfSubstratHTML(p){
   const form = (typeof TOPFFORMEN !== 'undefined' && TOPFFORMEN[p.topfform]) ? TOPFFORMEN[p.topfform].name : '';
   const subIst = (typeof SUBSTRATARTEN !== 'undefined' && SUBSTRATARTEN[p.substrat])
     ? SUBSTRATARTEN[p.substrat].name : '';
+  /* 4.0-beta.15: der Mix und wie viel Wasser er hält */
+  const mx = (typeof mixVon === 'function' && p.substrat !== 'wasser') ? mixVon(p) : null;
+  const mxSt = mx ? mixWasserStufe(mx.teile) : null;
+  /* Entspricht der Mix genau seiner Vorlage, steht ihr Name da */
+  const subLang = !!(mx && mx.eigen && !mixIstVorlage(mx.teile, p.substrat));
+  const subZeile = subLang ? esc(mixKurzText(mx.teile)) : esc(subIst);
   const ablIst = p.ablauf === 'ja' ? 'Abzugsloch vorhanden'
     : p.ablauf === 'nein' ? 'kein Abzugsloch' : '';
   const um = (typeof ereignisse === 'function') ? ereignisse(p.id).find(e=>e.typ === 'umgetopft') : null;
@@ -15073,14 +15366,18 @@ function topfSubstratHTML(p){
   const datum = d => new Date(d+'T12:00:00').toLocaleDateString('de-DE',{day:'numeric', month:'long', year:'numeric'});
   return `<dl class="spec kb-werte">
       <dt>Topf</dt><dd>${cm ? cm + ' cm' + (form ? ' · ' + esc(form) : '') : '<span class="kb-leer">nicht eingetragen</span>'}</dd>
-      ${(subIst || ablIst) ? `<dt>Substrat</dt><dd>${[esc(subIst), esc(ablIst)].filter(Boolean).join(' · ')}</dd>` : ''}
+      ${(subZeile || ablIst) ? `<dt>Substrat</dt><dd>${subLang
+        ? subZeile + (ablIst ? `<span class="mix-zusatz">${esc(ablIst)}</span>` : '')
+        : [subZeile, esc(ablIst)].filter(Boolean).join(' · ')}${mxSt ? `<span class="mix-haelt">Hält Wasser ${mxSt.stufe}</span>` : ''}</dd>` : ''}
       <dt>Umgetopft</dt><dd>${um ? datum(um.datum) : '<span class="kb-leer">noch nicht eingetragen</span>'}</dd>
       ${misch ? `<dt>Mischung</dt><dd>${misch}</dd>` : ''}
     </dl>
     <div class="kb-aktionen">
       <button type="button" class="kb-link" data-do="topf-eintragen" data-p="${p.id}">${cm ? 'Topfgröße ändern' : 'Topfgröße eintragen'}</button>
+      ${p.substrat !== 'wasser' ? `<button type="button" class="kb-link" data-mix-do="auf" data-p="${p.id}" aria-expanded="false">${mx ? 'Substrat ändern' : 'Substrat eintragen'}</button>` : ''}
       ${misch ? `<button type="button" class="kb-link" data-do="substrat-fuer" data-p="${p.id}">Im Substratrechner öffnen</button>` : ''}
-    </div>`;
+    </div>
+    ${p.substrat !== 'wasser' && typeof karteMixHTML === 'function' ? karteMixHTML(p) : ''}`;
 }
 
 /* Licht am Platz im Reiter Standort. Nur angezeigt — auf das Gieß-
@@ -17108,6 +17405,7 @@ function formularLeeren(){
     const el = $('#'+x); if(el) el.selectedIndex = 0;
   });
   if(typeof alTopfZuruecksetzen === 'function') alTopfZuruecksetzen();
+  if(typeof MIX_ED !== 'undefined' && MIX_ED.anlegen){ MIX_ED.anlegen.teile = {}; mixEdZeichnen('anlegen'); }
   if($('#f-fotos')) $('#f-fotos').value = '';
   if(typeof AL_FOTOS !== 'undefined'){
     AL_FOTOS.forEach(f=>{
@@ -17995,6 +18293,8 @@ function alKnopfGruppe(selId){
       + (mitBild ? topfIcon(o.value) + '<span>' + text + '</span>' : text)
       + '</button>';
   }).join('');
+  /* 4.0-beta.15: der Mix unter den Substrat-Knöpfen zieht mit */
+  if(selId === 'f-substrat' && typeof alMixZeichnen === 'function') alMixZeichnen();
 }
 
 /* Topfart und Substrat stehen als Tabelle im Code, nicht als Liste im
@@ -18362,7 +18662,7 @@ function alZsfZeichnen(){
     + alZeile('Zustand', text('f-zustand'))
     + alZeile('Standort', ort)
     + alZeile('Topf', topfText)
-    + alZeile('Substrat', kopf('f-substrat'))
+    + alZeile('Substrat', (typeof alMixWert === 'function' && alMixWert()) ? mixKurzText(alMixWert()) : kopf('f-substrat'))
     + alZeile('Gießklasse', text('f-klasse'))
     + alZeile('Licht', text('f-sonne'))
     + alZeile('Für Katzen', alGiftText())
@@ -21775,6 +22075,7 @@ async function alSpeichern(){
     topf: imWasser ? '' : alTopfWert(),
     topfform: imWasser ? '' : ($('#f-topfform').value || ''),
     substrat: imWasser ? 'wasser' : ($('#f-substrat').value || ''),
+    mix: imWasser ? null : alMixWert(),
     ablauf: imWasser ? '' : ($('#f-ablauf').value || ''),
     /* Woher die sieben Steckbrieffelder stammen, hat Stufe 1 entschieden:
        Bibliothek, KI oder selbst eingetragen. */
@@ -24714,6 +25015,17 @@ function gmWieZeilen(weg, p){
 /* 4.0-beta.14 (F152, F154): die Probe vor dem Gießen, unter den Schritten
    des Kärtchens. Satz der Gießgruppe, im Winter der Wintersatz; ohne
    Pflanze oder bei Wasser- und Hydrokultur keiner. */
+/* 4.0-beta.15 (F158): Hat die Gruppe keinen eigenen Wintersatz, steht
+   der Satz der Klasse hinter der Probe, nicht an ihrer Stelle — „tiefer
+   prüfen“ ergibt ohne die Probe davor keinen Sinn. Gruppen mit
+   umgekehrtem Jahr behalten den bisherigen Weg. */
+function probeWinterVon(g, kl){
+  if(g && g.probeWinter) return g.probeWinter;
+  const probe = (g && g.probe) || kl.probe || '';
+  if(!kl.probeWinter) return probe;
+  if(g && g.umgekehrtesJahr) return kl.probeWinter;
+  return probe && probe !== kl.probeWinter ? probe + ' ' + kl.probeWinter : kl.probeWinter;
+}
 function gmWieProbe(weg, p){
   if(!p || weg === 'wasser' || weg === 'hydro') return '';
   const art = typeof giessartVon === 'function' ? giessartVon(p) : null;
@@ -24721,7 +25033,7 @@ function gmWieProbe(weg, p){
   const kl = KLASSEN[p.klasse] || {};
   const g = typeof gruppeVon === 'function' ? gruppeVon(p) : null;
   const winter = typeof sommer === 'function' ? !sommer() : false;
-  return (winter ? ((g && g.probeWinter) || kl.probeWinter || (g && g.probe) || kl.probe)
+  return (winter ? probeWinterVon(g, kl)
                  : ((g && g.probe) || kl.probe)) || '';
 }
 function gmWieZeigen(weg, id){
@@ -25176,7 +25488,7 @@ function giessHinweisFuer(p, ohneArt){
      der Wintersatz der Gruppe, dann der der Klasse. Ohne ihn verdraengte
      der Klassensatz den der Gruppe (Bromelie: „tiefer pruefen“). */
   const g = (typeof gruppeVon === 'function') ? gruppeVon(p) : null;
-  const probe = winter ? ((g && g.probeWinter) || kl.probeWinter || (g && g.probe) || kl.probe)
+  const probe = winter ? probeWinterVon(g, kl)
                        : ((g && g.probe) || kl.probe);
   if(probe) teile.push(probe);
 
@@ -29565,7 +29877,7 @@ function balken(name, ist, soll){
     <span class="sb-name">${esc(name)}</span>
     <span class="sb-bahn"><span class="sb-ist ${passt?'gut':''}" style="width:${b(ist)}"></span>
       <span class="sb-soll" style="left:${b(soll)}"></span></span>
-    <span class="sb-wert">${ist.toFixed(1).replace('.',',')}<i>/${soll}</i></span></div>`;
+    <span class="sb-wert">${ist.toFixed(1).replace('.',',')}<i>/${String(soll).replace('.',',')}</i></span></div>`;
 }
 
 /* Wohin das Ergebnis geschrieben wird. Der Umtopf-Assistent haengt
