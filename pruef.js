@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.10', w.__T('FASSUNG') === '4.0-beta.10', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.11', w.__T('FASSUNG') === '4.0-beta.11', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11180,13 +11180,13 @@ setTimeout(async () => {
     const regeln = stil.replace(/\/\*[\s\S]*?\*\//g, '').split('}').map(r => r.split('{')).filter(r => r.length === 2)
       .map(r => ({sel:r[0].trim(), rumpf:r[1]}));
 
-    /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet */
+    /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet; seit beta.11 23 (Gießmodus: Sammelkarten) */
     const SCH = ['ut-langzeit','ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-vollstaerke','ck-winterpause','ck-saison',
       'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-einfach','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
-      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an'];
+      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
-    pruef('beta.5: Alle 21 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 21 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 21, quelle.split('type="checkbox" role="switch"').length - 1);
+    pruef('beta.5: Alle 23 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 23 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 23, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -11582,9 +11582,10 @@ setTimeout(async () => {
       const literRoh = T(`gmPflanzenVonListe(gmListe).filter(function(p){ var g = gruppeVon(p).id; return g !== 'moorbeet' && g !== 'nepenthes'; })
         .reduce(function(s, p){ return s + wasserBedarf(p); }, 0)`);
       const literLeitung = String(Math.max(0.5, Math.ceil(literRoh * 2) / 2)).replace('.', ',') + ' l';
-      pruef('beta.9: Übersicht: Liter je Wasserart, auf 0,5 l aufgerundet', inh().indexOf('Leitungswasser</b></span><span class="gm-ue-wert">' + literLeitung) !== -1, literLeitung);
-      pruef('beta.9: Übersicht: Karnivoren stehen unter Osmose oder Regenwasser', /Osmose oder Regenwasser<\/b><\/span><span class="gm-ue-wert">[0-9,]+ l<\/span><\/p><p class="gm-ue-klein">2 Pflanzen/.test(inh()));
-      pruef('beta.9: Übersicht: fehlende Topfgrößen werden genannt', /Bei 2 Pflanzen fehlt die Topfgröße, dort geschätzt\./.test(inh()), (inh().match(/Bei \d+ Pflanze[^<]*/) || [''])[0]);
+      /* seit beta.11 (Plan G3): Wasser als eine Zeile */
+      pruef('beta.9: Übersicht: Liter je Wasserart, auf 0,5 l aufgerundet', inh().indexOf('<span class="gm-ue-wert">' + literLeitung + '</span> Leitungswasser') !== -1, literLeitung);
+      pruef('beta.9: Übersicht: Karnivoren stehen unter Osmose oder Regenwasser', /<span class="gm-ue-wert">[0-9,]+ l<\/span> Osmose oder Regenwasser/.test(inh()));
+      pruef('beta.9: Übersicht: fehlende Topfgrößen werden genannt', /<span class="gm-ue-geschaetzt">2 Töpfe geschätzt<\/span>/.test(inh()), (inh().match(/\d+ T[öo]pfe? geschätzt/) || [''])[0]);
       pruef('beta.9: Übersicht: nur die Gießwege von heute', /Tauchbad/.test(inh()) && /Von unten/.test(inh()) && /In den Trichter/.test(inh()) && /<b>Anstau<\/b>/.test(inh()) && !/Hydrokultur/.test(inh()));
       /* seit beta.10 (Plan G1) nur noch der Wasserstand */
       pruef('beta.9: Übersicht: beim Gefäß der Wasserstand', /<i>Wasserstand ca\. 2 cm<\/i>/.test(inh()));
@@ -11859,6 +11860,365 @@ setTimeout(async () => {
         var a = ${alt10}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
         gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
         sichern(); })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.11: Plan G2 und G3 — Artwissen beim Anlegen und auf der Karte,
+     Gießmodus-Übersicht und Sammelkarten. Jeder Test legt seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'raeume', 'giess', 'anzucht', 'orte', 'gelernteArten', 'kiModelle', 'kiModell'];
+    const alt11 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
+    const fetch0 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 5000))]);
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const kn = () => d.getElementById('gm-knoepfe').innerHTML;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const feld = id => d.getElementById(id).value;
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
+    w.__aufrufe = [];
+    w.__verzug = 10;
+    w.__foto = {}; w.__art = {};
+    const ok = text => ({status:200, body:{candidates:[{finishReason:'STOP', content:{parts:[{text:text}]}}]}});
+    const fotoAntwort = o => JSON.stringify(Object.assign({ART:'Testpflanze', BOTANISCH:'Testgattung g2art', MERKMALE:'keine',
+      SORTE:'keine', SORTE_BELEG:'keine', SORTEN_VERWECHSLUNG:'keine', SICHERHEIT:'hoch', FEHLT:'keine', VERWECHSLUNG:'keine',
+      SUBSTRAT:'Erde', TOPFART:'Kulturtopf', ABLAUF:'ja'}, o || {}));
+    const artVoll = {LICHT:'hell', GIESSKLASSE:'normal', GIESSART:'durchdringend', TYP:'Strauch',
+      SPEICHER:'kein Speicher', FROST:'10', WICHTIG:'keine', PFLEGE:'Im Frühjahr zurückschneiden', WINTERRUHE:'keine',
+      KATZEN:'unbedenklich, kein Gift bekannt', VERMEHRUNG:['Kopfsteckling | 80 | Frühjahr | Erde | 3 Wochen']};
+    const artAntwort = o => JSON.stringify(Object.assign({}, artVoll, o || {}));
+    w.__antwort = {'*': leib => ok(leib.contents[0].parts.some(p => p.inline_data) ? fotoAntwort(w.__foto) : artAntwort(w.__art))};
+    w.fetch = (u, o) => {
+      const url = String(u);
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe.push({u:url, leib:leib});
+      const a = w.__antwort['*'](leib);
+      return new Promise(res => setTimeout(() => res({ok:a.status === 200, status:a.status, json:()=>Promise.resolve(a.body)}), w.__verzug));
+    };
+    const posts = () => w.__aufrufe.filter(a => a.u.indexOf(':generateContent') > -1);
+    const istFoto = a => a.leib.contents[0].parts.some(p => p.inline_data);
+    const schemaVon = a => (a.leib.generationConfig || {}).responseSchema || null;
+    const modellVon = a => (a.u.match(/models\/([^:]+):/) || [])[1];
+    const start = (name) => T(`alStart(); neuWegSetzen('ki'); KI_BILDER.anlegen.length = 0;
+      KI_BILDER.anlegen.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'});
+      document.getElementById('f-name').value = ${JSON.stringify(name || '')}; 1`);
+    const anlegen = async () => { await haengt(T(`kiDirektLos('anlegen')`)); await warte(150); };
+    const MODELLE = `[{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}, {id:'models/gemini-3.8-flash', anzeige:'3.8 Flash', langsam:true},
+      {id:'models/gemini-3.5-flash-lite', anzeige:'3.5 Flash Lite'}, {id:'models/gemini-3.9-flash-lite', anzeige:'3.9 Flash Lite'}]`;
+    const promptVon = a => a.leib.contents[0].parts[0].text;
+    try {
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = ${MODELLE}; S.kiModell = 'models/gemini-3.5-flash-lite'; S.gelernteArten = {};
+        Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; }); kiModellZeichnen(); })()`);
+
+      /* ── G2: Felder direkt unter der Artwissen-Karte, „Ändern“/„Fertig“ (F130) ── */
+      const kasten = d.getElementById('al-bibzsf');
+      pruef('beta.11: Die Pflegefelder stehen direkt unter der Artwissen-Karte, vor Kultur und Topf',
+        !!kasten && kasten.nextElementSibling && kasten.nextElementSibling.id === 'al-luecke'
+        && kasten.nextElementSibling.nextElementSibling && kasten.nextElementSibling.nextElementSibling.id === 'al-pflege'
+        && !!(d.getElementById('al-pflege').compareDocumentPosition(d.getElementById('f-kultur')) & 4),
+        kasten && kasten.nextElementSibling ? kasten.nextElementSibling.id : 'kein Kasten');
+      w.__aufrufe = []; w.__foto = {}; w.__art = {};
+      start('Gtest');
+      await anlegen();
+      T('alStufeZeigen(4)');
+      const pk = () => d.querySelector('#al-bibzsf #btn-al-pflege-auf');
+      pruef('beta.11: Vorher sind die Felder zu, der Knopf heißt „Ändern“', d.getElementById('al-pflege').hidden === true && !!pk() && pk().textContent === 'Ändern',
+        pk() ? pk().textContent : 'kein Knopf');
+      pk().click();
+      pruef('beta.11: „Ändern“ öffnet die Felder und heißt dann „Fertig“', d.getElementById('al-pflege').hidden === false && pk().textContent === 'Fertig',
+        pk().textContent + ' ' + d.getElementById('al-pflege').hidden);
+      pk().click();
+      pruef('beta.11: „Fertig“ klappt sie wieder zu', d.getElementById('al-pflege').hidden === true && pk().textContent === 'Ändern', pk().textContent);
+
+      /* ── Lückenprüfung (F132) ── */
+      pruef('beta.11: Fehlt erkennt „unbekannt“ und Fehlendes, „keine“ ist eine Antwort',
+        T(`JSON.stringify(awFehlt({licht:'hell', klasse:'normal', giessart:'durchdringend', typ:'Kraut', frost:'unbekannt', wichtig:'keine', pflege:'x', winterruhe:'keine', katzen:'ja', vermehrung:'x'}, awArtFelder()))`) === '["speicher","frost"]',
+        T(`JSON.stringify(awFehlt({licht:'hell', klasse:'normal', giessart:'durchdringend', typ:'Kraut', frost:'unbekannt', wichtig:'keine', pflege:'x', winterruhe:'keine', katzen:'ja', vermehrung:'x'}, awArtFelder()))`));
+      pruef('beta.11: Eine ungültige Gießklasse zählt als fehlend', T(`awFehlt({klasse:'irgendwas'}, ['GIESSKLASSE']).join()`) === 'klasse');
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lueckenart'}; w.__art = {GIESSKLASSE:'unbekannt', TYP:'unbekannt', FROST:'unbekannt', GIESSART:'unbekannt'};
+      start('Lücke');
+      await anlegen();
+      T('alStufeZeigen(4)');
+      const lt = d.getElementById('al-bibzsf-liste').textContent;
+      pruef('beta.11: Die Karte nennt die Lücken in einer Zeile', /Es fehlen: Gießklasse, Gießart, Typ, Frost/.test(lt), lt.slice(0, 160));
+      pruef('beta.11: Fehlende Felder stehen als „fehlt“ in der Karte', d.querySelectorAll('#al-bibzsf-liste .aw-fehlt').length === 4
+        && [...d.querySelectorAll('#al-bibzsf-liste .aw-fehlt dd')].every(x => x.textContent === 'fehlt'), String(d.querySelectorAll('#al-bibzsf-liste .aw-fehlt').length));
+      pruef('beta.11: Eine fehlende Gießklasse steht als „fehlt“, nicht als Vorgabe B', [...d.querySelectorAll('#al-bibzsf-liste .aw-fehlt')].some(x => /^Gießklasse/.test(x.textContent))
+        && !/B — Normal/.test(lt), lt.slice(0, 200));
+      const lk = d.querySelector('#al-bibzsf [data-aw="luecke"]');
+      pruef('beta.11: Der Knopf nennt das stärkste schnelle Modell ohne Lite', !!lk && lk.textContent === 'Mit 3.6 Flash gezielt nachfragen', lk ? lk.textContent : 'kein Knopf');
+
+      /* „Weiter“ mit Lücken: erst Hinweis, dann weiter */
+      T('alWeiter()');
+      pruef('beta.11: Erstes „Weiter“ bleibt auf Stufe 4 mit rotem Rahmen und Hinweis', T('alStufe') === 4 && kasten.classList.contains('aw-rot')
+        && d.getElementById('al-luecke').hidden === false && /Es fehlen noch Angaben/.test(d.getElementById('al-luecke').textContent)
+        && !!d.querySelector('#al-luecke [data-aw="luecke"]') && !!d.querySelector('#al-luecke [data-aw="ohne"]'), String(T('alStufe')));
+
+      /* Von Hand gesetzt wird nie überschrieben; die Nachfrage füllt nur Lücken */
+      const typ = d.getElementById('f-typ');
+      typ.value = 'Meine Wuchsform'; typ.dispatchEvent(new w.Event('input', {bubbles:true}));
+      w.__aufrufe = []; w.__art = {TYP:'Kraut', FROST:'3', GIESSART:'schluck'};
+      d.querySelector('#al-luecke [data-aw="luecke"]').click();
+      await warte(150);
+      const p6 = posts();
+      pruef('beta.11: Die Nachfrage ist genau eine Anfrage ohne Foto beim stärksten Modell ohne Lite',
+        p6.length === 1 && !istFoto(p6[0]) && modellVon(p6[0]) === 'gemini-3.6-flash', p6.length + ' ' + (p6[0] ? modellVon(p6[0]) : ''));
+      pruef('beta.11: Sie fragt nur die fehlenden Felder', !!p6[0] && !!schemaVon(p6[0])
+        && Object.keys(schemaVon(p6[0]).properties).join() === 'GIESSKLASSE,GIESSART,FROST'
+        && /GIESSART:/.test(promptVon(p6[0])) && /FROST:/.test(promptVon(p6[0])) && !/LICHT:/.test(promptVon(p6[0])) && !/VERMEHRUNG:/.test(promptVon(p6[0])) && !/TYP:/.test(promptVon(p6[0])),
+        p6[0] && JSON.stringify(Object.keys((schemaVon(p6[0]) || {}).properties || {})));
+      pruef('beta.11: Die Antwort füllt nur Lücken, die Handeingabe bleibt', feld('f-typ') === 'Meine Wuchsform' && feld('f-giessart') === 'schluck'
+        && T('AW.werte.frost') === '3' && T('awFehltListe().length') === 0, feld('f-typ') + ' / ' + feld('f-giessart') + ' / ' + T('AW.werte.frost'));
+      pruef('beta.11: Ohne Lücken verschwinden Rahmen und Hinweis', !kasten.classList.contains('aw-rot') && d.getElementById('al-luecke').hidden === true
+        && /Nachgefragt bei 3\.6 Flash/.test(d.getElementById('al-bibzsf-liste').textContent));
+
+      /* Zweites „Weiter“ geht weiter; „Ohne weiter“ ebenso */
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lueckenzwei'}; w.__art = {FROST:'unbekannt'};
+      start('Lücke2');
+      await anlegen();
+      T('alStufeZeigen(4); alWeiter()');
+      const st1 = T('alStufe');
+      T('alWeiter()');
+      pruef('beta.11: Beim zweiten „Weiter“ geht es trotz Lücke weiter', st1 === 4 && T('alStufe') === 5, st1 + ' → ' + T('alStufe'));
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lueckendrei'}; w.__art = {FROST:'unbekannt'};
+      start('Lücke3');
+      await anlegen();
+      T('alStufeZeigen(4); alWeiter()');
+      klick('#al-luecke [data-aw="ohne"]');
+      pruef('beta.11: „Ohne weiter“ geht auf die letzte Stufe', T('alStufe') === 5, String(T('alStufe')));
+
+      /* ── Gattungswissen Anstau (F131) ── */
+      w.__aufrufe = []; w.__foto = {ART:'Sonnentau', BOTANISCH:'Drosera prolifera × schizandra'}; w.__art = {GIESSKLASSE:'durstig'};
+      start('Andi');
+      await anlegen();
+      T('alStufeZeigen(4)');
+      pruef('beta.11: KI sagt „durstig“ bei Drosera: Wahl „KI und Gattungswissen weichen ab“',
+        T('JSON.stringify(AW.offen.klasse)') === JSON.stringify({ki:'A', gat:'S'}) && /KI und Gattungswissen weichen ab/.test(d.getElementById('al-bibzsf-liste').textContent)
+        && !!d.querySelector('#al-bibzsf [data-aw="wahl"][data-q="gat"]'), T('JSON.stringify(AW.offen)'));
+      klick('#al-bibzsf [data-aw="wahl"][data-q="gat"]');
+      pruef('beta.11: „Gattungswissen“ setzt Gießklasse S', feld('f-klasse') === 'S' && T('JSON.stringify(AW.offen)') === '{}' && d.getElementById('al-anstau').hidden === false, feld('f-klasse'));
+      w.__aufrufe = []; w.__foto = {ART:'Testschlauch', BOTANISCH:'Sarracenia Testhybride'}; w.__art = {GIESSKLASSE:'unbekannt'};
+      start('Sarra');
+      await anlegen();
+      T('alStufeZeigen(4)');
+      pruef('beta.11: Ohne Gießklasse der KI setzt die App S aus dem Gattungswissen', feld('f-klasse') === 'S' && T('AW.ausGattung') === true
+        && /aus dem Gattungswissen/.test(d.getElementById('al-bibzsf-liste').textContent) && T('awFehltFeld("klasse")') === false, feld('f-klasse'));
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung keinegattung'}; w.__art = {GIESSKLASSE:'durstig'};
+      start('Normal');
+      await anlegen();
+      pruef('beta.11: Andere Gattungen bleiben bei der KI', feld('f-klasse') === 'A' && T('JSON.stringify(AW.offen)') === '{}', feld('f-klasse'));
+
+      /* ── Lernen der Handänderung und Zeile auf der letzten Stufe (F133) ── */
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lernart'}; w.__art = {};
+      start('Lerni');
+      await anlegen();
+      T('alStufeZeigen(4)');
+      pk().click();
+      klick('#f-klasse-knoepfe [data-alwert="A"]');
+      T('alStufeZeigen(5)');
+      const lz = d.getElementById('al-lern');
+      pruef('beta.11: Die letzte Stufe nennt, was als Artwissen gemerkt wird', !!lz && lz.hidden === false
+        && /Als Artwissen für .*Testgattung lernart.* gemerkt: Gießklasse A · Licht hell/.test(lz.textContent), lz ? lz.textContent : 'keine Zeile');
+      T('alSpeichern()'); await warte(120);
+      pruef('beta.11: Die gelernte Art übernimmt die Handänderung', T(`(S.gelernteArten['testgattung lernart'] || {}).klasse`) === 'A',
+        T(`JSON.stringify(S.gelernteArten['testgattung lernart'] || null)`));
+      w.__aufrufe = []; w.__foto = {BOTANISCH:'Testgattung lernart'};
+      start('Lerni2');
+      await anlegen();
+      pruef('beta.11: Die nächste Pflanze der Art bekommt sie ohne Anfrage', posts().length === 1 && feld('f-klasse') === 'A', posts().length + ' ' + feld('f-klasse'));
+      T('formularLeeren(); modalZu("anleg-modal")');
+      await warte(80);
+
+      /* ── Modellwahl: Hinweis bei Lite nur in den Einstellungen ── */
+      T('kiModellZeichnen()');
+      const opt = [...d.querySelectorAll('.kimodell.feld-knopf .ki-modell-wahl option')].map(o => o.textContent);
+      const optAl = [...d.querySelectorAll('#ki-direkt-anlegen .ki-modell-wahl option, #anleg-modal .ki-modell-wahl option')].map(o => o.textContent);
+      pruef('beta.11: Einstellungen: Lite mit „schnell, aber lückenhafter“', opt.some(t => /3\.5 Flash Lite · schnell, aber lückenhafter/.test(t)) && !opt.some(t => /3\.6 Flash ·/.test(t)), opt.join(' | '));
+      pruef('beta.11: Andere Modellwahlen bleiben kurz', optAl.length > 0 && !optAl.some(t => /lückenhafter/.test(t)), optAl.join(' | '));
+
+      /* ── Karte → Bearbeiten → Speichern: „Artwissen ändern?“ (F133) ── */
+      T(`S.gelernteArten = {}; S.eigene.push({id:'G11K', eigen:true, name:'Kartenprobe', art:'Probe', botanisch:'Testgattung kartenart', sorte:'',
+        klasse:'A', sonne:'hell', typ:'Strauch', quellen:{}}); 1`);
+      const box = d.createElement('div'); box.id = 'b-G11K';
+      box.innerHTML = T(`bearbeitenInnenHTML(allePflanzen().find(function(p){ return p.id === 'G11K'; }))`);
+      d.body.appendChild(box);
+      box.querySelector('[data-e="klasse"]').value = 'S';
+      box.querySelector('[data-do="bearb-save"]').click();
+      const awm = d.getElementById('aw-aendern');
+      pruef('beta.11: Nach dem Speichern fragt „Artwissen ändern?“ mit der Änderung', T("modalOffen('aw-aendern')") === true
+        && /Gießklasse: A → S/.test(d.getElementById('aw-aendern-liste').textContent) && /Neue Pflanzen dieser Art/.test(d.getElementById('aw-aendern-text').textContent),
+        d.getElementById('aw-aendern-liste').textContent);
+      pruef('beta.11: Die Pflanze ist schon gespeichert', T(`allePflanzen().find(function(p){ return p.id === 'G11K'; }).klasse`) === 'S');
+      pruef('beta.11: Gießklasse S von Hand bringt den Anstau, die Gießart bleibt automatisch',
+        T(`(function(){ var p = allePflanzen().find(function(p){ return p.id === 'G11K'; }); return !p.giessart && giessartVon(p) === 'anstau'; })()`) === true,
+        T(`allePflanzen().find(function(p){ return p.id === 'G11K'; }).giessart`));
+      klick('#aw-aendern-ja');
+      await warte(60);
+      pruef('beta.11: „Ja, Artwissen ändern“ schreibt die gelernte Art', T(`(S.gelernteArten['testgattung kartenart'] || {}).klasse`) === 'S'
+        && T(`(S.gelernteArten['testgattung kartenart'] || {}).sonne`) === 'hell' && T("modalOffen('aw-aendern')") === false,
+        T(`JSON.stringify(S.gelernteArten['testgattung kartenart'] || null)`));
+      box.innerHTML = T(`bearbeitenInnenHTML(allePflanzen().find(function(p){ return p.id === 'G11K'; }))`);
+      box.querySelector('[data-e="sonne"]').value = 'voll';
+      box.querySelector('[data-do="bearb-save"]').click();
+      klick('#aw-aendern-nein');
+      await warte(60);
+      pruef('beta.11: „Nur diese Pflanze“ lässt die gelernte Art', T(`S.gelernteArten['testgattung kartenart'].sonne`) === 'hell'
+        && T(`allePflanzen().find(function(p){ return p.id === 'G11K'; }).sonne`) === 'voll' && T("modalOffen('aw-aendern')") === false);
+      T(`allePflanzen().find(function(p){ return p.id === 'G11K'; }).botanisch = ''; 1`);
+      box.innerHTML = T(`bearbeitenInnenHTML(allePflanzen().find(function(p){ return p.id === 'G11K'; }))`);
+      box.querySelector('[data-e="klasse"]').value = 'B';
+      box.querySelector('[data-do="bearb-save"]').click();
+      pruef('beta.11: Ohne botanischen Namen kommt keine Frage', T("modalOffen('aw-aendern')") === false);
+      box.innerHTML = T(`bearbeitenInnenHTML(allePflanzen().find(function(p){ return p.id === 'G11K'; }))`);
+      box.querySelector('[data-e="notiz"]').value = 'nur eine Notiz';
+      T(`allePflanzen().find(function(p){ return p.id === 'G11K'; }).botanisch = 'Testgattung kartenart'; 1`);
+      box.innerHTML = T(`bearbeitenInnenHTML(allePflanzen().find(function(p){ return p.id === 'G11K'; }))`);
+      box.querySelector('[data-e="notiz"]').value = 'nur eine Notiz';
+      box.querySelector('[data-do="bearb-save"]').click();
+      pruef('beta.11: Eine Notiz allein ist kein Artwissen, keine Frage', T("modalOffen('aw-aendern')") === false);
+      box.remove();
+      w.fetch = fetch0;
+
+      /* ── G3: Übersicht ── */
+      T(`(function(){
+        let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {};
+        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'pflanze'});
+        delete S.giess.gwOffen; delete S.giess.sammelU; delete S.giess.sammelAz;
+        var r = raumAnlegen('Prüfraum G11');
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:id, art:id, klasse:'B', sonne:'indirekt', raum:r}, o); };
+        S.eigene = [
+          pf('H1', {botanisch:'Monstera deliciosa', topf:'14'}),
+          pf('H2', {botanisch:'Phalaenopsis amabilis', typ:'Orchidee'}),
+          pf('H3', {botanisch:'Dionaea muscipula', klasse:'S'}),
+          pf('H4', {botanisch:'Sarracenia purpurea', klasse:'S'}),
+          pf('H5', {botanisch:'Nepenthes alata', klasse:'A', topf:'12'})
+        ];
+        S.water = {};
+        S.eigene.forEach(function(p){ S.water[p.id] = [vor(60)]; });
+        S.zustand = {};
+        sichern();
+      })()`);
+      T('gmStarten()');
+      const ue = inh();
+      const iW = ue.indexOf('gm-ue-wasser'), iG = ue.indexOf('gm-gw-sammel'), iH = ue.indexOf('>Heute dran<');
+      pruef('beta.11: Übersicht: Wasser, dann Gießwege, dann „Heute dran“', iW > -1 && iG > iW && iH > iG && ue.indexOf('Was du brauchst') === -1, [iW, iG, iH].join(','));
+      const wz = (d.querySelector('#gm-inhalt .gm-ue-wasser') || {}).textContent || '';
+      pruef('beta.11: Wasser als eine Zeile mit Liter je Wasserart und Schätzung am Ende',
+        /^Wasser: [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser) · [0-9,]+ l (Leitungswasser|Osmose oder Regenwasser) ?\d+ T(ö|o)pfe? geschätzt$/.test(wz.replace(/\s+/g, ' ').trim())
+        && /Leitungswasser/.test(wz) && /Osmose/.test(wz) && d.querySelectorAll('#gm-inhalt .gm-ue-wasser').length === 1, wz.replace(/\s+/g, ' ').trim());
+      const gl = () => d.getElementById('gm-gw-liste');
+      const gs = () => d.querySelector('#gm-inhalt [data-gm-gw]');
+      pruef('beta.11: Gießwege sind eingeklappt, eine Zeile mit Icons und Zahlen', !!gs() && gl().hidden === true && gs().getAttribute('aria-expanded') === 'false'
+        && gs().querySelectorAll('.gm-gw-chip svg.gm-ico').length >= 2, gs() ? gs().textContent.replace(/\s+/g, ' ') : 'keine Zeile');
+      const zahlWege = d.querySelectorAll('#gm-gw-liste .gm-gw-zeile').length;
+      pruef('beta.11: In Klartext steht „Gießwege: Zahl“', new RegExp('<span class="gm-wort">: ' + zahlWege + '</span>').test(inh())
+        && /html\[data-design="klartext"\] \.gm-gw-chips\{display:none\}/.test(stil), String(zahlWege));
+      gs().click();
+      pruef('beta.11: Antippen klappt die Gießwege auf und merkt es sich', gl().hidden === false && gs().getAttribute('aria-expanded') === 'true' && T('S.giess.gwOffen') === true);
+      T("modalZu('giessmodus')"); await warte(60);
+      T('gmStarten()');
+      pruef('beta.11: Beim nächsten Start bleiben sie offen', gl().hidden === false);
+      gs().click();
+      pruef('beta.11: Noch ein Tipp klappt sie zu', gl().hidden === true && T('S.giess.gwOffen') === false);
+
+      /* ── Schalter in Einstellungen → Wasser ── */
+      const su = d.getElementById('ck-gm-sammel-u'), sz = d.getElementById('ck-gm-sammel-az');
+      T('giessCenterZeichnen()');
+      pruef('beta.11: Zwei Schalter unter Wasser, beide an', !!su && !!sz && !!su.closest('#wasser-sec') && !!sz.closest('#wasser-sec')
+        && su.getAttribute('role') === 'switch' && su.checked && sz.checked);
+      pruef('beta.11: Sammelkarte an: eine Untersetzer-Karte mit beiden', T('JSON.stringify(gmListe.filter(function(x){ return x.untersetzer; }).map(function(x){ return x.pflanzen.length; }))') === '[2]');
+      T("modalZu('giessmodus')"); await warte(60);
+      su.checked = false; su.dispatchEvent(new w.Event('change', {bubbles:true}));
+      pruef('beta.11: Schalter aus wird gespeichert', T('S.giess.sammelU') === false);
+
+      /* ── Untersetzer einzeln ── */
+      T('gmStarten()');
+      const uk = JSON.parse(T('JSON.stringify(gmListe.map(function(x, i){ return x.untersetzer ? {i:i, n:x.pflanzen.length, e:!!x.einzeln, id:x.pflanzen[0].id} : null; }).filter(Boolean))'));
+      pruef('beta.11: Einzeln: jede Anstau-Pflanze eine eigene Karte am Ende des Laufwegs', uk.length === 2 && uk.every(x => x.n === 1 && x.e)
+        && uk[0].i === T('gmListe.length') - 2, JSON.stringify(uk));
+      pruef('beta.11: Übersicht zählt beide Untersetzer', /Heute: [^<]*2 Untersetzer/.test(inh()) && /Untersetzer · 2/.test(inh()), (inh().match(/Heute:[^<]*/) || [''])[0]);
+      T(`gmIndex = ${uk[0].i}; gmZeichnen()`);
+      pruef('beta.11: Einzelkarte mit „Aufgefüllt“, „War schon leer“, „Noch Wasser drin“ und „Später“', /data-gm-u="auf"/.test(inh()) && /data-gm-u="leer"/.test(inh()) && /data-gm-u="voll"/.test(inh())
+        && /data-gm="urest">Später</.test(kn()), kn());
+      const vorLog = T(`giessLog('${uk[0].id}').length`);
+      klick('[data-gm-u="auf"]');
+      pruef('beta.11: „Aufgefüllt“ geht gleich zur nächsten Karte', T('gmIndex') === uk[1].i && T(`giessLog('${uk[0].id}').length`) === vorLog + 1, String(T('gmIndex')));
+      klick('#gm-rueck');
+      pruef('beta.11: Rückgängig holt die Einzelkarte zurück, ohne Eintrag', T('gmIndex') === uk[0].i && /data-gm-u="auf"/.test(inh()) && T(`giessLog('${uk[0].id}').length`) === vorLog);
+      klick('[data-gm-u="leer"]');
+      klick('[data-gm="urest"]');
+      pruef('beta.11: Abschluss zählt den Untersetzer und das Später', T('gmPhase') === 'ende' && /1 Untersetzer nachgesehen/.test(inh()) && /1 übersprungen/.test(inh()), (inh().match(/<p class="gm-art">[^<]*/) || [''])[0]);
+      T("modalZu('giessmodus')"); await warte(60);
+      su.checked = true; su.dispatchEvent(new w.Event('change', {bubbles:true}));
+
+      /* ── Anzucht als Sammelkarte ── */
+      T(`(function(){
+        S.eigene = []; S.water = {};
+        var alt = iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 30));
+        ['Glas A', 'Glas B'].forEach(function(n){
+          var g = azGefaessAnlegen({name:n, medium:'wasser', start:alt});
+          azGruppeAnlegen({gefaess:g.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'});
+          g.start = alt; g.gewechselt = [alt];
+        });
+        sichern();
+      })()`);
+      T('gmStarten()');
+      pruef('beta.11: Sammelkarte an: eine Anzucht-Karte mit beiden Gläsern', T('gmListe.length') === 1 && T('!!gmListe[0].sammel') === true && T('gmListe[0].eintraege.length') === 2,
+        T('JSON.stringify(gmListe.map(function(x){ return x.sammel ? "S" + x.eintraege.length : x.name; }))'));
+      pruef('beta.11: Übersicht nennt beide Gläser', /Heute: 2 Anzucht/.test(inh()) && /Anzucht · 2/.test(inh()));
+      klick('[data-gm="los"]');
+      const ref0 = T('gmListe[0].eintraege[0].ref'), ref1 = T('gmListe[0].eintraege[1].ref');
+      pruef('beta.11: Eine Zeile je Glas mit Tat und „Später“, unten „Alle später“', d.querySelectorAll('#gm-inhalt [data-gm-azz]').length === 2
+        && d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length === 2 && d.querySelectorAll('#gm-inhalt [data-gm-az="spaeter"]').length === 2
+        && /data-gm="azrest">Alle später</.test(kn()) && /Wasser gewechselt/.test(inh()), kn());
+      klick('[data-gm-az="azja"][data-i="0"]');
+      pruef('beta.11: Die Tat trägt den Wechsel ein, die Karte bleibt stehen', T(`azGefaess('${ref0}').gewechselt.indexOf(iso(HEUTE)) > -1`) === true && T('gmIndex') === 0
+        && /✓ Wasser gewechselt/.test(inh()) && /data-gm="azrest">Rest später</.test(kn()), kn());
+      klick('[data-gm="azrest"]');
+      pruef('beta.11: „Rest später“ schließt ab: eine versorgt, eine später', T('gmPhase') === 'ende' && /1 Anzucht versorgt/.test(inh()) && /1 übersprungen/.test(inh()), (inh().match(/<p class="gm-art">[^<]*/) || [''])[0]);
+      klick('#gm-rueck');
+      pruef('beta.11: Rückgängig nimmt „Rest später“ zurück', T('gmPhase') === 'karte' && d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length === 1);
+      klick('#gm-rueck');
+      pruef('beta.11: Noch einmal Rückgängig nimmt den Wechsel zurück', d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length === 2
+        && T(`azGefaess('${ref0}').gewechselt.indexOf(iso(HEUTE))`) === -1);
+      klick('[data-gm="azrest"]');
+      pruef('beta.11: „Alle später“ schließt mit zwei übersprungen ab', T('gmPhase') === 'ende' && /2 übersprungen/.test(inh()), (inh().match(/<p class="gm-art">[^<]*/) || [''])[0]);
+      klick('#gm-rueck');
+      pruef('beta.11: Rückgängig nimmt „Alle später“ als Ganzes zurück', T('gmPhase') === 'karte' && d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length === 2,
+        String(d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length));
+      klick('[data-gm-az="spaeter"][data-i="0"]');
+      klick('[data-gm-az="azja"][data-i="1"]');
+      pruef('beta.11: Sind alle Zeilen gemeldet, heißt der Knopf „Weiter“', /data-gm="uweiter">Weiter</.test(kn()));
+      klick('[data-gm="uweiter"]');
+      const neuZeile = d.querySelector(`#gm-inhalt [data-gm-neu][data-id="az:gefaess:${ref0}"]`);
+      pruef('beta.11: Abschluss listet die spätere Anzucht zum Neu-Melden', !!neuZeile);
+      if(neuZeile) neuZeile.click();
+      pruef('beta.11: Neu melden zeigt nur diese Zeile offen', d.querySelectorAll('#gm-inhalt [data-gm-az="azja"]').length === 1
+        && !!d.querySelector(`#gm-inhalt [data-gm-azz="az:gefaess:${ref0}"] [data-gm-az="azja"]`) && kn().trim() === '');
+      klick('[data-gm-az="azja"]');
+      pruef('beta.11: Danach wieder der Abschluss mit zwei versorgt', T('gmPhase') === 'ende' && /2 Anzuchten versorgt/.test(inh()) && T(`azGefaess('${ref1}').gewechselt.indexOf(iso(HEUTE)) > -1`) === true);
+      T("modalZu('giessmodus')"); await warte(60);
+      sz.checked = false; sz.dispatchEvent(new w.Event('change', {bubbles:true}));
+      T(`(function(){ var alt = iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 30)); anzuchtDaten().gefaesse.forEach(function(g){ g.gewechselt = [alt]; }); sichern(); })()`);
+      T('gmStarten()');
+      pruef('beta.11: Schalter aus: jedes Glas eine eigene Karte', T('gmListe.length') === 2 && T('gmListe.every(function(x){ return x.anzucht && !x.sammel; })') === true,
+        T('JSON.stringify(gmListe.map(function(x){ return x.sammel ? "S" : x.name; }))'));
+      T("modalZu('giessmodus')"); await warte(60);
+    } catch(e) {
+      pruef('beta.11: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      w.fetch = fetch0;
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        var a = ${alt11}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
+        gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte';
+        kiSchluesselSetzen(''); formularLeeren(); AW = null;
+        Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; });
+        sichern(); })()`);
+      w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
     }
   }
 

@@ -4294,6 +4294,37 @@ html[data-design] .gm-ut-zeile.fertig .gm-ut-text b{color:var(--schrift-2)}
 html[data-design] .gm-ende{margin:var(--a-4, 16px) 0 10px}
 html[data-design] .gm-ende-liste{margin:0}
 html[data-design] .gm-ende .gm-ue-klein{margin:8px 4px 0}
+/* ══ Plan G2 (4.0-beta.11): Artwissen-Karte mit Lücken, Fenster „Artwissen ändern?“ ══ */
+html[data-design] .al-bibzsf.aw-rot{border:2px solid var(--alarm);box-shadow:0 0 0 2px color-mix(in srgb, var(--alarm) 18%, transparent)}
+html[data-design] .al-zsf .aw-fehlt dd{color:var(--alarm);font-weight:600}
+html[data-design] .aw-luecke{margin:0 0 8px;font-family:var(--f-body);font-size:var(--t-m);line-height:1.45;color:var(--alarm)}
+html[data-design] .aw-luecke-tools{margin:0 0 10px}
+html[data-design] .aw-luecke-meld{margin:0 0 8px}
+html[data-design] .aw-luecke-hinweis{margin:10px 0 18px;padding:12px 13px;border-radius:var(--r-mittel);background:var(--fl-karte);border:1px solid var(--alarm)}
+html[data-design] .aw-luecke-hinweis p{margin:0 0 10px;font-family:var(--f-body);font-size:var(--t-m);line-height:1.45}
+html[data-design] #al-pflege{margin-top:12px}
+html[data-design] .al-lern{margin:10px 0 0}
+html[data-design] .aw-aendern-liste{margin:0 0 14px;padding-left:20px;font-family:var(--f-body);font-size:var(--t-m);line-height:1.5}
+html[data-design="klartext"] .al-bibzsf.aw-rot{border-width:3px}
+/* ══ Plan G3 (4.0-beta.11): Übersicht mit Wasser-Zeile, Gießwege eingeklappt ══ */
+html[data-design] .gm-ue > .ein-karte.gm-ue-k{margin-bottom:var(--a-4, 16px)}
+html[data-design] .gm-ue-wasser > p{flex-wrap:wrap}
+html[data-design] .gm-ue-wasser .gm-ue-wert{font-weight:600}
+html[data-design] .gm-ue-geschaetzt{flex:0 0 auto;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design="klartext"] .gm-ue-geschaetzt{font-size:var(--t-m);color:var(--schrift)}
+html[data-design] .gm-ue-k > .gm-gw-sammel{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);border:0;border-radius:0;
+  background:none;color:var(--schrift);text-align:left;cursor:pointer;font:inherit}
+html[data-design] .gm-gw-s-t{flex:0 0 auto;font-family:var(--f-body);font-size:var(--t-m)}
+html[data-design] .gm-gw-s-t b{font-weight:600}
+html[data-design] .gm-gw-chips{flex:1 1 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 10px;min-width:0}
+html[data-design] .gm-gw-chip{display:inline-flex;align-items:center;gap:2px;font-family:var(--f-body);font-size:var(--t-s);font-variant-numeric:tabular-nums}
+html[data-design] .gm-gw-chip .gm-ico{width:26px;height:26px}
+html[data-design] .gm-gw-chip b{font-weight:600}
+html[data-design="klartext"] .gm-gw-chips{display:none}
+html[data-design="klartext"] .gm-gw-s-t{flex:1 1 auto}
+html[data-design] .gm-gw-liste[hidden]{display:none}
+html[data-design] .gm-gw-liste{border-top:1px solid var(--linie)}
+html[data-design="klartext"] .gm-gw-liste{border-top:2px solid var(--schrift)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9905,8 +9936,16 @@ document.addEventListener('click', e=>{
     }
     /* Das Intervall kommt aus der Gießklasse und wird nicht kopiert —
        eine geänderte Klasse wirkt dadurch sofort. */
+    const vorAw = Object.assign({}, allePflanzen().find(x=>x.id === id) || {});
+    /* 4.0-beta.11: Ohne eigene Wahl zeigt das Feld Gießart den automatischen
+       Weg. Unverändert gespeichert schrieb es ihn fest, und eine geänderte
+       Gießklasse wirkte nicht mehr (Klasse S ohne Anstau, belegt in jsdom). */
+    if(Object.prototype.hasOwnProperty.call(felder, 'giessart') && !vorAw.giessart
+       && typeof giessartRaten === 'function' && felder.giessart === giessartRaten(vorAw)) delete felder.giessart;
     aenderungSetzen(id, felder);
     render();
+    /* 4.0-beta.11 (F133): Artwissen geändert? Dann die Art mitändern lassen. */
+    if(typeof awKarteFragen === 'function') awKarteFragen(vorAw, allePflanzen().find(x=>x.id === id));
     return;
   }
   if(a === 'bearb-weg'){
@@ -11067,6 +11106,16 @@ function pflanzeEntfernen(id){
         <button data-haerte="">Unbekannt</button>
       </div>
       <p class="fhint" id="haerte-text"></p>
+
+      <p class="ein-abschnitt">Gießmodus</p>
+      <div class="ein-karte">
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="ck-gm-sammel-u"> <span class="lab" style="display:inline">Untersetzer-Pflanzen auf einer Sammelkarte</span></label>
+      <p class="fhint" data-erkl="Aus: Jede Anstau-Pflanze bekommt im Gießmodus eine eigene Karte. Gilt ab dem nächsten Start des Gießmodus.">Aus: Jede Anstau-Pflanze bekommt im Gießmodus eine eigene Karte. Gilt ab dem nächsten Start des Gießmodus.</p>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="ck-gm-sammel-az"> <span class="lab" style="display:inline">Anzucht auf einer Sammelkarte</span></label>
+      <p class="fhint" data-erkl="Aus: Jedes Glas und jedes Anzuchthaus bekommt eine eigene Karte. Gilt ab dem nächsten Start des Gießmodus.">Aus: Jedes Glas und jedes Anzuchthaus bekommt eine eigene Karte. Gilt ab dem nächsten Start des Gießmodus.</p>
+      </div>
     </div>
   </section>
 
@@ -11827,47 +11876,7 @@ function pflanzeEntfernen(id){
           <div class="al-zsf" id="al-bibzsf-liste"></div>
           <div class="tools" id="al-bibzsf-tools"><button type="button" id="btn-al-pflege-auf">Ändern</button></div>
         </div>
-        <div class="al-feld">
-          <span class="lab">Wie steht sie?</span>
-          <select id="f-kultur" hidden>
-            <option value="erde">In Erde — normaler Topf mit Substrat</option>
-            <option value="wasser">Im Wasserglas — Wasserkultur, nur Wurzeln im Wasser</option>
-            <option value="hydro">In Blähton — Hydrokultur, Pon oder Seramis</option>
-          </select>
-          <div class="al-knoepfe" id="f-kultur-knoepfe"></div>
-          <p class="fhint" id="f-kultur-hint"></p>
-        </div>
-        <div id="al-topf">
-          <div class="al-feld">
-            <span class="lab">Topfart</span>
-            <select id="f-topfform" data-bild="topf" hidden></select>
-            <div class="al-knoepfe" id="f-topfform-knoepfe"></div>
-          </div>
-          <div class="al-feld">
-            <span class="lab">Topfdurchmesser</span>
-            <label class="topf-schieber">
-              <span class="lab">Oben gemessen: <b id="f-topf-wert">nicht angegeben</b></span>
-              <input id="f-topf" type="range" min="5" max="80" step="1" value="14"
-                aria-label="Topfdurchmesser in Zentimetern">
-            </label>
-            <p class="topf-ergebnis" id="f-topf-ergebnis"></p>
-            <span class="fhint">Zählt erst, wenn du den Schieber bewegst. Ohne Angabe rechnet die App mit einem Mittelwert.</span>
-          </div>
-          <div class="al-feld">
-            <span class="lab">Substrat</span>
-            <select id="f-substrat" hidden></select>
-            <div class="al-knoepfe" id="f-substrat-knoepfe"></div>
-          </div>
-          <div class="al-feld">
-            <span class="lab">Abzugsloch</span>
-            <select id="f-ablauf" hidden>
-              <option value="">Keine Angabe</option>
-              <option value="ja">Ja — Wasser kann ablaufen</option>
-              <option value="nein">Nein — geschlossener Boden</option>
-            </select>
-            <div class="al-knoepfe" id="f-ablauf-knoepfe"></div>
-          </div>
-        </div>
+        <div class="aw-luecke-hinweis" id="al-luecke" hidden></div>
         <div id="al-pflege">
           <div class="al-feld">
             <span class="lab">Gießklasse</span>
@@ -11931,6 +11940,47 @@ function pflanzeEntfernen(id){
             </div>
           </details>
         </div>
+        <div class="al-feld">
+          <span class="lab">Wie steht sie?</span>
+          <select id="f-kultur" hidden>
+            <option value="erde">In Erde — normaler Topf mit Substrat</option>
+            <option value="wasser">Im Wasserglas — Wasserkultur, nur Wurzeln im Wasser</option>
+            <option value="hydro">In Blähton — Hydrokultur, Pon oder Seramis</option>
+          </select>
+          <div class="al-knoepfe" id="f-kultur-knoepfe"></div>
+          <p class="fhint" id="f-kultur-hint"></p>
+        </div>
+        <div id="al-topf">
+          <div class="al-feld">
+            <span class="lab">Topfart</span>
+            <select id="f-topfform" data-bild="topf" hidden></select>
+            <div class="al-knoepfe" id="f-topfform-knoepfe"></div>
+          </div>
+          <div class="al-feld">
+            <span class="lab">Topfdurchmesser</span>
+            <label class="topf-schieber">
+              <span class="lab">Oben gemessen: <b id="f-topf-wert">nicht angegeben</b></span>
+              <input id="f-topf" type="range" min="5" max="80" step="1" value="14"
+                aria-label="Topfdurchmesser in Zentimetern">
+            </label>
+            <p class="topf-ergebnis" id="f-topf-ergebnis"></p>
+            <span class="fhint">Zählt erst, wenn du den Schieber bewegst. Ohne Angabe rechnet die App mit einem Mittelwert.</span>
+          </div>
+          <div class="al-feld">
+            <span class="lab">Substrat</span>
+            <select id="f-substrat" hidden></select>
+            <div class="al-knoepfe" id="f-substrat-knoepfe"></div>
+          </div>
+          <div class="al-feld">
+            <span class="lab">Abzugsloch</span>
+            <select id="f-ablauf" hidden>
+              <option value="">Keine Angabe</option>
+              <option value="ja">Ja — Wasser kann ablaufen</option>
+              <option value="nein">Nein — geschlossener Boden</option>
+            </select>
+            <div class="al-knoepfe" id="f-ablauf-knoepfe"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Stufe 5: Bilder, Notizen, Abschluss -->
@@ -11953,6 +12003,7 @@ function pflanzeEntfernen(id){
         </div>
         <p class="al-frage" style="font-size:var(--t-l);margin-top:22px">Das wird angelegt</p>
         <div class="al-zsf" id="al-zsf"></div>
+        <p class="fhint al-lern" id="al-lern" hidden></p>
         <div class="tools"><button id="btn-neu-leeren" type="button">Formular leeren</button></div>
       </div>
 
@@ -12048,6 +12099,18 @@ function pflanzeEntfernen(id){
       <button id="km-save" class="haupt">Übernehmen</button>
       <button id="km-std">Zurücksetzen</button>
       <button id="km-zu">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div id="aw-aendern" class="modal" role="dialog" aria-modal="true" aria-labelledby="aw-aendern-titel" hidden>
+  <div class="modal-box aw-aendern-box">
+    <h3 id="aw-aendern-titel">Artwissen ändern?</h3>
+    <p id="aw-aendern-text"></p>
+    <ul class="aw-aendern-liste" id="aw-aendern-liste"></ul>
+    <div class="tools">
+      <button id="aw-aendern-ja" class="haupt">Ja, Artwissen ändern</button>
+      <button id="aw-aendern-nein">Nur diese Pflanze</button>
     </div>
   </div>
 </div>
@@ -12175,7 +12238,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.10';
+const FASSUNG = '4.0-beta.11';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -17886,6 +17949,7 @@ function alBibZsfZeichnen(){
   if(typeof AW !== 'undefined' && !AW && typeof gewaehlteArt !== 'undefined' && gewaehlteArt)
     AW = {quelle:'bib', bib:gewaehlteArt, fuer:{bot:gewaehlteArt.bot, art:gewaehlteArt.de, sorte:''}, schluessel:''};
   if(typeof AW !== 'undefined' && AW) return awKastenZeichnen(kasten, pflege, liste);
+  if(typeof awLueckeHinweisZeichnen === 'function') awLueckeHinweisZeichnen(kasten);
   const a = null;
   /* Kommt die Art aus der Bibliothek, sind sieben Felder bereits
      beantwortet. Sie trotzdem alle zu zeigen heißt, den Nutzer sieben
@@ -17939,22 +18003,43 @@ function awKastenZeichnen(kasten, pflege, liste){
       const lab = feld === 'klasse' ? 'Gießklasse' : 'Licht';
       if(offen[feld]){
         const t = feld === 'klasse' ? klText : soText;
-        html += '<div class="aw-abw"><span class="aw-lab">' + lab + ' · KI und Bibliothek weichen ab</span><div class="tools aw-wahl">'
+        /* 4.0-beta.11 (F131): Abweichung von der Gattung wie von der Bibliothek */
+        const gat = !!offen[feld].gat;
+        html += '<div class="aw-abw"><span class="aw-lab">' + lab + (gat ? ' · KI und Gattungswissen weichen ab' : ' · KI und Bibliothek weichen ab') + '</span><div class="tools aw-wahl">'
           + '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="ki">KI: ' + esc(t(offen[feld].ki)) + '</button>'
-          + '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="bib">Bibliothek: ' + esc(t(offen[feld].bib)) + '</button></div></div>';
-      } else html += alZeile(lab, text(feld === 'klasse' ? 'f-klasse' : 'f-sonne'));
+          + (gat ? '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="gat">Gattungswissen: ' + esc(t(offen[feld].gat)) + '</button>'
+                 : '<button type="button" data-aw="wahl" data-f="' + feld + '" data-q="bib">Bibliothek: ' + esc(t(offen[feld].bib)) + '</button>') + '</div></div>';
+      } else if(awFehltFeld(feld)) html += awFehltZeile(lab);
+      else html += alZeile(lab, text(feld === 'klasse' ? 'f-klasse' : 'f-sonne')
+        + (feld === 'klasse' && AW.ausGattung && !(AW.hand && AW.hand.klasse) ? ' · aus dem Gattungswissen' : ''));
     });
-    html += alZeile('Für Katzen', alGiftText()) + alZeile('Typ', (document.getElementById('f-typ') || {}).value);
+    html += alZeile('Für Katzen', alGiftText());
+    html += awFehltFeld('typ') ? awFehltZeile('Typ') : alZeile('Typ', (document.getElementById('f-typ') || {}).value);
+    AW_LUECKE.forEach(z => { if(z[0] !== 'klasse' && z[0] !== 'sonne' && z[0] !== 'typ' && awFehltFeld(z[0])) html += awFehltZeile(z[3]); });
     if(b) html += alZeile('Familie', b.fam || '');
   }
-  liste.innerHTML = html;
+  /* 4.0-beta.11 (F132): Zeile „Es fehlen …“ mit Knopf über der Liste */
+  const luecke = awFehltListe();
+  const lm = awLueckeModell();
+  liste.innerHTML = (luecke.length
+      ? '<p class="aw-luecke"><b>Es fehlen: ' + esc(luecke.map(awFeldName).join(', ')) + '</b></p>'
+        + (lm ? '<div class="tools aw-luecke-tools"><button type="button" data-aw="luecke"' + (AW.lueckeLaeuft ? ' disabled' : '') + '>'
+          + esc(AW.lueckeLaeuft ? 'Frage bei ' + (lm.anzeige || lm.id) + ' nach …' : 'Mit ' + (lm.anzeige || lm.id) + ' gezielt nachfragen') + '</button></div>' : '')
+      : '')
+    + (AW.lueckeMeld ? '<p class="kihinweis aw-luecke-meld">' + esc(AW.lueckeMeld) + '</p>' : '')
+    + html;
   if(tools){
     tools.innerHTML = vorschlag
       ? '<button type="button" class="haupt" data-aw="bib-alle">Vorschlag übernehmen</button><button type="button" id="btn-al-pflege-auf" data-aw="pflege-auf">Selbst eintragen</button>'
         + (kiBereit() ? '<button type="button" data-aw="ki">KI fragen</button>' : '')
       : '<button type="button" id="btn-al-pflege-auf" data-aw="pflege-auf">Ändern</button>'
         + (AW.quelle !== 'ki' && kiBereit() ? '<button type="button" data-aw="ki">KI fragen</button>' : '');
+    /* 4.0-beta.11 (F130): geöffnet heißt der Knopf „Fertig“ und klappt wieder zu */
+    const pk = tools.querySelector('#btn-al-pflege-auf');
+    if(pk && kasten.dataset.offen) pk.textContent = 'Fertig';
+    if(pk) pk.setAttribute('aria-expanded', kasten.dataset.offen ? 'true' : 'false');
   }
+  awLueckeHinweisZeichnen(kasten);
   /* Erst wählen, dann ändern: Solange eine Abweichung offen ist, bleiben
      die Felder zu. Sonst öffnen „Ändern“ und „Selbst eintragen“ sie. */
   pflege.hidden = Object.keys(offen).length ? true : !kasten.dataset.offen;
@@ -18061,7 +18146,7 @@ function alStufeZeigen(nr){
   if(alStufe === 2) alStufe2Zeichnen();
   if(alStufe === 3){ alKnoepfeAlle(); }
   if(alStufe === 4){ alKnoepfeAlle(); alKulturSetzen(); alTopfZeichnen(); alBibZsfZeichnen(); }
-  if(alStufe === 5){ alFotosZeichnen(); alZsfZeichnen(); }
+  if(alStufe === 5){ alFotosZeichnen(); alZsfZeichnen(); if(typeof alLernZeileZeichnen === 'function') alLernZeileZeichnen(); }
   const rumpf = document.querySelector('#anleg-modal .sekm-rumpf');
   if(rumpf) rumpf.scrollTop = 0;
 }
@@ -18125,6 +18210,8 @@ function alWeiter(){
     if(typeof alSpeichern === 'function') alSpeichern();
     return;
   }
+  /* 4.0-beta.11 (F132): erst auf die Lücken zeigen, beim zweiten Tippen weiter */
+  if(typeof alLueckeSperre === 'function' && alLueckeSperre()) return;
   alStufeZeigen(alStufe + 1);
 }
 
@@ -18158,12 +18245,17 @@ modalAnmelden('anleg-modal', {
   const w = document.getElementById('al-weiter');
   if(w) w.onclick = alWeiter;
   const p = document.getElementById('btn-al-pflege-auf');
-  if(p) p.onclick = ()=>{
-    const kasten = document.getElementById('al-bibzsf');
-    if(kasten) kasten.dataset.offen = '1';
-    alBibZsfZeichnen();
-    alKnoepfeAlle();
-  };
+  if(p) p.onclick = e => { if(e) e.stopPropagation(); alPflegeUmschalten(); };
+}
+/* 4.0-beta.11 (F130): „Ändern“ klappt die Felder direkt unter der Karte
+   auf und heißt dann „Fertig“; „Fertig“ klappt sie wieder zu. */
+function alPflegeUmschalten(){
+  const kasten = document.getElementById('al-bibzsf');
+  if(!kasten) return;
+  if(kasten.dataset.offen) delete kasten.dataset.offen;
+  else kasten.dataset.offen = '1';
+  alBibZsfZeichnen();
+  if(typeof alKnoepfeAlle === 'function') alKnoepfeAlle();
 }
 
 /* Ändert sich unter der Hand etwas an den Feldern — durch die
@@ -19313,7 +19405,10 @@ function kiModellZeichnen(){
     sel.innerHTML = liste.length
       ? liste.map(m => '<option value="' + esc(m.id) + '"'
           + (aktiv && m.id === aktiv.id ? ' selected' : '') + '>'
-          + esc(m.anzeige) + (m.langsam ? ' (langsam)' : '') + (m.empfohlen ? ' \u2713' : '') + '</option>').join('')
+          + esc(m.anzeige) + (m.langsam ? ' (langsam)' : '')
+          /* 4.0-beta.11 (F132): Lite lässt öfter Angaben weg */
+          + (/lite/i.test(m.id || '') && sel.closest('.feld-knopf') ? ' · schnell, aber lückenhafter' : '')
+          + (m.empfohlen ? ' \u2713' : '') + '</option>').join('')
       : '<option value="">'
         + (kiBereit() ? 'Modellliste noch nicht geholt' : 'Erst Schlüssel eintragen') + '</option>';
     sel.disabled = !liste.length;
@@ -19628,13 +19723,15 @@ function anlegenFotoPromptBauen(){
 }
 /* Der Auftrag ohne Foto nennt nur Art, botanischen Namen und Sorte,
    nie den Namen aus der Karte (Regel 10.12). */
-function anlegenArtPromptBauen(f){
+function anlegenArtPromptBauen(f, nurFelder){
   const name = [f.art, f.bot && f.bot !== f.art ? '(' + f.bot + ')' : ''].filter(Boolean).join(' ');
   const z = ['Du gibst Pflegewissen zu einer Zimmer- oder Balkonpflanzenart: ' + name
     + (f.sorte ? ', Sorte ' + f.sorte : '') + '. Es geht um die Art' + (f.sorte ? ' und Sorte' : '')
     + ', nicht um ein bestimmtes Exemplar. Schreib nichts, was für jede Zimmerpflanze gilt.'];
+  /* 4.0-beta.11 (F132): Die gezielte Nachfrage fragt nur, was fehlt. */
+  if(nurFelder) z.push('Es fehlen nur noch diese Angaben. Antworte nur dazu, und schreib „unbekannt“ nur, wenn es wirklich niemand weiß.');
   z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER');
-  awArtFelder().forEach(n => {
+  (nurFelder || awArtFelder()).forEach(n => {
     let t = AW_ART_TEXT[n] || (n === 'KATZEN' ? tierZeileFuer(meineTiere()) : (FELD_ZUSATZ[n] ? FELD_ZUSATZ[n].text : ''));
     if(n === 'LICHT' && f.sorte) t += ' ' + KI_LICHT_PANASCHIERT;
     if(t) z.push(t);
@@ -19748,9 +19845,16 @@ function awAnwenden(o){
   o = o || {};
   if(!AW || !AW.werte) return [];
   const w = AW.werte, msg = [];
-  AW.gesetzt = AW.gesetzt || {}; AW.offen = {};
+  /* 4.0-beta.11: o.nur setzt nur diese Felder (gezielte Nachfrage) und
+     lässt alles andere stehen, auch offene Wahlen. */
+  const an = feld => !o.nur || o.nur.indexOf(feld) > -1;
+  AW.gesetzt = AW.gesetzt || {};
+  if(!o.nur) AW.offen = {};
+  AW.offen = AW.offen || {};
   const f = awFormArt();
   const b = AW.quelle === 'ki' ? bibExakt(f.bot, f.art) : null;
+  /* F131: Gattungen im Anstau gelten nur, wenn die Art nicht in der Bibliothek steht. */
+  const gk = (AW.quelle === 'ki' && !b) ? gattungKlasse(f.bot, f.art) : '';
   const setze = (id, wert, feld) => {
     const el = document.getElementById(id);
     if(!el || !wert) return false;
@@ -19761,32 +19865,43 @@ function awAnwenden(o){
     return true;
   };
   [['klasse','f-klasse', b && b.klasse], ['sonne','f-sonne', b && b.licht]].forEach(([feld, id, bw]) => {
+    if(!an(feld)) return;
+    if(feld === 'klasse' && gk){
+      if(!w.klasse){
+        if(setze(id, gk)){ AW.gesetzt.klasse = 'bib'; AW.ausGattung = true; awFehltWeg('klasse'); }
+        return;
+      }
+      if(w.klasse !== gk){ AW.offen.klasse = {ki:w.klasse, gat:gk}; return; }
+    }
     if(!w[feld]) return;
     if(bw && bw !== w[feld]){ AW.offen[feld] = {ki:w[feld], bib:bw}; return; }
     setze(id, w[feld], feld);
   });
+  if(typeof alAnstauFeld === 'function') alAnstauFeld();
   const typ = document.getElementById('f-typ');
-  if(w.typ && typ && (!typ.value.trim() || AW.quelle !== 'bib')) { typ.value = w.typ; AW.gesetzt.typ = AW.quelle; }
+  if(an('typ') && w.typ && typ && (!typ.value.trim() || AW.quelle !== 'bib')) { typ.value = w.typ; AW.gesetzt.typ = AW.quelle; }
   const kul = document.getElementById('f-kultur');
-  if(w.giessart && !(kul && (kul.value === 'wasser' || kul.value === 'hydro'))) setze('f-giessart', w.giessart);
+  if(an('giessart') && w.giessart && !(kul && (kul.value === 'wasser' || kul.value === 'hydro'))) setze('f-giessart', w.giessart);
   const wi = document.getElementById('f-wichtig');
-  if(w.wichtig && wi && !wi.value.trim()){ wi.value = w.wichtig; AW.gesetzt.wichtig = AW.quelle; msg.push('Wichtiger Hinweis übernommen'); }
+  if(an('wichtig') && w.wichtig && wi && !wi.value.trim()){ wi.value = w.wichtig; AW.gesetzt.wichtig = AW.quelle; msg.push('Wichtiger Hinweis übernommen'); }
   /* Eine Auskunft darf verschärfen, nie entwarnen (wie bisher). */
-  if(w.gift === 'ja'){ setze('f-giftig', 'ja'); msg.push('Als giftig übernommen'); }
-  else if(w.gift === 'nein' && AW.quelle === 'ki') msg.push('Die Antwort nennt sie unbedenklich — das wird nicht ungeprüft übernommen');
+  if(an('gift') && w.gift === 'ja'){ setze('f-giftig', 'ja'); msg.push('Als giftig übernommen'); }
+  else if(an('gift') && w.gift === 'nein' && AW.quelle === 'ki') msg.push('Die Antwort nennt sie unbedenklich — das wird nicht ungeprüft übernommen');
   letzteKiAntwort = Object.assign(letzteKiAntwort || {}, {
     pflege: w.pflege || (letzteKiAntwort && letzteKiAntwort.pflege) || '',
     winterruhe: w.winterruhe || (letzteKiAntwort && letzteKiAntwort.winterruhe) || '',
     vermehrung: w.vermehrung || (letzteKiAntwort && letzteKiAntwort.vermehrung) || '',
     speicher: w.speicher || (letzteKiAntwort && letzteKiAntwort.speicher) || ''
   });
-  if(o.frostNotiz && w.frost && !/^winterhart$/.test(norm(w.frost))){
+  if(o.frostNotiz && an('frost') && w.frost && !/^winterhart$/.test(norm(w.frost))){
     const nz = document.getElementById('f-notiz');
     const zeile = 'Frostgrenze laut Bestimmung: ' + w.frost;
     if(nz && nz.value.indexOf(zeile) === -1) nz.value = (nz.value.trim() ? nz.value.trim() + '\n\n' : '') + zeile;
   }
+  if(AW.ausGattung && an('klasse') && !w.klasse) msg.push('Gießklasse S aus dem Gattungswissen gesetzt');
   if(Object.keys(AW.offen).length) msg.push('Bei ' + Object.keys(AW.offen).map(x => x === 'klasse' ? 'Gießklasse' : 'Licht').join(' und ')
-    + ' weicht die KI von der Bibliothek ab — du wählst auf der Stufe „Platz und Pflege“');
+    + (Object.keys(AW.offen).some(x => AW.offen[x].gat) ? ' weicht die KI vom Gattungswissen ab' : ' weicht die KI von der Bibliothek ab')
+    + ' — du wählst auf der Stufe „Platz und Pflege“');
   if(typeof alBibZsfZeichnen === 'function') alBibZsfZeichnen();
   return msg;
 }
@@ -19868,7 +19983,8 @@ async function awHolen(modellId){
   }
   if(tok !== AW_TOKEN) return;
   const d = geminiLesen(awJsonText(erg.text, awArtFelder()));
-  AW = {quelle:'ki', werte:awWerteAusAntwort(d), fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte)};
+  AW = {quelle:'ki', werte:awWerteAusAntwort(d), fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte),
+    fehlt:awFehlt(d, awArtFelder()), hand:{}};
   const msg = awAnwenden({frostNotiz:true});
   awStatus('Artwissen für ' + esc(awArtName(f)) + ' ist da. Es steht auf der Stufe „Platz und Pflege“ zum Bestätigen und kommt erst mit „Anlegen“ in die Karte.'
     + (msg.length ? ' ' + esc(msg.join(' · ')) + '.' : ''));
@@ -19882,11 +19998,9 @@ document.addEventListener('click', e => {
   if(was === 'stopp'){ kiAbbrechen(); return; }
   if(was === 'bib-alle'){ awBibUebernehmen(); return; }
   if(was === 'wahl'){ awWahl(k.dataset.f, k.dataset.q); return; }
-  if(was === 'pflege-auf'){
-    const kasten = document.getElementById('al-bibzsf');
-    if(kasten) kasten.dataset.offen = '1';
-    alBibZsfZeichnen();
-  }
+  if(was === 'pflege-auf'){ alPflegeUmschalten(); return; }
+  if(was === 'luecke'){ awLueckeFragen(); return; }
+  if(was === 'ohne'){ if(AW) AW.lueckeWarn = 2; alStufeZeigen(5); return; }
 });
 /* Ändert sich die Art von Hand, passt das alte Artwissen nicht mehr.
    Gelernte Arten und eigene Pflanzen kommen ohne Anfrage dazu, die KI
@@ -19930,29 +20044,270 @@ function awWahl(feld, q){
   const el = document.getElementById(id);
   if(el && wert){ el.value = wert; alKnopfGruppe(id); }
   AW.gesetzt = AW.gesetzt || {};
-  AW.gesetzt[feld] = q === 'bib' ? 'bib' : 'ki';
+  AW.gesetzt[feld] = (q === 'bib' || q === 'gat') ? 'bib' : 'ki';
   delete AW.offen[feld];
+  if(typeof alAnstauFeld === 'function') alAnstauFeld();
   alBibZsfZeichnen();
 }
 /* Beim Anlegen: was du aus der KI-Antwort übernommen hast, merkt sich
    die App als gelernte Art (F57, F59). Nur Felder, deren Wert in der
    Karte genau der KI-Wert ist. */
-function awLernen(p){
-  if(!AW || AW.quelle !== 'ki' || !AW.werte || !AW.schluessel) return false;
+/* 4.0-beta.11 (F133): gelernt wird, was in der Karte landet, auch was du
+   auf Stufe 4 von Hand geändert hast. Nicht gelernt wird ein Feld, das
+   noch fehlt oder dessen Wahl offen ist — dort steht nur der Vorgabewert.
+   Gelernte Arten und eigene Pflanzen lernen nur, wenn du etwas geändert hast. */
+function awLernWerte(p){
+  if(!AW || !AW.werte || !AW.schluessel) return null;
+  const hand = AW.hand || {};
+  const geaendert = Object.keys(hand).length > 0;
+  if(AW.quelle !== 'ki' && !((AW.quelle === 'gelernt' || AW.quelle === 'pflanze') && geaendert)) return null;
   const w = AW.werte, raus = {};
-  if(w.klasse && p.klasse === w.klasse) raus.klasse = w.klasse;
-  if(w.sonne && p.sonne === w.sonne) raus.sonne = w.sonne;
-  if(!raus.klasse && !raus.sonne) return false;
-  if(w.typ && p.typ === w.typ) raus.typ = w.typ;
-  if(w.giessart && p.giessart === w.giessart) raus.giessart = w.giessart;
-  if(w.wichtig && p.wichtig === w.wichtig) raus.wichtig = w.wichtig;
+  const lernbar = feld => !awFehltFeld(feld) && !(AW.offen && AW.offen[feld]);
+  if(p.klasse && lernbar('klasse')) raus.klasse = p.klasse;
+  if(p.sonne && lernbar('sonne')) raus.sonne = p.sonne;
+  if(!raus.klasse && !raus.sonne) return null;
+  if(p.typ && p.typ !== 'Ohne Angabe') raus.typ = p.typ;
+  if(p.giessart && p.giessart !== 'wasser' && p.giessart !== 'hydro') raus.giessart = p.giessart;
+  if(p.wichtig) raus.wichtig = p.wichtig;
   ['speicher','frost','pflege','winterruhe','vermehrung'].forEach(k => { if(w[k]) raus[k] = w[k]; });
   if(w.gift === 'ja' && p.gift) raus.gift = 'ja';
+  return raus;
+}
+function awLernen(p){
+  const raus = awLernWerte(p);
+  if(!raus) return false;
   const f = AW.fuer || {};
-  gelernteArten()[AW.schluessel] = Object.assign({art:p.art || f.art || '', bot:botOhneSorte(p.botanisch || f.bot || '').bot,
+  const g = gelernteArten();
+  const vorher = AW.quelle === 'ki' ? {} : (g[AW.schluessel] || {});
+  g[AW.schluessel] = Object.assign({}, vorher, {art:p.art || f.art || '', bot:botOhneSorte(p.botanisch || f.bot || '').bot,
     sorte:p.sorte || '', datum:iso(new Date())}, raus);
   return true;
 }
+
+/* ══ 4.0-beta.11 (Plan G2): Gattung, Lücken, gezielte Nachfrage ══════
+   Drosera, Dionaea, Sarracenia und Darlingtonia stehen im Anstau (F131).
+   Ein Feld fehlt, wenn die KI es nicht liefert oder „unbekannt“ schreibt;
+   „keine“ ist eine Antwort (F132). */
+const GATTUNG_ANSTAU = /^(Drosera|Dionaea|Sarracenia|Darlingtonia)(?=\s|$)/i;
+function gattungKlasse(bot, art){
+  const t = String(bot || '').trim() || String(art || '').trim();
+  return GATTUNG_ANSTAU.test(t) ? 'S' : '';
+}
+/* Feld im Artwissen, Schlüssel in geminiLesen, Schlüsselwort, Name */
+const AW_LUECKE = [
+  ['klasse','klasse','GIESSKLASSE','Gießklasse'], ['sonne','licht','LICHT','Licht'], ['giessart','giessart','GIESSART','Gießart'],
+  ['typ','typ','TYP','Typ'], ['speicher','speicher','SPEICHER','Speicher'], ['frost','frost','FROST','Frost'],
+  ['wichtig','wichtig','WICHTIG','Wichtig zu wissen'], ['pflege','pflege','PFLEGE','Pflegeschritte'],
+  ['winterruhe','winterruhe','WINTERRUHE','Winterruhe'], ['gift','katzen','KATZEN','Für Tiere'], ['vermehrung','vermehrung','VERMEHRUNG','Vermehrung']
+];
+function awRohLeer(v){
+  const t = norm(String(v == null ? '' : v)).trim();
+  return !t || /^(unbekannt|nicht bekannt|unklar|weiss nicht|weiß nicht|k\.? ?a\.?|-+|\?+)$/.test(t);
+}
+function awFehlt(d, felder){
+  d = d || {};
+  return AW_LUECKE.filter(z => felder.indexOf(z[2]) > -1).filter(z => {
+    const roh = d[z[1]];
+    if(awRohLeer(roh)) return true;
+    if(z[0] === 'klasse') return !klasseRaten(roh);
+    if(z[0] === 'sonne') return !lichtRaten(roh);
+    if(z[0] === 'giessart') return !giessartLesen(roh);
+    return false;
+  }).map(z => z[0]);
+}
+function awFehltFeld(feld){
+  return !!(typeof AW !== 'undefined' && AW && Array.isArray(AW.fehlt) && AW.fehlt.indexOf(feld) > -1
+    && !(AW.hand && AW.hand[feld]));
+}
+function awFehltListe(){
+  return AW_LUECKE.map(z => z[0]).filter(awFehltFeld);
+}
+function awFehltWeg(feld){
+  if(AW && Array.isArray(AW.fehlt)) AW.fehlt = AW.fehlt.filter(x => x !== feld);
+}
+function awFeldName(feld){
+  const z = AW_LUECKE.find(x => x[0] === feld);
+  return z ? z[3] : feld;
+}
+function awFehltZeile(lab){
+  return '<div class="aw-fehlt"><dt>' + esc(lab) + '</dt><dd>fehlt</dd></div>';
+}
+/* Das stärkste Modell der Liste ohne Lite, schnelle vor langsamen.
+   Gibt es keins, das gewählte Modell. */
+function awLueckeModell(){
+  if(!kiBereit()) return null;
+  const l = kiModelle().filter(m => !/lite/i.test(m.id || ''));
+  const r = (a, b) => kiModellPunkte(b.id) - kiModellPunkte(a.id);
+  const schnell = l.filter(m => !m.langsam).sort(r);
+  if(schnell.length) return schnell[0];
+  if(l.length) return l.sort(r)[0];
+  return kiModellAktiv();
+}
+/* Eine Anfrage, nur die fehlenden Felder, ohne Foto (Regel 10.6).
+   Gefüllt wird nur, was noch leer ist und was du nicht von Hand gesetzt hast. */
+async function awLueckeFragen(){
+  if(!AW || AW.lueckeLaeuft) return;
+  const fehlt = awFehltListe();
+  if(!fehlt.length) return;
+  const m = awLueckeModell();
+  if(!m){ AW.lueckeMeld = 'Für die Nachfrage fehlt der KI-Schlüssel oder die Modellliste.'; alBibZsfZeichnen(); return; }
+  const felder = fehlt.map(feld => AW_LUECKE.find(z => z[0] === feld)[2]);
+  const f = AW.fuer || awFormArt();
+  const tok = AW_TOKEN, aw = AW;
+  AW.lueckeLaeuft = true; AW.lueckeMeld = '';
+  alBibZsfZeichnen();
+  let erg = null;
+  try{
+    erg = await kiFragenEinmal(anlegenArtPromptBauen(f, felder), [], m.id,
+      {denken:'niedrig', zweck:'Anlegen · Lücken', schema:awSchema(felder)});
+  }catch(e){
+    if(tok !== AW_TOKEN || AW !== aw) return;
+    AW.lueckeLaeuft = false;
+    AW.lueckeMeld = (e && e.name === 'AbortError') ? 'Abgebrochen.' : (e.message || String(e));
+    alBibZsfZeichnen();
+    return;
+  }
+  if(tok !== AW_TOKEN || AW !== aw) return;
+  AW.lueckeLaeuft = false;
+  const d = geminiLesen(awJsonText(erg.text, felder));
+  const neu = awWerteAusAntwort(d);
+  const nochLeer = awFehlt(d, felder);
+  const gefuellt = [];
+  fehlt.forEach(feld => {
+    if(AW.hand && AW.hand[feld]) return;
+    if(nochLeer.indexOf(feld) > -1) return;
+    if(AW.werte[feld]) return;
+    AW.werte[feld] = neu[feld];
+    if(neu[feld]) gefuellt.push(feld);
+  });
+  AW.fehlt = (AW.fehlt || []).filter(feld => nochLeer.indexOf(feld) > -1 || felder.indexOf((AW_LUECKE.find(z => z[0] === feld) || [])[2]) === -1);
+  if(gefuellt.length) awAnwenden({nur:gefuellt, frostNotiz:true});
+  const rest = awFehltListe();
+  AW.lueckeMeld = 'Nachgefragt bei ' + (erg.modell ? erg.modell.anzeige : (m.anzeige || m.id)) + ': '
+    + (gefuellt.length ? gefuellt.map(awFeldName).join(', ') + ' ergänzt.' : 'nichts Neues.')
+    + (rest.length ? ' Es fehlt weiter: ' + rest.map(awFeldName).join(', ') + '.' : '');
+  alBibZsfZeichnen();
+}
+/* „Weiter“ mit Lücken: erst roter Rahmen und Hinweis, beim zweiten Mal weiter. */
+function awLueckeHinweisZeichnen(kasten){
+  const box = document.getElementById('al-luecke');
+  const fehlt = (typeof AW !== 'undefined' && AW) ? awFehltListe() : [];
+  const zeigen = !!(AW && AW.lueckeWarn === 1 && fehlt.length && kasten && !kasten.hidden);
+  if(kasten) kasten.classList.toggle('aw-rot', zeigen);
+  if(!box) return;
+  box.hidden = !zeigen;
+  box.innerHTML = zeigen
+    ? '<p><b>Es fehlen noch Angaben.</b> Ohne sie rechnet die App mit Vorgabewerten.</p><div class="tools">'
+      + (awLueckeModell() ? '<button type="button" class="haupt" data-aw="luecke"' + (AW.lueckeLaeuft ? ' disabled' : '') + '>Gezielt nachfragen</button>' : '')
+      + '<button type="button" data-aw="ohne">Ohne weiter</button></div>'
+    : '';
+}
+function alLueckeSperre(){
+  if(alStufe !== 4 || typeof AW === 'undefined' || !AW || AW.lueckeWarn) return false;
+  const k = document.getElementById('al-bibzsf');
+  if(!k || k.hidden || !awFehltListe().length) return false;
+  AW.lueckeWarn = 1;
+  alBibZsfZeichnen();
+  try{ k.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
+  return true;
+}
+/* Von Hand gesetzt zählt nicht mehr als Lücke und wird nie überschrieben. */
+const AW_HAND_FELDER = {'f-klasse':'klasse', 'f-sonne':'sonne', 'f-giftig':'gift', 'f-giessart':'giessart', 'f-typ':'typ', 'f-wichtig':'wichtig'};
+function awHandMerken(e){
+  const feld = e.target && AW_HAND_FELDER[e.target.id];
+  if(!feld || typeof AW === 'undefined' || !AW) return;
+  AW.hand = AW.hand || {};
+  AW.hand[feld] = true;
+  if(alStufe === 4) alBibZsfZeichnen();
+}
+document.addEventListener('change', awHandMerken);
+document.addEventListener('input', e => { if(e.target && (e.target.id === 'f-typ' || e.target.id === 'f-wichtig')) awHandMerken(e); });
+/* Zeile auf der letzten Stufe: was als Artwissen gemerkt wird (F133). */
+function alLernZeileZeichnen(){
+  const el = document.getElementById('al-lern');
+  if(!el) return;
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  const raus = (typeof AW !== 'undefined' && AW) ? awLernWerte({klasse:v('f-klasse'), sonne:v('f-sonne'), typ:v('f-typ') || 'Ohne Angabe',
+    giessart:v('f-giessart'), wichtig:v('f-wichtig'), gift:null}) : null;
+  if(!raus){ el.hidden = true; el.textContent = ''; return; }
+  const teile = [];
+  const klein = t => String(t || '').charAt(0).toLowerCase() + String(t || '').slice(1);
+  if(raus.klasse) teile.push('Gießklasse ' + raus.klasse);
+  if(raus.sonne) teile.push('Licht ' + klein(SONNE[raus.sonne] ? SONNE[raus.sonne].text : raus.sonne));
+  if(raus.typ) teile.push('Typ ' + raus.typ);
+  if(raus.giessart && GIESSARTEN[raus.giessart]) teile.push('Gießart ' + klein(GIESSARTEN[raus.giessart].name));
+  /* „keine“ ist eine Antwort, aber nichts, was gemerkt wird */
+  const extra = [['wichtig','Wichtig zu wissen'], ['pflege','Pflegeschritte'], ['winterruhe','Winterruhe'], ['vermehrung','Vermehrung']]
+    .filter(z => raus[z[0]] && !awRohLeer(raus[z[0]]) && !/^keine?\.?$/i.test(String(raus[z[0]]).trim())).map(z => z[1]);
+  const f = AW.fuer || awFormArt();
+  el.textContent = 'Als Artwissen für ' + awArtName({art:f.art, bot:f.bot}) + (f.sorte ? ' ‘' + f.sorte + '’' : '') + ' gemerkt: '
+    + teile.join(' · ') + (extra.length ? '; dazu ' + extra.join(', ') : '') + '.';
+  el.hidden = false;
+}
+
+/* Karte → Bearbeiten → Speichern: Artwissen der Art mitändern? (F133) */
+const AW_KARTE_FELDER = [['klasse','Gießklasse'], ['sonne','Licht'], ['giessart','Gießart'], ['typ','Typ'],
+  ['wichtig','Wichtig zu wissen'], ['pflege','Pflegeschritte'], ['winterruheText','Winterruhe']];
+var AW_KARTE_FRAGE = null;
+function awKarteWert(p, feld){
+  if(feld === 'giessart') return giessartVon(p);
+  if(feld === 'pflege') return Array.isArray(p.pflege) ? p.pflege.join('\n') : '';
+  if(feld === 'winterruheText') return typeof p.winterruheText === 'string' ? p.winterruheText : '';
+  if(feld === 'typ') return p.typ && p.typ !== 'Ohne Angabe' ? p.typ : '';
+  return p[feld] == null ? '' : String(p[feld]);
+}
+function awKarteAenderungen(vor, nach){
+  return AW_KARTE_FELDER.filter(z => awKarteWert(vor, z[0]) !== awKarteWert(nach, z[0])).map(z => {
+    const a = awKarteWert(vor, z[0]), n = awKarteWert(nach, z[0]);
+    const t = v => z[0] === 'sonne' ? (SONNE[v] ? SONNE[v].text : v)
+      : z[0] === 'giessart' ? (GIESSARTEN[v] ? GIESSARTEN[v].name : v) : v;
+    const kurz = z[0] === 'klasse' || z[0] === 'sonne' || z[0] === 'giessart' || z[0] === 'typ';
+    return {feld:z[0], name:z[1], text: kurz ? z[1] + ': ' + (a ? t(a) : 'leer') + ' → ' + (n ? t(n) : 'leer') : z[1] + ': geändert'};
+  });
+}
+function awKarteFragen(vor, nach){
+  if(!nach || !String(nach.botanisch || '').trim()) return false;
+  const aend = awKarteAenderungen(vor, nach);
+  if(!aend.length) return false;
+  const k = awSchluessel(nach.botanisch, nach.sorte);
+  if(!k) return false;
+  AW_KARTE_FRAGE = {id:nach.id, schluessel:k, aend:aend};
+  const t = document.getElementById('aw-aendern-text');
+  const l = document.getElementById('aw-aendern-liste');
+  const name = botOhneSorte(nach.botanisch).bot + (nach.sorte ? ' ‘' + nach.sorte + '’' : '');
+  if(t) t.textContent = 'Du hast an ' + nice(nach) + ' Artwissen geändert. Soll das auch für ' + name
+    + ' gelten? Neue Pflanzen dieser Art bekommen dann diese Werte. Vorhandene Pflanzen bleiben, wie sie sind.';
+  if(l) l.innerHTML = aend.map(x => '<li>' + esc(x.text) + '</li>').join('');
+  return modalAuf('aw-aendern');
+}
+function awKarteUebernehmen(){
+  const q = AW_KARTE_FRAGE;
+  AW_KARTE_FRAGE = null;
+  if(!q) return false;
+  const p = allePflanzen().find(x => x.id === q.id);
+  if(!p) return false;
+  const g = gelernteArten();
+  const basis = g[q.schluessel] || Object.assign(awWerteAusPflanze(p), {art:p.art || '', bot:botOhneSorte(p.botanisch || '').bot, sorte:p.sorte || ''});
+  const neu = Object.assign({}, basis);
+  q.aend.forEach(x => {
+    if(x.feld === 'klasse') neu.klasse = p.klasse || '';
+    else if(x.feld === 'sonne') neu.sonne = p.sonne || '';
+    else if(x.feld === 'giessart'){ const ga = p.giessart || ''; neu.giessart = (ga === 'wasser' || ga === 'hydro') ? '' : ga; }
+    else if(x.feld === 'typ') neu.typ = p.typ && p.typ !== 'Ohne Angabe' ? p.typ : '';
+    else if(x.feld === 'wichtig') neu.wichtig = p.wichtig || '';
+    else if(x.feld === 'pflege') neu.pflege = Array.isArray(p.pflege) ? p.pflege.join(' | ') : '';
+    else if(x.feld === 'winterruheText') neu.winterruhe = typeof p.winterruheText === 'string' ? p.winterruheText : '';
+  });
+  neu.datum = iso(new Date());
+  g[q.schluessel] = neu;
+  sichern();
+  return true;
+}
+modalAnmelden('aw-aendern', {groesse:'blatt', schleier:false, nachZu: ()=>{ AW_KARTE_FRAGE = null; }});
+document.addEventListener('click', e => {
+  if(e.target.closest('#aw-aendern-ja')){ awKarteUebernehmen(); modalZu('aw-aendern'); return; }
+  if(e.target.closest('#aw-aendern-nein')){ modalZu('aw-aendern'); }
+});
 
 /* ══ 4.0-beta.3: der BOTaniker (Baustein C) ═════════════════════
    Ein Chat, der zuerst ohne KI arbeitet: Er erkennt Pflanze und Absicht
@@ -23657,11 +24012,31 @@ function gmListeBauen(){
   const alle = heute.concat(mit);
   const unter = alle.filter(gmAnstauHeute);
   const laufweg = gmLaufweg(alle.filter(p => !gmAnstauHeute(p)));
-  gmListe = laufweg
-    .concat(unter.length ? [{untersetzer:true, pflanzen:gmLaufweg(unter)}] : [])
-    .concat(typeof azFaellig === 'function' ? azFaellig() : []);
+  /* 4.0-beta.11 (F135): Untersetzer und Anzucht als Sammelkarte oder einzeln.
+     Eine Einzelkarte ist eine Untersetzer-Karte mit genau einer Pflanze. */
+  const g = giessEinst();
+  const uL = gmLaufweg(unter);
+  const uK = !uL.length ? [] : g.sammelU === false
+    ? uL.map(p => ({untersetzer:true, einzeln:true, pflanzen:[p]}))
+    : [{untersetzer:true, pflanzen:uL}];
+  const az = typeof azFaellig === 'function' ? azFaellig() : [];
+  const azK = (g.sammelAz !== false && az.length > 1)
+    ? [{anzucht:true, sammel:true, name:'Anzucht', eintraege:az}] : az;
+  gmListe = laufweg.concat(uK).concat(azK);
   gmSnaps = {};
 }
+/* Alle Anstau-Pflanzen und alle Anzucht-Einträge, gleich wie sie verteilt sind. */
+function gmUntersetzerAlle(){
+  const r = [];
+  gmListe.forEach(x => { if(x && x.untersetzer) x.pflanzen.forEach(p => r.push(p)); });
+  return r;
+}
+function gmAzAlle(liste){
+  const r = [];
+  (liste || gmListe).forEach(x => { if(x && x.anzucht){ if(x.sammel) x.eintraege.forEach(e => r.push(e)); else r.push(x); } });
+  return r;
+}
+function gmAzId(e){ return 'az:' + e.typ + ':' + e.ref; }
 /* Wer morgen dran wäre und heute mitkommen kann. */
 function gmMorgen(){
   const heute = {};
@@ -23783,6 +24158,9 @@ function gmRueckgaengig(){
   const e = gmVerlauf.pop();
   if(!e){ gmPhase = 'uebersicht'; gmZeichnenUebersicht(); return; }
   gmEintragZuruecknehmen(e);
+  /* 4.0-beta.11: „Alle später“ der Anzucht-Sammelkarte geht als Ganzes zurück. */
+  while(e.gruppe && gmVerlauf.length && gmVerlauf[gmVerlauf.length - 1].gruppe === e.gruppe)
+    gmEintragZuruecknehmen(gmVerlauf.pop());
   gmIndex = e.index;
   gmZaehlen();
   gmZeichnen();
@@ -24082,6 +24460,9 @@ function gmMeldenUntersetzer(p, a, tat){
     snap, nach:gmSnapPflanze(p.id), befund:null});
   gmZaehlen();
   if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+  /* 4.0-beta.11: Eine Einzelkarte geht nach der Meldung weiter wie eine Pflanze. */
+  const k = gmListe[gmIndex];
+  if(k && k.einzeln){ gmWeiter(); return; }
   gmZeichnen();
 }
 function gmMeldenAz(e, a){
@@ -24091,6 +24472,23 @@ function gmMeldenAz(e, a){
     tat:a === 'azja' ? e.tat : '', snap, nach:gmSnapAz(e), befund:null});
   gmZaehlen();
   gmNach();
+}
+/* 4.0-beta.11 (F135): Meldung einer Zeile der Anzucht-Sammelkarte. Die
+   Karte bleibt stehen, bis jede Zeile gemeldet ist. „gruppe“ hält die
+   Einträge von „Alle später“ zusammen, damit Rückgängig sie zusammen
+   zurücknimmt. */
+function gmMeldenAzZeile(e, a, gruppe){
+  const snap = gmSnapAz(e);
+  if(a === 'azja') azErledigen(e.typ, e.ref);
+  gmVerlauf.push({index:gmIndex, typ:'az', id:gmAzId(e), name:e.name, a,
+    tat:a === 'azja' ? e.tat : '', snap, nach:gmSnapAz(e), befund:null, gruppe:gruppe || null});
+}
+function gmAzMeldung(index, id){
+  for(let i = gmVerlauf.length - 1; i >= 0; i--){
+    const v = gmVerlauf[i];
+    if(v.index === index && v.typ === 'az' && v.id === id) return v;
+  }
+  return null;
 }
 /* Meldungen der Untersetzer-Karte, je Pflanze die letzte. */
 function gmUMeldung(index, id){
@@ -24128,6 +24526,7 @@ function gmZeichnen(){
   }
   const p = gmListe[gmIndex];
   if(p && p.untersetzer){ gmZeichnenUntersetzer(p); return; }
+  if(p && p.anzucht && p.sammel){ gmZeichnenAzSammel(p); return; }
   if(p && p.anzucht){ gmZeichnenAnzucht(p); return; }
   if(!p){ gmZeichnenEnde(); return; }
   if(!gmSnaps[gmIndex]) gmSnaps[gmIndex] = gmSnapPflanze(p.id);
@@ -24239,6 +24638,9 @@ function gmKopf(p){
   } else if(p && p.untersetzer){
     const n = p.pflanzen.length;
     raum = `<p class="gm-raum">Untersetzer · ${n} ${n === 1 ? 'Pflanze' : 'Pflanzen'}</p>`;
+  } else if(p && p.anzucht && p.sammel){
+    const n = p.eintraege.length;
+    raum = `<p class="gm-raum">Anzucht · ${n} ${n === 1 ? 'Eintrag' : 'Einträge'}</p>`;
   } else if(p && p.anzucht){
     const vor = gmListe[gmIndex - 1];
     if(!vor || !vor.anzucht) raum = '<p class="gm-raum">Anzucht</p>';
@@ -24277,7 +24679,44 @@ function gmZeichnenUntersetzer(e){
       ${zeilen}
     </div>`;
   $('#gm-knoepfe').innerHTML = offenZahl
-    ? (nurId ? '' : `<button class="gm-spaeter" data-gm="urest">${offenZahl === e.pflanzen.length ? 'Alle später' : 'Rest später'}</button>`)
+    ? (nurId ? '' : `<button class="gm-spaeter" data-gm="urest">${e.einzeln ? 'Später' : offenZahl === e.pflanzen.length ? 'Alle später' : 'Rest später'}</button>`)
+    : `<button class="gm-ja" data-gm="uweiter">Weiter</button>`;
+  gmLeiste();
+}
+
+/* 4.0-beta.11 (F135): alle fälligen Gläser und Anzuchthäuser auf einer
+   Karte, je Zeile die Tat und „Später“, wie die Untersetzer-Karte. */
+function gmZeichnenAzSammel(e){
+  gmPhase = 'karte';
+  const nurId = gmNeuMelden ? (gmNeuMelden.e && gmNeuMelden.e.id) : null;
+  const zeilen = e.eintraege.map((z, i) => {
+    const id = gmAzId(z);
+    const m = gmAzMeldung(gmIndex, id);
+    const f = (z.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(z.ref) : null;
+    const offen = !m && (!nurId || nurId === id);
+    const lage = z.rest < 0 ? `${-z.rest} ${-z.rest === 1 ? 'Tag' : 'Tage'} überfällig` : 'heute dran';
+    const ergebnis = m ? (m.a === 'azja' ? m.tat : 'Später') : (nurId && nurId !== id ? 'unverändert' : '');
+    return `<div class="gm-ut-zeile${m ? ' fertig' : ''}" data-gm-azz="${esc(id)}">
+      <div class="gm-ut-kopf">
+        <div class="gm-ut-bild">${f && f.src ? `<img src="${f.src}" alt="">` : ''}</div>
+        <div class="gm-ut-text"><b>${esc(z.name)}</b><i>${esc(lage)} · alle ${z.iv} Tage${z.unter && z.unter.length ? ' · ' + z.unter.map(esc).join(', ') : ''}</i></div>
+        ${ergebnis ? `<span class="gm-ut-erg">${m && m.a === 'azja' ? '✓ ' : ''}${esc(ergebnis)}</span>` : ''}
+      </div>
+      ${offen ? `<div class="gm-zfrage-btns gm-ut-knoepfe">
+        <button type="button" data-gm-az="azja" data-i="${i}">${esc(z.tat)}</button>
+        <button type="button" data-gm-az="spaeter" data-i="${i}">Später</button></div>` : ''}
+    </div>`;
+  }).join('');
+  const offenZahl = e.eintraege.filter(z => !gmAzMeldung(gmIndex, gmAzId(z))).length;
+  $('#gm-inhalt').innerHTML = `
+    ${gmKopf(e)}
+    <div class="gm-karte gm-ut gm-azs">
+      <h3>Anzucht versorgen</h3>
+      <p class="gm-art">Gläser: Wasser wechseln. Anzuchthäuser und Gefäße mit Substrat: befeuchten.</p>
+      ${zeilen}
+    </div>`;
+  $('#gm-knoepfe').innerHTML = offenZahl
+    ? (nurId ? '' : `<button class="gm-spaeter" data-gm="azrest">${offenZahl === e.eintraege.length ? 'Alle später' : 'Rest später'}</button>`)
     : `<button class="gm-ja" data-gm="uweiter">Weiter</button>`;
   gmLeiste();
 }
@@ -24412,9 +24851,11 @@ function gmUeZeile(links, rechts, klein){
 function gmZeichnenUebersicht(){
   gmPhase = 'uebersicht';
   const pfl = gmPflanzenVonListe(gmListe);
-  const unter = gmListe.find(x => x && x.untersetzer);
-  const nU = unter ? unter.pflanzen.length : 0;
-  const az = gmListe.filter(x => x && x.anzucht);
+  /* 4.0-beta.11: Untersetzer können auf mehrere Karten verteilt sein,
+     Anzucht auf einer Sammelkarte stehen. */
+  const unterAlle = gmUntersetzerAlle();
+  const nU = unterAlle.length;
+  const az = gmAzAlle();
   const nP = pfl.length - nU;
   const pW = n => n + ' ' + (n === 1 ? 'Pflanze' : 'Pflanzen');
   const kopf = [];
@@ -24440,8 +24881,10 @@ function gmZeichnenUebersicht(){
     z.n++;
     if(gmMengeMl(p, weg) && !topfBekannt(p)) ohneTopf++;
   });
-  const brauch = wz.map(z => gmUeZeile('<b>' + esc(z.name) + '</b>', esc(gmLiter(z.l)), esc(pW(z.n)))).join('')
-    + (ohneTopf ? `<p class="gm-ue-klein">Bei ${ohneTopf} ${ohneTopf === 1 ? 'Pflanze fehlt' : 'Pflanzen fehlt'} die Topfgröße, dort geschätzt.</p>` : '');
+  /* 4.0-beta.11 (F134): Wasser als eine Zeile, Schätzungen am Ende */
+  const brauch = wz.length ? `<div class="gm-ue-zeile gm-ue-wasser"><p><span><b>Wasser:</b> ${wz.map(z =>
+      `<span class="gm-ue-wert">${esc(gmLiter(z.l))}</span> ${esc(z.name)}`).join(' · ')}</span>${
+      ohneTopf ? `<span class="gm-ue-geschaetzt">${ohneTopf} ${ohneTopf === 1 ? 'Topf' : 'Töpfe'} geschätzt</span>` : ''}</p></div>` : '';
 
   /* Dünger: die Frage nach dem Düngetag als Zeile statt als Fenster. */
   let dg = '';
@@ -24483,6 +24926,15 @@ function gmZeichnenUebersicht(){
     return gwZeile(w, l.length, klein);
   }).join('');
   if(nU) wegHtml += gwZeile('anstau', nU, '');
+  /* 4.0-beta.11 (F134): eingeklappt eine Zeile aus Icons mit Zahl, in
+     Klartext „Gießwege: 7“. Die Zeilen bleiben im Dokument. */
+  const gwAlle = reihe.map(w => [w, wege[w].length]).concat(nU ? [['anstau', nU]] : []);
+  const gwOffen = !!giessEinst().gwOffen;
+  const gwKopf = gwAlle.length ? `<button type="button" class="gm-gw-sammel" data-gm-gw="1" aria-expanded="${gwOffen}" aria-controls="gm-gw-liste">
+      <span class="gm-gw-s-t"><b>Gießwege</b><span class="gm-wort">: ${gwAlle.length}</span></span>
+      <span class="gm-gw-chips" aria-hidden="true">${gwAlle.map(([w, n]) => `<span class="gm-gw-chip">${gmIcon(w)}<b>${n}</b></span>`).join('')}</span>
+      <span class="gm-weg-p" aria-hidden="true">${gwOffen ? '⌃' : '›'}</span></button>` : '';
+  wegHtml = gwKopf + `<div class="gm-gw-liste" id="gm-gw-liste"${gwOffen ? '' : ' hidden'}>${wegHtml}</div>`;
 
   /* Heute dran: die Pflanzen in Laufreihenfolge, je Raum eine Zeile. */
   const pflZeile = (p, w, ml) => {
@@ -24508,7 +24960,7 @@ function gmZeichnenUebersicht(){
     heute += pflZeile(x, w, gmMengeMl(x, w));
   });
   if(nU){
-    heute += `<p class="gm-ue-raum">Untersetzer · ${nU}</p>` + unter.pflanzen.map(p => pflZeile(p, 'anstau', 0)).join('');
+    heute += `<p class="gm-ue-raum">Untersetzer · ${nU}</p>` + unterAlle.map(p => pflZeile(p, 'anstau', 0)).join('');
   }
   if(az.length){
     heute += `<p class="gm-ue-raum">Anzucht · ${az.length}</p>` + az.map(e => {
@@ -24536,9 +24988,9 @@ function gmZeichnenUebersicht(){
     <div class="gm-ue">
       <p class="gm-zaehler">Vor dem Gießen</p>
       <h3>Heute: ${esc(kopf.join(' · ') || 'nichts fällig')}</h3>
-      ${gmUeAbschnitt('Was du brauchst', brauch)}
+      ${brauch ? `<div class="ein-karte gm-ue-k">${brauch}</div>` : ''}
       ${gmUeAbschnitt('Dünger', dg)}
-      ${gmUeAbschnitt('Gießwege', wegHtml)}
+      ${gwAlle.length ? `<div class="ein-karte gm-ue-k gm-gw-k">${wegHtml}</div>` : ''}
       ${gmUeAbschnitt('Heute dran', heute)}
       ${gmUeAbschnitt('Morgen dran', morgen)}
     </div>`;
@@ -24638,6 +25090,26 @@ document.addEventListener('click', e=>{
   }
   const nb = e.target.closest('[data-gm-neu]');
   if(nb){ gmNeuStarten(Number(nb.dataset.gmNeu), nb.dataset.id); return; }
+  /* 4.0-beta.11: Gießwege auf- und zuklappen, Zustand gemerkt */
+  const gwb = e.target.closest('[data-gm-gw]');
+  if(gwb){
+    const g = giessEinst();
+    g.gwOffen = !g.gwOffen;
+    sichern();
+    gmZeichnenUebersicht();
+    return;
+  }
+  const azb = e.target.closest('[data-gm-az]');
+  if(azb){
+    const k = gmListe[gmIndex];
+    const z = k && k.sammel ? k.eintraege[Number(azb.dataset.i)] : null;
+    if(!z) return;
+    gmMeldenAzZeile(z, azb.dataset.gmAz === 'azja' ? 'azja' : 'spaeter');
+    gmZaehlen();
+    if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+    gmZeichnen();
+    return;
+  }
   const ub = e.target.closest('[data-gm-u]');
   if(ub){
     const up = allePflanzen().find(x => x.id === ub.dataset.id);
@@ -24655,6 +25127,15 @@ document.addEventListener('click', e=>{
     return;
   }
   if(a === 'uweiter'){ gmWeiter(); return; }
+  if(a === 'azrest'){
+    const k = gmListe[gmIndex];
+    if(!k || !k.sammel) return;
+    const gr = 'azrest-' + gmIndex + '-' + gmVerlauf.length;
+    k.eintraege.filter(z => !gmAzMeldung(gmIndex, gmAzId(z))).forEach(z => gmMeldenAzZeile(z, 'spaeter', gr));
+    gmZaehlen();
+    gmWeiter();
+    return;
+  }
   if(a === 'urest'){
     const u = gmListe[gmIndex];
     if(!u || !u.untersetzer) return;
@@ -25613,6 +26094,11 @@ function giessCenterZeichnen(){
   if(w) w.checked = g.winterpause !== false;
   const sa = document.getElementById('ck-saison');
   if(sa) sa.checked = g.saison !== false;
+  /* 4.0-beta.11 (F135): Sammelkarten, Standard an */
+  const su = document.getElementById('ck-gm-sammel-u');
+  if(su) su.checked = g.sammelU !== false;
+  const sz = document.getElementById('ck-gm-sammel-az');
+  if(sz) sz.checked = g.sammelAz !== false;
   const st = document.getElementById('saison-wahl');
   if(st) st.classList.toggle('aus', g.saison === false);
 
@@ -25709,6 +26195,9 @@ document.addEventListener('change', e=>{
   }
   if(e.target.id === 'ck-saison'){
     giessEinst().saison = e.target.checked; sichern(); giessCenterZeichnen(); mehrNebenzeilen(); render();
+  }
+  if(e.target.id === 'ck-gm-sammel-u' || e.target.id === 'ck-gm-sammel-az'){
+    giessEinst()[e.target.id === 'ck-gm-sammel-u' ? 'sammelU' : 'sammelAz'] = e.target.checked; sichern(); giessCenterZeichnen();
   }
 });
 
