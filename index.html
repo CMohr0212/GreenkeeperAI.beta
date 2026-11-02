@@ -4260,8 +4260,16 @@ html[data-design] .gm-wie-knopf{flex:0 0 auto;display:inline-flex;align-items:ce
 html[data-design] .gm-wie-knopf .gm-ico{width:30px;height:30px}
 html[data-design] .gm-wie-zusatz{font-variant-numeric:tabular-nums}
 html[data-design="klartext"] .gm-wie-knopf{border:2px solid var(--schrift);font-size:var(--t-m)}
-html[data-design] .gm-ue-k > .gm-gw-zeile{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);border:0;border-radius:0;
-  background:none;color:var(--schrift);text-align:left;cursor:pointer;font:inherit}
+/* 4.0-beta.13 (B): Die Zeilen stehen seit beta.11 im Klappbereich
+   #gm-gw-liste; die alte Regel „.gm-ue-k > .gm-gw-zeile“ griff dort nicht
+   mehr, und es erschienen graue Standardknöpfe nebeneinander. */
+html[data-design] .gm-gw-k .gm-gw-liste > button.gm-gw-zeile{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);
+  margin:0;padding:10px 0;border:0;border-radius:0;box-shadow:none;
+  background:none;color:var(--schrift);text-align:left;cursor:pointer;font:inherit;letter-spacing:0;text-transform:none}
+html[data-design] .gm-gw-k .gm-gw-liste > button.gm-gw-zeile + button.gm-gw-zeile{border-top:1px solid var(--linie)}
+html[data-design="klartext"] .gm-gw-k .gm-gw-liste > button.gm-gw-zeile + button.gm-gw-zeile{border-top:2px solid var(--schrift)}
+html[data-design] .gm-gw-k .gm-gw-liste > button.gm-gw-zeile .gm-ue-wert{margin-left:auto}
+html[data-design] .gm-dg-ohne .gm-dg-welche{flex:0 0 auto}
 html[data-design] .gm-gw-zeile .gm-ico{flex:0 0 30px;width:30px;height:30px}
 html[data-design] .gm-gw-t{flex:1 1 auto;min-width:0;margin:0;font-family:var(--f-body);font-size:var(--t-m)}
 html[data-design] .gm-gw-t b{display:block;font-weight:600}
@@ -4333,6 +4341,24 @@ html[data-design] .gt-tage{margin:0 0 6px}
 html[data-design] .al-gt{margin:12px 0 0}
 html[data-design] .al-gt .gm-zfrage-btns{margin-top:10px}
 html[data-design] .gm-gt-k .gm-ue-knopf{margin-top:8px}
+/* ══ Plan beta.13: Gießkarte oben statt mittig (D) ═══════════════════
+   „margin-block:auto“ aus Gießmodus F stellte kurze Karten in die Mitte;
+   darüber stand ein großer leerer Streifen. */
+html[data-design] .gm-mitte > #gm-inhalt{margin-block:0 auto}
+/* ══ Plan beta.13: Bearbeiten-Leiste ═══════════════════════════════
+   Speichern und Abbrechen kleben am unteren Rand des Fensters und kommen
+   beim Scrollen mit. „Pflanze löschen“ steht darunter am Ende (F91). */
+html[data-design] .bearb > .bearb-fuss{position:sticky;bottom:0;z-index:3;display:flex;flex-wrap:nowrap;gap:8px;
+  margin:14px -13px 0;padding:10px 13px calc(10px + env(safe-area-inset-bottom, 0px));
+  background:var(--sand);border-top:1px solid var(--linie);box-shadow:0 -6px 12px -10px rgba(0,0,0,.35)}
+html[data-design="klartext"] .bearb > .bearb-fuss{border-top:2px solid var(--schrift);box-shadow:none}
+html[data-design] .bearb > .bearb-fuss > button{flex:1 1 0;min-width:0;margin:0}
+html[data-design] .bearb > .bearb-fuss > button.haupt{flex-grow:1.7}
+/* In der Karte scrollt .sekm-rumpf mit 28 px plus Safe Area Innenabstand
+   unten; ohne Ausgleich klebte die Leiste darüber, und Text schien
+   durch den Streifen darunter. */
+html[data-design] .sekm-rumpf .bearb > .bearb-fuss{bottom:calc(-28px - env(safe-area-inset-bottom, 0px))}
+html[data-design] .bearb > .bearb-gefahr{margin-top:18px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -6400,6 +6426,11 @@ function zustandsAuswahl(p){
 
 function zustandVon(p){
   let z = S.zustand[p.id];
+  /* 4.0-beta.13 (A): Ein Eintrag nur mit Gelerntem (lernSchritt legt ihn
+     ohne Code an) oder mit unbekanntem Code ist kein Zustand. Vorher kam
+     er hier ohne Code mit dem Namen „Gesund“ heraus, und der Gießmodus
+     fragte „Ist der Zustand vorbei?“. */
+  if(z && (!z.code || !zustandDef(z.code))) z = null;
   /* Altbestand: alte Umstellungsfelder als Zustand deuten */
   if(!z && p.uebergang && p.uebergangBis && HEUTE < new Date(p.uebergangBis+'T23:59:59')){
     z = {code:'aquakultur', seit:null, bis:p.uebergangBis};
@@ -6411,13 +6442,26 @@ function zustandVon(p){
 }
 
 function zustandSetzen(id, code, tage, medium){
-  if(!code || code==='gesund'){ delete S.zustand[id]; sichern(); return; }
+  /* 4.0-beta.13 (A2): Im selben Eintrag liegt, was die App aus „War
+     staubtrocken“ und „Noch feucht“ gelernt hat. Ein Zustandswechsel
+     ersetzt nur Zustand, Beginn, Ende und Medium; das Gelernte bleibt.
+     Der Einfluss des Zustands auf den Abstand endet mit ihm, weil
+     intervallVon ihn nur anwendet, solange er gilt. */
+  const alt = S.zustand[id];
+  if(!code || code==='gesund'){
+    if(alt){
+      delete alt.code; delete alt.seit; delete alt.bis; delete alt.medium;
+      if(!Object.keys(alt).length) delete S.zustand[id];
+    }
+    sichern(); return;
+  }
   const def = zustandDef(code); if(!def) return;
   const t = tage!=null ? tage : (def.tage||0);
   const bis = t>0 ? iso(new Date(HEUTE.getTime() + t*86400000)) : null;
-  const alt = S.zustand[id];
-  S.zustand[id] = {code, seit:iso(HEUTE), bis,
-    medium: medium || (alt && alt.code === code ? alt.medium : null) || null};
+  const neu = Object.assign({}, alt || {});
+  neu.code = code; neu.seit = iso(HEUTE); neu.bis = bis;
+  neu.medium = medium || (alt && alt.code === code ? alt.medium : null) || null;
+  S.zustand[id] = neu;
   sichern();
 }
 /* Wasserglas, Substrat oder Moos — die Pflege weicht deutlich ab,
@@ -9890,9 +9934,11 @@ function bearbeitenInnenHTML(p){
         <textarea data-e="winterruheText" data-p="${p.id}" rows="2" placeholder="z. B. November bis Februar kühl bei 10 °C, kaum gießen">${esc(typeof p.winterruheText === 'string' ? p.winterruheText : '')}</textarea></label>
       <label class="fspan"><span class="lab">Notiz</span><textarea data-e="notiz" data-p="${p.id}" rows="3">${esc(p.notiz||'')}</textarea></label>
     </div>
-    <div class="tools">
+    <div class="tools bearb-fuss">
       <button class="haupt" data-do="bearb-save" data-p="${p.id}">Speichern</button>
       <button data-do="bearb-zu" data-p="${p.id}">Abbrechen</button>
+    </div>
+    <div class="tools bearb-gefahr">
       <button class="loeschen" data-do="bearb-weg" data-p="${p.id}">Pflanze löschen</button>
     </div>`;
 }
@@ -12272,7 +12318,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.12';
+const FASSUNG = '4.0-beta.13';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -24097,6 +24143,8 @@ let gmMit = {};
 let gmNeuMelden = null;
 let gmDgAuto = null;
 let gmDgWahl = null;
+/* 4.0-beta.13 (F147): Namen der Pflanzen ohne Dünger aufgeklappt. */
+let gmDgWelche = false;
 
 /* Was ein Tipp an einer Pflanze schreiben kann. Ein Fach mehr im
    Gießmodus heißt: hier eintragen, sonst bleibt nach Rückgängig ein
@@ -24783,17 +24831,13 @@ function gmZeichnen(){
      zweiten Pflanze liest ihn niemand mehr, er nahm aber die Stelle
      ein, an der das Besondere haette stehen muessen. Er sitzt jetzt
      im Streifen unter dem Namen und laesst sich antippen. */
-  const gr = gruppeVon(p);
-  const ln = lernStand(p);
   const kasten = [];
   if(stopp > 0) kasten.push({warn:true, text:'Nicht gießen. Wegen „' + z.def.name + '“ noch ' + stopp + (stopp===1?' Tag':' Tage') + ' trocken lassen.'});
   else {
     if(z.code !== 'gesund' && gmZugefragt[p.id])
       kasten.push({warn:false, text: z.def.name + (z.def.kurz ? ' — ' + z.def.kurz : '')});
-    if(Math.abs(ln.faktor - 1) > 0.02){
-      const roh = giessIntervall(p), ohne = Math.max(1, Math.round(roh / ln.faktor));
-      if(ohne !== roh) kasten.push({warn:false, text:'Aus deinen Rückmeldungen: ' + roh + ' statt ' + ohne + ' Tage.'});
-    }
+    /* 4.0-beta.13 (F149): kein Hinweis „Aus deinen Rückmeldungen“ mehr.
+       Das Lernen selbst läuft unverändert weiter. */
     const v = umtopfVerdacht(p);
     if(v) kasten.push({warn:true, text:v.text});
     if(p.sonne === 'voll' && typeof sommer === 'function' && sommer() && p.klasse !== 'S')
@@ -24832,8 +24876,6 @@ function gmZeichnen(){
     <p class="gm-lage ${st.stand==='over'||st.stand==='stopp'?'warn':''}">${esc(lage)}${st.letzte?` · zuletzt vor ${st.tage} ${st.tage===1?'Tag':'Tagen'}`:''}</p>
     ${wz ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
     ${ohneDg ? `<p class="gm-weg-dg">Heute ohne Dünger: ${esc(ohneDg.text)}</p>` : ''}
-    <button type="button" class="gm-chip" data-gm-probe="1" aria-expanded="false">${esc(p.klasse + ' · ' + gr.name)}${gr.geraten?' <i>geschätzt</i>':''}</button>
-    <p class="gm-probe" hidden>${esc(giessHinweisFuer(p, true).text)}</p>
     ${zFrage}
     ${(gmDuengetag === 'ja' && duengFaellig(p))
       ? `<p class="gm-hinweis gm-dueng-vermerk">Mit Dünger — die Kanne steht bereit.</p>` : ''}
@@ -25137,7 +25179,9 @@ function gmZeichnenUebersicht(){
     if(ohne.length){
       const gruende = ohne.map(p => duengSperre(p) || duengGrenze(p));
       const winter = gruende.every(r => r && r.code === 'winter');
-      dg += gmUeZeile('<b>Ohne Dünger:</b> ' + esc(winter && !mit.length ? 'Winterpause bis März' : ohne.map(p => nice(p)).join(', ')), null, null);
+      /* 4.0-beta.13 (F147): Zahl statt Namensliste, Namen nach „Welche?“. */
+      if(winter && !mit.length) dg += gmUeZeile('<b>Ohne Dünger:</b> Winterpause bis März', null, null);
+      else dg += `<div class="gm-ue-zeile gm-dg-ohne"><p><span><b>Ohne Dünger:</b> ${esc(pW(ohne.length))}</span><button type="button" class="mehr-dazu gm-dg-welche" data-gm="dgwelche" aria-expanded="${gmDgWelche}" aria-controls="gm-dg-namen">Welche?</button></p><p class="gm-ue-klein" id="gm-dg-namen"${gmDgWelche ? '' : ' hidden'}>${esc(ohne.map(p => nice(p)).join(', '))}</p></div>`;
     }
   } else if(gmDgAuto){
     const kand = gmDuengKandidaten(gmListe);
@@ -25372,6 +25416,13 @@ document.addEventListener('click', e=>{
   const a = b.dataset.gm;
   if(a === 'zu'){ gmBeenden(); return; }
   if(a === 'los'){ gmIndex = 0; gmZeichnen(); return; }
+  if(a === 'dgwelche'){
+    gmDgWelche = !gmDgWelche;
+    const n = document.getElementById('gm-dg-namen');
+    if(n) n.hidden = !gmDgWelche;
+    b.setAttribute('aria-expanded', String(gmDgWelche));
+    return;
+  }
   if(a === 'dgohne' || a === 'dgmit'){
     gmDgWahl = a === 'dgohne' ? 'ohne' : null;
     gmDuengetagSetzen();
