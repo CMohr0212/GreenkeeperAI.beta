@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.16', w.__T('FASSUNG') === '4.0-beta.16', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.17', w.__T('FASSUNG') === '4.0-beta.17', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11584,7 +11584,7 @@ setTimeout(async () => {
       pruef('beta.9: Übersicht kommt vor der ersten Pflanze', T('gmPhase') === 'uebersicht' && /Vor dem Gießen/.test(inh()) && /data-gm="los"/.test(kn()), T('gmPhase'));
       pruef('beta.9: Übersicht: Kopf mit Pflanzen und Untersetzer', /Heute: 11 Pflanzen · 1 Untersetzer/.test(inh()), (inh().match(/Heute:[^<]*/) || [''])[0]);
       const literRoh = T(`gmPflanzenVonListe(gmListe).filter(function(p){ var g = gruppeVon(p).id; return g !== 'moorbeet' && g !== 'nepenthes'; })
-        .reduce(function(s, p){ return s + wasserBedarf(p); }, 0)`);
+        .reduce(function(s, p){ return s + giessMengeL(p); }, 0)`);  /* seit beta.17: Menge aus Topf und Mix */
       const literLeitung = String(Math.max(0.5, Math.ceil(literRoh * 2) / 2)).replace('.', ',') + ' l';
       /* seit beta.11 (Plan G3): Wasser als eine Zeile */
       pruef('beta.9: Übersicht: Liter je Wasserart, auf 0,5 l aufgerundet', inh().indexOf('<span class="gm-ue-wert">' + literLeitung + '</span> Leitungswasser') !== -1, literLeitung);
@@ -11626,10 +11626,10 @@ setTimeout(async () => {
       /* I Gießweg-Zeile und C Menge */
       const karte = id => { T(`gmListeBauen(); gmIndex = gmListe.findIndex(function(x){ return x.id === '${id}'; }); gmZeichnen()`); return inh(); };
       let h = karte('F8');
-      pruef('beta.9: Karte: Gießweg sichtbar, „Anders als sonst“ bei Abweichung', /class="gm-weg anders"[^>]*>.*?class="gm-weg-t">Anders als sonst: Tauchbad · ca\. \d+ ml</.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
+      pruef('beta.9: Karte: Gießweg sichtbar, „Anders als sonst“ bei Abweichung', /class="gm-weg anders"[^>]*>.*?class="gm-weg-t">Anders als sonst: Tauchbad · nimmt ca\. \d+ ml auf</.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F1');
-      const ml1 = T("Math.round(wasserBedarf(allePflanzen().find(function(x){ return x.id === 'F1'; })) * 1000 / 50) * 50");
-      pruef('beta.9: Karte: Menge auf 50 ml gerundet', new RegExp('class="gm-weg-t">Von unten · ca\\. ' + ml1 + ' ml<').test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
+      const ml1 = T("Math.round(giessMengeL(allePflanzen().find(function(x){ return x.id === 'F1'; })) * 1000 / 50) * 50");
+      pruef('beta.9: Karte: Menge auf 50 ml gerundet', new RegExp('class="gm-weg-t">Von unten · nimmt ca\\. ' + ml1 + ' ml auf<').test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
       h = karte('F5');
       /* seit 4.0-beta.14 (F156): ohne Topfgröße keine ml */
       pruef('beta.9: Karte: ohne Topfgröße keine Menge', /class="gm-weg-t">[^<]+</.test(h) && !/class="gm-weg-t">[^<]*ml</.test(h) && !/geschätzt/.test(h), (h.match(/class="gm-weg-t">[^<]*/) || [''])[0]);
@@ -11849,7 +11849,7 @@ setTimeout(async () => {
       T("gmIndex = gmListe.findIndex(function(x){ return x.id === 'G1'; }); gmZeichnen()");
       const balken = d.querySelector('#gm-inhalt button.gm-weg[data-gm-wie="unten"][data-id="G1"]');
       pruef('beta.10: Kartenbalken: Icon links, Weg und Menge, Pfeil rechts', !!balken && balken.firstElementChild && balken.firstElementChild.tagName.toLowerCase() === 'svg'
-        && (balken.querySelector('.gm-weg-t') || {}).textContent === 'Von unten · ca. ' + ml1 + ' ml' && !!balken.querySelector('.gm-weg-p'), balken ? balken.textContent : 'kein Balken');
+        && (balken.querySelector('.gm-weg-t') || {}).textContent === 'Von unten · nimmt ca. ' + ml1 + ' ml auf' && !!balken.querySelector('.gm-weg-p'), balken ? balken.textContent : 'kein Balken');
       if(balken) balken.click();
       const wie = (d.getElementById('gm-wie-inhalt') || {}).textContent || '';
       const cm = T('gmWasserstandCm(16)');
@@ -12724,8 +12724,9 @@ setTimeout(async () => {
       klick('#gm-inhalt [data-gm-topf="ja"]');
       pruef('beta.14: „Speichern“ trägt die Topfgröße an der Pflanze ein', String(T(`S.eigene.find(function(x){ return x.id === 'T1'; }).topf`)) === '22',
         String(T(`S.eigene.find(function(x){ return x.id === 'T1'; }).topf`)));
-      /* Sollwert selbst gerechnet: Zylinder 22 cm, Höhe 0,8 × Durchmesser, ein Fünftel, auf 50 ml */
-      const soll22 = Math.max(50, Math.round(Math.max(0.1, Math.round(Math.PI * 11 * 11 * 17.6 / 1000 * 0.2 * 100) / 100) * 1000 / 50) * 50);
+      /* Sollwert selbst gerechnet (seit beta.17): Kegelstumpf 22 cm, unten 70 %, Höhe 0,85 × Durchmesser, Aufnahme der Mix-Stufe, auf 50 ml */
+      const auf22 = {viel:0.25, mittel:0.18, wenig:0.12}[T(`mixWasserStufe(mixVon(S.eigene.find(function(x){ return x.id === 'T1'; })) ? mixVon(S.eigene.find(function(x){ return x.id === 'T1'; })).teile : {}) ? mixWasserStufe(mixVon(S.eigene.find(function(x){ return x.id === 'T1'; })).teile).stufe : 'mittel'`)];
+      const soll22 = Math.max(50, Math.round(Math.max(0.05, Math.round(Math.PI * 18.7 / 3 * (121 + 11 * 7.7 + 7.7 * 7.7) / 1000 * auf22 * 100) / 100) * 1000 / 50) * 50);
       pruef('beta.14: Danach ist die Frage weg und die Menge steht da', !tf() && T(`gmListe[gmIndex].id`) === 'T1'
         && new RegExp('class="gm-weg-t">[^<]*ca\\. ' + soll22 + ' ml<').test(inh()), (inh().match(/class="gm-weg-t">[^<]*/) || [''])[0] + ' / ' + soll22);
       klick('[data-gm="spaeter"]');
@@ -13050,6 +13051,61 @@ setTimeout(async () => {
     } finally {
       T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         var a = ${alt16}; S.eigene = a.eigene; S.raeume = a.raeume; sichern(); return 1; })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.17: Plan 4b — Startfaktor und Gießmenge aus dem Mix,
+     Tauchbad-Richtwert. Jeder Test legt seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const alt17 = T(`JSON.stringify({eigene:S.eigene, giess:S.giess, zustand:S.zustand})`);
+    const heute17 = T('HEUTE.getTime()');
+    try {
+      T(`S.giess.saison = false; HEUTE = new Date(2026, 6, 15, 12); 1`);
+      const VIEL = {sphagnum:1}, MITTEL = {rindenhumus:1}, WENIG = {rinde:1};
+      pruef('beta.17: Testmischungen haben die Stufen viel, mittel, wenig',
+        T(`mixWasserStufe(${JSON.stringify(VIEL)}).stufe`) === 'viel' && T(`mixWasserStufe(${JSON.stringify(MITTEL)}).stufe`) === 'mittel' && T(`mixWasserStufe(${JSON.stringify(WENIG)}).stufe`) === 'wenig');
+      const pf = o => Object.assign({id:'MB1', name:'Testi', art:'Testart', botanisch:'Testus testus', klasse:'B', gruppe:'laub', giessart:'durch'}, o);
+      const iv = o => T(`(function(){ S.eigene = [${JSON.stringify(pf(o))}]; S.zustand = {}; return intervallVon(allePflanzen()[0]); })()`);
+      const roh = T(`(function(){ var p = ${JSON.stringify(pf({}))}; var b = intervallBasis(p); return jahresMischung(b[0], b[1], jahresLage()); })()`);
+      pruef('beta.17 (F166): Mix viel streckt den Abstand ×1,2', iv({mix:VIEL}) === Math.max(1, Math.round(roh * 1.2)), iv({mix:VIEL}) + ' / ' + roh);
+      pruef('beta.17 (F166): Mix wenig kürzt den Abstand ×0,8', iv({mix:WENIG}) === Math.max(1, Math.round(roh * 0.8)), iv({mix:WENIG}) + ' / ' + roh);
+      pruef('beta.17 (F166): Mix mittel lässt den Abstand', iv({mix:MITTEL}) === Math.round(roh), iv({mix:MITTEL}));
+      pruef('beta.17 (F166): Ohne eigenen Mix kein Startfaktor (Vorlage zählt nicht)', iv({substrat:'sphagnum'}) === Math.round(roh), iv({substrat:'sphagnum'}));
+      pruef('beta.17 (F166): Eigener Rhythmus bleibt genau', iv({mix:VIEL, intervallEigen:true, intervall:[7, 7]}) === 7, iv({mix:VIEL, intervallEigen:true, intervall:[7, 7]}));
+      const st = iv({klasse:'S', gruppe:'moorbeet', giessart:'anstau'});
+      pruef('beta.17 (F166): Anstau ohne Startfaktor', iv({klasse:'S', gruppe:'moorbeet', giessart:'anstau', mix:VIEL}) === st, st);
+
+      /* Menge: Kegelstumpf, unten 70 %, Höhe 0,85 × Durchmesser */
+      const soll = (cm, a) => { const R = cm / 2, r = R * 0.7, h = cm * 0.85;
+        const l = Math.max(0.05, Math.round(Math.PI * h / 3 * (R*R + R*r + r*r) / 1000 * a * 100) / 100);
+        return Math.max(50, Math.round(l * 1000 / 50) * 50); };
+      const ml = (o, weg) => T(`gmMengeMl(${JSON.stringify(pf(o))}, '${weg || 'durch'}')`);
+      pruef('beta.17 (F167): 27 cm, mittel rund 1,7 l statt 2,45 l', ml({topf:27, mix:MITTEL}) === soll(27, 0.18) && ml({topf:27, mix:MITTEL}) >= 1600 && ml({topf:27, mix:MITTEL}) <= 1800, ml({topf:27, mix:MITTEL}));
+      pruef('beta.17 (F167): 27 cm, viel 25 %', ml({topf:27, mix:VIEL}) === soll(27, 0.25), ml({topf:27, mix:VIEL}));
+      pruef('beta.17 (F167): 27 cm, wenig 12 %', ml({topf:27, mix:WENIG}) === soll(27, 0.12), ml({topf:27, mix:WENIG}));
+      const vst = T(`mixWasserStufe(MIX_VORLAGEN.sphagnum.teile).stufe`);
+      pruef('beta.17 (F167): Ohne eigenen Mix gilt die Stufe der Vorlage', ml({topf:20, substrat:'sphagnum'}) === soll(20, {viel:0.25, mittel:0.18, wenig:0.12}[vst]), ml({topf:20, substrat:'sphagnum'}) + ' ' + vst);
+      pruef('beta.17 (F167): Ohne Topfgröße weiter keine Zahl', ml({mix:VIEL}) === 0);
+      pruef('beta.17 (F168): Von unten heißt es „nimmt ca. … ml auf“', T(`gmMengeText(${JSON.stringify(pf({topf:12, mix:MITTEL}))}, 'unten')`) === 'nimmt ca. ' + soll(12, 0.18) + ' ml auf');
+      pruef('beta.17: Von oben bleibt „ca. … ml“', T(`gmMengeText(${JSON.stringify(pf({topf:12, mix:MITTEL}))}, 'durch')`) === 'ca. ' + soll(12, 0.18) + ' ml');
+
+      /* Übersicht: Richtwert beim Gießen von unten */
+      const ue = weise => T(`(function(){
+        S.eigene = [${JSON.stringify(pf({id:'MB1', topf:20, mix:MITTEL}))}, ${JSON.stringify(pf({id:'MB2', name:'Zwei', topf:12, mix:VIEL}))},
+          ${JSON.stringify(pf({id:'MB3', name:'Drei', mix:VIEL}))}, ${JSON.stringify(pf({id:'MB4', name:'Vier', topf:30, klasse:'S', gruppe:'moorbeet', giessart:'anstau'}))}];
+        S.zustand = {}; S.giess.weise = '${weise}';
+        gmListe = allePflanzen().slice(); gmIndex = 0; gmZeichnenUebersicht();
+        var e = document.querySelector('.gm-ue-auf'); return e ? e.textContent : ''; })()`);
+      const lit = l => { const R = l / 2, r = R * 0.7, h = l * 0.85; return Math.max(0.05, Math.round(Math.PI * h / 3 * (R*R + R*r + r*r) / 1000 * (l === 20 ? 0.18 : 0.25) * 100) / 100); };
+      const sum = String(Math.round((lit(20) + lit(12)) * 10) / 10).replace('.', ',');
+      const tu = ue('unten');
+      pruef('beta.17 (F168): Von unten: „Alle zusammen nehmen etwa X l auf“ (ohne Anstau und ohne Topfgröße)', tu === 'Alle zusammen nehmen etwa ' + sum + ' l auf', tu + ' / ' + sum);
+      pruef('beta.17 (F168): Von oben kein Richtwert', ue('oben') === '');
+    } catch(e) {
+      pruef('beta.17: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      T(`(function(){ var a = ${alt17}; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; HEUTE = new Date(${heute17}); gmListe = []; sichern(); return 1; })()`);
     }
   }
 

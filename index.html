@@ -9190,6 +9190,37 @@ function mixWasserStufe(teile){
   const stufe = w.wasser >= 6.5 ? 'viel' : (w.wasser >= 4.5 ? 'mittel' : 'wenig');
   return {stufe, wert:w.wasser};
 }
+/* 4.0-beta.17 (Plan 4b, F166, F167): Was aus dem Mix folgt.
+   Startfaktor des Abstands nur bei eigenem Mix; die Aufnahme gilt auch
+   für die Vorlage, ohne beides wie „mittel“. */
+function mixStufeVon(p){
+  const m = mixVon(p);
+  const s = m ? mixWasserStufe(m.teile) : null;
+  return s ? s.stufe : 'mittel';
+}
+function mixStartFaktor(p){
+  if(!p || !mixSumme(mixSauber(p.mix))) return 1;
+  const g = typeof giessartVon === 'function' ? giessartVon(p) : null;
+  if(g === 'wasser' || g === 'hydro') return 1;  /* Anstau kehrt in intervallVon vorher zurück */
+  return {viel:1.2, mittel:1, wenig:0.8}[mixStufeVon(p)] || 1;
+}
+function mixAufnahme(p){
+  return {viel:0.25, mittel:0.18, wenig:0.12}[mixStufeVon(p)] || 0.18;
+}
+/* Ein Topf verjüngt sich: unten etwa 70 % des oberen Durchmessers,
+   Höhe 0,85 × Durchmesser (Kegelstumpf statt Zylinder). */
+function topfVolumenL(cm){
+  cm = Number(cm || 0);
+  if(!cm) return 0;
+  const R = cm / 2, r = R * 0.7, h = cm * 0.85;
+  return Math.PI * h / 3 * (R * R + R * r + r * r) / 1000;
+}
+/* Wie viel eine Pflanze bei einem Gießen aufnimmt, in Litern. */
+function giessMengeL(p){
+  const cm = Number(p && p.topf || 0);
+  if(!cm) return 0.25;
+  return Math.max(0.05, Math.round(topfVolumenL(cm) * mixAufnahme(p) * 100) / 100);
+}
 function mixIstVorlage(teile, key){
   const v = MIX_VORLAGEN[key];
   if(!v) return false;
@@ -12714,7 +12745,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.16';
+const FASSUNG = '4.0-beta.17';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13764,6 +13795,11 @@ function intervallVon(p){
   /* Ein eigener Rhythmus ist genau das, was eingetragen wurde. Ein
      vorher gelernter Faktor darf ihn nicht still verschieben — sonst
      stünde nach „alle 7 Tage“ auf der Karte „alle 9 Tage“. */
+  /* 4.0-beta.17 (F166): Startfaktor aus dem eigenen Mix, vor dem Gelernten. */
+  if(!ivEigen(p) && typeof mixStartFaktor === 'function'){
+    const mf = mixStartFaktor(p);
+    if(mf !== 1) basis = basis * mf;
+  }
   if(!ivEigen(p) && typeof lernFaktorVon === 'function' && (typeof gruppeLernt !== 'function' || gruppeLernt(p)))
     basis = basis * lernFaktorVon(p.id);
   basis = Math.max(1, Math.round(basis));
@@ -25003,17 +25039,19 @@ function gmSpuelBuchen(p, weg){
   else if(S.spuelen[p.id] != null) delete S.spuelen[p.id];
   sichern();
 }
-/* Menge (C): ein Fünftel des Topfvolumens, auf 50 ml gerundet. */
+/* Menge (C): Topfvolumen × Aufnahme des Mix, auf 50 ml gerundet (beta.17). */
 function gmMengeMl(p, weg){
   if(weg === 'anstau' || weg === 'wasser' || weg === 'hydro') return 0;
   /* 4.0-beta.14 (F156): ohne Topfgröße keine geratene Zahl */
   if(!topfBekannt(p)) return 0;
-  const ml = Math.max(50, Math.round(wasserBedarf(p) * 1000 / 50) * 50);
+  const ml = Math.max(50, Math.round(giessMengeL(p) * 1000 / 50) * 50);
   return weg === 'spuelen' ? ml * 2 : ml;
 }
 function gmMengeText(p, weg){
   const ml = gmMengeMl(p, weg);
   if(!ml) return '';
+  /* 4.0-beta.17 (F168): von unten und im Tauchbad nimmt der Topf auf. */
+  if(weg === 'unten' || weg === 'tauchen') return 'nimmt ca. ' + ml + ' ml auf';
   return 'ca. ' + ml + ' ml';
 }
 function gmAnders(weg){
@@ -25688,12 +25726,21 @@ function gmZeichnenUebersicht(){
     let z = wz.find(x => x.name === name);
     if(!z){ z = {name, l:0, n:0}; wz.push(z); }
     const weg = gmWegHeute(p);
-    z.l += (weg === 'spuelen' ? 2 : 1) * wasserBedarf(p);
+    z.l += (weg === 'spuelen' ? 2 : 1) * giessMengeL(p);
     z.n++;
   });
   /* 4.0-beta.11 (F134): Wasser als eine Zeile, Schätzungen am Ende */
+  /* 4.0-beta.17 (F168): von unten nur ein Richtwert, wie viel alle
+     zusammen aufnehmen (Pflanzen mit Topfgröße, ohne Anstau, Wasser, Hydro). */
+  let aufL = 0;
+  if(giessWeise() === 'unten') pfl.forEach(p => {
+    const w = gmWegHeute(p);
+    if(w === 'anstau' || w === 'wasser' || w === 'hydro' || !topfBekannt(p)) return;
+    aufL += giessMengeL(p);
+  });
+  const auf = aufL > 0 ? `<p class="gm-ue-klein gm-ue-auf">Alle zusammen nehmen etwa ${esc(String(Math.round(aufL * 10) / 10).replace('.', ','))} l auf</p>` : '';
   const brauch = wz.length ? `<div class="gm-ue-zeile gm-ue-wasser"><p><span><b>Wasser:</b> ${wz.map(z =>
-      `<span class="gm-ue-wert">${esc(gmLiter(z.l))}</span> ${esc(z.name)}`).join(' · ')}</span></p></div>` : '';
+      `<span class="gm-ue-wert">${esc(gmLiter(z.l))}</span> ${esc(z.name)}`).join(' · ')}</span></p>${auf}</div>` : '';
 
   /* Dünger: die Frage nach dem Düngetag als Zeile statt als Fenster. */
   let dg = '';
