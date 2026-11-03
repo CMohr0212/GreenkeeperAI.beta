@@ -4389,6 +4389,16 @@ html[data-design] .mix-edit .mix-ed{margin-top:0}
 html[data-design] .mix-edit .gm-zfrage-btns{margin-top:14px}
 html[data-design="klartext"] .mix-name{font-size:var(--t-l, var(--t-m))}
 html[data-design="klartext"] .mix-edit{border:2px solid var(--schrift)}
+/* ══ Plan 4a-2 (4.0-beta.16): Standardmischungen, Fenster „Bestandteil“ ══ */
+html[data-design] #mix-add .mix-add-box{position:relative;display:flex;flex-direction:column;max-height:calc(100dvh - 44px);
+  padding:20px 0 8px;text-align:left}
+html[data-design] #mix-add h3{margin:0 64px 10px 18px;font-size:1.2rem}
+html[data-design] #mix-add-zu{position:absolute;top:10px;right:10px;width:var(--tap);height:var(--tap);border-radius:50%;
+  border:1px solid var(--linie);background:var(--fl-karte);color:var(--schrift);font-size:1.35rem;line-height:1;cursor:pointer}
+html[data-design] #mix-add .mix-add-liste{overflow-y:auto;border:0;border-radius:0;background:none}
+html[data-design] .mix-add-liste > button .mix-add-plus{flex:0 0 auto;width:22px;text-align:center;font-size:1.3rem;
+  font-weight:600;line-height:1;color:var(--fl-akzent)}
+html[data-design="klartext"] .mix-add-liste > button .mix-add-plus{color:var(--schrift)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -8561,11 +8571,11 @@ function diagnose(symptome, antworten, pflanze){
    ══════════════════════════════════════════════════════════════ */
 
 const ZUTATEN = [
-  {id:'pflanzerde', name:'Blumenerde', gruppe:'Basis', wasser:7, luft:3, naehr:7, ph:6.0, max:0.7,
+  {id:'pflanzerde', name:'Blumenerde', gruppe:'Basis', wasser:7, luft:2, naehr:7, ph:6.0, max:0.7,
    text:'Die übliche Sackware. Speichert gut, verdichtet aber mit der Zeit und ist allein für fast nichts ideal.'},
   {id:'anzuchterde', name:'Anzuchterde', gruppe:'Basis', wasser:6, luft:4, naehr:2, ph:6.0, max:0.8,
    text:'Fein und bewusst mager. Gut für Aussaat und Stecklinge, weil Wurzeln zum Suchen gezwungen werden.'},
-  {id:'kokoshum', name:'Kokoserde (Quellziegel)', gruppe:'Basis', wasser:8, luft:5, naehr:1, ph:6.2, max:0.8,
+  {id:'kokoshum', name:'Kokoserde (Quellziegel)', gruppe:'Basis', wasser:8, luft:1, naehr:1, ph:6.2, max:0.8,
    text:'Speichert viel, bleibt strukturstabiler als Torf, bringt aber kaum Nährstoffe mit. Vor dem Gebrauch gut wässern.'},
   {id:'kokoschips', name:'Kokoschips', gruppe:'Struktur', wasser:5, luft:8, naehr:1, ph:6.2, max:0.8,
    text:'Grobe Stücke, die Luftkanäle offen halten. Klassiker in Aroiden-Mischungen.'},
@@ -8593,9 +8603,9 @@ const ZUTATEN = [
    text:'Puffert Nährstoffe und bindet Schadstoffe. Nettes Extra, kein Muss.'},
   {id:'kohle', name:'Pflanzenkohle', gruppe:'Struktur', wasser:3, luft:8, naehr:1, ph:8.0, max:0.15,
    text:'Hält das Substrat frisch und speichert Nährstoffe. Sparsam einsetzen, hebt den pH-Wert.'},
-  {id:'wurmhumus', name:'Wurmhumus oder Kompost', gruppe:'Nährstoff', wasser:7, luft:3, naehr:9, ph:7.0, max:0.3,
+  {id:'wurmhumus', name:'Wurmhumus oder Kompost', gruppe:'Nährstoff', wasser:7, luft:1, naehr:9, ph:7.0, max:0.3,
    text:'Kräftiger Nährstoffanteil mit Bodenleben. Zu viel davon verdichtet.'},
-  {id:'gartenerde', name:'Gartenerde', gruppe:'Basis', wasser:6, luft:2, naehr:5, ph:7.0, max:0.25,
+  {id:'gartenerde', name:'Gartenerde', gruppe:'Basis', wasser:6, luft:1, naehr:5, ph:7.0, max:0.25,
    text:'Gratis, aber schwer und oft lehmig. Im Topf nur als kleiner Anteil und nie ungesiebt.'},
   {id:'weisstorf', name:'Weißtorf, ungedüngt', gruppe:'Sauer', wasser:9, luft:3, naehr:0, ph:3.8, max:0.75,
    text:'Für Karnivoren unverzichtbar, sonst ökologisch fragwürdig. Nur ungedüngte Ware verwenden.'},
@@ -8705,19 +8715,19 @@ const ZIELE = {
   aroide: {name:'Aroideen und Kletterpflanzen', wasser:5, luft:7.5, naehr:3, ph:6.0,
     gewicht:{luft:4, wasser:2, naehr:2, ph:1},
     text:'Ihre dicken Wurzeln brauchen Luft. Grobe Struktur mit etwas Speicher — reine Blumenerde erstickt sie langsam.'},
-  farn: {name:'Farne und Pfeilwurzgewächse', wasser:6.5, luft:5.5, naehr:3, ph:5.9,
+  farn: {name:'Farne und Pfeilwurzgewächse', wasser:6.5, luft:4, naehr:3, ph:5.9,
     gewicht:{wasser:4, luft:3, naehr:2, ph:1},
     text:'Gleichmäßig feucht, aber nie stehend nass. Viel Speichermasse, trotzdem grobe Poren.'},
   kraut_trocken: {name:'Mediterrane Kräuter', wasser:4, luft:6.5, naehr:2.5, ph:6.3,
     gewicht:{luft:4, wasser:3, naehr:3, ph:1},
     text:'Rosmarin, Lavendel, Thymian, Salbei: mager, durchlässig, eher kalkhaltig. Fette Erde lässt sie faulen.'},
-  kraut_feucht: {name:'Blattkräuter', wasser:7, luft:4.5, naehr:5, ph:6.2,
+  kraut_feucht: {name:'Blattkräuter', wasser:7, luft:3, naehr:5, ph:6.2,
     gewicht:{wasser:3, naehr:3, luft:2, ph:1},
     text:'Basilikum, Petersilie, Minze, Schnittlauch: nährstoffreich und gleichmäßig feucht.'},
-  gemuese: {name:'Gemüse und Fruchtpflanzen', wasser:7, luft:4.5, naehr:6, ph:6.3,
+  gemuese: {name:'Gemüse und Fruchtpflanzen', wasser:7, luft:3, naehr:6, ph:6.3,
     gewicht:{naehr:4, wasser:3, luft:2, ph:1},
     text:'Tomate, Paprika, Gurke: hoher Nährstoffhunger, gleichmäßige Feuchte, trotzdem Struktur gegen Verdichtung.'},
-  bluete: {name:'Blüh- und Balkonpflanzen', wasser:7, luft:4.5, naehr:5, ph:6.2,
+  bluete: {name:'Blüh- und Balkonpflanzen', wasser:7, luft:3, naehr:5, ph:6.2,
     gewicht:{naehr:3, wasser:3, luft:2, ph:1},
     text:'Dauerblüher zehren stark. Nährstoffreich, aber mit genug Struktur für den ganzen Sommer im Kasten.'},
   sauer: {name:'Saure Böden', wasser:6, luft:6, naehr:3.5, ph:4.6, sperre:'sauer',
@@ -8750,7 +8760,7 @@ const ZIELE = {
       'Alle zwei bis drei Monate mit klarem Wasser durchspülen, sonst reichern sich Salze im Korn an.',
       'Nur Hydrodünger verwenden; im Blähton gibt es nichts, was normalen Dünger puffert.'],
     wechsel:'auffüllen etwa alle 10 bis 16 Tage'},
-  standard: {name:'Zimmerpflanzen allgemein', wasser:6.5, luft:5, naehr:4, ph:6.0,
+  standard: {name:'Zimmerpflanzen allgemein', wasser:6.5, luft:4, naehr:4, ph:6.0,
     gewicht:{wasser:3, luft:3, naehr:2, ph:1},
     text:'Ausgewogen: genug Speicher für eine Woche, genug Luft gegen Staunässe.'}
 };
@@ -8793,6 +8803,7 @@ function zielFuer(p){
 }
 
 /* Eigenschaften einer Mischung: Mittelwert nach Volumenanteilen */
+const MIX_GROB_LUFT = 7;
 function mischungWerte(teile){
   let summe = 0, w = 0, l = 0, n = 0, ph = 0, phTeile = 0;
   Object.keys(teile).forEach(id=>{
@@ -8804,6 +8815,12 @@ function mischungWerte(teile){
     if(!z.neutral){ ph += z.ph*t; phTeile += t; }
   });
   if(!summe) return null;
+  /* 4.0-beta.16 (Plan 4a-2): Feines füllt die Poren zwischen Feinem.
+     Luftporen entstehen erst durch einen groben Anteil (Luftwert ab 7);
+     unter einem Fünftel Grobem zählt die Luft nur halb. */
+  let grob = 0;
+  Object.keys(teile).forEach(id=>{ const z = ZUTAT[id]; if(teile[id] && z && z.luft >= MIX_GROB_LUFT) grob += teile[id]; });
+  if(grob / summe < 0.2) l = l / 2;
   return {wasser:w/summe, luft:l/summe, naehr:n/summe,
           ph: phTeile ? ph/phTeile : 7.0, teile:summe};
 }
@@ -9033,11 +9050,11 @@ const REZEPTE = {
     text:'Viel Speichermasse, trotzdem offene Poren. Farne verzeihen kein Austrocknen, aber auch keine Nässe.'},
   kraut_trocken: {teile:{pflanzerde:2, bims:2, kies:1, sand:1},
     text:'Mager und durchlässig. Rosmarin und Lavendel sterben häufiger an fetter Erde als an Trockenheit.'},
-  kraut_feucht: {teile:{pflanzerde:4, kokoshum:2, wurmhumus:1, perlit:1},
+  kraut_feucht: {teile:{pflanzerde:4, kokoshum:2, wurmhumus:1, perlit:2},
     text:'Nährstoffreich und gleichmäßig feucht, mit etwas Struktur gegen das Verdichten im Kasten.'},
-  gemuese: {teile:{pflanzerde:4, wurmhumus:2, kokoshum:1, bims:1},
+  gemuese: {teile:{pflanzerde:4, wurmhumus:2, kokoshum:1, bims:2},
     text:'Kräftig gezehrt wird hier den ganzen Sommer. Kompost bringt Bodenleben, Bims hält die Struktur bis zur Ernte.'},
-  bluete: {teile:{pflanzerde:4, kokoshum:2, wurmhumus:1, perlit:1},
+  bluete: {teile:{pflanzerde:4, kokoshum:2, wurmhumus:1, perlit:2},
     text:'Dauerblüher brauchen Futter und gleichmäßige Feuchte, aber der Balkonkasten darf nicht zubetonieren.'},
   sauer: {teile:{moorbeeterde:4, rinde:2, bims:1},
     text:'Saure Basis, Rinde hält den pH-Wert unten und lockert. Nur mit Regenwasser gießen, sonst steigt der pH wieder.'},
@@ -9082,6 +9099,53 @@ const MIX_VORLAGEN = {
   kies:      {name:'Kies oder Sand',   teile:{kies:1}},
   pon:       {name:'Mineralisch (Pon)', teile:{pon:1}}
 };
+/* 4.0-beta.16 (Plan 4a-2): Vorlagen sind Standardmischungen aus den
+   Rezepten. Die acht Einzel-Substrate oben bleiben nur intern für
+   p.substrat und den Bestand ohne eigenen Mix. */
+const MIX_STANDARD = [
+  {k:'standard',  name:'Zimmerpflanzen',          rezept:'standard'},
+  {k:'aroide',    name:'Aroiden',                 rezept:'aroide'},
+  {k:'sukkulent', name:'Sukkulenten und Kakteen', rezept:'sukkulent'},
+  {k:'orchidee',  name:'Orchideen',               rezept:'orchidee'},
+  {k:'karnivore', name:'Karnivoren',              rezept:'karnivore'},
+  {k:'farn',      name:'Farne',                   rezept:'farn'},
+  {k:'palme',     name:'Palmen und Kübel',        rezept:'palme'},
+  {k:'pon',       name:'Mineralisch (Pon)',       teile:{pon:1}},
+  {k:'hydro',     name:'Hydro (Blähton)',         rezept:'hydrokultur'}
+];
+function mixStandardTeile(k){
+  const v = MIX_STANDARD.find(x=>x.k === k);
+  if(!v) return null;
+  const t = v.teile || (REZEPTE[v.rezept] ? REZEPTE[v.rezept].teile : null);
+  return t ? Object.assign({}, t) : null;
+}
+function mixGleich(a, b){
+  a = mixSauber(a); b = mixSauber(b);
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length > 0 && ka.length === kb.length && ka.every(id=>a[id] === b[id]);
+}
+/* Name der Standardmischung, der dieser Mix genau entspricht */
+function mixStandardName(teile){
+  const v = MIX_STANDARD.find(x=>mixGleich(teile, mixStandardTeile(x.k)));
+  return v ? v.name : '';
+}
+/* Ein Wort, was ein Bestandteil tut — für das Fenster „Bestandteil“ */
+const MIX_WIRKUNG = {
+  pflanzerde:'speichert', anzuchterde:'speichert, mager', kokoshum:'speichert', rindenhumus:'speichert',
+  gartenerde:'speichert', vermiculit:'speichert', sphagnum:'speichert', lauberde:'speichert', bentonit:'speichert',
+  kokoschips:'lockert', rinde:'lockert', rindegrob:'lockert', kokosfaser:'lockert', holzfaser:'lockert', kohle:'lockert',
+  perlit:'lockert', bims:'mineralisch', lava:'mineralisch', blaehton:'mineralisch', seramis:'mineralisch',
+  kies:'mineralisch', sand:'mineralisch', zeolith:'mineralisch', akadama:'mineralisch', pon:'mineralisch',
+  wurmhumus:'düngt', weisstorf:'säuert', moorbeeterde:'säuert', kanuma:'säuert'
+};
+/* Häufige zuerst, der Rest in der Reihenfolge der Tabelle */
+const MIX_HAEUFIG = ['pflanzerde','kokoshum','rinde','kokoschips','perlit','bims','lava','wurmhumus',
+  'sphagnum','blaehton','seramis','pon','akadama','kohle'];
+function mixAddReihe(){
+  const rest = ZUTATEN.map(z=>z.id).filter(id=>MIX_HAEUFIG.indexOf(id) === -1);
+  return MIX_HAEUFIG.filter(id=>ZUTAT[id]).concat(rest);
+}
+
 /* Zu welchem Substrat ein Bestandteil zählt */
 const MIX_ART = {
   pflanzerde:'erde', anzuchterde:'erde', kokoshum:'erde', rindenhumus:'erde', wurmhumus:'erde',
@@ -9166,9 +9230,13 @@ function mixEdHTML(ctx){
   const ed = MIX_ED[ctx] || {teile:{}, alle:false};
   const teile = mixSauber(ed.teile);
   const p = ed.pflanze ? ed.pflanze() : null;
-  const vorl = (ed.alle ? Object.keys(MIX_VORLAGEN) : ['pon'])
-    .map(k=>`<button type="button" class="sym" data-mix-vorlage="${k}">${esc(MIX_VORLAGEN[k].name)}</button>`).join('')
-    + (mixEmpfehlung(p) ? '<button type="button" class="sym" data-mix-vorlage="empfehlung">Empfehlung für diese Art</button>' : '');
+  /* 4.0-beta.16: Empfehlung zuerst, dann die Standardmischungen; die
+     gewählte Vorlage ist markiert, solange der Mix ihr entspricht. */
+  const emp = mixEmpfehlung(p);
+  const vk = (k, name, t)=>`<button type="button" class="sym${t && mixGleich(teile, t) ? ' on' : ''}" data-mix-vorlage="${k}"`
+    + ` aria-pressed="${t && mixGleich(teile, t) ? 'true' : 'false'}">${esc(name)}</button>`;
+  const vorl = (emp ? vk('empfehlung', 'Empfehlung für diese Art', emp) : '')
+    + MIX_STANDARD.map(v=>vk(v.k, v.name, mixStandardTeile(v.k))).join('');
   const ids = Object.keys(teile).sort((a, b)=>ZUTATEN.findIndex(z=>z.id===a) - ZUTATEN.findIndex(z=>z.id===b));
   const zeilen = ids.length ? ids.map(id=>{
     const name = esc(ZUTAT[id].name);
@@ -9177,13 +9245,9 @@ function mixEdHTML(ctx){
       + `<span class="takt-zahl mix-n" aria-live="polite">${teile[id]}</span>`
       + `<button type="button" class="takt-pm" data-mix-pm="1" data-mix-id="${id}" aria-label="Ein Teil mehr ${name}">+</button>`
       + `</span></div>`;
-  }).join('') : '<p class="fhint mix-leer">Wähle eine Vorlage oder füge Bestandteile hinzu.</p>';
-  const gruppen = {};
-  ZUTATEN.forEach(z=>{ if(!teile[z.id]) (gruppen[z.gruppe] = gruppen[z.gruppe] || []).push(z); });
-  const add = '<select data-mix-add aria-label="Bestandteil hinzufügen"><option value="">+ Bestandteil</option>'
-    + Object.keys(gruppen).map(g=>'<optgroup label="' + esc(g) + '">'
-      + gruppen[g].map(z=>'<option value="' + z.id + '">' + esc(z.name) + '</option>').join('') + '</optgroup>').join('')
-    + '</select>';
+  }).join('') : '<p class="fhint mix-leer">Tippe eine Mischung an oder füge Bestandteile hinzu.</p>';
+  /* 4.0-beta.16 (Regel 9.10): ein App-Fenster statt der Systemliste */
+  const add = '<div class="gm-zfrage-btns"><button type="button" class="mix-add-knopf" data-mix-add-auf>+ Bestandteil</button></div>';
   const zid = mixZielVon(p);
   const ziel = ZIELE[zid];
   const w = mischungWerte(teile);
@@ -9217,8 +9281,7 @@ document.addEventListener('click', e=>{
   e.stopPropagation();
   if(b.dataset.mixVorlage){
     const k = b.dataset.mixVorlage;
-    const t = k === 'empfehlung' ? mixEmpfehlung(ed.pflanze ? ed.pflanze() : null)
-      : (MIX_VORLAGEN[k] ? MIX_VORLAGEN[k].teile : null);
+    const t = k === 'empfehlung' ? mixEmpfehlung(ed.pflanze ? ed.pflanze() : null) : mixStandardTeile(k);
     if(t) mixEdAendern(ctx, Object.assign({}, t));
     return;
   }
@@ -9228,13 +9291,39 @@ document.addEventListener('click', e=>{
   if(t[id] <= 0) delete t[id];
   mixEdAendern(ctx, t);
 });
-document.addEventListener('change', e=>{
-  const sel = e.target.closest && e.target.closest('[data-mix-add]');
-  if(!sel || !sel.value) return;
-  const box = sel.closest('[data-mix-ctx]'); if(!box) return;
-  const ctx = box.dataset.mixCtx, ed = MIX_ED[ctx]; if(!ed) return;
+/* Fenster „Bestandteil hinzufügen“ (#mix-add, Kind von <body>) */
+var MIX_ADD_CTX = '';
+function mixAddListeHTML(ctx){
+  const ed = MIX_ED[ctx]; const teile = ed ? mixSauber(ed.teile) : {};
+  return mixAddReihe().filter(id=>!teile[id]).map(id=>
+    `<button type="button" data-mix-add-id="${id}"><span class="mix-add-plus" aria-hidden="true">+</span>`
+    + `<span class="wl-txt"><b>${esc(ZUTAT[id].name)}</b><i>${esc(MIX_WIRKUNG[id] || '')}</i></span></button>`).join('');
+}
+function mixAddOeffnen(ctx, ausloeser){
+  const liste = document.getElementById('mix-add-liste');
+  if(!liste || !MIX_ED[ctx]) return;
+  MIX_ADD_CTX = ctx;
+  liste.innerHTML = mixAddListeHTML(ctx);
+  modalAuf('mix-add', ausloeser);
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest) return;
+  const auf = e.target.closest('[data-mix-add-auf]');
+  if(auf){
+    const box = auf.closest('[data-mix-ctx]'); if(!box) return;
+    e.stopPropagation();
+    mixAddOeffnen(box.dataset.mixCtx, auf);
+    return;
+  }
+  if(e.target.closest('#mix-add-zu')){ modalZu('mix-add'); return; }
+  const w = e.target.closest('[data-mix-add-id]');
+  if(!w) return;
+  e.stopPropagation();
+  const ctx = MIX_ADD_CTX, ed = MIX_ED[ctx];
+  modalZu('mix-add');
+  if(!ed) return;
   const t = Object.assign({}, ed.teile);
-  t[sel.value] = (t[sel.value] || 0) + 1;
+  t[w.dataset.mixAddId] = (t[w.dataset.mixAddId] || 0) + 1;
   mixEdAendern(ctx, t);
 });
 
@@ -12020,6 +12109,14 @@ function pflanzeEntfernen(id){
   </div>
 </div>
 
+<div id="mix-add" class="modal" role="dialog" aria-modal="true" aria-labelledby="mix-add-titel" hidden>
+  <div class="modal-box mix-add-box">
+    <button type="button" id="mix-add-zu" aria-label="Schließen">×</button>
+    <h3 id="mix-add-titel">Bestandteil hinzufügen</h3>
+    <div class="wahl-liste mix-add-liste" id="mix-add-liste" role="group" aria-label="Bestandteile"></div>
+  </div>
+</div>
+
 <div id="rundgang" role="dialog" aria-modal="true" aria-label="Rundgang" hidden>
   <div class="gm-leiste">
     <div class="gm-fort-bahn"><span id="rg-fort"></span></div>
@@ -12346,7 +12443,7 @@ function pflanzeEntfernen(id){
           <div class="al-feld">
             <span class="lab">Substrat</span>
             <select id="f-substrat" hidden></select>
-            <div class="al-knoepfe" id="f-substrat-knoepfe"></div>
+            <div class="al-knoepfe" id="f-substrat-knoepfe" hidden></div>
             <div class="mix-ed" id="f-mix" data-mix-ctx="anlegen"></div>
           </div>
           <div class="al-feld">
@@ -12617,7 +12714,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.15';
+const FASSUNG = '4.0-beta.16';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15347,7 +15444,8 @@ function topfSubstratHTML(p){
   const mxSt = mx ? mixWasserStufe(mx.teile) : null;
   /* Entspricht der Mix genau seiner Vorlage, steht ihr Name da */
   const subLang = !!(mx && mx.eigen && !mixIstVorlage(mx.teile, p.substrat));
-  const subZeile = subLang ? esc(mixKurzText(mx.teile)) : esc(subIst);
+  const subStd = subLang ? mixStandardName(mx.teile) : '';
+  const subZeile = subLang ? esc(subStd || mixKurzText(mx.teile)) : esc(subIst);
   const ablIst = p.ablauf === 'ja' ? 'Abzugsloch vorhanden'
     : p.ablauf === 'nein' ? 'kein Abzugsloch' : '';
   const um = (typeof ereignisse === 'function') ? ereignisse(p.id).find(e=>e.typ === 'umgetopft') : null;
@@ -18188,6 +18286,7 @@ document.addEventListener('click', e => {
 
 /* 4.0-beta.10: Hinweiskärtchen zum Gießweg, über dem Gießmodus. */
 modalAnmelden('gm-wie', {groesse:'blatt', schleier:true});
+modalAnmelden('mix-add', {groesse:'blatt', schleier:true});
 
 modalAnmelden('rundgang', {
   groesse:'voll', schleier:false,

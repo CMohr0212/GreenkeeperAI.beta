@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.15', w.__T('FASSUNG') === '4.0-beta.15', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.16', w.__T('FASSUNG') === '4.0-beta.16', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -12852,7 +12852,7 @@ setTimeout(async () => {
       await warte(80);
       d.getElementById('f-art').value = 'Efeutute'; d.getElementById('f-bot').value = 'Epipremnum aureum'; d.getElementById('f-typ').value = 'Kletterpflanze';
       T('alStufeZeigen(4)');
-      pruef('beta.15: Ohne Vorlage zeigt der Mix den Hinweis und keine Balken', !!mix() && /Wähle eine Vorlage/.test(mix().textContent) && !mix().querySelector('.sb-zeile'), mix() && mix().textContent.slice(0, 120));
+      pruef('beta.15: Ohne Vorlage zeigt der Mix den Hinweis und keine Balken', !!mix() && /Tippe eine Mischung an/.test(mix().textContent) && !mix().querySelector('.sb-zeile'), mix() && mix().textContent.slice(0, 120));
       d.querySelector('#f-substrat-knoepfe [data-alwert="erdeRinde"]').click();
       pruef('beta.15: Vorlage „Erde mit Rinde“ füllt 2 Blumenerde, 1 Pinienrinde', zeilen(mix()) === 'Blumenerde=2,Pinienrinde 5–15 mm=1', zeilen(mix()));
       pruef('beta.15: Vier Balken wie im Substratrechner', mix().querySelectorAll('.sb-zeile').length === 4
@@ -12868,16 +12868,21 @@ setTimeout(async () => {
       pruef('beta.15: − auf 0 nimmt den Bestandteil heraus, der Knopf springt auf „Erde“',
         zeilen(mix()) === 'Blumenerde=2' && d.getElementById('f-substrat').value === 'erde'
         && d.querySelector('#f-substrat-knoepfe [data-alwert="erde"]').getAttribute('aria-pressed') === 'true', zeilen(mix()) + ' ' + d.getElementById('f-substrat').value);
-      const add = mix().querySelector('[data-mix-add]');
-      pruef('beta.15: „+ Bestandteil“ bietet nur, was noch nicht drin ist, in Gruppen', !!add && !add.querySelector('option[value="pflanzerde"]') && !!add.querySelector('optgroup option[value="akadama"]'));
-      add.value = 'perlit'; add.dispatchEvent(new w.Event('change', {bubbles:true}));
+      /* beta.16: „+ Bestandteil“ öffnet das Fenster #mix-add statt einer Systemliste */
+      const addNimm = id => { mix().querySelector('[data-mix-add-auf]').click(); const b = d.querySelector('#mix-add-liste [data-mix-add-id="' + id + '"]'); if(b) b.click(); return !!b; };
+      mix().querySelector('[data-mix-add-auf]').click();
+      const liste16 = d.getElementById('mix-add-liste');
+      pruef('beta.15: „+ Bestandteil“ bietet nur, was noch nicht drin ist', !!liste16 && !liste16.querySelector('[data-mix-add-id="pflanzerde"]') && !!liste16.querySelector('[data-mix-add-id="akadama"]'));
+      T("modalZu('mix-add')"); await warte(30);
+      addNimm('perlit');
       pruef('beta.15: Ein neuer Bestandteil kommt mit 1 Teil dazu, Balken ändern sich', zeilen(mix()) === 'Blumenerde=2,Perlit=1' && /^5,7\//.test(wasserWert(mix())), zeilen(mix()) + ' ' + wasserWert(mix()));
       const empf = mix().querySelector('[data-mix-vorlage="empfehlung"]');
       empf && empf.click();
       pruef('beta.15: „Empfehlung für diese Art“ setzt das Rezept des Substratrechners',
         !!empf && T('JSON.stringify(MIX_ED.anlegen.teile)') === T('JSON.stringify(REZEPTE.aroide.teile)'), T('JSON.stringify(MIX_ED.anlegen.teile)'));
-      pruef('beta.15: Im Anlegen stehen nur Pon und Empfehlung als zusätzliche Vorlagen',
-        [...mix().querySelectorAll('[data-mix-vorlage]')].map(b => b.dataset.mixVorlage).join() === 'pon,empfehlung');
+      pruef('beta.16: Im Anlegen stehen Empfehlung und die Standardmischungen als Vorlagen',
+        [...mix().querySelectorAll('[data-mix-vorlage]')].map(b => b.dataset.mixVorlage).join() === 'empfehlung,' + T('MIX_STANDARD.map(function(v){ return v.k; }).join()'),
+        [...mix().querySelectorAll('[data-mix-vorlage]')].map(b => b.dataset.mixVorlage).join());
       mix().querySelector('[data-mix-vorlage="pon"]').click();
       pruef('beta.15: Pon-Vorlage stellt den Knopf auf „Seramis oder Pon“', d.getElementById('f-substrat').value === 'seramis' && zeilen(mix()) === 'Pon (Fertigmischung)=1');
       d.querySelector('#f-substrat-knoepfe [data-alwert=""]').click();
@@ -12886,8 +12891,7 @@ setTimeout(async () => {
       /* Speichern: p.mix und p.substrat */
       d.querySelector('#f-substrat-knoepfe [data-alwert="erdeRinde"]').click();
       mix().querySelector('[data-mix-pm="1"][data-mix-id="rinde"]').click();
-      add.value = '';
-      const a2 = mix().querySelector('[data-mix-add]'); a2.value = 'bims'; a2.dispatchEvent(new w.Event('change', {bubbles:true}));
+      addNimm('bims');
       d.getElementById('f-name').value = 'Mix15';
       T(`(function(){ formLageZeichnen(raumAnlegen('Prüfraum 15'), ''); var t = document.getElementById('f-topf'); t.value = '14'; t.dataset.gesetzt = '1'; alTopfZeichnen(); return 1; })()`);
       T('alStufeZeigen(5)');
@@ -12923,10 +12927,14 @@ setTimeout(async () => {
       const kbox = () => km().querySelector('[data-mix-ctx="karte:MX1"]');
       pruef('beta.15: Aufklappen zeigt alle Vorlagen und die Rinde-Vorlage als Mix',
         !!kbox() && !km().querySelector('[data-mix-box="MX1"]').hidden && zeilen(kbox()) === 'Pinienrinde 5–15 mm=1'
-        && [...kbox().querySelectorAll('[data-mix-vorlage]')].map(b => b.dataset.mixVorlage).join() === 'erde,erdeRinde,rinde,blaehton,seramis,sphagnum,kies,pon,empfehlung',
+        && [...kbox().querySelectorAll('[data-mix-vorlage]')].map(b => b.dataset.mixVorlage).join() === 'empfehlung,' + T('MIX_STANDARD.map(function(v){ return v.k; }).join()'),
         kbox() ? zeilen(kbox()) : 'kein Kasten');
       const kk = sel => { const el = kbox() && kbox().querySelector(sel); if(el) el.click(); return !!el; };
-      kk('[data-mix-vorlage="sphagnum"]');
+      /* beta.16: Sphagnum ist keine Vorlage mehr; über das Fenster hinzufügen */
+      kk('[data-mix-pm="-1"][data-mix-id="rinde"]');
+      kk('[data-mix-add-auf]');
+      { const sb = d.querySelector('#mix-add-liste [data-mix-add-id="sphagnum"]'); if(sb) sb.click(); }
+      await bisDa(() => T(`modalOffen('mix-add')`) === false, 1500);
       kk('[data-mix-pm="1"][data-mix-id="sphagnum"]');
       pruef('beta.15: In der Karte ändert ein Tipp nur den Baustein, Balken folgen', zeilen(kbox()) === 'Sphagnum-Moos=2' && /^9,0\//.test(wasserWert(kbox())) && /Hält Wasser viel/.test(kbox().textContent), zeilen(kbox()) + ' ' + wasserWert(kbox()));
       pruef('beta.15: Vor dem Speichern bleibt die Pflanze unverändert', T(`S.eigene.filter(function(x){ return x.id === 'MX1'; })[0].substrat`) === 'rinde');
@@ -12938,14 +12946,14 @@ setTimeout(async () => {
       T(`karteOeffnen('MX1')`);
       await bisDa(() => km().querySelector('[data-mix-do="auf"][data-p="MX1"]') && km().querySelector('[data-mix-box="MX1"]').hidden);
       const auf2 = km().querySelector('[data-mix-do="auf"][data-p="MX1"]'); auf2.click();
-      kbox().querySelector('[data-mix-vorlage="erde"]').click();
+      kbox().querySelector('[data-mix-vorlage="standard"]').click();
       km().querySelector('[data-mix-do="abbrechen"][data-p="MX1"]').click();
       pruef('beta.15: Abbrechen lässt den gespeicherten Mix stehen', T(`JSON.stringify(S.eigene.filter(function(x){ return x.id === 'MX1'; })[0].mix)`) === '{"sphagnum":2}'
         && km().querySelector('[data-mix-box="MX1"]').hidden === true);
 
       /* Substratrechner: Rezepte unverändert, Zahlen mit Komma */
       const rez = T(`JSON.stringify(Object.keys(REZEPTE).map(function(k){ var r = rezeptFuer(k); return [k, r && r.werte && Math.round(r.werte.wasser * 100)]; }))`);
-      pruef('beta.15: Rezepte des Substratrechners rechnen wie vorher', rez === '[["karnivore",640],["karnivore_epi",533],["orchidee",338],["sukkulent",375],["aroide",480],["farn",625],["kraut_trocken",417],["kraut_feucht",675],["gemuese",675],["bluete",675],["sauer",571],["zitrus",488],["palme",529],["bromelie",443],["hydrokultur",220],["standard",644]]', rez);
+      pruef('beta.16: Rezepte des Substratrechners (Blattkräuter, Gemüse, Blüher mit mehr Grobem)', rez === '[["karnivore",640],["karnivore_epi",533],["orchidee",338],["sukkulent",375],["aroide",480],["farn",625],["kraut_trocken",417],["kraut_feucht",633],["gemuese",644],["bluete",633],["sauer",571],["zitrus",488],["palme",529],["bromelie",443],["hydrokultur",220],["standard",644]]', rez);
       pruef('beta.15: Zielwerte der Balken mit Komma', /\/7,5<\/i>/.test(T(`balken('X', 5, 7.5)`)), T(`balken('X', 5, 7.5)`));
 
       /* Stil */
@@ -12958,6 +12966,90 @@ setTimeout(async () => {
         HEUTE = new Date(${heute15});
         var a = ${alt15}; Object.keys(a).forEach(function(k){ S[k] = a[k]; });
         formularLeeren(); sichern(); render(); })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.16: Plan 4a-2 — Standardmischungen, Fenster „Bestandteil“
+     statt Systemliste, Luftporen aus dem Grobanteil. Jeder Test legt
+     seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const alt16 = T(`JSON.stringify({eigene:S.eigene, raeume:S.raeume})`);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const bisDa = async (f, ms) => { for(let i = 0; i < (ms || 3000) / 30; i++){ try { if(f()) return true; } catch(e){} await warte(30); } return false; };
+    const zu = () => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); return 1; })()`);
+    const zeilen = box => [...box.querySelectorAll('.mix-zeile')].map(z => z.querySelector('.mix-name').textContent + '=' + z.querySelector('.mix-n').textContent).join(',');
+    const luft = t => T(`mischungWerte(${JSON.stringify(t)}).luft`);
+    try {
+      /* Luftporen: Sollwerte im Test gerechnet (Blumenerde 2, Kokoserde 1, Wurmhumus 1, Rinde 8) */
+      const l1 = luft({pflanzerde:1, kokoshum:1, wurmhumus:1});
+      pruef('beta.16: Blumenerde, Kokoserde, Wurmhumus ohne Grobes: Luftporen unter 1', l1 < 1 && Math.abs(l1 - (2 + 1 + 1) / 3 / 2) < 0.001, l1);
+      const l2 = luft({pflanzerde:1, kokoshum:1, rinde:1});
+      pruef('beta.16: Ein Drittel Rinde: Luftporen über 3, nicht halbiert', l2 > 3 && Math.abs(l2 - (2 + 1 + 8) / 3) < 0.001, l2);
+      const l3 = luft({pflanzerde:9, perlit:1});
+      pruef('beta.16: Ein Zehntel Perlit ist unter einem Fünftel Grobem: halbiert', Math.abs(l3 - (9 * 2 + 9) / 10 / 2) < 0.001, l3);
+      pruef('beta.16: Kokoserde hat selbst Luftwert 1', T(`ZUTAT.kokoshum.luft`) === 1);
+
+      /* Standardmischungen */
+      const std = JSON.parse(T(`JSON.stringify(MIX_STANDARD.map(function(v){ var t = mixStandardTeile(v.k); return [v.k, v.name, t ? mixSubstratVon(t) : '']; }))`));
+      pruef('beta.16: Neun Standardmischungen, jede ergibt ein Substrat', std.length === 9 && std.every(x => x[2]), JSON.stringify(std));
+      pruef('beta.16: Aroiden-Mischung ist das Rezept des Substratrechners', T(`JSON.stringify(mixStandardTeile('aroide'))`) === T(`JSON.stringify(REZEPTE.aroide.teile)`));
+      pruef('beta.16: Jeder Bestandteil hat ein Wort zur Wirkung', T(`ZUTATEN.filter(function(z){ return !MIX_WIRKUNG[z.id]; }).map(function(z){ return z.id; }).join()`) === '');
+      pruef('beta.16: Fenster „Bestandteil“ ist ein Kind von <body>', !!d.getElementById('mix-add') && d.getElementById('mix-add').parentNode === d.body);
+
+      /* Anlegen */
+      /* T42: ein noch laufendes history.back() früherer Blöcke schlösse sonst das Anlegen mit */
+      zu(); await warte(250); T(`history.replaceState(null, ''); 1`); T('alStart()'); await warte(80);
+      d.getElementById('f-art').value = 'Efeutute'; d.getElementById('f-bot').value = 'Epipremnum aureum'; d.getElementById('f-typ').value = 'Kletterpflanze';
+      T('alStufeZeigen(4)');
+      const mix = () => d.getElementById('f-mix');
+      pruef('beta.16: Einzel-Substrat-Knöpfe im Anlegen ausgeblendet', d.getElementById('f-substrat-knoepfe').hidden === true);
+      pruef('beta.16: Keine Systemliste im Mix, Knopf „+ Bestandteil“', !mix().querySelector('select') && !!mix().querySelector('button[data-mix-add-auf]'));
+      mix().querySelector('[data-mix-add-auf]').click();
+      pruef('beta.16: Bestandteil ohne Vorlage: Fenster öffnet über dem Anlegen', T(`modalOben()`) === 'mix-add' && T(`modalOffen('anleg-modal')`) === true && d.getElementById('mix-add').hidden === false);
+      const ids = [...d.querySelectorAll('#mix-add-liste [data-mix-add-id]')].map(b => b.dataset.mixAddId);
+      pruef('beta.16: Häufige zuerst (Blumenerde, Kokoserde, Rinde)', ids.slice(0, 3).join() === 'pflanzerde,kokoshum,rinde', ids.slice(0, 4).join());
+      pruef('beta.16: Knopf nennt Name und Wirkung', /Perlit/.test(d.querySelector('#mix-add-liste [data-mix-add-id="perlit"]').textContent) && /lockert/.test(d.querySelector('#mix-add-liste [data-mix-add-id="perlit"]').textContent));
+      d.querySelector('#mix-add-liste [data-mix-add-id="kokoshum"]').click();
+      await bisDa(() => T(`modalOffen('mix-add')`) === false, 1500);
+      pruef('beta.16: Tipp fügt 1 Teil hinzu und schließt das Fenster, Anlegen bleibt offen', zeilen(mix()) === 'Kokoserde (Quellziegel)=1' && T(`modalOffen('mix-add')`) === false && T(`modalOffen('anleg-modal')`) === true, zeilen(mix()) + ' ' + T('JSON.stringify(MODAL_STAPEL)'));
+      mix().querySelector('[data-mix-add-auf]').click();
+      pruef('beta.16: Was schon drin ist, fehlt in der Liste', !d.querySelector('#mix-add-liste [data-mix-add-id="kokoshum"]') && !!d.querySelector('#mix-add-liste [data-mix-add-id="pflanzerde"]'));
+      d.getElementById('mix-add-zu').click();
+      await bisDa(() => T(`modalOffen('mix-add')`) === false, 1500);
+      pruef('beta.16: × schließt das Fenster ohne Änderung', T(`modalOffen('mix-add')`) === false && zeilen(mix()) === 'Kokoserde (Quellziegel)=1');
+      mix().querySelector('[data-mix-vorlage="aroide"]').click();
+      const aro = mix().querySelector('[data-mix-vorlage="aroide"]');
+      pruef('beta.16: Vorlage füllt den Mix und ist markiert', T(`JSON.stringify(MIX_ED.anlegen.teile)`) === T(`JSON.stringify(REZEPTE.aroide.teile)`) && aro.classList.contains('on') && aro.getAttribute('aria-pressed') === 'true');
+      mix().querySelector('[data-mix-pm="1"][data-mix-id="bims"]').click();
+      pruef('beta.16: Nach einer Änderung ist keine Vorlage mehr markiert', !mix().querySelector('[data-mix-vorlage].on'));
+
+      /* Karte: Name der Standardmischung, Fenster über der Karte */
+      zu(); await warte(250); T(`history.replaceState(null, ''); 1`);
+      T(`(function(){ S.eigene.push({id:'MX16', eigen:true, name:'Aroide16', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', sonne:'hell', typ:'Kletterpflanze',
+          intervall:[8,12], todo:[], log:[], notiz:'', topf:'14', topfform:'kultur', substrat:mixSubstratVon(REZEPTE.aroide.teile), mix:Object.assign({}, REZEPTE.aroide.teile), ablauf:''}); sichern(); return 1; })()`);
+      const ts = T(`topfSubstratHTML(S.eigene.filter(function(x){ return x.id === 'MX16'; })[0])`);
+      pruef('beta.16: Karte zeigt den Namen der Standardmischung statt der Teile', /Substrat<\/dt><dd>Aroiden/.test(ts), ts.slice(0, 260));
+      T(`karteOeffnen('MX16')`);
+      const km = () => d.querySelector('#karte-modal');
+      await bisDa(() => km().querySelector('[data-mix-do="auf"][data-p="MX16"]'));
+      km().querySelector('[data-mix-do="auf"][data-p="MX16"]').click();
+      const kbox = () => km().querySelector('[data-mix-ctx="karte:MX16"]');
+      kbox().querySelector('[data-mix-add-auf]').click();
+      pruef('beta.16: In der Karte öffnet das Fenster über der Karte', T(`modalOben()`) === 'mix-add' && T(`modalOffen('karte-modal')`) === true);
+      d.querySelector('#mix-add-liste [data-mix-add-id="sphagnum"]').click();
+      await bisDa(() => T(`modalOffen('mix-add')`) === false, 1500);
+      pruef('beta.16: Tipp in der Karte ergänzt den Mix, die Karte bleibt offen', /Sphagnum-Moos=1/.test(zeilen(kbox())) && T(`modalOffen('karte-modal')`) === true, zeilen(kbox()));
+
+      /* Ziele auf der neuen Skala */
+      pruef('beta.16: Ziel Luftporen Zimmerpflanzen 4, Blattkräuter 3', T('ZIELE.standard.luft') === 4 && T('ZIELE.kraut_feucht.luft') === 3);
+      const stil = Array.from(d.querySelectorAll('style')).map(x => x.textContent).join('\n');
+      pruef('beta.16: Stilblock „Plan 4a-2“ steht nach „Plan Schritt 4a“', stil.lastIndexOf('Plan 4a-2') > stil.lastIndexOf('Plan Schritt 4a (4.0-beta.15)') && /html\[data-design\] #mix-add-zu\{/.test(stil));
+    } catch(e) {
+      pruef('beta.16: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        var a = ${alt16}; S.eigene = a.eigene; S.raeume = a.raeume; sichern(); return 1; })()`);
     }
   }
 
