@@ -4417,6 +4417,11 @@ html[data-design] .al-knoepfe > button.al-neu-knopf{border-style:dashed;color:va
 html[data-design] .al-knoepfe > button.al-neu-knopf b{font-weight:600}
 html[data-design="klartext"] .al-knoepfe > button.al-neu-knopf{color:var(--schrift);border-width:2px}
 html[data-design] #modus-zurueck-box{margin:4px 0 10px}
+/* ══ Plan M1b (4.0-beta.19): Namensfeld und KI-Stufe im Anlegen ══ */
+html[data-design] #form-neu .al-kiname{display:flex;flex-direction:column;gap:14px;margin:0 0 18px}
+html[data-design] #form-neu .al-kiname[hidden]{display:none}
+html[data-design] #form-neu .al-kiname .al-knoepfe{margin-top:2px}
+html[data-design] #form-neu .fotokrit[hidden]{display:none}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -11870,7 +11875,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="ansicht" aria-expanded="false" aria-label="Wozu ist die Ansicht-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-ansicht" hidden>
-      <p class="wz-hilfe" hidden>Normalerweise ist die App in vier Reiter geteilt, die unten am Rand stehen. Mit dem Haken läuft stattdessen wieder alles untereinander auf einer einzigen langen Seite. Am großen Bildschirm ist das oft angenehmer, am Handy meistens nicht. Der Modus Sammler zeigt nur das Wichtigste, der Modus Entdecker alles. Darunter lässt sich jeder Schalter einzeln umlegen; dann heißt der Modus „angepasst“, und „Zurücksetzen“ stellt die Vorgabe wieder her. Die Schalter blenden nur aus: Es geht nichts verloren, und keine Rechnung ändert sich. Pflegehinweise sind die kleinen grauen Kästen auf den Pflanzenkarten — etwa wenn an einem Platz deutlich weniger Sonne ankommt, als die Art gewohnt ist. Sie verbieten nichts und ändern nichts, sie sagen nur Bescheid. Einzelne lassen sich mit dem × wegklicken, mit dem Haken hier verschwinden sie alle.</p>
+      <p class="wz-hilfe" hidden>Normalerweise ist die App in vier Reiter geteilt, die unten am Rand stehen. Mit dem Haken läuft stattdessen wieder alles untereinander auf einer einzigen langen Seite. Am großen Bildschirm ist das oft angenehmer, am Handy meistens nicht. Der Modus Sammler zeigt nur das Wichtigste, der Modus Entdecker alles. Darunter lässt sich jeder Schalter einzeln umlegen und die Kartendichte wählen; dann heißt der Modus „angepasst“, und „Zurücksetzen“ stellt die Vorgabe wieder her. Die Schalter blenden nur aus: Es geht nichts verloren, und keine Rechnung ändert sich. Pflegehinweise sind die kleinen grauen Kästen auf den Pflanzenkarten — etwa wenn an einem Platz deutlich weniger Sonne ankommt, als die Art gewohnt ist. Sie verbieten nichts und ändern nichts, sie sagen nur Bescheid. Einzelne lassen sich mit dem × wegklicken, mit dem Haken hier verschwinden sie alle.</p>
     <span class="dsn-lab ein-abschnitt">Design</span>
     <div class="dsn-wahl" role="group" aria-label="Design wählen" id="dsn-wahl"></div>
     <p class="ein-abschnitt">Modus</p>
@@ -11898,6 +11903,15 @@ function pflanzeEntfernen(id){
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-giessart"> <span class="lab" style="display:inline">Gießart von Hand festlegen</span></label>
     </div>
+    <!-- 4.0-beta.19 (Plan M1b): Die Kartendichte gehört zum Modus -->
+    <p class="ein-abschnitt">Kartendichte</p>
+    <p class="fhint" data-erkl-kurz="Wie viel eine offene Karte zeigt.">Wie viel auf einer aufgeklappten Pflanzenkarte steht. Sammler startet mit Knapp, Entdecker mit Normal. Nichts geht verloren — Knapp klappt nur mehr zu.</p>
+    <div class="ein-wahl segment" role="group" aria-label="Kartendichte wählen" id="dichte-wahl">
+      <button data-dichte="knapp">Knapp</button>
+      <button data-dichte="normal" aria-pressed="true">Normal</button>
+      <button data-dichte="voll">Ausführlich</button>
+    </div>
+    <p class="fhint" id="dichte-text"></p>
     </div>
   </section>
 
@@ -11913,7 +11927,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="einstell" aria-expanded="false" aria-label="Wozu sind die Einstellungen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-einstell" hidden>
-      <p class="wz-hilfe" hidden>Alles, was die App als Ganzes betrifft: wie sie aussieht, wie viel auf einer Karte steht, welche Tiere bei dir wohnen und was der Rundgang fragt. Nichts davon greift in deine Pflanzendaten ein — jede Einstellung lässt sich jederzeit zurücknehmen.</p>
+      <p class="wz-hilfe" hidden>Alles, was die App als Ganzes betrifft: wie sie aussieht, welche Tiere bei dir wohnen und was der Rundgang fragt. Nichts davon greift in deine Pflanzendaten ein — jede Einstellung lässt sich jederzeit zurücknehmen.</p>
 
       <p class="ein-abschnitt">Aussehen</p>
       <div class="ein-liste">
@@ -11921,15 +11935,6 @@ function pflanzeEntfernen(id){
           <span class="ein-txt"><b>Ansicht</b><i id="ein-u-ansicht">Botanisch</i></span>
           <span class="ein-p" aria-hidden="true">›</span></button>
       </div>
-
-      <p class="ein-abschnitt">Kartendichte</p>
-      <p class="fhint" data-erkl-kurz="Wie viel eine offene Karte zeigt.">Wie viel auf einer aufgeklappten Pflanzenkarte steht. Nichts geht verloren — Knapp klappt nur mehr zu.</p>
-      <div class="ein-wahl segment" role="group" aria-label="Kartendichte wählen" id="dichte-wahl">
-        <button data-dichte="knapp">Knapp</button>
-        <button data-dichte="normal" aria-pressed="true">Normal</button>
-        <button data-dichte="voll">Ausführlich</button>
-      </div>
-      <p class="fhint" id="dichte-text"></p>
 
       <p class="ein-abschnitt">Auf der Heute-Seite</p>
       <p class="fhint" data-erkl>Zusatzzeilen über den Aufgaben. Beides lässt sich jederzeit wieder einblenden.</p>
@@ -12312,6 +12317,21 @@ function pflanzeEntfernen(id){
           <div class="bibpick" id="bib-gewaehlt" hidden></div>
         </div>
         <div class="kibox" id="neu-kibox" hidden>
+          <!-- 4.0-beta.19 (Plan M1b): Wer den Namen kennt, braucht keine Bestimmung -->
+          <div class="al-kiname" id="al-kiname" hidden>
+            <div class="al-feld">
+              <span class="lab">Du kennst den Namen?</span>
+              <input id="f-kiname" placeholder="z. B. Alocasia baginda" autocomplete="off" spellcheck="false" aria-describedby="f-kiname-hint">
+              <span class="fhint" id="f-kiname-hint">Botanisch oder deutsch. Dann holt die KI nur die Daten dazu, ohne Foto. Leer lassen, wenn sie die Art am Foto bestimmen soll.</span>
+            </div>
+            <div class="al-feld">
+              <span class="lab">Was die KI liefert</span>
+              <div class="al-knoepfe" id="al-kistufe" role="group" aria-label="Was die KI liefert">
+                <button type="button" class="al-knopf" data-kistufe="kurz" aria-pressed="false"><b>Nur Steckbrief</b><i>Licht, Gießen, Wuchs, Frost, Vermehrung</i></button>
+                <button type="button" class="al-knopf" data-kistufe="voll" aria-pressed="false"><b>Mit Pflegetexten</b><i>Dazu Pflegeschritte, Winterruhe und „Wichtig“</i></button>
+              </div>
+            </div>
+          </div>
           <div class="fotokrit">
             <b>Diese drei Aufnahmen braucht die KI</b>
             <ol>
@@ -12782,7 +12802,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.18';
+const FASSUNG = '4.0-beta.19';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -17567,7 +17587,7 @@ $('#btn-neu-cancel').onclick = ()=>{
    „Formular leeren“ auch von Hand auslösen — nützlich, wenn die
    eingefügte Antwort zur falschen Pflanze gehörte. */
 function formularLeeren(){
-  ['f-name','f-art','f-bot','f-sorte','f-typ','f-notiz','f-paste','f-wichtig'].forEach(x=>{
+  ['f-name','f-art','f-bot','f-sorte','f-typ','f-notiz','f-paste','f-wichtig','f-kiname'].forEach(x=>{
     if($('#'+x)) $('#'+x).value = '';
   });
   if(typeof SORTE_VORSCHLAG !== 'undefined') SORTE_VORSCHLAG = null;
@@ -18911,10 +18931,38 @@ function alFussKi(){
   if(!weiter || !kiStufe) return;
   if(!an){ weiter.textContent = 'Weiter'; weiter.dataset.fragt = ''; weiter.disabled = false; return; }
   const laeuft = !!(innen && innen.disabled);
-  weiter.textContent = laeuft ? 'Läuft …' : 'Fragen';
+  weiter.textContent = laeuft ? 'Läuft …' : (alKiName() ? 'Daten holen' : 'Fragen');
   weiter.dataset.fragt = '1';
   weiter.disabled = laeuft;
 }
+/* 4.0-beta.19: der selbst eingegebene Name, sonst leer */
+function alKiName(){
+  const el = document.getElementById('f-kiname');
+  const kn = document.getElementById('al-kiname');
+  return el && kn && !kn.hidden ? el.value.trim() : '';
+}
+function alKiStufeZeichnen(){
+  const st = typeof kiStufeVon === 'function' ? kiStufeVon() : 'voll';
+  document.querySelectorAll('#al-kistufe [data-kistufe]').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.kistufe === st ? 'true' : 'false'));
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#al-kistufe [data-kistufe]');
+  if(!b) return;
+  S.kiStufe = b.dataset.kistufe;
+  sichern();
+  alKiStufeZeichnen();
+});
+/* Mit Namen braucht es keine Aufnahmen für die Bestimmung */
+function alKiNameZeigen(){
+  const kk = document.querySelector('#neu-kibox .fotokrit');
+  if(kk) kk.hidden = !!alKiName();
+  if(typeof kiHinweis === 'function') kiHinweis();
+  alFussKi();
+}
+document.addEventListener('input', e => {
+  if(e.target && e.target.id === 'f-kiname') alKiNameZeigen();
+});
 function alStufe2Zeichnen(){
   const weg = (typeof neuWeg !== 'undefined') ? neuWeg : null;
   const frage = document.getElementById('al-frage-2');
@@ -20264,6 +20312,13 @@ function kiModusZeigen(){
     const titel = document.getElementById(x[3]);
     const knopf = document.getElementById(x[4]);
     if(kasten) kasten.hidden = !an;
+    if(x[0] === 'anlegen'){
+      const kn = document.getElementById('al-kiname');
+      if(kn) kn.hidden = !an;
+      if(typeof alKiStufeZeichnen === 'function') alKiStufeZeichnen();
+      const kk = document.querySelector('#neu-kibox .fotokrit');
+      if(kk) kk.hidden = !!(typeof alKiName === 'function' && alKiName());
+    }
     /* Die Bilderzeile steht ausserhalb des Kastens, weil sie oben
        liegt — sie muss dieselbe Sichtbarkeit bekommen. */
     if(x[0] === 'doktor'){
@@ -20385,6 +20440,8 @@ async function kiDirektLos(wo, modellId){
     try{ await kiModelleHolen(); kiModellZeichnen(); }
     catch(e){ kiDirektMeldung(wo, e.message || String(e), 'warn'); return; }
   }
+  /* 4.0-beta.19 (Plan M1b): Mit eingegebenem Name keine Bestimmung am Foto */
+  if(wo === 'anlegen' && alKiName()){ anlegenNachName(alKiName(), modellId); return; }
   if(!KI_BILDER[wo].length){
     kiDirektMeldung(wo, 'Ohne Bild kann das Modell nichts beurteilen. Wähle mindestens eine Aufnahme.', 'warn');
     return;
@@ -20447,8 +20504,11 @@ const AW_ENUM = {
 const AW_JSON_SATZ = 'Antworte nur mit einem JSON-Objekt, dessen Schlüssel genau die Schlüsselwörter unten sind, jeder Wert auf Deutsch. '
   + 'Weißt du etwas nicht, schreib genau: unbekannt. Kannst du kein JSON ausgeben, schreib eine Zeile je Schlüsselwort: SCHLÜSSELWORT: Wert.';
 
+/* 4.0-beta.19 (F176): „Nur Steckbrief“ fragt keine Pflegetexte */
+const AW_PFLEGETEXTE = ['WICHTIG','PFLEGE','WINTERRUHE'];
 function awArtFelder(){
-  const f = ['LICHT','GIESSKLASSE','GIESSART','TYP','SPEICHER','FROST','WICHTIG','PFLEGE','WINTERRUHE'];
+  let f = ['LICHT','GIESSKLASSE','GIESSART','TYP','SPEICHER','FROST','WICHTIG','PFLEGE','WINTERRUHE'];
+  if(typeof kiStufeVon === 'function' && kiStufeVon() === 'kurz') f = f.filter(n => AW_PFLEGETEXTE.indexOf(n) === -1);
   if(tierZeileFuer(meineTiere())) f.push('KATZEN');
   f.push('VERMEHRUNG');
   return f;
@@ -20690,6 +20750,39 @@ async function anlegenZweistufig(ziel, modellId){
            + ' schon in der Fotoauswahl — dort kannst du sie wieder herausnehmen.' : '')
     + ' Was in die Karte geht, steht unten zum Bestätigen.', 'ok');
   awNachBestimmung(geminiLesen(text), ziel ? ziel.id : null);
+}
+/* 4.0-beta.19 (Plan M1b): Anlegen nach eingegebenem Namen. Der Name
+   geht durch dieselbe Übernahme wie eine KI-Antwort (Bibliothek, Gift,
+   Stufe 3), dann holt awNachBestimmung das Artwissen: aus gelernten
+   Arten, eigenen Pflanzen oder der Bibliothek ohne Anfrage, sonst genau
+   eine Anfrage ohne Foto (Regel 10.6). Die KI bekommt den Namen nur zum
+   Nachschlagen; Art und botanischer Name kommen aus dem Feld. */
+function alNameLesen(eingabe){
+  const t = String(eingabe || '').replace(/\s+/g, ' ').trim();
+  const bs = botOhneSorte(t);
+  const b = bibExakt(bs.bot, t) || bibExakt(bs.bot, bs.bot);
+  if(b) return {art:b.de, bot:/^[A-ZÄÖÜ][a-zäöü]+ [a-zäöü×]/.test(bs.bot) && norm(bs.bot) !== norm(b.de) ? bs.bot : b.bot, sorte:bs.sorte, bib:b};
+  const botanisch = /^[A-Z][a-z]+ (× ?|x )?[a-z][a-z-]+/.test(bs.bot);
+  return botanisch ? {art:bs.bot, bot:bs.bot, sorte:bs.sorte, bib:null} : {art:t, bot:'', sorte:'', bib:null};
+}
+function anlegenNachName(eingabe, modellId){
+  const n = alNameLesen(eingabe);
+  if(!n.art && !n.bot) return;
+  ++AW_TOKEN;
+  AW = null; awStatus('');
+  kiDirektMeldung('anlegen', '', '');
+  kiAntwortEinsetzen('anlegen', 'ART: ' + n.art + (n.bot ? '\nBOTANISCH: ' + n.bot : ''));
+  /* Die Übernahme setzt bei einem Treffer den Bibliotheksnamen; was du
+     geschrieben hast, gilt. Die Sorte kommt von dir, nicht aus der KI. */
+  const fb = document.getElementById('f-bot');
+  if(fb && n.bot) fb.value = n.bot;
+  const fs = document.getElementById('f-sorte');
+  const sh = document.getElementById('f-sorte-hint');
+  if(fs && n.sorte){ fs.value = n.sorte; if(typeof SORTE_VORSCHLAG !== 'undefined') SORTE_VORSCHLAG = null; if(sh){ sh.innerHTML = ''; sh.hidden = true; } }
+  const nb = kiBilderUebernehmen();
+  kiDirektMeldung('anlegen', 'Name übernommen: ' + awArtName({art:n.art, bot:n.bot}) + (n.sorte ? ', Sorte ' + n.sorte : '') + '.'
+    + (nb ? ' ' + (nb === 1 ? 'Das Bild liegt' : 'Die ' + nb + ' Bilder liegen') + ' in der Fotoauswahl, an die KI gehen sie nicht.' : ''), 'ok');
+  awNachBestimmung({sicher:'hoch'}, modellId || null);
 }
 /* Nach der Bestimmung: woher das Artwissen kommt. */
 function awNachBestimmung(d, modellId){
@@ -21822,7 +21915,9 @@ function kiHinweis(txt, ton){
   /* Im Direktweg gibt es nichts zu kopieren und nichts zu öffnen —
      dort erklärt der Satz, was der Knopf tut. */
   if(typeof kiDirektAn === 'function' && kiDirektAn()){
-    el.textContent = 'Bild wählen, „Fragen“ antippen. Die Antwort kommt von selbst in die Felder.';
+    el.textContent = (typeof alKiName === 'function' && alKiName())
+      ? '„Daten holen“ antippen. Ein Bild kommt nur in die Fotoauswahl, nicht zur KI.'
+      : 'Bild wählen, „Fragen“ antippen. Die Antwort kommt von selbst in die Felder.';
     return;
   }
   if(typeof kiBereit === 'function' && !kiBereit()){
@@ -26697,6 +26792,7 @@ function sektionOeffnen(key, ausloeser){
   modalAuf('sek-modal', ausloeser);
   if(key === 'grundriss' && typeof planRender === 'function') planRender();
   if(key === 'ansicht' && typeof designWahlZeichnen === 'function') designWahlZeichnen();
+  if(key === 'ansicht' && typeof dichteZeichnen === 'function') dichteZeichnen();
   if(key === 'wetter' && typeof wetterEinstellungZeichnen === 'function') wetterEinstellungZeichnen();
   if(key === 'einstell'){
     if(typeof dichteZeichnen === 'function') dichteZeichnen();
@@ -26917,7 +27013,7 @@ const MH_UNTER = {
   },
   einstell:  ()=>{
     const d = {botanisch:'Botanisch', klartext:'Klartext', terrarium:'Terrarium'}[S.design] || 'Botanisch';
-    const dd = {knapp:'Knapp', normal:'Normal', voll:'Ausführlich'}[S.dichte || 'normal'];
+    const dd = {knapp:'Knapp', normal:'Normal', voll:'Ausführlich'}[(typeof dichteVon === 'function' ? dichteVon() : S.dichte) || 'normal'];
     return d + ' · ' + dd;
   },
   tour:      ()=>((S.tutorial||{}).aus ? 'Abgeschaltet' : 'Kapitel erneut ansehen'),
@@ -27305,8 +27401,9 @@ function heuteSchalterZeichnen(){
 document.addEventListener('click', e=>{
   const d = e.target.closest('#dichte-wahl [data-dichte]');
   if(!d) return;
-  S.dichte = d.dataset.dichte;
-  sichern();
+  /* 4.0-beta.19: gespeichert wird nur die Abweichung vom Modus */
+  if(typeof dichteSetzen === 'function') dichteSetzen(d.dataset.dichte);
+  else { S.dichte = d.dataset.dichte; sichern(); }
   dichteZeichnen();
   mehrNebenzeilen();
 });
@@ -28023,8 +28120,8 @@ function hinweiseSetzen(an){
    Schalter blendet nur aus (Klasse s-aus-<k> am body), er ändert nie
    eine Rechnung. Gelesen wird nur über schalterAn(k). */
 var MODI = {
-  sammler:   {name:'Sammler',   kurz:'Nur das Wichtigste: gießen, Sammlung, Notizen. Für viele Pflanzen und wenig Text.'},
-  entdecker: {name:'Entdecker', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
+  sammler:   {name:'Sammler',   dichte:'knapp',  kiStufe:'kurz', kurz:'Nur das Wichtigste: gießen, Sammlung, Notizen. Für viele Pflanzen und wenig Text.'},
+  entdecker: {name:'Entdecker', dichte:'normal', kiStufe:'voll', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
 };
 var SCHALTER = [
   {k:'hinweise',   id:'ans-hinweise',   vor:{sammler:false, entdecker:true}},
@@ -28044,8 +28141,41 @@ function schalterAn(k){
   const abw = S.schalter || {};
   return Object.prototype.hasOwnProperty.call(abw, k) ? !!abw[k] : !!sc.vor[modusVon()];
 }
+/* 4.0-beta.19 (Plan M1b): Die Kartendichte folgt dem Modus. Eine
+   Abweichung steht als S.schalter.dichte und zählt als „angepasst“.
+   S.dichte bleibt der gerade geltende Wert, weil accOffen und ältere
+   Stellen ihn lesen. */
+var DICHTEN = ['knapp', 'normal', 'voll'];
+function dichteVon(){
+  const ab = (S.schalter || {}).dichte;
+  if(DICHTEN.indexOf(ab) !== -1) return ab;
+  return MODI[modusVon()].dichte;
+}
+function dichteSetzen(d){
+  if(DICHTEN.indexOf(d) === -1) return;
+  S.schalter = S.schalter || {};
+  if(d === MODI[modusVon()].dichte) delete S.schalter.dichte;
+  else S.schalter.dichte = d;
+  schalterAnwenden();
+  sichern();
+}
+/* Bestand: Eine Dichte, die vom Modus abweicht, bleibt als Abweichung. */
+function dichteUebernehmen(){
+  if(S.dichteM1b) return;
+  S.dichteM1b = true;
+  S.schalter = S.schalter || {};
+  if(DICHTEN.indexOf(S.dichte) !== -1 && S.dichte !== MODI[modusVon()].dichte
+     && !Object.prototype.hasOwnProperty.call(S.schalter, 'dichte')) S.schalter.dichte = S.dichte;
+}
+/* KI-Stufe beim Anlegen (F176): Sammler nur Steckbrief, Entdecker mit
+   Pflegetexten; im Anlegen umstellbar, ein Moduswechsel setzt zurück. */
+function kiStufeVon(){
+  if(S.kiStufe === 'kurz' || S.kiStufe === 'voll') return S.kiStufe;
+  return MODI[modusVon()].kiStufe;
+}
 function modusAngepasst(){
-  return SCHALTER.filter(sc => Object.prototype.hasOwnProperty.call(S.schalter || {}, sc.k)).length;
+  return SCHALTER.filter(sc => Object.prototype.hasOwnProperty.call(S.schalter || {}, sc.k)).length
+    + (DICHTEN.indexOf((S.schalter || {}).dichte) !== -1 ? 1 : 0);
 }
 /* Bestand: „Einfacher Modus“ wird Sammler, sonst Entdecker; abgeschaltete
    Pflegehinweise bleiben als Abweichung abgeschaltet. Nichts wird gelöscht. */
@@ -28065,12 +28195,14 @@ function schalterAnwenden(){
   });
   /* Ältere Stellen lesen S.pflegehinweise und body.einfach weiter */
   S.pflegehinweise = schalterAn('hinweise');
+  S.dichte = dichteVon();
+  if(typeof dichteZeichnen === 'function') dichteZeichnen();
   document.querySelectorAll('#modus-wahl [data-modus]').forEach(b =>
     b.setAttribute('aria-pressed', b.dataset.modus === m ? 'true' : 'false'));
   const n = modusAngepasst();
   const txt = document.getElementById('modus-text');
   if(txt) txt.textContent = n
-    ? MODI[m].name + ' (angepasst): ' + (n === 1 ? 'ein Schalter weicht' : n + ' Schalter weichen') + ' von der Vorgabe ab.'
+    ? MODI[m].name + ' (angepasst): ' + (n === 1 ? 'eine Einstellung weicht' : n + ' Einstellungen weichen') + ' von der Vorgabe ab.'
     : MODI[m].kurz;
   const zb = document.getElementById('modus-zurueck-box');
   if(zb) zb.hidden = !n;
@@ -28079,6 +28211,7 @@ function modusSetzen(m){
   if(!MODI[m]) return;
   S.modus = m;
   S.schalter = {};
+  delete S.kiStufe;
   einfachSetzen(m === 'sammler');
   schalterAnwenden();
   hinweiseSetzen(schalterAn('hinweise'));
@@ -28094,6 +28227,7 @@ function schalterSetzen(k, an){
   else sichern();
 }
 modusUebernehmen();
+dichteUebernehmen();
 SCHALTER.forEach(sc => {
   const el = document.getElementById(sc.id);
   if(el) el.onchange = () => schalterSetzen(sc.k, el.checked);

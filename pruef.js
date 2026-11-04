@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.18', w.__T('FASSUNG') === '4.0-beta.18', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.19', w.__T('FASSUNG') === '4.0-beta.19', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -4289,7 +4289,7 @@ setTimeout(async () => {
         .indexOf(w.__T('FASSUNG')) !== -1);
 
     /* ── Kartendichte ── */
-    pruef('Dichte startet auf normal', w.__T('S.dichte') === 'normal', w.__T('S.dichte'));
+    pruef('Dichte startet auf normal', w.__T('dichteVon()') === 'normal' && w.__T('S.dichte') === 'normal', w.__T('S.dichte'));
     w.__T("S.acc = {giessen:1}");
     pruef('Normal folgt dem Gemerkten',
       w.__T("accOffen('giessen')") === true && w.__T("accOffen('katzen')") === false);
@@ -13240,6 +13240,160 @@ setTimeout(async () => {
       w.prompt = altPrompt;
       T(`(function(){ var a = ${alt18}; S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph;
         S.raeume = a.raeume; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; AL_LAGE_NEU = '';
+        formularLeeren(); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.19: Plan M1b — Kartendichte im Modus, KI-Stufe beim
+     Anlegen, Anlegen nach eingegebenem Namen ohne Foto. Jeder Test legt
+     seine Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const alt19 = T(`JSON.stringify({modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise, dichte:S.dichte, m1b:S.dichteM1b, kiStufe:S.kiStufe, eigene:S.eigene, gelernt:S.gelernteArten, kiModelle:S.kiModelle, kiModell:S.kiModell})`);
+    const fetch19 = w.fetch;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 5000))]);
+    try {
+      /* Kartendichte folgt dem Modus */
+      T(`modusSetzen('sammler'); 1`);
+      pruef('beta.19: Sammler startet mit Kartendichte Knapp', T(`dichteVon()`) === 'knapp' && T(`S.dichte`) === 'knapp'
+        && d.querySelector('#dichte-wahl [data-dichte="knapp"]').getAttribute('aria-pressed') === 'true', T(`S.dichte`));
+      pruef('beta.19: Knapp lässt im Sammler alles zu', T(`(S.acc = {giessen:1}, accOffen('giessen'))`) === false);
+      T(`modusSetzen('entdecker'); 1`);
+      pruef('beta.19: Entdecker startet mit Kartendichte Normal', T(`dichteVon()`) === 'normal' && T(`S.dichte`) === 'normal', T(`S.dichte`));
+      d.querySelector('#dichte-wahl [data-dichte="voll"]').click();
+      const mt = d.getElementById('modus-text').textContent;
+      pruef('beta.19: Andere Dichte ist eine Abweichung und macht den Modus „angepasst“',
+        T(`S.schalter.dichte`) === 'voll' && T(`S.dichte`) === 'voll' && mt.indexOf('Entdecker (angepasst)') === 0
+        && !d.getElementById('modus-zurueck-box').hidden, mt);
+      d.querySelector('#dichte-wahl [data-dichte="normal"]').click();
+      pruef('beta.19: Zurück auf die Dichte des Modus ist keine Abweichung', T(`JSON.stringify(S.schalter)`) === '{}'
+        && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
+      d.querySelector('#dichte-wahl [data-dichte="knapp"]').click();
+      d.getElementById('modus-zurueck').click();
+      pruef('beta.19: Zurücksetzen stellt auch die Dichte zurück', T(`S.dichte`) === 'normal' && T(`JSON.stringify(S.schalter)`) === '{}', T(`S.dichte`));
+      pruef('beta.19: Kartendichte steht auf der Seite Ansicht, nicht mehr unter Einstellungen',
+        !!d.querySelector('#mh-in-ansicht #dichte-wahl') && !d.querySelector('#mh-in-einstell #dichte-wahl')
+        && !!d.querySelector('#mh-in-ansicht #dichte-text'));
+      const ueb = (m, dd) => T(`(function(){ S.dichteM1b = false; S.modus = '${m}'; S.schalter = {}; S.dichte = '${dd}';
+        dichteUebernehmen(); return JSON.stringify(S.schalter); })()`);
+      pruef('beta.19: Bestand: eine vom Modus abweichende Dichte bleibt als Abweichung', ueb('sammler', 'normal') === '{"dichte":"normal"}', ueb('sammler', 'normal'));
+      pruef('beta.19: Bestand: die Dichte des Modus ist keine Abweichung', ueb('entdecker', 'normal') === '{}', ueb('entdecker', 'normal'));
+      pruef('beta.19: Bestand wird nur einmal übernommen', T(`(function(){ S.dichteM1b = true; S.modus = 'sammler'; S.schalter = {}; S.dichte = 'voll';
+        dichteUebernehmen(); return JSON.stringify(S.schalter); })()`) === '{}');
+      T(`modusSetzen('entdecker'); 1`);
+
+      /* KI-Stufe (F176) */
+      const felder = () => T(`awArtFelder().join(',')`);
+      T(`modusSetzen('sammler'); 1`);
+      pruef('beta.19 (F176): Sammler fragt nur den Steckbrief', T(`kiStufeVon()`) === 'kurz' && !/PFLEGE|WICHTIG|WINTERRUHE/.test(felder()) && /LICHT/.test(felder()), felder());
+      pruef('beta.19 (F176): Der Auftrag „Nur Steckbrief“ nennt keine Pflegetexte',
+        !/^(PFLEGE|WICHTIG|WINTERRUHE):/m.test(T(`anlegenArtPromptBauen({art:'Probe', bot:'Probea test', sorte:''})`)));
+      T(`modusSetzen('entdecker'); 1`);
+      pruef('beta.19 (F176): Entdecker fragt mit Pflegetexten', T(`kiStufeVon()`) === 'voll' && /PFLEGE/.test(felder()) && /WICHTIG/.test(felder()), felder());
+      T(`alKiStufeZeichnen(); 1`);
+      d.querySelector('#al-kistufe [data-kistufe="kurz"]').click();
+      pruef('beta.19 (F176): Tipp auf „Nur Steckbrief“ stellt um', T(`S.kiStufe`) === 'kurz' && T(`kiStufeVon()`) === 'kurz'
+        && d.querySelector('#al-kistufe [data-kistufe="kurz"]').getAttribute('aria-pressed') === 'true'
+        && d.querySelector('#al-kistufe [data-kistufe="voll"]').getAttribute('aria-pressed') === 'false');
+      T(`modusSetzen('entdecker'); 1`);
+      pruef('beta.19 (F176): Moduswechsel setzt die KI-Stufe auf die Vorgabe', T(`S.kiStufe`) === undefined && T(`kiStufeVon()`) === 'voll', String(T(`S.kiStufe`)));
+
+      /* Anlegen nach Namen: Attrappe für Google */
+      w.__aufrufe19 = [];
+      w.fetch = (u, o) => {
+        let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+        w.__aufrufe19.push({u:String(u), leib:leib});
+        const text = JSON.stringify({LICHT:'hell', GIESSKLASSE:'durstig', GIESSART:'durchdringend', TYP:'Staude', SPEICHER:'unterirdische Knolle oder Rhizom',
+          FROST:'15', WICHTIG:'Nie unter 15 Grad', PFLEGE:'Gleichmäßig feucht halten', WINTERRUHE:'keine', KATZEN:'giftig',
+          BOTANISCH:'Alocasia dragon', ART:'Skelett-Pfeilblatt', VERMEHRUNG:['Teilung | 80 | Frühjahr | Erde | 3 Wochen']});
+        return new Promise(res => setTimeout(() => res({ok:true, status:200, json:()=>Promise.resolve({candidates:[{finishReason:'STOP', content:{parts:[{text:text}]}}]})}), 10));
+      };
+      T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}]; S.kiModell = 'models/gemini-3.6-flash';
+        S.gelernteArten = {}; Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; });
+        S.eigene = (S.eigene || []).filter(function(p){ return !/^Namensgattung/.test(p.botanisch || ''); }); 1`);
+      const posts = () => w.__aufrufe19.filter(a => a.u.indexOf(':generateContent') > -1);
+      const istFoto = a => a.leib.contents[0].parts.some(p => p.inline_data);
+      const promptVon = a => a.leib.contents[0].parts[0].text;
+      const start = (name, foto) => T(`alStart(); neuWegSetzen('ki'); alStufeZeigen(2); KI_BILDER.anlegen.length = 0;
+        ${foto ? `KI_BILDER.anlegen.push({mime:'image/jpeg', daten:'QUJD', vorschau:'data:image/jpeg;base64,QUJD'});` : ''}
+        kiModusZeigen(); document.getElementById('f-kiname').value = ${JSON.stringify(name)};
+        document.getElementById('f-kiname').dispatchEvent(new Event('input', {bubbles:true})); 1`);
+      const los = async () => { await haengt(T(`kiDirektLos('anlegen')`)); await warte(200); };
+      const feld = id => d.getElementById(id).value;
+      const status = () => d.getElementById('al-artfrage').textContent;
+
+      start('Namensgattung probeart', false);
+      pruef('beta.19: Namensfeld ist mit Schlüssel sichtbar', !d.getElementById('al-kiname').hidden);
+      pruef('beta.19: Mit Namen heißt der Hauptknopf „Daten holen“', d.getElementById('al-weiter').textContent === 'Daten holen', d.getElementById('al-weiter').textContent);
+      pruef('beta.19: Mit Namen verschwinden die Foto-Anweisungen, der Satz nennt „Daten holen“',
+        d.querySelector('#neu-kibox .fotokrit').hidden && /Daten holen/.test(d.getElementById('ki-hinweis').textContent), d.getElementById('ki-hinweis').textContent);
+      w.__aufrufe19 = [];
+      await los();
+      const p1 = posts();
+      pruef('beta.19: Name ohne Foto: genau eine Anfrage, ohne Bild', p1.length === 1 && !istFoto(p1[0]), String(p1.length));
+      pruef('beta.19: Die Anfrage fragt das Artwissen zum eingegebenen Namen',
+        !!p1[0] && /Namensgattung probeart/.test(promptVon(p1[0])) && !!((p1[0].leib.generationConfig || {}).responseSchema || {properties:{}}).properties.LICHT,
+        p1[0] && promptVon(p1[0]).slice(0, 160));
+      pruef('beta.19: Botanischer Name und Art kommen aus dem Feld, nicht von der KI', feld('f-bot') === 'Namensgattung probeart'
+        && feld('f-art') === 'Namensgattung probeart', feld('f-bot') + ' / ' + feld('f-art'));
+      pruef('beta.19: Danach steht Stufe 3 mit dem Artwissen', T(`alStufe`) === 3 && feld('f-klasse') === 'A' && /ist da/.test(status()), T(`alStufe`) + ' ' + feld('f-klasse') + ' ' + status());
+
+      /* Mit Foto: das Foto geht nicht an die KI */
+      start('Namensgattung probeart', true);
+      w.__aufrufe19 = [];
+      await los();
+      const p2 = posts();
+      const meld = (d.getElementById('ki-lauf-anlegen') || {}).textContent + ' ' + ((d.querySelector('#ki-direkt-anlegen .kimeld, #ki-hinweis') || {}).textContent || '');
+      pruef('beta.19: Name mit Foto: eine Anfrage, das Foto geht nicht mit', p2.length === 1 && !istFoto(p2[0]), String(p2.length));
+
+      /* Sorte in Anführungszeichen */
+      start("Namensgattung probeart 'Weißrand'", false);
+      w.__aufrufe19 = [];
+      await los();
+      pruef('beta.19: Eine Sorte im Namen landet im Feld Sorte', feld('f-bot') === 'Namensgattung probeart' && feld('f-sorte') === 'Weißrand',
+        feld('f-bot') + ' / ' + feld('f-sorte'));
+
+      /* Deutscher Name ohne Bibliothek */
+      start('Probeblatt Unbekannt', false);
+      w.__aufrufe19 = [];
+      await los();
+      const p3 = posts();
+      pruef('beta.19: Ein deutscher Name wird Art, kein botanischer Name', feld('f-art') === 'Probeblatt Unbekannt' && feld('f-bot') === ''
+        && p3.length === 1 && /Probeblatt Unbekannt/.test(promptVon(p3[0])), feld('f-art') + ' / ' + feld('f-bot') + ' / ' + p3.length);
+
+      /* Bibliothek: keine Anfrage */
+      const bibBot = T(`(function(){ var k = Object.keys(BIB_NACH_BOT).find(function(x){ return /^[A-Z][a-z]+ [a-z]+$/.test(x); }); return k; })()`);
+      start(bibBot, false);
+      w.__aufrufe19 = [];
+      await los();
+      pruef('beta.19: Ein Bibliotheksname schickt keine Anfrage', posts().length === 0 && /Bibliothek/.test(status()), bibBot + ' · ' + posts().length + ' · ' + status());
+      pruef('beta.19: Der Bibliotheksname steht im Feld botanisch', feld('f-bot') === bibBot, feld('f-bot'));
+
+      /* Gelernte Art: keine Anfrage */
+      T(`S.gelernteArten = {}; S.gelernteArten[awSchluessel('Namensgattung gelernt', '')] = {klasse:'C', sonne:'voll', typ:'Kaktus'}; 1`);
+      start('Namensgattung gelernt', false);
+      w.__aufrufe19 = [];
+      await los();
+      pruef('beta.19: Eine gelernte Art schickt keine Anfrage', posts().length === 0 && /gelernten Arten/.test(status()), posts().length + ' · ' + status());
+
+      /* Ohne Namen bleibt die Bestimmung am Foto */
+      start('', false);
+      pruef('beta.19: Ohne Namen heißt der Hauptknopf „Fragen“', d.getElementById('al-weiter').textContent === 'Fragen', d.getElementById('al-weiter').textContent);
+      pruef('beta.19: Ohne Namen stehen die Foto-Anweisungen da', !d.querySelector('#neu-kibox .fotokrit').hidden);
+      w.__aufrufe19 = [];
+      await los();
+      pruef('beta.19: Ohne Namen und ohne Foto geht keine Anfrage', posts().length === 0, String(posts().length));
+      T(`document.getElementById('f-kiname').value = 'Rest'; formularLeeren(); 1`);
+      pruef('beta.19: Formular leeren leert das Namensfeld', feld('f-kiname') === '');
+    } catch(e) {
+      pruef('beta.19: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      w.fetch = fetch19;
+      T(`(function(){ var a = ${alt19}; S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph;
+        S.dichte = a.dichte; S.dichteM1b = a.m1b; if(a.kiStufe) S.kiStufe = a.kiStufe; else delete S.kiStufe;
+        S.eigene = a.eigene; S.gelernteArten = a.gelernt; S.kiModelle = a.kiModelle; S.kiModell = a.kiModell; KI_BILDER.anlegen.length = 0;
         formularLeeren(); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })()`);
     }
   }
