@@ -2648,7 +2648,16 @@ html[data-design="klartext"] .km-neben button{min-height:var(--tap);border-width
 /* Einfacher Modus: alles ausblenden, was Einsteiger nur bremst.
    Der Grundriss ist kein eigener Reiter, sondern ein Block auf der
    Werkzeuge-Seite — deshalb über seine eigene Kennung. */
-body.einfach .nur-experte{display:none!important}
+/* 4.0-beta.18 (Plan M1a): Was einzeln abschaltbar ist, trägt
+   data-schalter oder ist ein Kartenabschnitt; schalterAnwenden setzt
+   je abgeschaltetem Schalter die Klasse s-aus-<Schlüssel> am body. */
+body.s-aus-giessart [data-schalter~="giessart"],
+body.s-aus-wachstum [data-schalter~="wachstum"],
+body.s-aus-wachstum .kblock[data-kblock="wachstum"],
+body.s-aus-pflege .kblock[data-kblock="pflege"],
+body.s-aus-licht .kblock[data-kblock="licht"],
+body.s-aus-befunde .kblock[data-kblock="befunde"],
+body.s-aus-abstammung .kblock[data-kblock="abstammung"]{display:none!important}
 body.einfach #zonen-sec{display:none!important}
 .ktabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line);
   overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -4399,6 +4408,15 @@ html[data-design] #mix-add .mix-add-liste{overflow-y:auto;border:0;border-radius
 html[data-design] .mix-add-liste > button .mix-add-plus{flex:0 0 auto;width:22px;text-align:center;font-size:1.3rem;
   font-weight:600;line-height:1;color:var(--fl-akzent)}
 html[data-design="klartext"] .mix-add-liste > button .mix-add-plus{color:var(--schrift)}
+/* ══ Plan M1a (4.0-beta.18): Lage als Knöpfe, Modi ══ */
+html[data-design] .al-knoepfe > .al-neu-zeile,html[data-design] .al-knoepfe > .al-lage-leer{grid-column:1 / -1;margin:0}
+html[data-design] .al-neu-zeile{display:flex;flex-direction:column;gap:8px}
+html[data-design] .al-neu-zeile > input{width:100%}
+html[data-design] .al-neu-zeile .gm-zfrage-btns{margin:0}
+html[data-design] .al-knoepfe > button.al-neu-knopf{border-style:dashed;color:var(--fl-akzent)}
+html[data-design] .al-knoepfe > button.al-neu-knopf b{font-weight:600}
+html[data-design="klartext"] .al-knoepfe > button.al-neu-knopf{color:var(--schrift);border-width:2px}
+html[data-design] #modus-zurueck-box{margin:4px 0 10px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -10337,7 +10355,7 @@ function bearbeitenInnenHTML(p){
         <option value="unbekannt"${gift==='unbekannt'?' selected':''}>ungeprüft</option>
         <option value="nein"${gift==='nein'?' selected':''}>unbedenklich</option>
         <option value="ja"${gift==='ja'?' selected':''}>giftig</option></select></label>
-      <label class="nur-experte"><span class="lab">Gießart</span><select data-e="giessart" data-p="${p.id}">
+      <label data-schalter="giessart"><span class="lab">Gießart</span><select data-e="giessart" data-p="${p.id}">
         ${Object.keys(GIESSARTEN).map(k=>`<option value="${k}"${giessartVon(p)===k?' selected':''}>${esc(GIESSARTEN[k].name)}</option>`).join('')}</select>
         <span class="fhint">${esc(giessartText(p))}</span></label>
       <label class="fspan"><span class="lab">Wichtig zu wissen</span>
@@ -11852,17 +11870,33 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="ansicht" aria-expanded="false" aria-label="Wozu ist die Ansicht-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-ansicht" hidden>
-      <p class="wz-hilfe" hidden>Normalerweise ist die App in vier Reiter geteilt, die unten am Rand stehen. Mit dem Haken läuft stattdessen wieder alles untereinander auf einer einzigen langen Seite. Am großen Bildschirm ist das oft angenehmer, am Handy meistens nicht. Der einfache Modus blendet alles aus, was man am Anfang nicht braucht — der Grundriss, die Gießart-Auswahl und der Blattzähler verschwinden, der Rundgang läuft mit drei Knöpfen. Es geht dabei nichts verloren: sobald du den Haken wieder wegnimmst, ist alles unverändert da. Pflegehinweise sind die kleinen grauen Kästen auf den Pflanzenkarten — etwa wenn an einem Platz deutlich weniger Sonne ankommt, als die Art gewohnt ist. Sie verbieten nichts und ändern nichts, sie sagen nur Bescheid. Einzelne lassen sich mit dem × wegklicken, mit dem Haken hier verschwinden sie alle.</p>
+      <p class="wz-hilfe" hidden>Normalerweise ist die App in vier Reiter geteilt, die unten am Rand stehen. Mit dem Haken läuft stattdessen wieder alles untereinander auf einer einzigen langen Seite. Am großen Bildschirm ist das oft angenehmer, am Handy meistens nicht. Der Modus Sammler zeigt nur das Wichtigste, der Modus Entdecker alles. Darunter lässt sich jeder Schalter einzeln umlegen; dann heißt der Modus „angepasst“, und „Zurücksetzen“ stellt die Vorgabe wieder her. Die Schalter blenden nur aus: Es geht nichts verloren, und keine Rechnung ändert sich. Pflegehinweise sind die kleinen grauen Kästen auf den Pflanzenkarten — etwa wenn an einem Platz deutlich weniger Sonne ankommt, als die Art gewohnt ist. Sie verbieten nichts und ändern nichts, sie sagen nur Bescheid. Einzelne lassen sich mit dem × wegklicken, mit dem Haken hier verschwinden sie alle.</p>
     <span class="dsn-lab ein-abschnitt">Design</span>
     <div class="dsn-wahl" role="group" aria-label="Design wählen" id="dsn-wahl"></div>
+    <p class="ein-abschnitt">Modus</p>
+    <div class="ein-wahl segment" role="group" aria-label="Modus wählen" id="modus-wahl">
+      <button type="button" data-modus="sammler" aria-pressed="false">Sammler</button>
+      <button type="button" data-modus="entdecker" aria-pressed="false">Entdecker</button>
+    </div>
+    <p class="fhint" id="modus-text"></p>
+    <div class="gm-zfrage-btns" id="modus-zurueck-box" hidden><button type="button" id="modus-zurueck">Zurücksetzen</button></div>
     <p class="ein-abschnitt">Anzeige</p>
-    <div class="ein-karte">
-      <label class="fspan check">
-        <input type="checkbox" role="switch" id="ans-einfach"> <span class="lab" style="display:inline">Einfacher Modus</span></label>
-      <p class="fhint" id="einfach-text" hidden></p>
+    <div class="ein-karte" id="schalter-karte">
       <label class="fspan check">
         <input type="checkbox" role="switch" id="ans-hinweise"> <span class="lab" style="display:inline">Pflegehinweise auf den Karten</span></label>
       <p class="fhint" id="hinweise-text" hidden></p>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-pflege"> <span class="lab" style="display:inline">Pflegeschritte in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-licht"> <span class="lab" style="display:inline">Licht am Platz in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-wachstum"> <span class="lab" style="display:inline">Wachstum in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-befunde"> <span class="lab" style="display:inline">Befunde des Doktors in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-abstammung"> <span class="lab" style="display:inline">Abstammung in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-giessart"> <span class="lab" style="display:inline">Gießart von Hand festlegen</span></label>
     </div>
     </div>
   </section>
@@ -12368,12 +12402,14 @@ function pflanzeEntfernen(id){
         <p class="al-unter">Raum und Topfgröße braucht die App für Laufweg und Gießmenge. Den Stellplatz kannst du auch später auf der Karte setzen.</p>
         <div class="al-feld" id="al-feld-raum">
           <span class="lab">Raum</span>
-          <select id="f-raum"></select>
+          <select id="f-raum" hidden></select>
+          <div class="al-knoepfe" id="f-raum-knoepfe"></div>
           <p class="al-pflicht" id="al-pflicht-raum" hidden>Bitte einen Raum wählen.</p>
         </div>
         <div class="al-feld">
           <span class="lab">Stellplatz</span>
-          <select id="f-stellplatz"></select>
+          <select id="f-stellplatz" hidden></select>
+          <div class="al-knoepfe" id="f-stellplatz-knoepfe"></div>
         </div>
         <div class="al-bibzsf" id="al-bibzsf" hidden>
           <h4 id="al-bibzsf-titel">Aus der Bibliothek übernommen</h4>
@@ -12425,11 +12461,11 @@ function pflanzeEntfernen(id){
             <span class="lab">Typ</span>
             <input id="f-typ" placeholder="z. B. Kletterpflanze">
           </div>
-          <details class="kiprompt nur-experte">
+          <details class="kiprompt" data-schalter="giessart">
             <summary>Gießart von Hand festlegen</summary>
             <div class="al-feld" style="margin-top:10px">
-              <select id="f-giessart">
-                <option value="">automatisch aus Klasse und Typ</option>
+              <select id="f-giessart" hidden>
+                <option value="">Automatisch — aus Klasse und Typ</option>
                 <option value="durch">Durchdringend — bis unten Wasser austritt</option>
                 <option value="schluck">Schluck — nur die Erde anfeuchten</option>
                 <option value="tauchen">Tauchen — bis keine Blasen mehr aufsteigen</option>
@@ -12438,9 +12474,10 @@ function pflanzeEntfernen(id){
                 <!-- Die beiden setzt die Kulturform oben. Ohne Eintrag hier
                      hätte das Auswahlfeld keinen gültigen Wert dafür und
                      fiele stillschweigend auf „automatisch“ zurück. -->
-                <option value="wasser">Wasserkultur — Wasser wechseln statt gießen</option>
-                <option value="hydro">Hydrokultur — Wasserstand halten</option>
+                <option value="wasser" data-kein-knopf>Wasserkultur — Wasser wechseln statt gießen</option>
+                <option value="hydro" data-kein-knopf>Hydrokultur — Wasserstand halten</option>
               </select>
+              <div class="al-knoepfe" id="f-giessart-knoepfe"></div>
             </div>
           </details>
         </div>
@@ -12745,7 +12782,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.17';
+const FASSUNG = '4.0-beta.18';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -12997,6 +13034,8 @@ const LEERSTAND = () => ({
      `null` heißt überall „nicht gesetzt“ — so lesen die Stellen im
      Code das Feld schon heute. */
   ablegerErbe:null, ansicht:null, anzucht:null, einfach:null, fassungGesehen:null,
+  /* 4.0-beta.18: Modus ('sammler' | 'entdecker') und Abweichungen davon */
+  modus:null, schalter:null,
   gruppierung:null, hinweisWeg:null, histAnsicht:null, installBandWeg:null,
   installiert:null, kartei:null, kartenTab:null, kiDienst:null, pflegehinweise:null,
   samAnsicht:null, sicherTage:null, sortierung:null, speicherFest:null,
@@ -16030,7 +16069,7 @@ function kartenDetailHTML(p){
         {key:'standort', titel:'Standort', inhalt: lagePaneHTML(p)},
         {key:'verlauf', titel:'Verlauf', inhalt:
           kblock('historie', 'Historie', giessVerlaufHTML(p))
-          + kblock('wachstum', 'Wachstum', typeof wachstumHTML==='function' ? wachstumHTML(p) : '', '', 'nur-experte')
+          + kblock('wachstum', 'Wachstum', typeof wachstumHTML==='function' ? wachstumHTML(p) : '')
           + kblock('status', 'Einträge', typeof statusHTML==='function' ? statusHTML(p) : '', nEreig ? `${nEreig}` : '')
           + kblock('befunde', 'Befunde des Doktors', befundeHTML(p), nBef ? `${nBef}` : '')
           + kblock('abstammung', 'Abstammung', abstammungHTML(p))
@@ -17538,6 +17577,7 @@ function formularLeeren(){
    'f-topfform','f-substrat','f-ablauf','f-anstau'].forEach(x=>{
     const el = $('#'+x); if(el) el.selectedIndex = 0;
   });
+  if(typeof AL_LAGE_NEU !== 'undefined') AL_LAGE_NEU = '';
   if(typeof alTopfZuruecksetzen === 'function') alTopfZuruecksetzen();
   if(typeof MIX_ED !== 'undefined' && MIX_ED.anlegen){ MIX_ED.anlegen.teile = {}; mixEdZeichnen('anlegen'); }
   if($('#f-fotos')) $('#f-fotos').value = '';
@@ -18406,6 +18446,11 @@ let AL_FOTOS = [];      /* gewählte Dateien, mit Vorschau */
    Lange Beschriftungen wie „B — Normal, obere 2–3 cm antrocknen“
    werden am Gedankenstrich getrennt: vorn fett, hinten klein. */
 function alKnopfGruppe(selId){
+  /* 4.0-beta.18: Raum und Stellplatz haben eigene Knöpfe mit „+ Neu“ oben */
+  if(selId === 'f-raum' || selId === 'f-stellplatz'){
+    if(typeof alLageKnoepfe === 'function') alLageKnoepfe();
+    return;
+  }
   const sel = document.getElementById(selId);
   const box = document.getElementById(selId + '-knoepfe');
   if(!sel || !box) return;
@@ -18414,7 +18459,7 @@ function alKnopfGruppe(selId){
      Knopfarten mit zwei Handlern waeren zwei Stellen zum Auseinander-
      laufen. */
   const bild = sel.dataset.bild === 'topf' && typeof topfIcon === 'function';
-  box.innerHTML = Array.prototype.map.call(sel.options, o => {
+  box.innerHTML = Array.prototype.filter.call(sel.options, o => !o.hasAttribute('data-kein-knopf')).map(o => {
     const t = String(o.textContent || '');
     const i = t.indexOf(' — ');
     const kopf = i > -1 ? t.slice(0, i) : t;
@@ -18538,7 +18583,7 @@ document.addEventListener('input', e => {
 function alKnoepfeAlle(){
   alListenFuellen();
   ['f-zustand', 'f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
-   'f-topfform', 'f-substrat', 'f-ablauf'].forEach(alKnopfGruppe);
+   'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum'].forEach(alKnopfGruppe);
   alAnstauFeld();
 }
 /* 4.0-beta.9: Die Frage nach dem Untersetzer nur bei Klasse S. */
@@ -18569,6 +18614,7 @@ function alKulturSetzen(){
     if(wert === 'wasser') g.value = 'wasser';
     else if(wert === 'hydro') g.value = 'hydro';
     else if(g.value === 'wasser' || g.value === 'hydro') g.value = '';
+    alKnopfGruppe('f-giessart');
   }
   /* Gießklasse, Gießart und Anstau ergeben im Wasserglas keinen Sinn.
      Sie stehen zu lassen hieße, nach etwas zu fragen, das die App
@@ -18966,7 +19012,7 @@ function alPflegeUmschalten(){
 document.addEventListener('change', e => {
   const t = e.target;
   if(!t || !t.id) return;
-  if(/^f-(zustand|kultur|klasse|sonne|giftig|topfform|substrat|ablauf)$/.test(t.id))
+  if(/^f-(zustand|kultur|klasse|sonne|giftig|topfform|substrat|ablauf|giessart)$/.test(t.id))
     alKnopfGruppe(t.id);
   if(t.id === 'f-kultur') alKulturSetzen();
   if(t.id === 'f-topfform' && typeof alTopfZeichnen === 'function') alTopfZeichnen();
@@ -21864,6 +21910,7 @@ $('#btn-paste-los').onclick = ()=>{
     const treffer3 = giessartLesen(d.giessart);
     if(treffer3){
       $('#f-giessart').value = treffer3;
+      if(typeof alKnopfGruppe === 'function') alKnopfGruppe('f-giessart');
       /* Erkennt die KI ein Wasserglas, muss die Kulturform mitziehen —
          sonst überschreibt die nächste Stufe den Wert wieder. */
       const kul = document.getElementById('f-kultur');
@@ -22121,7 +22168,7 @@ function formLageZeichnen(wunschRaum, wunschPlatz){
   const plaetze = stellplaetzeFuer(raumId);
   const stand = raumListe().map(r=>r.id+':'+r.name).join('|') + '#' + plaetze.join('|')
     + '#' + raumId + '#' + alt;
-  if(stand === formLageStand) return;
+  if(stand === formLageStand){ alLageKnoepfe(); return; }
   formLageStand = stand;
 
   rs.innerHTML = ['<option value="">— Raum wählen —</option>']
@@ -22130,7 +22177,73 @@ function formLageZeichnen(wunschRaum, wunschPlatz){
   ss.innerHTML = ['<option value="">— kein Stellplatz —</option>']
     .concat(plaetze.map(n=>`<option value="${esc(n)}"${alt===n?' selected':''}>${esc(n)}</option>`))
     .concat(['<option value="__neu">+ Neuen Stellplatz anlegen …</option>']).join('');
+  alLageKnoepfe();
 }
+
+/* 4.0-beta.18 (Plan M1a, Regel 9.10): Raum und Stellplatz als Knöpfe.
+   „+ Neu …“ steht als erster Knopf und öffnet eine Eingabezeile in der
+   Liste — kein Browser-Dialog. Die Auswahlfelder bleiben versteckt im
+   Dokument und tragen weiter den Wert. */
+var AL_LAGE_NEU = '';   /* 'raum' | 'platz' | '' */
+function alLageKnoepfe(){
+  const rs = document.getElementById('f-raum'), ss = document.getElementById('f-stellplatz');
+  const rb = document.getElementById('f-raum-knoepfe'), sb = document.getElementById('f-stellplatz-knoepfe');
+  if(!rs || !ss || !rb || !sb) return;
+  const raumId = (rs.value && rs.value !== '__neu') ? rs.value : '';
+  const platz = (ss.value && ss.value !== '__neu') ? ss.value : '';
+  const knopf = (ziel, wert, kopf, unter, an) => '<button type="button" class="al-knopf"'
+    + ' data-alwert="' + esc(wert) + '" data-alziel="' + ziel + '" aria-pressed="' + (an ? 'true' : 'false') + '">'
+    + '<b>' + esc(kopf) + '</b>' + (unter ? '<i>' + esc(unter) + '</i>' : '') + '</button>';
+  const neu = (wo, text, ph) => AL_LAGE_NEU === wo
+    ? '<div class="al-neu-zeile" data-al-neu-zeile="' + wo + '">'
+      + '<input type="text" id="al-neu-' + wo + '" maxlength="40" enterkeyhint="done" autocomplete="off" placeholder="' + esc(ph) + '" aria-label="' + esc(ph) + '">'
+      + '<div class="gm-zfrage-btns"><button type="button" class="haupt" data-al-neu-ok="' + wo + '">Anlegen</button>'
+      + '<button type="button" data-al-neu-ab="' + wo + '">Abbrechen</button></div></div>'
+    : '<button type="button" class="al-knopf al-neu-knopf" data-al-neu="' + wo + '"><b>' + esc(text) + '</b></button>';
+  rb.innerHTML = neu('raum', '+ Neuer Raum', 'Name des Raums')
+    + raumListe().map(r => knopf('f-raum', r.id, r.name, '', r.id === raumId)).join('');
+  sb.innerHTML = !raumId
+    ? '<p class="fhint al-lage-leer">Erst einen Raum wählen.</p>'
+    : neu('platz', '+ Neuer Stellplatz', 'Name des Stellplatzes')
+      + knopf('f-stellplatz', '', 'Kein Stellplatz', '', !platz)
+      + stellplaetzeFuer(raumId).map(n => knopf('f-stellplatz', n, n, '', n === platz)).join('');
+}
+function alLageNeuAnlegen(wo){
+  const inp = document.getElementById('al-neu-' + wo);
+  const name = inp ? inp.value.trim() : '';
+  if(!name){ if(inp) inp.focus(); return; }
+  AL_LAGE_NEU = '';
+  formLageStand = '';
+  if(wo === 'raum'){
+    formLageZeichnen(raumAnlegen(name) || '', '');
+    if(typeof alPflichtNachziehen === 'function') alPflichtNachziehen();
+  } else {
+    const rid = document.getElementById('f-raum').value;
+    formLageZeichnen(rid, stellplatzAnlegen(rid, name) || '');
+  }
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  const n = t.closest && t.closest('[data-al-neu]');
+  if(n){
+    AL_LAGE_NEU = n.dataset.alNeu;
+    alLageKnoepfe();
+    const inp = document.getElementById('al-neu-' + AL_LAGE_NEU);
+    if(inp) inp.focus();
+    return;
+  }
+  const ok = t.closest && t.closest('[data-al-neu-ok]');
+  if(ok){ alLageNeuAnlegen(ok.dataset.alNeuOk); return; }
+  const ab = t.closest && t.closest('[data-al-neu-ab]');
+  if(ab){ AL_LAGE_NEU = ''; alLageKnoepfe(); }
+});
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if(e.key === 'Enter' && t && /^al-neu-(raum|platz)$/.test(t.id)){
+    e.preventDefault();
+    alLageNeuAnlegen(t.id.slice(7));
+  }
+});
 
 document.addEventListener('change', e=>{
   const el = e.target;
@@ -26314,7 +26427,7 @@ function wachstumHTML(p){
   const max = Math.max(1, ...keys.map(k=>monate[k]));
   const bars = keys.length >= 2 ? `<div class="w-bars">${keys.map(k=>
     `<span class="w-bar" style="height:${Math.max(8, monate[k]/max*100)}%" title="${k}: ${monate[k]}"></span>`).join('')}</div>` : '';
-  return `<div class="wachstum nur-experte">
+  return `<div class="wachstum" data-schalter="wachstum">
     <p class="w-kopf">Wachstum</p>
     <div class="w-reihe">
       <button class="w-plus" data-blatt="${p.id}">+ Neues Blatt</button>
@@ -27903,18 +28016,96 @@ function hinweiseSetzen(an){
   sichern();
   if(typeof render === 'function') render();
 }
-const schalterHinweise = document.getElementById('ans-hinweise');
-if(schalterHinweise){
-  schalterHinweise.checked = S.pflegehinweise !== false;
-  schalterHinweise.onchange = ()=>hinweiseSetzen(schalterHinweise.checked);
-}
 
-const schalterEinfach = document.getElementById('ans-einfach');
-if(schalterEinfach){
-  schalterEinfach.checked = !!S.einfach;
-  schalterEinfach.onchange = ()=>einfachSetzen(schalterEinfach.checked);
+/* ── Modi und Schalter (4.0-beta.18, Plan M1a, F179) ───────────
+   Zwei Modi als Vorgabe, darunter jeder Schalter einzeln. Gespeichert
+   werden der Modus und nur die Abweichungen von seiner Vorgabe. Ein
+   Schalter blendet nur aus (Klasse s-aus-<k> am body), er ändert nie
+   eine Rechnung. Gelesen wird nur über schalterAn(k). */
+var MODI = {
+  sammler:   {name:'Sammler',   kurz:'Nur das Wichtigste: gießen, Sammlung, Notizen. Für viele Pflanzen und wenig Text.'},
+  entdecker: {name:'Entdecker', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
+};
+var SCHALTER = [
+  {k:'hinweise',   id:'ans-hinweise',   vor:{sammler:false, entdecker:true}},
+  {k:'pflege',     id:'sch-pflege',     vor:{sammler:false, entdecker:true}},
+  {k:'licht',      id:'sch-licht',      vor:{sammler:false, entdecker:true}},
+  {k:'wachstum',   id:'sch-wachstum',   vor:{sammler:false, entdecker:true}},
+  {k:'befunde',    id:'sch-befunde',    vor:{sammler:false, entdecker:true}},
+  {k:'abstammung', id:'sch-abstammung', vor:{sammler:false, entdecker:true}},
+  {k:'giessart',   id:'sch-giessart',   vor:{sammler:false, entdecker:true}}
+];
+function modusVon(){
+  return MODI[S.modus] ? S.modus : (S.einfach ? 'sammler' : 'entdecker');
 }
-einfachSetzen(!!S.einfach);
+function schalterAn(k){
+  const sc = SCHALTER.find(x => x.k === k);
+  if(!sc) return true;
+  const abw = S.schalter || {};
+  return Object.prototype.hasOwnProperty.call(abw, k) ? !!abw[k] : !!sc.vor[modusVon()];
+}
+function modusAngepasst(){
+  return SCHALTER.filter(sc => Object.prototype.hasOwnProperty.call(S.schalter || {}, sc.k)).length;
+}
+/* Bestand: „Einfacher Modus“ wird Sammler, sonst Entdecker; abgeschaltete
+   Pflegehinweise bleiben als Abweichung abgeschaltet. Nichts wird gelöscht. */
+function modusUebernehmen(){
+  if(MODI[S.modus]) return;
+  S.modus = S.einfach ? 'sammler' : 'entdecker';
+  S.schalter = S.schalter || {};
+  if(S.pflegehinweise === false && S.modus === 'entdecker') S.schalter.hinweise = false;
+}
+function schalterAnwenden(){
+  const m = modusVon();
+  SCHALTER.forEach(sc => {
+    const an = schalterAn(sc.k);
+    document.body.classList.toggle('s-aus-' + sc.k, !an);
+    const el = document.getElementById(sc.id);
+    if(el) el.checked = an;
+  });
+  /* Ältere Stellen lesen S.pflegehinweise und body.einfach weiter */
+  S.pflegehinweise = schalterAn('hinweise');
+  document.querySelectorAll('#modus-wahl [data-modus]').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.modus === m ? 'true' : 'false'));
+  const n = modusAngepasst();
+  const txt = document.getElementById('modus-text');
+  if(txt) txt.textContent = n
+    ? MODI[m].name + ' (angepasst): ' + (n === 1 ? 'ein Schalter weicht' : n + ' Schalter weichen') + ' von der Vorgabe ab.'
+    : MODI[m].kurz;
+  const zb = document.getElementById('modus-zurueck-box');
+  if(zb) zb.hidden = !n;
+}
+function modusSetzen(m){
+  if(!MODI[m]) return;
+  S.modus = m;
+  S.schalter = {};
+  einfachSetzen(m === 'sammler');
+  schalterAnwenden();
+  hinweiseSetzen(schalterAn('hinweise'));
+}
+function schalterSetzen(k, an){
+  const sc = SCHALTER.find(x => x.k === k);
+  if(!sc) return;
+  S.schalter = S.schalter || {};
+  if(!!an === !!sc.vor[modusVon()]) delete S.schalter[k];
+  else S.schalter[k] = !!an;
+  schalterAnwenden();
+  if(k === 'hinweise') hinweiseSetzen(!!an);
+  else sichern();
+}
+modusUebernehmen();
+SCHALTER.forEach(sc => {
+  const el = document.getElementById(sc.id);
+  if(el) el.onchange = () => schalterSetzen(sc.k, el.checked);
+});
+document.querySelectorAll('#modus-wahl [data-modus]').forEach(b =>
+  b.onclick = () => { if(b.dataset.modus !== modusVon() || modusAngepasst()) modusSetzen(b.dataset.modus); });
+{
+  const z = document.getElementById('modus-zurueck');
+  if(z) z.onclick = () => modusSetzen(modusVon());
+}
+einfachSetzen(modusVon() === 'sammler');
+schalterAnwenden();
 /* Nur den Text setzen, nicht neu zeichnen — die Karten stehen zu
    diesem Zeitpunkt noch gar nicht. */
 (function(){

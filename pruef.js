@@ -158,7 +158,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.17', w.__T('FASSUNG') === '4.0-beta.17', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.18', w.__T('FASSUNG') === '4.0-beta.18', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11186,11 +11186,13 @@ setTimeout(async () => {
 
     /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet; seit beta.11 23 (Gießmodus: Sammelkarten) */
     const SCH = ['ut-langzeit','ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-vollstaerke','ck-winterpause','ck-saison',
-      'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-einfach','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
-      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az'];
+      'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
+      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
+      /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
+      'sch-pflege','sch-licht','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
-    pruef('beta.5: Alle 23 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 23 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 23, quelle.split('type="checkbox" role="switch"').length - 1);
+    pruef('beta.5: Alle 28 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 28 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 28, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -11223,13 +11225,17 @@ setTimeout(async () => {
     const wpAn = T(`giessEinst().winterpause`);
     wp.click();
     pruef('beta.5: Schalter Winterpause schaltet an und wieder aus', wpAn === true && T(`giessEinst().winterpause`) === false, wpAn);
-    const ein = d.getElementById('ans-einfach'); const einVorher = T('!!S.einfach');
-    ein.checked = einVorher; ein.click();
-    const einNach = T('!!S.einfach'); ein.click();
-    pruef('beta.5: Schalter Einfacher Modus schaltet um', einNach === !einVorher && T('!!S.einfach') === einVorher);
+    /* seit beta.18: der Schalter „Einfacher Modus“ ist der Modus Sammler */
+    const einVorher = T('modusVon()');
+    d.querySelector('#modus-wahl [data-modus="sammler"]').click();
+    const einNach = T('!!S.einfach');
+    d.querySelector('#modus-wahl [data-modus="' + einVorher + '"]').click();
+    pruef('beta.5: Modus Sammler schaltet den alten einfachen Modus mit', einNach === true && T('modusVon()') === einVorher, einVorher);
     const opt0 = T(`ubOptionen().ohneBilder`); d.getElementById('url-ohnebilder').click(); const opt1 = T(`ubOptionen().ohneBilder`); d.getElementById('url-ohnebilder').click();
     pruef('beta.5: Schalter im Urlaubszettel wirkt auf den Zettel', opt0 !== opt1 && T(`ubOptionen().ohneBilder`) === opt0, opt0 + ' → ' + opt1);
-    melde.click(); const aus = T(`!!MELDE_AUS['Probeart s2 | ']`); melde.click();
+    /* seit beta.18 zeichnet der Moduswechsel neu: den Haken frisch holen */
+    const melde2 = () => d.querySelector('[data-melde-gel="Probeart s2 | "]') || melde;
+    melde2().click(); const aus = T(`!!MELDE_AUS['Probeart s2 | ']`); melde2().click();
     pruef('beta.5: Haken bei Arten melden nimmt aus und wieder auf', aus === true && T(`!!MELDE_AUS['Probeart s2 | ']`) === false);
     T(`(function(){ delete S.gelernteArten['Probeart s2 | ']; meldeRender(); })()`);
 
@@ -11323,7 +11329,7 @@ setTimeout(async () => {
     const seg = ['dichte-wahl', 'haerte-wahl', 'saison-wahl', 'tier-anaus'].filter(id => !d.getElementById(id).classList.contains('segment'));
     pruef('beta.6: Kartendichte, Härte, Stärke und Haustiere sind Segmente', seg.length === 0, seg.join(', '));
     pruef('beta.6: Gewähltes Segment ist gefüllt', /\.segment > button\[aria-pressed="true"\]\{[^}]*background:var\(--fl-akzent\)/.test(stil));
-    const felder = ['ein-kanne', 'ein-dosis', 'ein-schwelle', 'ein-dgtag', 'ck-vollstaerke', 'ck-winterpause', 'ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'ans-einfach', 'ans-hinweise', 'tour-aus']
+    const felder = ['ein-kanne', 'ein-dosis', 'ein-schwelle', 'ein-dgtag', 'ck-vollstaerke', 'ck-winterpause', 'ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'ans-hinweise', 'tour-aus']
       .filter(id => !d.getElementById(id).closest('.ein-karte'));
     pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
     pruef('beta.6: Ort und Modell stehen als Feld mit Knopf', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select + #btn-ki-modelle'));
@@ -13106,6 +13112,135 @@ setTimeout(async () => {
       pruef('beta.17: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
     } finally {
       T(`(function(){ var a = ${alt17}; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; HEUTE = new Date(${heute17}); gmListe = []; sichern(); return 1; })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.18: Plan M1a — Modi Sammler und Entdecker, Schalter,
+     Raum, Stellplatz und Gießart als Knöpfe. Jeder Test legt seine
+     Daten selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const alt18 = T(`JSON.stringify({modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise, raeume:S.raeume, eigene:S.eigene, giess:S.giess, zustand:S.zustand})`);
+    const altPrompt = w.prompt;
+    const quelle18 = () => fs.readFileSync('index.html', 'utf8');
+    try {
+      /* Bestand */
+      const ueb = (e, ph) => T(`(function(){ S.modus = null; S.schalter = null; S.einfach = ${e}; S.pflegehinweise = ${ph};
+        modusUebernehmen(); return S.modus + '|' + JSON.stringify(S.schalter); })()`);
+      pruef('beta.18: Bestand mit einfachem Modus wird Sammler', ueb(true, null) === 'sammler|{}', ueb(true, null));
+      pruef('beta.18: Bestand ohne einfachen Modus wird Entdecker', ueb(false, null) === 'entdecker|{}', ueb(false, null));
+      pruef('beta.18: Abgeschaltete Pflegehinweise bleiben abgeschaltet', ueb(false, false) === 'entdecker|{"hinweise":false}', ueb(false, false));
+
+      /* Vorgaben und Abweichungen */
+      T(`modusSetzen('sammler'); 1`);
+      const alle = () => T(`SCHALTER.map(function(s){ return schalterAn(s.k) ? 1 : 0; }).join('')`);
+      pruef('beta.18: Sammler schaltet alle sieben Schalter aus', alle() === '0000000', alle());
+      T(`modusSetzen('entdecker'); 1`);
+      pruef('beta.18: Entdecker schaltet alle sieben Schalter an', alle() === '1111111', alle());
+      pruef('beta.18: Katalog hat sieben Schalter mit eigenem Schalter in der Ansicht',
+        T(`SCHALTER.length`) === 7 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+      d.getElementById('sch-befunde').click();
+      pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
+      const mt = d.getElementById('modus-text').textContent;
+      pruef('beta.18 (F179): Modus heißt „Entdecker (angepasst)“ und „Zurücksetzen“ erscheint', mt.indexOf('Entdecker (angepasst)') === 0 && !d.getElementById('modus-zurueck-box').hidden, mt);
+      d.getElementById('sch-befunde').click();
+      pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
+      d.getElementById('sch-pflege').click(); d.getElementById('sch-licht').click();
+      d.getElementById('modus-zurueck').click();
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111111' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
+      T(`S.pflegehinweise = true; 1`);
+      d.querySelector('#modus-wahl [data-modus="sammler"]').click();
+      pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
+        T(`S.modus`) === 'sammler' && T(`!!S.einfach`) && d.body.classList.contains('einfach')
+        && d.querySelector('#modus-wahl [data-modus="sammler"]').getAttribute('aria-pressed') === 'true');
+      pruef('beta.18: Pflegehinweise folgen dem Schalter', T(`S.pflegehinweise`) === false && !d.getElementById('ans-hinweise').checked);
+
+      /* Ausblenden über die Klasse am body */
+      const probe = (html, k) => {
+        const box = d.createElement('div'); box.innerHTML = html; d.body.appendChild(box);
+        const el = box.firstElementChild;
+        T(`modusSetzen('entdecker'); schalterSetzen('${k}', false); 1`);
+        const aus = w.getComputedStyle(el).display;
+        T(`schalterSetzen('${k}', true); 1`);
+        const an = w.getComputedStyle(el).display;
+        box.remove();
+        return aus === 'none' && an !== 'none' && !d.body.classList.contains('s-aus-' + k);
+      };
+      [['pflege','<section class="kblock" data-kblock="pflege"></section>'],
+       ['licht','<section class="kblock" data-kblock="licht"></section>'],
+       ['wachstum','<section class="kblock" data-kblock="wachstum"></section>'],
+       ['befunde','<section class="kblock" data-kblock="befunde"></section>'],
+       ['abstammung','<section class="kblock" data-kblock="abstammung"></section>'],
+       ['giessart','<details data-schalter="giessart"></details>']].forEach(([k, h]) =>
+        pruef('beta.18: Schalter „' + k + '“ blendet aus und wieder ein', probe(h, k)));
+      pruef('beta.18: Gießart von Hand im Anlegen hängt am Schalter', !!d.querySelector('#form-neu details[data-schalter="giessart"] #f-giessart'));
+      pruef('beta.18: Keine Stelle hängt mehr am alten Einfach-Ausblenden', quelle18().indexOf('nur-experte') === -1);
+
+      /* Schalter ändern keine Rechnung */
+      const rech = T(`(function(){ S.giess.saison = false; S.zustand = {};
+        S.eigene = [{id:'M1A-1', eigen:true, name:'Probe', art:'Probeart', botanisch:'Probea m1a', klasse:'B', topf:'14', substrat:'erde', quellen:{}, todo:[], log:[]}];
+        var p = allePflanzen()[0], r = [];
+        modusSetzen('entdecker'); r.push(intervallVon(p) + '/' + giessMengeL(p));
+        modusSetzen('sammler'); r.push(intervallVon(p) + '/' + giessMengeL(p));
+        return r.join(' '); })()`);
+      const [ra, rb] = rech.split(' ');
+      pruef('beta.18: Abstand und Gießmenge sind in beiden Modi gleich', ra === rb, rech);
+
+      /* Raum und Stellplatz als Knöpfe */
+      let fragen = 0; w.prompt = () => { fragen++; return 'Durch Dialog'; };
+      T(`S.raeume = []; raumAnlegen('Küche'); raumAnlegen('Bad'); AL_LAGE_NEU = ''; formLageStand = ''; formLageZeichnen('', ''); 1`);
+      const rk = () => [...d.querySelectorAll('#f-raum-knoepfe > *')];
+      pruef('beta.18 (F199): „+ Neuer Raum“ ist der erste Knopf', rk()[0].textContent === '+ Neuer Raum' && rk().length === 3, rk().map(b => b.textContent).join(','));
+      pruef('beta.18 (F199): Raumauswahl ist versteckt, Knöpfe sichtbar', d.getElementById('f-raum').hidden && !d.getElementById('f-raum-knoepfe').hidden);
+      pruef('beta.18: Ohne Raum kein Stellplatz-Knopf', d.querySelector('#f-stellplatz-knoepfe .al-lage-leer') && !d.querySelector('#f-stellplatz-knoepfe button'));
+      rk()[2].click();
+      const bad = T(`raumListe().find(function(r){ return r.name === 'Bad'; }).id`);
+      pruef('beta.18: Tipp auf einen Raum wählt ihn', d.getElementById('f-raum').value === bad && rk()[2].getAttribute('aria-pressed') === 'true', d.getElementById('f-raum').value);
+      const sk = [...d.querySelectorAll('#f-stellplatz-knoepfe > button')];
+      pruef('beta.18: Stellplatz: „+ Neuer Stellplatz“ zuerst, dann „Kein Stellplatz“', sk[0].textContent === '+ Neuer Stellplatz' && sk[1].textContent === 'Kein Stellplatz' && sk.length > 2, sk.slice(0, 3).map(b => b.textContent).join(','));
+      sk[2].click();
+      pruef('beta.18: Tipp auf einen Stellplatz wählt ihn', d.getElementById('f-stellplatz').value === sk[2].dataset.alwert && d.getElementById('f-raum').value === bad);
+      rk()[0].click();
+      const inp = d.getElementById('al-neu-raum');
+      pruef('beta.18: „+ Neuer Raum“ öffnet eine Eingabezeile in der Liste', !!inp && !!inp.closest('#f-raum-knoepfe'));
+      d.querySelector('[data-al-neu-ok="raum"]').click();
+      pruef('beta.18: Leerer Name legt keinen Raum an', T(`raumListe().length`) === 2 && !!d.getElementById('al-neu-raum'));
+      d.getElementById('al-neu-raum').value = 'Wintergarten';
+      d.querySelector('[data-al-neu-ok="raum"]').click();
+      const wg = T(`(raumListe().find(function(r){ return r.name === 'Wintergarten'; }) || {}).id || ''`);
+      pruef('beta.18 (F199): Neuer Raum ohne Browser-Dialog angelegt und gewählt', !!wg && d.getElementById('f-raum').value === wg && fragen === 0 && !d.getElementById('al-neu-raum'), wg + ' / ' + fragen);
+      d.querySelector('[data-al-neu="platz"]').click();
+      d.getElementById('al-neu-platz').value = 'Hochbeet';
+      d.getElementById('al-neu-platz').dispatchEvent(new w.KeyboardEvent('keydown', {key:'Enter', bubbles:true}));
+      pruef('beta.18: Neuer Stellplatz per Eingabetaste angelegt und gewählt', d.getElementById('f-stellplatz').value === 'Hochbeet' && fragen === 0, d.getElementById('f-stellplatz').value);
+      d.querySelector('[data-al-neu="raum"]').click();
+      d.querySelector('[data-al-neu-ab="raum"]').click();
+      pruef('beta.18: Abbrechen schließt die Eingabezeile', !d.getElementById('al-neu-raum') && rk()[0].textContent === '+ Neuer Raum');
+      d.querySelector('[data-al-neu="raum"]').click();
+      T(`formularLeeren(); 1`);
+      pruef('beta.18: Formular leeren nimmt die Raumwahl aus den Knöpfen', !d.querySelector('#f-raum-knoepfe [aria-pressed="true"]'));
+      pruef('beta.18: Formular leeren schließt eine offene Eingabezeile', !d.getElementById('al-neu-raum'));
+
+      /* Gießart als Knöpfe */
+      T(`alKnopfGruppe('f-giessart'); 1`);
+      const gk = [...d.querySelectorAll('#f-giessart-knoepfe > button')];
+      pruef('beta.18: Gießart von Hand als Knöpfe, ohne Wasser- und Hydrokultur', gk.length === 6 && !gk.some(b => /^(wasser|hydro)$/.test(b.dataset.alwert)) && d.getElementById('f-giessart').hidden, gk.map(b => b.dataset.alwert).join(','));
+      gk.find(b => b.dataset.alwert === 'schluck').click();
+      pruef('beta.18: Tipp auf eine Gießart setzt sie', d.getElementById('f-giessart').value === 'schluck'
+        && d.querySelector('#f-giessart-knoepfe [data-alwert="schluck"]').getAttribute('aria-pressed') === 'true');
+      const kul = d.getElementById('f-kultur');
+      kul.value = 'wasser'; kul.dispatchEvent(new w.Event('change', {bubbles:true}));
+      kul.value = 'erde'; kul.dispatchEvent(new w.Event('change', {bubbles:true}));
+      pruef('beta.18: Zurück in Erde stellt die Gießart-Knöpfe auf „Automatisch“', d.getElementById('f-giessart').value === ''
+        && (d.querySelector('#f-giessart-knoepfe [aria-pressed="true"]') || {dataset:{}}).dataset.alwert === '');
+    } catch(e) {
+      pruef('beta.18: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    } finally {
+      w.prompt = altPrompt;
+      T(`(function(){ var a = ${alt18}; S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph;
+        S.raeume = a.raeume; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; AL_LAGE_NEU = '';
+        formularLeeren(); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })()`);
     }
   }
 
