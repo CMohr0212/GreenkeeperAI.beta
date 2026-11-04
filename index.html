@@ -4434,6 +4434,33 @@ html[data-design] .wk .wk-kachel i{font-style:normal;font-size:var(--t-s);line-h
 html[data-design] .wk .wk-kachel[aria-pressed="true"]{border-color:var(--ink);background:var(--paper);box-shadow:inset 0 0 0 2px var(--ink)}
 html[data-design] .wk .wk-kachel[aria-pressed="true"] b::before{content:'✓ '}
 html[data-design] .wk .wk-neben[aria-pressed="true"]::before{content:'✓ '}
+/* ══ Plan M2 (4.0-beta.21): Gießliste, Schalter im Gießmodus ══ */
+html[data-design] .gm-liste .gm-lg-k{padding-top:4px;padding-bottom:12px}
+html[data-design] .gm-liste .gm-lg{margin-top:18px}
+html[data-design] .gm-lg-k > .gm-lg-zeile{display:flex;align-items:center;gap:12px;min-height:var(--tap);padding-top:8px;padding-bottom:8px;cursor:pointer}
+html[data-design] .gm-lg-zeile > input[type="checkbox"]{flex:0 0 auto;margin:0 2px 0 0}
+html[data-design] .gm-ue-k > .gm-lg-sp{padding-top:12px}
+html[data-design] .gm-lg-k > .gm-lg-knoepfe{flex-wrap:wrap;margin-top:12px;padding-top:12px}
+html[data-design] .gm-lg-knoepfe > button{flex:1 1 40%;min-width:0}
+html[data-design] .gm-lg-knoepfe > button.haupt{flex:1.6 1 50%}
+html[data-design] .gm-lg-knoepfe > button:disabled{opacity:.45;cursor:default}
+html[data-design="klartext"] .gm-lg-knoepfe > button{flex-basis:100%}
+html[data-design] .gm-lg-k > .gm-lg-erledigt{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+html[data-design] .gm-lg-erledigt > p{flex:1 1 auto;margin:0;font-family:var(--f-body);font-size:var(--t-m);color:var(--schrift-2)}
+html[data-design] .gm-lg-erledigt > p b{color:var(--fl-akzent);font-weight:700}
+html[data-design="klartext"] .gm-lg-erledigt > p b{color:var(--schrift)}
+html[data-design] .gm-lg-erledigt > .gm-zfrage-btns{flex:0 0 auto}
+html[data-design="klartext"] .gm-lg-erledigt > .gm-zfrage-btns{flex:1 1 100%}
+/* Gießweg als Text (Schalter „Hinweiskärtchen beim Gießen“ aus) */
+html[data-design] .gm-weg.gm-weg-text{cursor:default}
+html[data-design] .gm-wie-text{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);padding:4px 6px;
+  font-family:var(--f-body);font-size:var(--t-s);font-weight:600;color:var(--schrift)}
+html[data-design] .gm-wie-text .gm-ico{width:30px;height:30px}
+html[data-design="klartext"] .gm-wie-text{font-size:var(--t-m);margin-left:auto}
+html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile{display:flex;align-items:center;gap:10px;min-height:var(--tap);padding:10px 0;color:var(--schrift)}
+html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile + div.gm-gw-zeile{border-top:1px solid var(--linie)}
+html[data-design="klartext"] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile + div.gm-gw-zeile{border-top:2px solid var(--schrift)}
+html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile .gm-ue-wert{margin-left:auto}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -11931,6 +11958,13 @@ function pflanzeEntfernen(id){
         <input type="checkbox" role="switch" id="sch-abstammung"> <span class="lab" style="display:inline">Abstammung in der Karte</span></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-giessart"> <span class="lab" style="display:inline">Gießart von Hand festlegen</span></label>
+      <!-- 4.0-beta.21 (Plan M2a/M2b): Schalter für den Gießmodus -->
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-gliste"> <span class="lab" style="display:inline">Gießen als Liste</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-gmwie"> <span class="lab" style="display:inline">Hinweiskärtchen beim Gießen</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-gmzustand"> <span class="lab" style="display:inline">Zustandsfrage beim Gießen</span></label>
     </div>
     <!-- 4.0-beta.19 (Plan M1b): Die Kartendichte gehört zum Modus -->
     <p class="ein-abschnitt">Kartendichte</p>
@@ -12822,7 +12856,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.20';
+const FASSUNG = '4.0-beta.21';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -24918,6 +24952,16 @@ let gmDgAuto = null;
 let gmDgWahl = null;
 /* 4.0-beta.13 (F147): Namen der Pflanzen ohne Dünger aufgeklappt. */
 let gmDgWelche = false;
+/* 4.0-beta.21 (Plan M2a): Gießliste. gmListeAktiv: der Durchgang läuft
+   über die Liste. gmHaken: abgewählte Einträge ({id: false}); ohne
+   Eintrag gilt der Haken als gesetzt, außer in der Gießpause.
+   gmStill: Meldungen aus der Liste zeichnen nichts und gehen nicht
+   weiter. gmTeil (Plan M2b): „Nacheinander“ einer Gruppe — die Indizes
+   der angehakten Pflanzen in gmListe; gmListe selbst bleibt ganz. */
+let gmListeAktiv = false;
+let gmHaken = {};
+let gmStill = false;
+let gmTeil = null;
 
 /* Was ein Tipp an einer Pflanze schreiben kann. Ein Fach mehr im
    Gießmodus heißt: hier eintragen, sonst bleibt nach Rückgängig ein
@@ -25074,6 +25118,7 @@ function gmStarten(){
   gmZwHinweisMerken();
   gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = []; gmZugefragt = {};
   gmVerlauf = []; gmSnaps = {}; gmNeuMelden = null; gmDgWahl = null; gmDgAuto = null;
+  gmListeAktiv = false; gmHaken = {}; gmStill = false; gmTeil = null;
   gmDuengEntscheiden();
   gmPhase = 'uebersicht';
   modalAuf('giessmodus');
@@ -25160,17 +25205,35 @@ let gmBefunde = [];
 let gmZugefragt = {};
 function gmBeenden(){ modalZu('giessmodus'); }
 function gmWeiter(){
+  if(gmTeil){
+    gmTeil.pos++;
+    if(gmTeil.pos >= gmTeil.idx.length){ gmTeilEnde(); return; }
+    gmIndex = gmTeil.idx[gmTeil.pos];
+    gmZeichnen();
+    return;
+  }
   gmIndex++;
   if(gmIndex >= gmListe.length) gmZeichnenEnde(); else gmZeichnen();
 }
 /* Nach einer Meldung: weiter, oder beim Neu-Melden zurück zur
    Abschlusskarte. */
 function gmNach(){
-  if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+  if(gmStill) return;
+  if(gmNeuMelden){ gmNeuLg(); gmNeuMelden = null; gmZeichnenEnde(); return; }
+  /* 4.0-beta.21 (Plan M2b): Meldungen aus „Nacheinander“ gehören zur Gruppe. */
+  if(gmTeil){ const e = gmVerlauf[gmVerlauf.length - 1]; if(e && !e.lg) e.lg = gmTeil.lg; }
   gmWeiter();
+}
+/* Eine neu gemeldete Zeile bleibt in ihrer Gruppe der Liste. */
+function gmNeuLg(){
+  const n = gmNeuMelden;
+  const lg = n && ((n.e && n.e.lg) || (n.urest && n.urest.lg));
+  const e = gmVerlauf[gmVerlauf.length - 1];
+  if(lg && e && !e.lg) e.lg = lg;
 }
 function gmAnzeigen(){
   if(gmPhase === 'uebersicht') gmZeichnenUebersicht();
+  else if(gmPhase === 'liste') gmZeichnenListe();
   else if(gmPhase === 'ende') gmZeichnenEnde();
   else gmZeichnen();
 }
@@ -25191,6 +25254,8 @@ function gmFort(){
   if(!f) return;
   f.style.width = (gmPhase === 'ende' || gmNeuMelden) ? '100%'
     : gmPhase === 'uebersicht' ? '0%'
+    : gmPhase === 'liste' ? (gmGruppen().filter(g => gmGruppeFertig(g.key)).length / Math.max(1, gmGruppen().length) * 100).toFixed(1) + '%'
+    : gmTeil ? (gmTeil.pos / Math.max(1, gmTeil.idx.length) * 100).toFixed(1) + '%'
     : ((gmIndex) / Math.max(1, gmListe.length) * 100).toFixed(1) + '%';
 }
 /* Der Knopf links in der Leiste: auf der ersten Karte zurück zur
@@ -25199,11 +25264,15 @@ function gmLeiste(){
   const b = document.getElementById('gm-rueck');
   if(!b) return;
   let t = '';
-  if(gmPhase === 'karte') t = gmNeuMelden ? 'Abbrechen' : (gmVerlauf.length ? 'Rückgängig' : 'Übersicht');
+  if(gmPhase === 'karte' && gmTeil && !gmNeuMelden) t = gmVerlauf.some(e => e.lg === gmTeil.lg) ? 'Rückgängig' : 'Zur Liste';
+  else if(gmPhase === 'karte') t = gmNeuMelden ? 'Abbrechen' : (gmVerlauf.length ? 'Rückgängig' : 'Übersicht');
   else if(gmPhase === 'ende') t = gmVerlauf.length ? 'Rückgängig' : '';
+  /* 4.0-beta.21: Aus der Liste zurück zur Übersicht nur, solange nichts
+     gemeldet ist — „Mitnehmen“ dort baut den Laufweg neu. */
+  else if(gmPhase === 'liste') t = gmVerlauf.length ? '' : 'Übersicht';
   b.textContent = t;
   b.hidden = !t;
-  b.dataset.gmRueck = t === 'Abbrechen' ? 'abbrechen' : t === 'Übersicht' ? 'uebersicht' : 'rueck';
+  b.dataset.gmRueck = t === 'Abbrechen' ? 'abbrechen' : t === 'Übersicht' ? 'uebersicht' : t === 'Zur Liste' ? 'liste' : 'rueck';
   gmFort();
 }
 function gmEintragZuruecknehmen(e){
@@ -25213,6 +25282,26 @@ function gmEintragZuruecknehmen(e){
 }
 function gmRueckgaengig(){
   if(gmNeuMelden){ gmNeuAbbrechen(); return; }
+  /* 4.0-beta.21 (Plan M2b): in „Nacheinander“ wie Karte für Karte, nur
+     innerhalb der Gruppe; vor ihrer ersten Meldung zurück zur Liste. */
+  if(gmTeil){
+    const t = gmVerlauf[gmVerlauf.length - 1];
+    if(!t || t.lg !== gmTeil.lg){ gmTeil = null; gmZeichnenListe(); return; }
+    gmVerlauf.pop();
+    gmEintragZuruecknehmen(t);
+    gmIndex = t.index;
+    gmTeil.pos = Math.max(0, gmTeil.idx.indexOf(t.index));
+    gmZaehlen();
+    gmZeichnen();
+    return;
+  }
+  /* 4.0-beta.21 (Plan M2a): Im Durchgang über die Liste nimmt Rückgängig
+     die zuletzt gemeldete Gruppe ganz zurück und zeigt die Liste. */
+  if(gmListeAktiv){
+    const t = gmVerlauf[gmVerlauf.length - 1];
+    if(!t){ gmZeichnenListe(); return; }
+    if(t.lg){ gmGruppeZurueck(t.lg); gmZeichnenListe(); return; }
+  }
   const e = gmVerlauf.pop();
   if(!e){ gmPhase = 'uebersicht'; gmZeichnenUebersicht(); return; }
   gmEintragZuruecknehmen(e);
@@ -25391,6 +25480,10 @@ function gmIcon(weg, cls){
 /* Knopf mit Icon (Klartext: das Wort), öffnet das Hinweiskärtchen. */
 function gmWieKnopf(weg, id, zusatz){
   const W = GM_WEGE[weg] || GM_WEGE.durch;
+  /* 4.0-beta.21 (Plan M2b): Ohne „Hinweiskärtchen beim Gießen“ steht der
+     Weg als Text da und öffnet nichts. */
+  if(!schalterAn('gmwie')) return '<span class="gm-wie-text">' + gmIcon(weg) + '<span class="gm-wort">' + esc(W.name) + '</span>'
+    + (zusatz ? '<span class="gm-wie-zusatz">' + esc(zusatz) + '</span>' : '') + '</span>';
   return '<button type="button" class="gm-wie-knopf" data-gm-wie="' + esc(weg) + '"' + (id ? ' data-id="' + esc(id) + '"' : '')
     + ' aria-label="' + esc(W.name + (zusatz ? ', ' + zusatz : '') + ', Hinweis öffnen') + '">'
     + gmIcon(weg) + '<span class="gm-wort">' + esc(W.name) + '</span>'
@@ -25546,7 +25639,8 @@ function gmMeldenUntersetzer(p, a, tat){
   gmVerlauf.push({index:gmIndex, typ:'u', id:p.id, name:nice(p), a, tat:tat || '',
     snap, nach:gmSnapPflanze(p.id), befund:null});
   gmZaehlen();
-  if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+  if(gmStill) return;
+  if(gmNeuMelden){ gmNeuLg(); gmNeuMelden = null; gmZeichnenEnde(); return; }
   /* 4.0-beta.11: Eine Einzelkarte geht nach der Meldung weiter wie eine Pflanze. */
   const k = gmListe[gmIndex];
   if(k && k.einzeln){ gmWeiter(); return; }
@@ -25651,7 +25745,8 @@ function gmZeichnen(){
      fragt erst, wenn die volle Frist des Zustands abgelaufen ist —
      bei „Ausgehungert" nach sechs Wochen, und bis dahin rechnet die
      App mit einem Zustand, den es vielleicht nicht mehr gibt. */
-  const zFrage = (stopp <= 0 && z.code !== 'gesund' && !gmZugefragt[p.id])
+  /* 4.0-beta.21 (Plan M2b): abschaltbar mit „Zustandsfrage beim Gießen“. */
+  const zFrage = (stopp <= 0 && z.code !== 'gesund' && !gmZugefragt[p.id] && schalterAn('gmzustand'))
     ? `<div class="gm-zfrage">
          <p><b>${esc(z.def.name)}</b> — ${esc(z.def.frage || 'Ist der Zustand vorbei?')}</p>
          <div class="gm-zfrage-btns">
@@ -25690,7 +25785,8 @@ function gmZeichnen(){
       </div>
     </div>
     <p class="gm-lage ${st.stand==='over'||st.stand==='stopp'?'warn':''}">${esc(lage)}${st.letzte?` · zuletzt vor ${st.tage} ${st.tage===1?'Tag':'Tagen'}`:''}</p>
-    ${wz ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
+    ${wz && !schalterAn('gmwie') ? `<p class="gm-weg gm-weg-text${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span></p>` : ''}
+    ${wz && schalterAn('gmwie') ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
     ${ohneDg ? `<p class="gm-weg-dg">Heute ohne Dünger: ${esc(ohneDg.text)}</p>` : ''}
     ${zFrage}
     ${tFrage}
@@ -25745,6 +25841,12 @@ document.addEventListener('input', e => {
 /* Zähler und, wo ein neuer Raum beginnt, „Wohnzimmer · 4 Pflanzen“. */
 function gmKopf(p){
   if(gmNeuMelden) return '<p class="gm-zaehler">Neu melden</p>';
+  /* 4.0-beta.21 (Plan M2b): Zähler der Gruppe, auf der ersten Karte ihr Name. */
+  if(gmTeil){
+    const n = gmTeil.idx.length;
+    return `<p class="gm-zaehler">${gmTeil.pos + 1} von ${n}</p>`
+      + (gmTeil.pos === 0 ? `<p class="gm-raum">${esc(gmTeil.name)} · ${n} ${n === 1 ? 'Pflanze' : 'Pflanzen'}</p>` : '');
+  }
   let raum = '';
   if(p && !p.anzucht && !p.untersetzer){
     const vor = gmListe[gmIndex - 1];
@@ -26058,7 +26160,10 @@ function gmZeichnenUebersicht(){
   /* 4.0-beta.10 (Plan G1): je Weg Icon, Name und Zahl, ohne Namen der
      Pflanzen; nur beim Gefäß von unten der Wasserstand. */
   /* Die ganze Zeile öffnet das Kärtchen, auch in Klartext ohne Icon. */
-  const gwZeile = (w, n, klein) => `<button type="button" class="gm-gw-zeile" data-gm-wie="${esc(w)}">${gmIcon(w)}<span class="gm-gw-t"><b>${esc((GM_WEGE[w] || GM_WEGE.durch).name)}</b>${
+  const gwZeile = (w, n, klein) => !schalterAn('gmwie')
+    ? `<div class="gm-gw-zeile gm-gw-text">${gmIcon(w)}<span class="gm-gw-t"><b>${esc((GM_WEGE[w] || GM_WEGE.durch).name)}</b>${
+      klein ? `<i>${esc(klein)}</i>` : ''}</span><span class="gm-ue-wert">${n}</span></div>`
+    : `<button type="button" class="gm-gw-zeile" data-gm-wie="${esc(w)}">${gmIcon(w)}<span class="gm-gw-t"><b>${esc((GM_WEGE[w] || GM_WEGE.durch).name)}</b>${
     klein ? `<i>${esc(klein)}</i>` : ''}</span><span class="gm-ue-wert">${n}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>`;
   let wegHtml = reihe.map(w => {
     const l = wege[w];
@@ -26139,9 +26244,197 @@ function gmZeichnenUebersicht(){
       ${gmUeAbschnitt('Heute dran', heute)}
       ${gmUeAbschnitt('Morgen dran', morgen)}
     </div>`;
-  $('#gm-knoepfe').innerHTML = `<button class="gm-ja" data-gm="los">Los</button>`;
+  /* 4.0-beta.21 (Plan M2a): Mit „Gießen als Liste“ führt der Hauptknopf zur Liste. */
+  $('#gm-knoepfe').innerHTML = schalterAn('gliste')
+    ? `<button class="gm-ja" data-gm="liste">Zur Liste</button>`
+    : `<button class="gm-ja" data-gm="los">Los</button>`;
   gmLeiste();
 }
+
+/* ══ 4.0-beta.21 (Plan M2a): Gießliste nach Raum ═══════════════
+   Eine Gruppe je Raum in der Reihenfolge des Laufwegs (Raumliste,
+   „Ohne Raum“ am Ende der Räume), darin Zwischenzeilen je Stellplatz;
+   danach „Untersetzer“ und „Anzucht“. Gemeldet wird mit denselben
+   Funktionen wie auf der Karte (gmMeldenPflanze, gmMeldenUntersetzer,
+   gmMeldenAzZeile); jeder Eintrag trägt seine Gruppe in e.lg. */
+function gmGruppen(){
+  const raum = [], nach = {};
+  let u = null, az = null;
+  gmListe.forEach((x, i) => {
+    if(!x) return;
+    if(x.untersetzer){
+      if(!u) u = {key:'u', typ:'u', name:'Untersetzer', eintraege:[]};
+      x.pflanzen.forEach(p => u.eintraege.push({id:p.id, p, index:i, sp:''}));
+      return;
+    }
+    if(x.anzucht){
+      if(!az) az = {key:'az', typ:'az', name:'Anzucht', eintraege:[]};
+      (x.sammel ? x.eintraege : [x]).forEach(e => az.eintraege.push({id:gmAzId(e), az:e, index:i, sp:''}));
+      return;
+    }
+    const name = gmRaumName(x);
+    const r = gmRaumVon(x);
+    const key = 'r:' + (r && raumNameVon(r) ? r : '');
+    let g = nach[key];
+    if(!g){ g = nach[key] = {key, typ:'raum', name, eintraege:[]}; raum.push(g); }
+    g.eintraege.push({id:x.id, p:x, index:i, sp:x.stellplatz || ''});
+  });
+  const ohne = raum.filter(g => g.key === 'r:');
+  return raum.filter(g => g.key !== 'r:').concat(ohne).concat(u ? [u] : []).concat(az ? [az] : []);
+}
+function gmHakenAn(z){
+  if(Object.prototype.hasOwnProperty.call(gmHaken, z.id)) return !!gmHaken[z.id];
+  return !(z.p && typeof stoppRest === 'function' && stoppRest(z.p) > 0);
+}
+function gmGruppeFertig(key){ return gmVerlauf.some(e => e.lg === key); }
+function gmGruppeZahl(key){
+  return gmVerlauf.filter(e => e.lg === key
+    && (e.a === 'ja' || e.a === 'trocken' || e.a === 'auf' || e.a === 'leer' || e.a === 'azja')).length;
+}
+const GM_LG_WORT = {raum:['Alle gegossen', 'gegossen'], u:['Alle aufgefüllt', 'aufgefüllt'], az:['Alle versorgt', 'versorgt']};
+function gmLgKnopfText(g){
+  const n = g.eintraege.filter(gmHakenAn).length;
+  return n ? GM_LG_WORT[g.typ][0] + ' (' + n + ')' : 'Alle später';
+}
+function gmZeichnenListe(){
+  gmPhase = 'liste';
+  gmTeil = null;
+  const gr = gmGruppen();
+  const fertig = gr.filter(g => gmGruppeFertig(g.key)).length;
+  const teile = gr.map(g => {
+    const kopf = `<p class="ein-abschnitt gm-ue-etikett">${esc(g.name)} · ${g.eintraege.length}</p>`;
+    if(gmGruppeFertig(g.key)){
+      return `<section class="gm-lg fertig" data-gm-lg="${esc(g.key)}">${kopf}<div class="ein-karte gm-ue-k gm-lg-k">
+        <div class="gm-lg-erledigt"><p><b>Erledigt</b> · ${gmGruppeZahl(g.key)} ${GM_LG_WORT[g.typ][1]}</p>
+        <div class="gm-zfrage-btns"><button type="button" data-gm-lgr="${esc(g.key)}">Rückgängig</button></div></div></div></section>`;
+    }
+    const mitSp = g.eintraege.some(z => z.sp);
+    let spVor = null, zeilen = '';
+    g.eintraege.forEach(z => {
+      if(mitSp && z.sp !== spVor){
+        zeilen += `<p class="gm-ue-raum gm-lg-sp">${esc(z.sp || 'Ohne Stellplatz')}</p>`;
+        spVor = z.sp;
+      }
+      const name = z.az ? z.az.name : nice(z.p);
+      const klein = z.az ? z.az.tat
+        : [z.p.art, (typeof stoppRest === 'function' && stoppRest(z.p) > 0) ? 'Gießpause' : ''].filter(Boolean).join(' · ');
+      zeilen += `<label class="gm-lg-zeile"><span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}</span>`
+        + `<input type="checkbox" data-gm-hk="${esc(z.id)}" data-gm-lgk="${esc(g.key)}"${gmHakenAn(z) ? ' checked' : ''}></label>`;
+    });
+    const n = g.eintraege.filter(gmHakenAn).length;
+    return `<section class="gm-lg" data-gm-lg="${esc(g.key)}">${kopf}<div class="ein-karte gm-ue-k gm-lg-k">${zeilen}
+      <div class="gm-zfrage-btns gm-lg-knoepfe"><button type="button" class="haupt" data-gm-lga="${esc(g.key)}">${esc(gmLgKnopfText(g))}</button>${
+        g.typ === 'raum' ? `<button type="button" data-gm-lgn="${esc(g.key)}"${n ? '' : ' disabled'}>Nacheinander</button>` : ''}</div></div></section>`;
+  }).join('');
+  $('#gm-inhalt').innerHTML = `
+    <div class="gm-ue gm-liste">
+      <p class="gm-zaehler">Gießliste</p>
+      <h3>${fertig} von ${gr.length} ${gr.length === 1 ? 'Gruppe' : 'Gruppen'} erledigt</h3>
+      ${teile}
+    </div>`;
+  $('#gm-knoepfe').innerHTML = '';
+  gmLeiste();
+}
+/* Nach einer Gruppe: weiter in der Liste oder, wenn alle erledigt sind,
+   die gewohnte Abschlusskarte. */
+function gmListeWeiter(){
+  if(gmGruppen().every(g => gmGruppeFertig(g.key))) gmZeichnenEnde();
+  else gmZeichnenListe();
+}
+/* Meldet einen Eintrag der Liste: angehakt wie die erste Taste der
+   Karte, abgewählt wie „Später“ (schreibt nichts, bleibt fällig). */
+function gmListeMelden(g, z, an){
+  gmIndex = z.index;
+  if(g.typ === 'raum') gmMeldenPflanze(z.p, an ? 'ja' : 'spaeter', an ? gmKnopfSatz(z.p).ja : '');
+  else if(g.typ === 'u') gmMeldenUntersetzer(z.p, 'auf', GM_U_KNOEPFE[0][1]);
+  else gmMeldenAzZeile(z.az, an ? 'azja' : 'spaeter', null);
+  const e = gmVerlauf[gmVerlauf.length - 1];
+  if(e) e.lg = g.key;
+}
+function gmGruppeMelden(key){
+  const g = gmGruppen().find(x => x.key === key);
+  if(!g || gmGruppeFertig(key)) return;
+  const merk = gmIndex;
+  gmStill = true;
+  try {
+    g.eintraege.forEach(z => { if(g.typ !== 'u' || gmHakenAn(z)) gmListeMelden(g, z, gmHakenAn(z)); });
+    /* Abgewählte Untersetzer: wie „Rest später“ der Karte, je Karte ein Eintrag. */
+    if(g.typ === 'u'){
+      const je = {};
+      g.eintraege.filter(z => !gmHakenAn(z)).forEach(z => { (je[z.index] = je[z.index] || []).push(z.id); });
+      Object.keys(je).forEach(i => gmVerlauf.push({index:Number(i), typ:'urest', ids:je[i], snap:null, nach:null, befund:null, lg:key}));
+    }
+  } finally {
+    gmStill = false;
+  }
+  gmIndex = merk;
+  gmZaehlen();
+  gmListeWeiter();
+}
+/* Nimmt genau diese Gruppe zurück, auch wenn danach andere gemeldet wurden. */
+function gmGruppeZurueck(key){
+  for(let i = gmVerlauf.length - 1; i >= 0; i--){
+    const e = gmVerlauf[i];
+    if(e.lg !== key) continue;
+    gmVerlauf.splice(i, 1);
+    gmEintragZuruecknehmen(e);
+  }
+  gmZaehlen();
+}
+/* ── 4.0-beta.21 (Plan M2b): „Nacheinander“ ─────────────────────
+   Die gewohnten Karten nur für die angehakten Pflanzen der Gruppe.
+   Nach der letzten Karte zählen Abgewählte als „Später“, und es geht
+   zurück zur Liste. */
+function gmTeilStarten(key){
+  const g = gmGruppen().find(x => x.key === key);
+  if(!g || g.typ !== 'raum' || gmGruppeFertig(key)) return;
+  const idx = g.eintraege.filter(gmHakenAn).map(z => z.index);
+  if(!idx.length) return;
+  gmTeil = {lg:key, name:g.name, idx, pos:0};
+  gmIndex = idx[0];
+  gmZeichnen();
+}
+function gmTeilEnde(){
+  const t = gmTeil;
+  gmTeil = null;
+  const g = t && gmGruppen().find(x => x.key === t.lg);
+  if(g){
+    const merk = gmIndex;
+    gmStill = true;
+    try {
+      g.eintraege.forEach(z => {
+        if(gmHakenAn(z) || gmVerlauf.some(e => e.lg === g.key && e.typ === 'p' && e.id === z.id)) return;
+        gmListeMelden(g, z, false);
+      });
+    } finally {
+      gmStill = false;
+    }
+    gmIndex = merk;
+    gmZaehlen();
+  }
+  gmListeWeiter();
+}
+document.addEventListener('change', e => {
+  const hk = e.target && e.target.closest && e.target.closest('[data-gm-hk]');
+  if(!hk) return;
+  gmHaken[hk.dataset.gmHk] = !!hk.checked;
+  /* Nur die Knöpfe der Gruppe nachziehen, damit die Liste nicht springt. */
+  const g = gmGruppen().find(x => x.key === hk.dataset.gmLgk);
+  const sec = hk.closest('[data-gm-lg]');
+  if(!g || !sec) return;
+  const a = sec.querySelector('[data-gm-lga]');
+  if(a) a.textContent = gmLgKnopfText(g);
+  const n = sec.querySelector('[data-gm-lgn]');
+  if(n) n.disabled = !g.eintraege.some(gmHakenAn);
+});
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-gm-lga]');
+  if(a){ gmGruppeMelden(a.dataset.gmLga); return; }
+  const r = e.target.closest('[data-gm-lgr]');
+  if(r){ gmGruppeZurueck(r.dataset.gmLgr); gmZeichnenListe(); return; }
+  const n = e.target.closest('[data-gm-lgn]');
+  if(n){ gmTeilStarten(n.dataset.gmLgn); return; }
+});
 
 function gmZeichnenEnde(){
   gmPhase = 'ende';
@@ -26211,12 +26504,13 @@ document.addEventListener('click', e=>{
   if(tb){ gmTopfAntwort(tb.dataset.gmTopf === 'ja'); return; }
   /* 4.0-beta.10: Icon oder Balken öffnet das Hinweiskärtchen. */
   const wb = e.target.closest('[data-gm-wie]');
-  if(wb){ gmWieZeigen(wb.dataset.gmWie, wb.dataset.id || null); return; }
+  if(wb){ if(schalterAn('gmwie')) gmWieZeigen(wb.dataset.gmWie, wb.dataset.id || null); return; }
   if(e.target.closest('#gm-wie-zu')){ modalZu('gm-wie'); return; }
   /* 4.0-beta.9: Leiste, Übersicht, Untersetzer und Abschlusskarte. */
   const rb = e.target.closest('#gm-rueck');
   if(rb){
     if(rb.dataset.gmRueck === 'uebersicht'){ gmPhase = 'uebersicht'; gmZeichnenUebersicht(); }
+    else if(rb.dataset.gmRueck === 'liste'){ gmTeil = null; gmZeichnenListe(); }
     else gmRueckgaengig();
     return;
   }
@@ -26247,7 +26541,7 @@ document.addEventListener('click', e=>{
     if(!z) return;
     gmMeldenAzZeile(z, azb.dataset.gmAz === 'azja' ? 'azja' : 'spaeter');
     gmZaehlen();
-    if(gmNeuMelden){ gmNeuMelden = null; gmZeichnenEnde(); return; }
+    if(gmNeuMelden){ gmNeuLg(); gmNeuMelden = null; gmZeichnenEnde(); return; }
     gmZeichnen();
     return;
   }
@@ -26261,6 +26555,7 @@ document.addEventListener('click', e=>{
   const a = b.dataset.gm;
   if(a === 'zu'){ gmBeenden(); return; }
   if(a === 'los'){ gmIndex = 0; gmZeichnen(); return; }
+  if(a === 'liste'){ gmListeAktiv = true; gmTeil = null; gmZeichnenListe(); return; }
   if(a === 'dgwelche'){
     gmDgWelche = !gmDgWelche;
     const n = document.getElementById('gm-dg-namen');
@@ -28194,7 +28489,11 @@ var SCHALTER = [
   {k:'wachstum',   id:'sch-wachstum',   vor:{sammler:false, entdecker:true}},
   {k:'befunde',    id:'sch-befunde',    vor:{sammler:false, entdecker:true}},
   {k:'abstammung', id:'sch-abstammung', vor:{sammler:false, entdecker:true}},
-  {k:'giessart',   id:'sch-giessart',   vor:{sammler:false, entdecker:true}}
+  {k:'giessart',   id:'sch-giessart',   vor:{sammler:false, entdecker:true}},
+  /* 4.0-beta.21 (Plan M2a/M2b): Gießen als Liste, Kärtchen und Zustandsfrage im Gießmodus */
+  {k:'gliste',     id:'sch-gliste',     vor:{sammler:true,  entdecker:false}},
+  {k:'gmwie',      id:'sch-gmwie',      vor:{sammler:false, entdecker:true}},
+  {k:'gmzustand',  id:'sch-gmzustand',  vor:{sammler:false, entdecker:true}}
 ];
 function modusVon(){
   return MODI[S.modus] ? S.modus : (S.einfach ? 'sammler' : 'entdecker');

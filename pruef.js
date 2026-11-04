@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.20', w.__T('FASSUNG') === '4.0-beta.20', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.21', w.__T('FASSUNG') === '4.0-beta.21', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11197,10 +11197,12 @@ setTimeout(async () => {
       'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
       'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
-      'sch-pflege','sch-licht','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart'];
+      'sch-pflege','sch-licht','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart',
+      /* seit beta.21 (M2a/M2b): drei Schalter für den Gießmodus */
+      'sch-gliste','sch-gmwie','sch-gmzustand'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
-    pruef('beta.5: Alle 28 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 28 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 28, quelle.split('type="checkbox" role="switch"').length - 1);
+    pruef('beta.5: Alle 31 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 31 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 31, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -13143,11 +13145,12 @@ setTimeout(async () => {
       /* Vorgaben und Abweichungen */
       T(`modusSetzen('sammler'); 1`);
       const alle = () => T(`SCHALTER.map(function(s){ return schalterAn(s.k) ? 1 : 0; }).join('')`);
-      pruef('beta.18: Sammler schaltet alle sieben Schalter aus', alle() === '0000000', alle());
+      /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
+      pruef('beta.18: Sammler schaltet alle sieben Schalter aus (beta.21: Liste an)', alle() === '0000000100', alle());
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.18: Entdecker schaltet alle sieben Schalter an', alle() === '1111111', alle());
-      pruef('beta.18: Katalog hat sieben Schalter mit eigenem Schalter in der Ansicht',
-        T(`SCHALTER.length`) === 7 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+      pruef('beta.18: Entdecker schaltet alle sieben Schalter an (beta.21: Liste aus, Kärtchen und Zustandsfrage an)', alle() === '1111111011', alle());
+      pruef('beta.18: Katalog hat zehn Schalter (seit beta.21) mit eigenem Schalter in der Ansicht',
+        T(`SCHALTER.length`) === 10 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
       const mt = d.getElementById('modus-text').textContent;
@@ -13156,7 +13159,7 @@ setTimeout(async () => {
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
       d.getElementById('sch-pflege').click(); d.getElementById('sch-licht').click();
       d.getElementById('modus-zurueck').click();
-      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111111' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111111011' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       T(`S.pflegehinweise = true; 1`);
       d.querySelector('#modus-wahl [data-modus="sammler"]').click();
       pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
@@ -13511,6 +13514,308 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph; S.dichte = a.dichte;
         S.startGesehen = a.start; if(a.kiStufe) S.kiStufe = a.kiStufe; else delete S.kiStufe;
         designSetzen(a.design, false); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${alt20})`);
+    }
+  }
+
+  /* ══ 4.0-beta.21: Plan M2a — Gießliste nach Raum (Sammelsitzung mit
+     M2b). Jeder Test legt Räume, Pflanzen und Gläser selbst an und
+     stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const kn = () => d.getElementById('gm-knoepfe').innerHTML;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+      spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise}`;
+    const alt21 = T(`JSON.stringify(${LAGER})`);
+    const zurueck = v => T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+      S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
+      S.einfach = a.einfach; S.pflegehinweise = a.ph; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(v)})`);
+    const faecher = id => T(`JSON.stringify(GM_SNAP_FAECHER.map(function(k){ return (S[k] && S[k][${JSON.stringify(id)}] !== undefined) ? S[k][${JSON.stringify(id)}] : null; }))`);
+    const heuteGegossen = id => T(`(S.water[${JSON.stringify(id)}] || []).indexOf(iso(HEUTE)) > -1`) === true;
+    const aufbau21 = () => T(`(function(){
+      var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+      history.replaceState(null, '');
+      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
+      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+        tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
+      var k = raumAnlegen('Prüf-Küche L21'), b = raumAnlegen('Prüf-Bad L21');
+      stellplatzAnlegen(k, 'Lplatz A'); stellplatzAnlegen(k, 'Lplatz B');
+      window.__l21 = {k:k, b:b};
+      var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+      var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:id, art:'Art ' + id, botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', topf:'12'}, o); };
+      S.eigene = [
+        pf('L1', {raum:k, stellplatz:'Lplatz B'}),
+        pf('L2', {raum:k, stellplatz:'Lplatz A'}),
+        pf('L3', {raum:k}),
+        pf('L4', {raum:b}),
+        pf('L5', {}),
+        pf('L6', {raum:b}),
+        pf('L7', {botanisch:'Dionaea muscipula', klasse:'S', raum:k, topf:''})
+      ];
+      S.water = {};
+      S.eigene.forEach(function(p){ S.water[p.id] = [vor(150)]; });
+      ['Glas L21 A', 'Glas L21 B'].forEach(function(n){
+        var g = azGefaessAnlegen({name:n, medium:'wasser', start:vor(30)});
+        azGruppeAnlegen({gefaess:g.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'});
+        g.start = vor(30); g.gewechselt = [vor(30)];
+      });
+      modusSetzen('entdecker'); schalterSetzen('gliste', true);
+      sichern();
+      return 1;
+    })()`);
+    try {
+      /* 1 Schalter und Vorgaben */
+      T(`modusSetzen('sammler'); 1`);
+      const sAn = T(`schalterAn('gliste')`);
+      T(`modusSetzen('entdecker'); 1`);
+      const eAn = T(`schalterAn('gliste')`);
+      pruef('beta.21 (M2a): „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus', sAn === true && eAn === false, sAn + '/' + eAn);
+      const sch = d.getElementById('sch-gliste');
+      pruef('beta.21 (M2a): Der Schalter steht unter Ansicht › Anzeige', !!sch && sch.getAttribute('role') === 'switch' && !!sch.closest('#schalter-karte')
+        && /Gießen als Liste/.test(sch.closest('label').textContent));
+      sch.click();
+      pruef('beta.21 (M2a): An bei Entdecker zählt als angepasst', T(`JSON.stringify(S.schalter)`) === '{"gliste":true}' && T(`modusAngepasst()`) === 1, T(`JSON.stringify(S.schalter)`));
+      sch.click();
+
+      /* 2 Übersicht */
+      aufbau21();
+      const K = 'r:' + T('__l21.k'), B = 'r:' + T('__l21.b');
+      T('gmStarten()');
+      pruef('beta.21 (M2a): Mit Schalter führt der Hauptknopf der Übersicht zur Liste', T('gmPhase') === 'uebersicht' && /data-gm="liste">Zur Liste</.test(kn()) && !/data-gm="los"/.test(kn()), kn());
+      T(`schalterSetzen('gliste', false); gmZeichnenUebersicht(); 1`);
+      pruef('beta.21 (M2a): Ohne Schalter bleibt „Los“', /data-gm="los">Los</.test(kn()) && !/data-gm="liste"/.test(kn()), kn());
+      T(`schalterSetzen('gliste', true); gmZeichnenUebersicht(); 1`);
+
+      /* 3 und 4 Gruppen */
+      klick('[data-gm="liste"]');
+      const gr = Array.prototype.map.call(d.querySelectorAll('#gm-inhalt [data-gm-lg]'), e => e.dataset.gmLg);
+      pruef('beta.21 (M2a): Gruppen je Raum in Raumfolge, „Ohne Raum“ nach den Räumen, dann Untersetzer und Anzucht',
+        T('gmPhase') === 'liste' && gr.join('|') === [K, B, 'r:', 'u', 'az'].join('|'), gr.join('|'));
+      const etik = Array.prototype.map.call(d.querySelectorAll('#gm-inhalt .gm-lg .gm-ue-etikett'), e => e.textContent.trim());
+      pruef('beta.21 (M2a): Gruppen tragen Name und Zahl', etik.join('|') === 'Prüf-Küche L21 · 3|Prüf-Bad L21 · 2|Ohne Raum · 1|Untersetzer · 1|Anzucht · 2', etik.join('|'));
+      const folge = sec => Array.prototype.map.call(d.querySelectorAll(`#gm-inhalt [data-gm-lg="${sec}"] .gm-lg-sp, #gm-inhalt [data-gm-lg="${sec}"] [data-gm-hk]`),
+        e => e.matches('.gm-lg-sp') ? '#' + e.textContent.trim() : e.dataset.gmHk);
+      pruef('beta.21 (M2a): Stellplätze als Zwischenzeilen in Stellplatz-Folge, ohne Stellplatz am Ende', folge(K).join('|') === '#Lplatz A|L2|#Lplatz B|L1|#Ohne Stellplatz|L3', folge(K).join('|'));
+      pruef('beta.21 (M2a): Ein Raum ohne Stellplätze hat keine Zwischenzeilen', folge(B).join('|') === 'L4|L6', folge(B).join('|'));
+      const zeileK = d.querySelector(`#gm-inhalt [data-gm-lg="${K}"] [data-gm-hk="L2"]`);
+      pruef('beta.21 (M2a): Je Zeile Name, Art klein und ein gesetzter Haken', !!zeileK && zeileK.checked && zeileK.type === 'checkbox'
+        && /<b>L2<\/b><i>Art L2<\/i>/.test(zeileK.closest('label').innerHTML), zeileK && zeileK.closest('label').innerHTML);
+      const kText = key => { const b = d.querySelector(`#gm-inhalt [data-gm-lga="${key}"]`); return b ? b.textContent.trim() : ''; };
+      pruef('beta.21 (M2a): Knopf je Gruppe mit Zahl', kText(K) === 'Alle gegossen (3)' && kText('u') === 'Alle aufgefüllt (1)' && kText('az') === 'Alle versorgt (2)',
+        [kText(K), kText('u'), kText('az')].join(' | '));
+      pruef('beta.21 (M2a): In der Liste kein Fußknopf und kein Rückgängig, „Übersicht“ links', kn().trim() === '' && d.getElementById('gm-rueck').textContent === 'Übersicht');
+
+      /* 5 Haken */
+      const h6 = d.querySelector('#gm-inhalt [data-gm-hk="L6"]');
+      h6.checked = false; h6.dispatchEvent(new w.Event('change', {bubbles:true}));
+      pruef('beta.21 (M2a): Abwählen zählt den Knopf herunter', kText(B) === 'Alle gegossen (1)' && T('gmHaken.L6') === false, kText(B));
+
+      /* 6 Gleiche Fächer wie die Einzelmeldung */
+      const stand = T(`JSON.stringify({water:S.water, dueng:S.dueng, zustand:S.zustand, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anstau:S.anstau, spuelen:S.spuelen, giess:S.giess})`);
+      const vorF = faecher('L4');
+      T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); gmStarten(); gmIndex = gmListe.findIndex(function(x){ return x.id === 'L4'; }); gmZeichnen(); 1`);
+      klick('[data-gm="ja"]');
+      const karteF = faecher('L4');
+      const karteDg = T(`!!(S.dueng && S.dueng.L4)`), karteSp = T(`S.spuelen && S.spuelen.L4`);
+      T(`(function(v){ v = JSON.parse(v); Object.keys(v).forEach(function(k){ S[k] = v[k]; }); sichern(); return 1; })(${JSON.stringify(stand)})`);
+      pruef('beta.21 (M2a): Testdaten: die Einzelmeldung schreibt Wasser, Dünger und Spülzähler', karteF !== vorF && karteDg === true && karteSp === 1 && heuteGegossen('L4') === false,
+        karteDg + '/' + karteSp);
+      T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); gmStarten(); 1`);
+      klick('[data-gm="liste"]');
+      const h6b = d.querySelector('#gm-inhalt [data-gm-hk="L6"]');
+      h6b.checked = false; h6b.dispatchEvent(new w.Event('change', {bubbles:true}));
+      klick(`[data-gm-lga="${B}"]`);
+      const listeF = faecher('L4');
+      pruef('beta.21 (M2a): „Alle gegossen“ schreibt dieselben Fächer wie „Gegossen“ auf der Karte', listeF === karteF && heuteGegossen('L4'), listeF + ' ≠ ' + karteF);
+
+      /* 7 Abgewählte bleibt fällig */
+      pruef('beta.21 (M2a): Die abgewählte Pflanze bleibt fällig und unverändert', !heuteGegossen('L6') && T(`giessListe().some(function(p){ return p.id === 'L6'; })`) === true
+        && faecher('L6') === T(`JSON.stringify(GM_SNAP_FAECHER.map(function(k){ return k === 'water' ? S.water.L6 : ((S[k] && S[k].L6 !== undefined) ? S[k].L6 : null); }))`)
+        && T(`(S.water.L6 || []).length`) === 1);
+      const secB = () => d.querySelector(`#gm-inhalt [data-gm-lg="${B}"]`);
+      pruef('beta.21 (M2a): Erledigte Gruppe zeigt „Erledigt · 1 gegossen“ und „Rückgängig“', T('gmPhase') === 'liste' && !!secB() && secB().classList.contains('fertig')
+        && /Erledigt<\/b> · 1 gegossen/.test(secB().innerHTML) && !!secB().querySelector('[data-gm-lgr]') && !secB().querySelector('[data-gm-hk]'), secB() && secB().textContent.trim());
+      pruef('beta.21 (M2a): Nach der ersten Meldung steht links kein „Übersicht“ mehr', d.getElementById('gm-rueck').hidden);
+
+      /* 8 Rückgängig je Gruppe, auch für eine frühere */
+      klick(`[data-gm-lga="${K}"]`);
+      pruef('beta.21 (M2a): Die zweite Gruppe gießt alle drei', ['L1', 'L2', 'L3'].every(heuteGegossen));
+      klick(`[data-gm-lgr="${B}"]`);
+      pruef('beta.21 (M2a): Rückgängig der früheren Gruppe nimmt nur diese zurück', !heuteGegossen('L4') && faecher('L4') === vorF && ['L1', 'L2', 'L3'].every(heuteGegossen)
+        && !secB().classList.contains('fertig') && d.querySelector(`#gm-inhalt [data-gm-lg="${K}"]`).classList.contains('fertig')
+        && T(`gmVerlauf.every(function(e){ return e.lg === '${K}'; }) && gmVerlauf.length === 3`) === true, T(`JSON.stringify(gmVerlauf.map(function(e){ return e.lg + ':' + e.id; }))`));
+      pruef('beta.21 (M2a): Der Haken bleibt nach Rückgängig abgewählt', d.querySelector('#gm-inhalt [data-gm-hk="L6"]').checked === false && kText(B) === 'Alle gegossen (1)');
+
+      /* 9 Abschlusskarte und Neu melden */
+      klick(`[data-gm-lga="${B}"]`);
+      klick('[data-gm-lga="r:"]');
+      klick('[data-gm-lga="u"]');
+      pruef('beta.21 (M2a): Untersetzer „Alle aufgefüllt“ trägt Gießen ein wie „Aufgefüllt“', heuteGegossen('L7') && T(`gmVerlauf.some(function(e){ return e.typ === 'u' && e.id === 'L7' && e.a === 'auf' && e.lg === 'u'; })`) === true);
+      pruef('beta.21 (M2a): Vor der letzten Gruppe noch keine Abschlusskarte', T('gmPhase') === 'liste');
+      klick('[data-gm-lga="az"]');
+      pruef('beta.21 (M2a): Nach der letzten Gruppe kommt die Abschlusskarte',
+        T('gmPhase') === 'ende' && /5 Pflanzen gegossen, 1 Untersetzer nachgesehen, 2 Anzuchten versorgt, 1 übersprungen/.test(inh())
+        && T(`anzuchtDaten().gefaesse.every(function(g){ return g.gewechselt.indexOf(iso(HEUTE)) > -1; })`) === true, (inh().match(/<p class="gm-art">[^<]*/) || [''])[0]);
+      const neu6 = d.querySelector('#gm-inhalt [data-gm-neu][data-id="L6"]');
+      pruef('beta.21 (M2a): Die abgewählte Pflanze steht unter „Später“ zum Neu-Melden', !!neu6);
+      if(neu6) neu6.click();
+      pruef('beta.21 (M2a): Neu melden öffnet die Karte dieser Pflanze', T('gmPhase') === 'karte' && /Neu melden/.test(inh()) && /<h3>L6<\/h3>/.test(inh()));
+      klick('[data-gm="ja"]');
+      pruef('beta.21 (M2a): Danach Abschlusskarte, die Meldung bleibt in ihrer Gruppe', T('gmPhase') === 'ende' && heuteGegossen('L6')
+        && T(`gmVerlauf[gmVerlauf.length - 1].id === 'L6' && gmVerlauf[gmVerlauf.length - 1].lg === '${B}'`) === true && /6 Pflanzen gegossen/.test(inh()));
+      klick('#gm-rueck');
+      pruef('beta.21 (M2a): Rückgängig auf der Abschlusskarte nimmt die Gruppe zurück und zeigt die Liste', T('gmPhase') === 'liste' && !heuteGegossen('L6') && !heuteGegossen('L4')
+        && !secB().classList.contains('fertig') && heuteGegossen('L5'));
+    } catch(e) {
+      pruef('beta.21 (M2a): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      zurueck(alt21);
+    }
+  }
+
+  /* ══ 4.0-beta.21: Plan M2b — „Nacheinander“ je Gruppe, Schalter für
+     Hinweiskärtchen und Zustandsfrage im Gießmodus. Eigene Daten, Stand
+     am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const inh = () => d.getElementById('gm-inhalt').innerHTML;
+    const kn = () => d.getElementById('gm-knoepfe').innerHTML;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+      spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise}`;
+    const alt21b = T(`JSON.stringify(${LAGER})`);
+    const zurueck = v => T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+      S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
+      S.einfach = a.einfach; S.pflegehinweise = a.ph; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(v)})`);
+    const faecher = id => T(`JSON.stringify(GM_SNAP_FAECHER.map(function(k){ return (S[k] && S[k][${JSON.stringify(id)}] !== undefined) ? S[k][${JSON.stringify(id)}] : null; }))`);
+    const heuteGegossen = id => T(`(S.water[${JSON.stringify(id)}] || []).indexOf(iso(HEUTE)) > -1`) === true;
+    const aufbau21 = () => T(`(function(){
+      var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+      history.replaceState(null, '');
+      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
+      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+        tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
+      var k = raumAnlegen('Prüf-Küche L21'), b = raumAnlegen('Prüf-Bad L21');
+      stellplatzAnlegen(k, 'Lplatz A'); stellplatzAnlegen(k, 'Lplatz B');
+      window.__l21 = {k:k, b:b};
+      var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+      var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:id, art:'Art ' + id, botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', topf:'12'}, o); };
+      S.eigene = [
+        pf('L1', {raum:k, stellplatz:'Lplatz B'}),
+        pf('L2', {raum:k, stellplatz:'Lplatz A'}),
+        pf('L3', {raum:k}),
+        pf('L4', {raum:b}),
+        pf('L5', {}),
+        pf('L6', {raum:b}),
+        pf('L7', {botanisch:'Dionaea muscipula', klasse:'S', raum:k, topf:''})
+      ];
+      S.water = {};
+      S.eigene.forEach(function(p){ S.water[p.id] = [vor(150)]; });
+      ['Glas L21 A', 'Glas L21 B'].forEach(function(n){
+        var g = azGefaessAnlegen({name:n, medium:'wasser', start:vor(30)});
+        azGruppeAnlegen({gefaess:g.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'});
+        g.start = vor(30); g.gewechselt = [vor(30)];
+      });
+      modusSetzen('entdecker'); schalterSetzen('gliste', true);
+      sichern();
+      return 1;
+    })()`);
+    const neuStart = () => T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); gmStarten(); 1`);
+    const h3 = () => (inh().match(/<h3>([^<]*)<\/h3>/) || ['', ''])[1];
+    try {
+      /* 7 Vorgaben */
+      T(`modusSetzen('sammler'); 1`);
+      const sv = T(`schalterAn('gmwie') + '/' + schalterAn('gmzustand')`);
+      T(`modusSetzen('entdecker'); 1`);
+      const ev = T(`schalterAn('gmwie') + '/' + schalterAn('gmzustand')`);
+      pruef('beta.21 (M2b): Kärtchen und Zustandsfrage sind bei Sammler aus, bei Entdecker an', sv === 'false/false' && ev === 'true/true', sv + ' · ' + ev);
+      pruef('beta.21 (M2b): Beide Schalter stehen unter Ansicht › Anzeige', ['sch-gmwie', 'sch-gmzustand'].every(id => {
+        const e = d.getElementById(id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })
+        && /Hinweiskärtchen beim Gießen/.test(d.getElementById('schalter-karte').textContent) && /Zustandsfrage beim Gießen/.test(d.getElementById('schalter-karte').textContent));
+
+      /* 1 bis 4 Nacheinander */
+      aufbau21();
+      const K = 'r:' + T('__l21.k'), B = 'r:' + T('__l21.b');
+      neuStart();
+      klick('[data-gm="liste"]');
+      const nk = Array.prototype.map.call(d.querySelectorAll('#gm-inhalt [data-gm-lgn]'), e => e.dataset.gmLgn);
+      pruef('beta.21 (M2b): „Nacheinander“ steht je Raum-Gruppe, nicht bei Untersetzer und Anzucht', nk.join('|') === [K, B, 'r:'].join('|')
+        && /data-gm-lgn="[^"]*">Nacheinander</.test(inh()), nk.join('|'));
+      const lenVor = T('gmListe.length');
+      const h1 = d.querySelector('#gm-inhalt [data-gm-hk="L1"]');
+      h1.checked = false; h1.dispatchEvent(new w.Event('change', {bubbles:true}));
+      klick('#gm-inhalt [data-gm-lgn="' + K + '"]');
+      pruef('beta.21 (M2b): „Nacheinander“ öffnet die Karte der ersten angehakten Pflanze', T('gmPhase') === 'karte' && h3() === 'L2'
+        && /<p class="gm-zaehler">1 von 2<\/p>/.test(inh()) && /Prüf-Küche L21 · 2 Pflanzen/.test(inh()), h3());
+      pruef('beta.21 (M2b): Links steht „Zur Liste“, solange in der Gruppe nichts gemeldet ist', d.getElementById('gm-rueck').textContent === 'Zur Liste');
+      klick('#gm-rueck');
+      pruef('beta.21 (M2b): „Zur Liste“ geht zurück, ohne die Gruppe zu erledigen', T('gmPhase') === 'liste' && T('gmTeil') === null
+        && !d.querySelector('#gm-inhalt [data-gm-lg="' + K + '"]').classList.contains('fertig') && T('gmVerlauf.length') === 0);
+      klick('#gm-inhalt [data-gm-lgn="' + K + '"]');
+      const besucht = [h3()];
+      klick('[data-gm="ja"]');
+      besucht.push(h3());
+      pruef('beta.21 (M2b): Rückgängig steht nach der ersten Meldung', d.getElementById('gm-rueck').textContent === 'Rückgängig' && /2 von 2/.test(inh()));
+      klick('#gm-rueck');
+      pruef('beta.21 (M2b): Rückgängig in „Nacheinander“ holt die vorige Karte der Gruppe zurück', T('gmPhase') === 'karte' && h3() === 'L2' && !heuteGegossen('L2') && T('gmTeil.pos') === 0);
+      klick('[data-gm="ja"]');
+      klick('[data-gm="ja"]');
+      pruef('beta.21 (M2b): Karten nur für die angehakten Pflanzen der Gruppe', besucht.join('|') === 'L2|L3' && heuteGegossen('L2') && heuteGegossen('L3') && !heuteGegossen('L1'), besucht.join('|'));
+      const secK = () => d.querySelector('#gm-inhalt [data-gm-lg="' + K + '"]');
+      pruef('beta.21 (M2b): Nach der letzten Karte zurück zur Liste, Gruppe erledigt mit Zahl', T('gmPhase') === 'liste' && T('gmTeil') === null
+        && secK().classList.contains('fertig') && /Erledigt<\/b> · 2 gegossen/.test(secK().innerHTML), secK() && secK().textContent.trim());
+      pruef('beta.21 (M2b): Die abgewählte Pflanze zählt als „Später“ der Gruppe und bleibt fällig', !heuteGegossen('L1')
+        && T(`gmVerlauf.some(function(e){ return e.id === 'L1' && e.a === 'spaeter' && e.lg === '${K}'; })`) === true
+        && T(`gmVerlauf.filter(function(e){ return e.lg === '${K}'; }).length`) === 3);
+      pruef('beta.21 (M2b): Die volle Liste bleibt erhalten', T('gmListe.length') === lenVor, T('gmListe.length') + '/' + lenVor);
+      klick('[data-gm-lgr="' + K + '"]');
+      pruef('beta.21 (M2b): Rückgängig je Gruppe nimmt auch „Nacheinander“ ganz zurück', !heuteGegossen('L2') && !heuteGegossen('L3') && !secK().classList.contains('fertig')
+        && T(`gmVerlauf.length`) === 0);
+
+      /* Gießpause in der Liste */
+      T(`zustandSetzen('L4', 'wurzelfaeule'); 1`);
+      neuStart();
+      klick('[data-gm="liste"]');
+      const h4 = d.querySelector('#gm-inhalt [data-gm-hk="L4"]');
+      pruef('beta.21 (M2b): Eine Pflanze in der Gießpause startet abgewählt und trägt „Gießpause“', !!h4 && h4.checked === false && /Gießpause/.test(h4.closest('label').textContent)
+        && /Alle gegossen \(1\)/.test(d.querySelector('#gm-inhalt [data-gm-lga="' + B + '"]').textContent));
+      T(`zustandSetzen('L4', 'gesund'); 1`);
+
+      /* 5 Hinweiskärtchen */
+      T(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'L2'; }); p.topf = ''; giessEinst().topfOhne = {}; zustandSetzen('L2', 'quarantaene'); modusSetzen('sammler'); return 1; })()`);
+      neuStart();
+      pruef('beta.21 (M2b): Kärtchen aus: in der Übersicht kein Knopf, der Weg als Text', !d.querySelector('#gm-inhalt .gm-wie-knopf') && !!d.querySelector('#gm-inhalt .gm-wie-text')
+        && !d.querySelector('#gm-inhalt [data-gm-wie]') && d.querySelectorAll('#gm-inhalt .gm-gw-zeile.gm-gw-text').length > 0);
+      T(`gmIndex = gmListe.findIndex(function(x){ return x.id === 'L2'; }); gmZeichnen(); 1`);
+      const wt = d.querySelector('#gm-inhalt .gm-weg');
+      pruef('beta.21 (M2b): Kärtchen aus: auf der Karte steht der Weg als Text ohne Knopf', !!wt && wt.tagName === 'P' && wt.classList.contains('gm-weg-text')
+        && !d.querySelector('#gm-inhalt [data-gm-wie]') && !/›/.test(wt.textContent), wt && wt.outerHTML.slice(0, 120));
+      if(wt) wt.click();
+      pruef('beta.21 (M2b): Ein Tipp auf den Weg öffnet kein Kärtchen', T(`modalOffen('gm-wie')`) === false);
+
+      /* 6 Zustandsfrage */
+      pruef('beta.21 (M2b): Zustandsfrage aus: keine Frage auf der Karte, die Topffrage bleibt', !d.querySelector('#gm-inhalt [data-gm-z]') && !!d.querySelector('#gm-inhalt .gm-topffrage')
+        && !!d.querySelector('#gm-inhalt [data-gm-topf="ja"]'));
+      T(`modusSetzen('entdecker'); gmZeichnen(); 1`);
+      pruef('beta.21 (M2b): Entdecker: Zustandsfrage und Topffrage stehen da', !!d.querySelector('#gm-inhalt [data-gm-z="vorbei"]') && !!d.querySelector('#gm-inhalt .gm-topffrage'));
+      const wk = d.querySelector('#gm-inhalt button.gm-weg[data-gm-wie]');
+      pruef('beta.21 (M2b): Entdecker: der Weg ist wieder ein Knopf zum Kärtchen', !!wk);
+      if(wk) wk.click();
+      pruef('beta.21 (M2b): Entdecker: der Knopf öffnet das Kärtchen', T(`modalOffen('gm-wie')`) === true);
+      T(`modalZu('gm-wie'); 1`); await warte(200);
+      T(`gmZeichnenUebersicht(); 1`);
+      pruef('beta.21 (M2b): Entdecker: in der Übersicht wieder Knöpfe', !!d.querySelector('#gm-inhalt .gm-wie-knopf') && !d.querySelector('#gm-inhalt .gm-wie-text'));
+    } catch(e) {
+      pruef('beta.21 (M2b): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      zurueck(alt21b);
     }
   }
 
