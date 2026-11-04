@@ -4421,7 +4421,19 @@ html[data-design] #modus-zurueck-box{margin:4px 0 10px}
 html[data-design] #form-neu .al-kiname{display:flex;flex-direction:column;gap:14px;margin:0 0 18px}
 html[data-design] #form-neu .al-kiname[hidden]{display:none}
 html[data-design] #form-neu .al-kiname .al-knoepfe{margin-top:2px}
-html[data-design] #form-neu .fotokrit[hidden]{display:none}
+/* ══ Plan M1c (4.0-beta.20): Startfrage Modus und Design ══ */
+html[data-design] .wk .wk-modi .wk-gross{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;flex:1 1 100%}
+html[data-design] .wk .wk-modi .wk-gross b{font-weight:700;font-size:var(--t-l)}
+html[data-design] .wk .wk-modi .wk-gross i{font-style:normal;font-size:var(--t-s);line-height:1.45;color:var(--ink-2)}
+html[data-design] .wk .wk-designs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 10px}
+html[data-design] .wk .wk-kachel{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px;
+  border:1px solid var(--line);border-radius:var(--r-mittel);background:var(--sand);color:inherit;font:inherit;text-align:left;cursor:pointer}
+html[data-design] .wk .wk-kachel .dsn-schau{display:block;width:100%;height:auto;border-radius:var(--r-klein)}
+html[data-design] .wk .wk-kachel b{font-weight:700;font-size:var(--t-l)}
+html[data-design] .wk .wk-kachel i{font-style:normal;font-size:var(--t-s);line-height:1.4;color:var(--ink-2)}
+html[data-design] .wk .wk-kachel[aria-pressed="true"]{border-color:var(--ink);background:var(--paper);box-shadow:inset 0 0 0 2px var(--ink)}
+html[data-design] .wk .wk-kachel[aria-pressed="true"] b::before{content:'✓ '}
+html[data-design] .wk .wk-neben[aria-pressed="true"]::before{content:'✓ '}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -10484,7 +10496,7 @@ function pflanzeEntfernen(id){
            Liste war die erste von drei Erklärungen desselben. -->
       <p class="wk-lead">Ein Notizbuch für deine Pflanzen. Alles bleibt auf diesem Gerät —
         kein Konto, keine Anmeldung, keine Daten irgendwo draußen.</p>
-      <p class="wk-lead">Zwei kurze Fragen, dann kannst du loslegen.</p>
+      <p class="wk-lead">Drei kurze Fragen, dann kannst du loslegen.</p>
       <div class="wk-knoepfe">
         <button class="wk-haupt" data-wkgo="2">Los geht's</button>
         <button class="wk-neben" data-wkfertig="0">Überspringen</button>
@@ -10493,7 +10505,36 @@ function pflanzeEntfernen(id){
     </div>
 
     <div class="wk-schritt" data-wk="2" hidden>
-      <p class="wk-nr">Frage 1 von 2</p>
+      <p class="wk-nr">Frage 1 von 3</p>
+      <h2 class="wk-titel">Wie viel soll die App zeigen?</h2>
+      <p class="wk-lead">Der Modus entscheidet, was du siehst. Deine Daten sind in beiden gleich,
+        es geht nichts verloren.</p>
+      <div class="wk-wahl wk-modi" role="group" aria-label="Modus wählen" id="wk-modi">
+        <button type="button" class="wk-gross" data-wkmodus="sammler" aria-pressed="false"><b>Sammler</b><i></i></button>
+        <button type="button" class="wk-gross" data-wkmodus="entdecker" aria-pressed="false"><b>Entdecker</b><i></i></button>
+      </div>
+      <p class="wk-klein">Das lässt sich jederzeit ändern: Einstellungen › Ansicht.</p>
+      <div class="wk-knoepfe">
+        <button class="wk-haupt" data-wkgo="3">Weiter</button>
+        <button class="wk-neben" data-wkfertig="0">Überspringen</button>
+      </div>
+    </div>
+
+    <div class="wk-schritt" data-wk="3" hidden>
+      <p class="wk-nr">Frage 2 von 3</p>
+      <h2 class="wk-titel">Welches Design gefällt dir?</h2>
+      <p class="wk-lead">Tipp eines an, die Seite färbt sich gleich um.</p>
+      <div class="wk-designs" role="group" aria-label="Design wählen" id="wk-designs"></div>
+      <button type="button" class="wk-neben" id="wk-klartext" data-wkdesign="klartext" aria-pressed="false">Lieber schlicht: Klartext</button>
+      <p class="wk-klein">Das lässt sich jederzeit ändern: Einstellungen › Ansicht.</p>
+      <div class="wk-knoepfe">
+        <button class="wk-haupt" data-wkgo="4">Weiter</button>
+        <button class="wk-neben" data-wkfertig="0">Überspringen</button>
+      </div>
+    </div>
+
+    <div class="wk-schritt" data-wk="4" hidden>
+      <p class="wk-nr">Frage 3 von 3</p>
       <h2 class="wk-titel">Hast du Haustiere?</h2>
       <p class="wk-lead">Viele Zimmerpflanzen sind für Tiere giftig. Wenn du magst, warnt dich
         die App, sobald eine davon in Reichweite steht.</p>
@@ -10506,24 +10547,12 @@ function pflanzeEntfernen(id){
         <div class="wk-chips" id="wk-arten"></div>
       </div>
       <div class="wk-knoepfe">
-        <button class="wk-haupt" data-wkgo="3">Weiter</button>
+        <button class="wk-haupt" data-wkgo="5">Weiter</button>
+        <button class="wk-neben" data-wkfertig="0">Überspringen</button>
       </div>
     </div>
 
-    <div class="wk-schritt" data-wk="3" hidden>
-      <p class="wk-nr">Frage 2 von 2</p>
-      <h2 class="wk-titel">Möchtest du den Grundriss nutzen?</h2>
-      <p class="wk-lead">Du zeichnest deinen Raum mit Fenstern und Himmelsrichtung. Die App
-        rechnet daraus aus, wie viele Sonnenstunden an jedem Platz ankommen — und sagt dir,
-        welche Pflanze wo gut steht. Das ist der aufwendigste Teil, aber auch der nützlichste.</p>
-      <div class="wk-wahl">
-        <button class="wk-gross" data-wkplan="1">Ja, zeig mir das</button>
-        <button class="wk-gross" data-wkplan="0">Später</button>
-      </div>
-      <p class="wk-klein">Du kannst das jederzeit ändern — hinter dem Zahnrad.</p>
-    </div>
-
-    <div class="wk-schritt" data-wk="4" hidden>
+    <div class="wk-schritt" data-wk="5" hidden>
       <p class="wk-nr">Fertig</p>
       <h2 class="wk-titel">Kann losgehen</h2>
       <p class="wk-lead">Ein letzter Hinweis, der wichtigste von allen:</p>
@@ -12332,15 +12361,6 @@ function pflanzeEntfernen(id){
               </div>
             </div>
           </div>
-          <div class="fotokrit">
-            <b>Diese drei Aufnahmen braucht die KI</b>
-            <ol>
-              <li>Die ganze Pflanze, <b>Topf und Untersetzer vollständig im Bild</b> — sonst kann sie zu Topfgröße und Wasserablauf nichts sagen.</li>
-              <li>Eine Nahaufnahme der <b>Blattunterseite und einer Blattachsel</b> — dort sitzen Schädlinge, und ohne diese Sicht bleibt jeder Befund unbestätigt.</li>
-              <li>Die auffällige Stelle selbst, scharf und bei Tageslicht.</li>
-            </ol>
-            <p>Alle drei mitschicken. Was fehlt, meldet die Antwort unter „nicht beurteilbar“.</p>
-          </div>
           <div class="kidirekt" id="ki-direkt-anlegen" hidden>
             <div class="kimodell">
               <select class="ki-modell-wahl" aria-label="Welches Modell"></select>
@@ -12802,7 +12822,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.19';
+const FASSUNG = '4.0-beta.20';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -18955,8 +18975,6 @@ document.addEventListener('click', e => {
 });
 /* Mit Namen braucht es keine Aufnahmen für die Bestimmung */
 function alKiNameZeigen(){
-  const kk = document.querySelector('#neu-kibox .fotokrit');
-  if(kk) kk.hidden = !!alKiName();
   if(typeof kiHinweis === 'function') kiHinweis();
   alFussKi();
 }
@@ -19072,6 +19090,8 @@ modalAnmelden('willkommen', {
   nachAuf: ()=>{
     if(typeof wkSchritt==='function') wkSchritt(1);
     if(typeof wkArtenZeichnen==='function') wkArtenZeichnen();
+    if(typeof wkModusZeichnen==='function') wkModusZeichnen();
+    if(typeof wkDesignZeichnen==='function') wkDesignZeichnen();
   }
 });
 
@@ -19379,6 +19399,37 @@ function wkSchritt(nr){
   if(w) w.scrollTop = 0;
 }
 
+/* 4.0-beta.20 (Plan M1c): Modus und Design beim ersten Start. Die Texte
+   des Modus kommen aus MODI, die Vorschau aus designMiniatur, damit nichts
+   ein zweites Mal gepflegt wird. Ein Tipp stellt sofort um. */
+const WK_DESIGN_TEXT = {
+  botanisch: 'Warm und ruhig, helle Seiten in Grün und Creme.',
+  terrarium: 'Dunkel durchgehend, ein leuchtender Akzent.'
+};
+function wkModusZeichnen(){
+  /* Das Willkommen öffnet beim ersten Start, bevor der Block mit MODI und
+     modusVon geladen ist; dann zeichnet ihn der Block nach dem Laden nach. */
+  if(typeof modusVon !== 'function' || typeof MODI === 'undefined') return;
+  const m = modusVon();
+  document.querySelectorAll('#wk-modi [data-wkmodus]').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.wkmodus === m ? 'true' : 'false');
+    const i = b.querySelector('i');
+    if(i) i.textContent = MODI[b.dataset.wkmodus].kurz;
+  });
+}
+function wkDesignMarkieren(){
+  document.querySelectorAll('#wk-designs [data-wkdesign], #wk-klartext').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.wkdesign === S.design ? 'true' : 'false'));
+}
+function wkDesignZeichnen(){
+  const box = document.getElementById('wk-designs'); if(!box) return;
+  box.innerHTML = ['botanisch', 'terrarium'].map(k =>
+    `<button type="button" class="wk-kachel" data-wkdesign="${k}" aria-pressed="false">
+       ${designMiniatur(k)}<b>${esc(DESIGNS[k].name)}</b><i>${esc(WK_DESIGN_TEXT[k])}</i>
+     </button>`).join('');
+  wkDesignMarkieren();
+}
+
 function wkArtenZeichnen(){
   const box = document.getElementById('wk-arten'); if(!box) return;
   const gewaehlt = (S.tiere && S.tiere.arten) || [];
@@ -19438,13 +19489,17 @@ document.addEventListener('click', e=>{
     return;
   }
 
-  const pl = e.target.closest('[data-wkplan]');
-  if(pl){
-    S.grundrissWunsch = pl.dataset.wkplan === '1';
-    sichern();
-    document.querySelectorAll('[data-wkplan]').forEach(b=>
-      b.setAttribute('aria-pressed', String(b === pl)));
-    setTimeout(()=>wkSchritt(4), 220);
+  const mo = e.target.closest('[data-wkmodus]');
+  if(mo){
+    modusSetzen(mo.dataset.wkmodus);
+    wkModusZeichnen();
+    return;
+  }
+
+  const dz = e.target.closest('[data-wkdesign]');
+  if(dz){
+    designSetzen(dz.dataset.wkdesign);
+    wkDesignMarkieren();
     return;
   }
 
@@ -20316,8 +20371,6 @@ function kiModusZeigen(){
       const kn = document.getElementById('al-kiname');
       if(kn) kn.hidden = !an;
       if(typeof alKiStufeZeichnen === 'function') alKiStufeZeichnen();
-      const kk = document.querySelector('#neu-kibox .fotokrit');
-      if(kk) kk.hidden = !!(typeof alKiName === 'function' && alKiName());
     }
     /* Die Bilderzeile steht ausserhalb des Kastens, weil sie oben
        liegt — sie muss dieselbe Sichtbarkeit bekommen. */
@@ -20484,8 +20537,11 @@ async function kiDirektLos(wo, modellId){
    genau eine Anfrage ohne Foto (Regel 10.6). In die Karte kommt es erst
    mit „Anlegen“ (Regel 10.8); weicht die KI von der Bibliothek ab,
    entscheidest du je Feld (Regel 10.13). */
+/* 4.0-beta.20 (Plan M1c): Das Foto beim Anlegen bestimmt nur noch die Art.
+   Topfart und Abzugsloch fragt es nicht mehr, die Topfurteile gehören dem
+   Doktor. SUBSTRAT bleibt, weil es Wasser- und Hydrokultur erkennt. */
 const AW_FOTO_FELDER = ['ART','BOTANISCH','MERKMALE','SORTE','SORTE_BELEG','SORTEN_VERWECHSLUNG',
-  'SICHERHEIT','FEHLT','VERWECHSLUNG','SUBSTRAT','TOPFART','ABLAUF'];
+  'SICHERHEIT','FEHLT','VERWECHSLUNG','SUBSTRAT'];
 const AW_ART_TEXT = {
   LICHT:'LICHT: Nur genau eines dieser Wörter: voll, hell, indirekt',
   GIESSKLASSE:'GIESSKLASSE: Nur genau eines dieser Wörter: normal, durstig, kakteenmodus, anstau',
@@ -20521,12 +20577,20 @@ function awSchema(felder){
   });
   return {type:'OBJECT', properties:props, required:felder.slice(), propertyOrdering:felder.slice()};
 }
+/* FEHLT im Foto-Auftrag fragt nur nach Blattunterseiten und Blattachseln. */
+function awFehltOhneTopf(t){
+  return String(t)
+    .replace('Beantworte dabei zwei Fragen: Waren Blattunterseiten und Blattachseln erkennbar? Waren Topf, Topfrand und Untersetzer ganz im Bild?',
+             'Beantworte dabei diese Frage: Waren Blattunterseiten und Blattachseln erkennbar?')
+    .replace(', und nichts über den Topf behaupten, was du nicht siehst', '');
+}
 /* Feldzeile des Foto-Auftrags: dieselben Texte wie im großen Auftrag. */
 function awFotoZeile(n){
   const f = FMT_ZEILEN.find(x => x.name === n);
   let t = f ? f.zeilen.join('\n') : (FELD_ZUSATZ[n] ? FELD_ZUSATZ[n].text : '');
   if(n === 'BOTANISCH') t += ' ' + KI_KREUZUNG_REGEL;
   if(n === 'MERKMALE') t += ' ' + KI_MERKMALE_REGEL;
+  if(n === 'FEHLT') t = awFehltOhneTopf(t);
   return sorteSaetze(t);
 }
 function anlegenFotoPromptBauen(){
@@ -28228,6 +28292,7 @@ function schalterSetzen(k, an){
 }
 modusUebernehmen();
 dichteUebernehmen();
+if(typeof wkModusZeichnen === 'function') wkModusZeichnen();
 SCHALTER.forEach(sc => {
   const el = document.getElementById(sc.id);
   if(el) el.onchange = () => schalterSetzen(sc.k, el.checked);

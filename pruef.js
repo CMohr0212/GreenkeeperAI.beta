@@ -140,6 +140,14 @@ const w = dom.window;
 
 setTimeout(async () => {
   const d = w.document;
+  /* beta.20: Zustand des Willkommens gleich nach dem Laden, vor jedem Eingriff. */
+  const wk0 = {
+    offen: !d.getElementById('willkommen').hidden,
+    modi: Array.prototype.map.call(d.querySelectorAll('#wk-modi [data-wkmodus]'),
+      b => b.dataset.wkmodus + ':' + b.getAttribute('aria-pressed') + ':' + (b.querySelector('i') ? b.querySelector('i').textContent : '')).join('|'),
+    kacheln: d.querySelectorAll('#wk-designs .wk-kachel').length,
+    fehler: fehler.slice()
+  };
   /* 60 ms waren zu knapp: modalZu() geht ueber history.back(), und
      popstate kommt in jsdom unter Last spaeter. Die Pruefung schlug
      dann sprunghaft fehl, ohne dass sich an der App etwas geaendert
@@ -158,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.19', w.__T('FASSUNG') === '4.0-beta.19', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.20', w.__T('FASSUNG') === '4.0-beta.20', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -2967,17 +2975,17 @@ setTimeout(async () => {
       d.querySelector('[data-wkfertig="1"]').textContent.trim() === 'Kurze Runde durch die App',
       d.querySelector('[data-wkfertig="1"]').textContent.trim());
     pruef('Der Nebenknopf hei\u00dft „Selbst umsehen\u201c',
-      d.querySelector('[data-wk="4"] [data-wkfertig="0"]').textContent.trim() === 'Selbst umsehen');
-    pruef('Die Haustier-Frage bleibt', !!d.querySelector('[data-wk="2"] [data-wktiere]'));
-    pruef('Die Grundriss-Frage bleibt', !!d.querySelector('[data-wk="3"] [data-wkplan]'));
+      d.querySelector('[data-wk="5"] [data-wkfertig="0"]').textContent.trim() === 'Selbst umsehen');
+    pruef('Die Haustier-Frage bleibt', !!d.querySelector('[data-wk="4"] [data-wktiere]'));
+    pruef('Die Grundriss-Frage ist seit beta.20 weg', !d.querySelector('[data-wkplan]'));
 
     /* Rueckweg-Hinweise an jedem Ausgang */
     /* beta.3: „Mehr“ heißt hinter dem Zahnrad „Einstellungen“. */
     const hinweisAuf = el => el && /Einstellungen\s*\u203a\s*App Tour/.test(el.textContent);
     pruef('Willkommen Schritt 1 nennt den R\u00fcckweg',
       hinweisAuf(d.querySelector('[data-wk="1"]')));
-    pruef('Willkommen Schritt 4 nennt den R\u00fcckweg',
-      hinweisAuf(d.querySelector('[data-wk="4"]')));
+    pruef('Willkommen Schritt 5 nennt den R\u00fcckweg',
+      hinweisAuf(d.querySelector('[data-wk="5"]')));
     pruef('Der Schlussschritt der Runde nennt ihn',
       /Einstellungen \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[6].text')));
     pruef('Der \u00dcberspringen-Knopf nennt ihn',
@@ -13327,8 +13335,8 @@ setTimeout(async () => {
       start('Namensgattung probeart', false);
       pruef('beta.19: Namensfeld ist mit Schlüssel sichtbar', !d.getElementById('al-kiname').hidden);
       pruef('beta.19: Mit Namen heißt der Hauptknopf „Daten holen“', d.getElementById('al-weiter').textContent === 'Daten holen', d.getElementById('al-weiter').textContent);
-      pruef('beta.19: Mit Namen verschwinden die Foto-Anweisungen, der Satz nennt „Daten holen“',
-        d.querySelector('#neu-kibox .fotokrit').hidden && /Daten holen/.test(d.getElementById('ki-hinweis').textContent), d.getElementById('ki-hinweis').textContent);
+      pruef('beta.19: Mit Namen nennt der Satz „Daten holen“',
+        /Daten holen/.test(d.getElementById('ki-hinweis').textContent), d.getElementById('ki-hinweis').textContent);
       w.__aufrufe19 = [];
       await los();
       const p1 = posts();
@@ -13381,7 +13389,7 @@ setTimeout(async () => {
       /* Ohne Namen bleibt die Bestimmung am Foto */
       start('', false);
       pruef('beta.19: Ohne Namen heißt der Hauptknopf „Fragen“', d.getElementById('al-weiter').textContent === 'Fragen', d.getElementById('al-weiter').textContent);
-      pruef('beta.19: Ohne Namen stehen die Foto-Anweisungen da', !d.querySelector('#neu-kibox .fotokrit').hidden);
+      pruef('beta.20: Ohne Namen steht im Anlegen kein Foto-Kasten mehr', !d.querySelector('#neu-kibox .fotokrit'));
       w.__aufrufe19 = [];
       await los();
       pruef('beta.19: Ohne Namen und ohne Foto geht keine Anfrage', posts().length === 0, String(posts().length));
@@ -13395,6 +13403,114 @@ setTimeout(async () => {
         S.dichte = a.dichte; S.dichteM1b = a.m1b; if(a.kiStufe) S.kiStufe = a.kiStufe; else delete S.kiStufe;
         S.eigene = a.eigene; S.gelernteArten = a.gelernt; S.kiModelle = a.kiModelle; S.kiModell = a.kiModell; KI_BILDER.anlegen.length = 0;
         formularLeeren(); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })()`);
+    }
+  }
+
+  /* ══ 4.0-beta.20: Plan M1c — Startfrage mit Modus und Design, kein
+     Foto-Kasten im Anlegen, Foto-Auftrag ohne Topf. Jeder Test legt seine
+     Daten selbst an und stellt Modus, Design und Startzustand zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt20 = T(`JSON.stringify({modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise, dichte:S.dichte, design:S.design, start:S.startGesehen, kiStufe:S.kiStufe})`);
+    const sicht = nr => Array.prototype.filter.call(d.querySelectorAll('.wk-schritt'), e => !e.hidden).map(e => e.dataset.wk).join();
+    try {
+      T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); modusSetzen('entdecker'); designSetzen('botanisch', false); 1`);
+      await warte(250);
+      T(`history.replaceState(null, ''); modalAuf('willkommen'); 1`);
+      await warte(250);
+
+      /* Folge der Stufen */
+      pruef('beta.20: Willkommen hat fünf Stufen in der Folge Start, Modus, Design, Haustiere, Fertig',
+        Array.prototype.map.call(d.querySelectorAll('.wk-schritt'), e => e.dataset.wk).join() === '1,2,3,4,5'
+        && !!d.querySelector('[data-wk="2"] [data-wkmodus]') && !!d.querySelector('[data-wk="3"] #wk-designs')
+        && !!d.querySelector('[data-wk="4"] [data-wktiere]') && !!d.querySelector('[data-wk="5"] [data-wkfertig="1"]'));
+      pruef('beta.20: Es beginnt auf Stufe 1', sicht() === '1', sicht());
+      pruef('beta.20: Beim allerersten Start öffnet das Willkommen ohne Laufzeitfehler und mit gezeichnetem Modus und Designs',
+        wk0.offen && wk0.fehler.length === 0 && wk0.kacheln === 2
+        && wk0.modi.indexOf('sammler:false:' + T(`MODI.sammler.kurz`)) !== -1 && wk0.modi.indexOf('entdecker:true:' + T(`MODI.entdecker.kurz`)) !== -1, wk0.modi + ' | ' + wk0.fehler.join(' ; ').slice(0, 200));
+      d.querySelector('[data-wk="1"] [data-wkgo="2"]').click();
+      pruef('beta.20: „Los geht\'s“ führt zur Modus-Frage', sicht() === '2', sicht());
+      const fragen = Array.prototype.map.call(d.querySelectorAll('.wk-nr'), e => e.textContent.trim()).join('|');
+      pruef('beta.20: Die Fragen zählen bis 3', /Frage 1 von 3/.test(fragen) && /Frage 2 von 3/.test(fragen) && /Frage 3 von 3/.test(fragen) && !/von 2/.test(fragen), fragen);
+      pruef('beta.20: Der Einleitungstext sagt „Drei kurze Fragen“', /Drei kurze Fragen/.test(d.querySelector('[data-wk="1"]').textContent));
+      pruef('beta.20: Keine Grundriss-Frage im Willkommen', !d.querySelector('[data-wkplan]') && !/Grundriss/.test(d.getElementById('willkommen').textContent));
+
+      /* Modus-Frage */
+      const mk = m => d.querySelector('#wk-modi [data-wkmodus="' + m + '"]');
+      pruef('beta.20: Beide Modi stehen mit dem Kurztext aus MODI da',
+        mk('sammler').querySelector('i').textContent === T(`MODI.sammler.kurz`) && mk('entdecker').querySelector('i').textContent === T(`MODI.entdecker.kurz`)
+        && mk('sammler').textContent.indexOf('Sammler') === 0);
+      pruef('beta.20: Der aktuelle Modus ist vorgewählt', mk('entdecker').getAttribute('aria-pressed') === 'true' && mk('sammler').getAttribute('aria-pressed') === 'false');
+      mk('sammler').click();
+      pruef('beta.20: Tipp auf Sammler stellt den Modus um', T(`modusVon()`) === 'sammler' && T(`S.modus`) === 'sammler'
+        && mk('sammler').getAttribute('aria-pressed') === 'true' && mk('entdecker').getAttribute('aria-pressed') === 'false' && T(`schalterAn('pflege')`) === false, T(`S.modus`));
+      mk('entdecker').click();
+      pruef('beta.20: Tipp auf Entdecker stellt zurück', T(`modusVon()`) === 'entdecker' && T(`schalterAn('pflege')`) === true);
+
+      /* Design-Frage */
+      d.querySelector('[data-wk="2"] [data-wkgo="3"]').click();
+      pruef('beta.20: „Weiter“ führt zur Design-Frage', sicht() === '3', sicht());
+      const dk = k => d.querySelector('#wk-designs [data-wkdesign="' + k + '"]');
+      pruef('beta.20: Botanisch und Terrarium stehen als Kacheln mit Vorschaubild da',
+        !!dk('botanisch') && !!dk('terrarium') && !!dk('botanisch').querySelector('svg.dsn-schau') && !!dk('terrarium').querySelector('svg.dsn-schau')
+        && d.querySelectorAll('#wk-designs .wk-kachel').length === 2 && !d.querySelector('#wk-designs [data-wkdesign="klartext"]'));
+      pruef('beta.20: Klartext steht klein darunter', !!d.getElementById('wk-klartext') && d.getElementById('wk-klartext').classList.contains('wk-neben')
+        && /schlicht/i.test(d.getElementById('wk-klartext').textContent));
+      pruef('beta.20: Das aktuelle Design ist vorgewählt', dk('botanisch').getAttribute('aria-pressed') === 'true' && dk('terrarium').getAttribute('aria-pressed') === 'false');
+      const dd = () => d.documentElement.getAttribute('data-design');
+      dk('terrarium').click();
+      pruef('beta.20: Tipp auf Terrarium färbt sofort um', dd() === 'terrarium' && T(`S.design`) === 'terrarium'
+        && dk('terrarium').getAttribute('aria-pressed') === 'true' && dk('botanisch').getAttribute('aria-pressed') === 'false', dd());
+      d.getElementById('wk-klartext').click();
+      pruef('beta.20: Klartext schaltet um und markiert nur seinen Knopf', dd() === 'klartext' && T(`S.design`) === 'klartext'
+        && d.getElementById('wk-klartext').getAttribute('aria-pressed') === 'true'
+        && dk('terrarium').getAttribute('aria-pressed') === 'false' && dk('botanisch').getAttribute('aria-pressed') === 'false', dd());
+      dk('botanisch').click();
+      pruef('beta.20: Zurück auf Botanisch', dd() === 'botanisch' && d.getElementById('wk-klartext').getAttribute('aria-pressed') === 'false');
+      d.querySelector('[data-wk="3"] [data-wkgo="4"]').click();
+      pruef('beta.20: „Weiter“ führt zu den Haustieren', sicht() === '4', sicht());
+      d.querySelector('[data-wk="4"] [data-wkgo="5"]').click();
+      pruef('beta.20: Die Haustier-Frage führt zu „Fertig“', sicht() === '5', sicht());
+
+      /* Überspringen auf jeder Frage */
+      pruef('beta.20: Jede Frage hat „Überspringen“', ['1', '2', '3', '4'].every(n => !!d.querySelector('[data-wk="' + n + '"] [data-wkfertig="0"]')));
+      for(const n of ['2', '3', '4']){
+        T(`modusSetzen('entdecker'); designSetzen('botanisch', false); S.startGesehen = null; while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); modalAuf('willkommen'); 1`);
+        await warte(150);
+        T(`wkSchritt(${n}); 1`);
+        d.querySelector('[data-wk="' + n + '"] [data-wkfertig="0"]').click();
+        await warte(150);
+        pruef('beta.20: Überspringen auf Frage ' + n + ' lässt Entdecker und Botanisch und setzt den Start',
+          T(`modusVon()`) === 'entdecker' && T(`S.design`) === 'botanisch' && !!T(`S.startGesehen`) && d.getElementById('willkommen').hidden, T(`S.startGesehen`));
+      }
+
+      /* Anlegen: kein Foto-Kasten, der Doktor behält seinen */
+      pruef('beta.20: Im Anlegen steht kein Kasten „Diese drei Aufnahmen“', !d.querySelector('#neu-kibox .fotokrit') && !d.querySelector('#form-neu .fotokrit')
+        && html.indexOf('Alle drei mitschicken') === -1);
+      const kr = d.querySelectorAll('.fotokrit');
+      pruef('beta.20: Der Doktor behält seinen Kasten', kr.length === 1 && /Diese drei Aufnahmen braucht die KI/.test(kr[0].textContent)
+        && /Alle drei an dieselbe Unterhaltung anh/.test(kr[0].textContent) && !kr[0].closest('#form-neu'), String(kr.length));
+
+      /* Foto-Auftrag ohne Topf */
+      const fp = T(`anlegenFotoPromptBauen()`);
+      pruef('beta.20: Der Foto-Auftrag fragt weder Topfart noch Abzugsloch', !/TOPFART|ABLAUF/.test(fp)
+        && T(`AW_FOTO_FELDER.indexOf('TOPFART') === -1 && AW_FOTO_FELDER.indexOf('ABLAUF') === -1`));
+      pruef('beta.20: FEHLT im Foto-Auftrag fragt nur nach Blattunterseiten und Blattachseln',
+        /FEHLT:/.test(fp) && /Blattunterseiten und Blattachseln erkennbar/.test(fp) && !/Topfrand|Untersetzer|Topf behaupten|zwei Fragen/.test(fp), (fp.match(/FEHLT:[^\n]*/) || [''])[0].slice(0, 160));
+      pruef('beta.20: SUBSTRAT bleibt im Foto-Auftrag (Wasser- und Hydrokultur)', /SUBSTRAT:/.test(fp) && T(`AW_FOTO_FELDER.indexOf('SUBSTRAT') !== -1`));
+      pruef('beta.20: Das Antwortschema der Foto-Anfrage hat keine Topffelder',
+        T(`Object.keys(awSchema(AW_FOTO_FELDER).properties).join()`).split(',').every(k => k !== 'TOPFART' && k !== 'ABLAUF'));
+      const kp = T(`anlegenPromptBauen()`);
+pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.test(kp) && /ABLAUF:/.test(kp));
+    } catch(e) {
+      pruef('beta.20: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, '');
+        S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph; S.dichte = a.dichte;
+        S.startGesehen = a.start; if(a.kiStufe) S.kiStufe = a.kiStufe; else delete S.kiStufe;
+        designSetzen(a.design, false); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${alt20})`);
     }
   }
 
