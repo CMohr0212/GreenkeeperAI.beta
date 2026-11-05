@@ -12856,7 +12856,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.21';
+const FASSUNG = '4.0-beta.22';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -24954,7 +24954,8 @@ let gmDgWahl = null;
 let gmDgWelche = false;
 /* 4.0-beta.21 (Plan M2a): Gießliste. gmListeAktiv: der Durchgang läuft
    über die Liste. gmHaken: abgewählte Einträge ({id: false}); ohne
-   Eintrag gilt der Haken als gesetzt, außer in der Gießpause.
+   Eintrag gilt der Haken als gesetzt. Pflanzen in der Gießpause
+   stehen nicht in der Liste (4.0-beta.22, Plan M2c, F204).
    gmStill: Meldungen aus der Liste zeichnen nichts und gehen nicht
    weiter. gmTeil (Plan M2b): „Nacheinander“ einer Gruppe — die Indizes
    der angehakten Pflanzen in gmListe; gmListe selbst bleibt ganz. */
@@ -26263,8 +26264,11 @@ function gmGruppen(){
   gmListe.forEach((x, i) => {
     if(!x) return;
     if(x.untersetzer){
-      if(!u) u = {key:'u', typ:'u', name:'Untersetzer', eintraege:[]};
-      x.pflanzen.forEach(p => u.eintraege.push({id:p.id, p, index:i, sp:''}));
+      x.pflanzen.forEach(p => {
+        if(gmInPause(p)) return;
+        if(!u) u = {key:'u', typ:'u', name:'Untersetzer', eintraege:[]};
+        u.eintraege.push({id:p.id, p, index:i, sp:''});
+      });
       return;
     }
     if(x.anzucht){
@@ -26272,6 +26276,7 @@ function gmGruppen(){
       (x.sammel ? x.eintraege : [x]).forEach(e => az.eintraege.push({id:gmAzId(e), az:e, index:i, sp:''}));
       return;
     }
+    if(gmInPause(x)) return;
     const name = gmRaumName(x);
     const r = gmRaumVon(x);
     const key = 'r:' + (r && raumNameVon(r) ? r : '');
@@ -26282,9 +26287,14 @@ function gmGruppen(){
   const ohne = raum.filter(g => g.key === 'r:');
   return raum.filter(g => g.key !== 'r:').concat(ohne).concat(u ? [u] : []).concat(az ? [az] : []);
 }
+/* 4.0-beta.22 (Plan M2c, F204): Pflanzen in der Gießpause stehen nicht
+   in der Gießliste. Die Karte „Nacheinander“ ohne Liste behält sie. */
+function gmInPause(p){
+  return !!p && typeof stoppRest === 'function' && stoppRest(p) > 0;
+}
 function gmHakenAn(z){
   if(Object.prototype.hasOwnProperty.call(gmHaken, z.id)) return !!gmHaken[z.id];
-  return !(z.p && typeof stoppRest === 'function' && stoppRest(z.p) > 0);
+  return true;
 }
 function gmGruppeFertig(key){ return gmVerlauf.some(e => e.lg === key); }
 function gmGruppeZahl(key){
@@ -26295,6 +26305,15 @@ const GM_LG_WORT = {raum:['Alle gegossen', 'gegossen'], u:['Alle aufgefüllt', '
 function gmLgKnopfText(g){
   const n = g.eintraege.filter(gmHakenAn).length;
   return n ? GM_LG_WORT[g.typ][0] + ' (' + n + ')' : 'Alle später';
+}
+/* 4.0-beta.22 (Plan M2c): Bild je Zeile wie in „Heute dran“. Pflanzen
+   und Untersetzer zeigen ihr Profilfoto, Anzucht das Foto des Gefäßes;
+   ohne Foto steht der erste Buchstabe im Kreis (F206). */
+function gmLgBild(z, name){
+  const id = z.p ? z.p.id : (z.az && z.az.typ === 'gefaess' ? z.az.ref : null);
+  const f = (id && typeof profilFoto === 'function') ? profilFoto(id) : null;
+  return '<span class="gm-ue-bild">' + (f && f.src ? '<img src="' + f.src + '" alt="">'
+    : '<span class="gm-ue-init" aria-hidden="true">' + esc((String(name).trim()[0] || '?').toUpperCase()) + '</span>') + '</span>';
 }
 function gmZeichnenListe(){
   gmPhase = 'liste';
@@ -26316,9 +26335,8 @@ function gmZeichnenListe(){
         spVor = z.sp;
       }
       const name = z.az ? z.az.name : nice(z.p);
-      const klein = z.az ? z.az.tat
-        : [z.p.art, (typeof stoppRest === 'function' && stoppRest(z.p) > 0) ? 'Gießpause' : ''].filter(Boolean).join(' · ');
-      zeilen += `<label class="gm-lg-zeile"><span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}</span>`
+      const klein = z.az ? z.az.tat : (z.p.art || '');
+      zeilen += `<label class="gm-lg-zeile">${gmLgBild(z, name)}<span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}</span>`
         + `<input type="checkbox" data-gm-hk="${esc(z.id)}" data-gm-lgk="${esc(g.key)}"${gmHakenAn(z) ? ' checked' : ''}></label>`;
     });
     const n = g.eintraege.filter(gmHakenAn).length;

@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.21', w.__T('FASSUNG') === '4.0-beta.21', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.22', w.__T('FASSUNG') === '4.0-beta.22', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -13784,7 +13784,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       neuStart();
       klick('[data-gm="liste"]');
       const h4 = d.querySelector('#gm-inhalt [data-gm-hk="L4"]');
-      pruef('beta.21 (M2b): Eine Pflanze in der Gießpause startet abgewählt und trägt „Gießpause“', !!h4 && h4.checked === false && /Gießpause/.test(h4.closest('label').textContent)
+      /* 4.0-beta.22 (F204): statt abgewählt fehlt sie ganz. */
+      pruef('beta.21 (M2b): Eine Pflanze in der Gießpause steht nicht in der Liste, die Gruppe zählt eine weniger', !h4
         && /Alle gegossen \(1\)/.test(d.querySelector('#gm-inhalt [data-gm-lga="' + B + '"]').textContent));
       T(`zustandSetzen('L4', 'gesund'); 1`);
 
@@ -13816,6 +13817,84 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.21 (M2b): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
     } finally {
       zurueck(alt21b);
+    }
+  }
+
+  /* ══ 4.0-beta.22: Plan M2c — Gießliste mit Bildern, Gießpause nicht in
+     der Liste (F204, F206). Legt Räume, Pflanzen, Fotos und ein Glas
+     selbst an und stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+      spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach,
+      fotos:S.fotos, profil:S.profil}`;
+    const alt22 = T(`JSON.stringify(${LAGER})`);
+    const heuteGegossen = id => T(`(S.water[${JSON.stringify(id)}] || []).indexOf(iso(HEUTE)) > -1`) === true;
+    const BILD = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    try {
+      T(`(function(){
+        var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
+        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+          tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
+        var k = raumAnlegen('Prüf-Küche L22'), b = raumAnlegen('Prüf-Bad L22');
+        window.__l22 = {k:k, b:b};
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:id, art:'Art ' + id, botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', topf:'12'}, o); };
+        S.eigene = [
+          pf('P1', {raum:k}),
+          pf('P2', {raum:k}),
+          pf('P3', {raum:k}),
+          pf('P4', {raum:b}),
+          pf('U1', {botanisch:'Dionaea muscipula', klasse:'S', raum:k, topf:''})
+        ];
+        S.water = {};
+        S.eigene.forEach(function(p){ S.water[p.id] = [vor(150)]; });
+        ['P2', 'P4', 'U1'].forEach(function(id){ S.zustand[id] = {code:'wurzelfaeule', seit:iso(HEUTE)}; });
+        S.fotos = S.fotos || {}; S.profil = S.profil || {};
+        S.fotos.P1 = [{key:'f22', src:${JSON.stringify(BILD)}, datum:iso(HEUTE)}];
+        var g = azGefaessAnlegen({name:'Glas L22', medium:'wasser', start:vor(30)});
+        azGruppeAnlegen({gefaess:g.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'});
+        g.start = vor(30); g.gewechselt = [vor(30)];
+        modusSetzen('entdecker'); schalterSetzen('gliste', true);
+        sichern();
+        return 1;
+      })()`);
+      const K = 'r:' + T('__l22.k'), B = 'r:' + T('__l22.b');
+      pruef('beta.22 (M2c): Testdaten: drei Pflanzen in der Gießpause', ['P2', 'P4', 'U1'].every(id => T(`stoppRest(S.eigene.find(function(p){ return p.id === ${JSON.stringify(id)}; })) > 0`) === true));
+      T('gmStarten()');
+      pruef('beta.22 (M2c): Der Laufweg der Karten behält die Pflanze in der Gießpause', T(`gmListe.some(function(x){ return x && x.id === 'P2'; })`) === true);
+      klick('[data-gm="liste"]');
+      pruef('beta.22 (M2c): Die Liste ist offen', T('gmPhase') === 'liste');
+      pruef('beta.22 (M2c): Eine Pflanze in der Gießpause steht nicht in der Liste', !d.querySelector('#gm-inhalt [data-gm-hk="P2"]') && !!d.querySelector('#gm-inhalt [data-gm-hk="P1"]'));
+      const etK = d.querySelector(`#gm-inhalt [data-gm-lg="${K}"] .gm-ue-etikett`);
+      pruef('beta.22 (M2c): Die Gruppe zählt nur die Pflanzen ohne Gießpause', !!etK && /· 2$/.test(etK.textContent.trim()), etK && etK.textContent);
+      const gr = Array.prototype.map.call(d.querySelectorAll('#gm-inhalt [data-gm-lg]'), e => e.dataset.gmLg);
+      pruef('beta.22 (M2c): Ein Raum nur mit Gießpause hat keine Gruppe', gr.indexOf(B) === -1, gr.join('|'));
+      pruef('beta.22 (M2c): Untersetzer nur mit Gießpause haben keine Gruppe', gr.indexOf('u') === -1, gr.join('|'));
+      pruef('beta.22 (M2c): Kein Wort „Gießpause“ in der Liste', !/Gießpause/.test(d.getElementById('gm-inhalt').textContent));
+      const bild = hk => { const z = d.querySelector(`#gm-inhalt [data-gm-hk="${hk}"]`); return z && z.closest('label').querySelector('.gm-ue-bild'); };
+      const b1 = bild('P1'), b3 = bild('P3');
+      pruef('beta.22 (M2c): Zeile mit Profilfoto zeigt das Foto', !!b1 && !!b1.querySelector('img') && b1.querySelector('img').getAttribute('src') === BILD);
+      pruef('beta.22 (M2c): Zeile ohne Foto zeigt den Anfangsbuchstaben', !!b3 && !b3.querySelector('img') && !!b3.querySelector('.gm-ue-init') && b3.textContent.trim() === 'P');
+      const azZ = d.querySelector('#gm-inhalt [data-gm-lg="az"] .gm-lg-zeile');
+      pruef('beta.22 (M2c): Anzucht-Zeile hat ein Bild oder den Anfangsbuchstaben', !!azZ && !!azZ.querySelector('.gm-ue-bild') && (!!azZ.querySelector('.gm-ue-bild img') || !!azZ.querySelector('.gm-ue-init').textContent.trim()));
+      pruef('beta.22 (M2c): Das Bild steht vor dem Namen, der Haken am Ende', !!b1 && b1.parentNode.firstElementChild === b1 && b1.parentNode.lastElementChild.type === 'checkbox');
+      pruef('beta.22 (M2c): Ohne Eintrag gilt jeder Haken als gesetzt', T(`gmHakenAn({id:'P2', p:S.eigene.find(function(p){ return p.id === 'P2'; })})`) === true);
+      klick(`[data-gm-lga="${K}"]`);
+      pruef('beta.22 (M2c): „Alle gegossen“ gießt die Gruppe, nicht die Pflanze in der Gießpause', heuteGegossen('P1') && heuteGegossen('P3') && !heuteGegossen('P2'));
+      klick('[data-gm-lga="az"]');
+      pruef('beta.22 (M2c): Nach der letzten Gruppe kommt die Abschlusskarte, auch ohne Meldung für die Gießpause', T('gmPhase') === 'ende', T('gmPhase'));
+    } catch(e){
+      pruef('beta.22 (M2c): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+        S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
+        S.einfach = a.einfach; S.fotos = a.fotos; S.profil = a.profil; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(alt22)})`);
     }
   }
 
