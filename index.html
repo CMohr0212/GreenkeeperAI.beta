@@ -3681,7 +3681,8 @@ button.haupt, .wk-haupt, .km-haupt,
 .gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
 .km-neben button, .dokwahl-gewaehlt button,
 .gm-fuss button, .gm-zfrage-btns button,
-.sich-hinweis button, .wt-zeile button, .kimodell button, .raummass .rm-zeile > button{
+.sich-hinweis button, .wt-zeile button, .kimodell button, .raummass .rm-zeile > button,
+.sam-answ > button.sam-ansicht-knopf{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   min-height:var(--knopf-h);padding:0 18px;
   font-family:var(--f-body);font-size:var(--t-l);font-weight:600;font-style:normal;
@@ -3700,7 +3701,8 @@ button.haupt:active, .wk-haupt:active, .km-haupt:active,
 .gr-karte-tools button, .gr-zurueck button, .km-anstoss-taten button,
 .km-neben button, .dokwahl-gewaehlt button,
 .gm-fuss button, .gm-zfrage-btns button,
-.sich-hinweis button, .wt-zeile button, .kimodell button, .takt-pm, .raummass .rm-zeile > button{
+.sich-hinweis button, .wt-zeile button, .kimodell button, .takt-pm, .raummass .rm-zeile > button,
+.sam-answ > button.sam-ansicht-knopf{
   background:var(--fl-karte);border:1.5px solid var(--linie-stark);color:var(--schrift)}
 
 /* Haupt */
@@ -4463,7 +4465,6 @@ html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile .gm-ue-wert{margin-lef
 /* ══ Plan G1a (4.0-beta.23): Liste, Raster 2 bis 5, Auswahl, Räume ══
    Jede Regel trägt #out, damit sie die älteren Rasterregeln der drei
    Designs schlägt (die stärkste davon hat keine Kennung). */
-html[data-design] .sam-stufen{margin:4px 0 12px}
 html[data-design] #out.sam-raster[data-spalten="2"] .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 html[data-design] #out.sam-raster[data-spalten="3"] .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 html[data-design] #out.sam-raster[data-spalten="4"] .grid{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:6px}
@@ -4473,17 +4474,9 @@ html[data-design]:not([data-design="botanisch"]) #out.sam-raster[data-spalten="5
 html[data-design="botanisch"] #out.sam-raster[data-spalten="4"] .card,
 html[data-design="botanisch"] #out.sam-raster[data-spalten="5"] .card{margin-bottom:6px;border-radius:var(--r-mittel)}
 html[data-design] #out .card{position:relative}
-/* Zwei und drei Spalten: Name und Art (Abnahme 4) */
-html[data-design] #out.sam-raster:is([data-spalten="2"],[data-spalten="3"]) .card:not(.open) .card-bot{display:block;
+/* Galerie (zwei Spalten): Name und Art. Ab drei Spalten gilt der Block G1a-2. */
+html[data-design] #out.sam-raster[data-spalten="2"] .card:not(.open) .card-bot{display:block;
   margin:2px 0 0;font-size:var(--t-xs);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Ab vier Spalten nur Foto und Kurzname, ab fünf nur das Foto (F180). */
-html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
-html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) .card-body{padding:5px 6px 6px;text-align:left}
-html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) .card-name{display:block;margin:0;
-  font-family:var(--f-body);font-size:var(--t-xs);font-weight:600;letter-spacing:0;line-height:1.3;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
-html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-body{
-  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 /* Liste: 8 bis 10 Pflanzen je Bildschirm, Foto, Name, Fälligkeit */
 html[data-design] #out.sam-zeilen .grid{display:block}
 html[data-design] #out.sam-zeilen .card:not(.open){margin:0 0 6px;border-radius:var(--r-mittel)}
@@ -4540,6 +4533,69 @@ html[data-design] .rv-box > p{margin:0 0 10px;font-size:var(--t-s);color:var(--s
 html[data-design] .rv-box > input{display:block;width:100%;margin:0 0 10px}
 html[data-design] .rv-box > .rv-fehler{color:var(--alarm);font-weight:600}
 html[data-design] .rv-leer{margin:0;padding:14px 16px;font-size:var(--t-s);color:var(--schrift-2)}
+/* ══ Plan G1a-2 (4.0-beta.24): Ansicht, Einklappen, Raster 3 bis 5 ══
+   Feedback Chris 06.11., F217 bis F222. */
+/* Ansicht: Knopf mit eigenem Aufklappmenü (F218). Das Menü liegt über
+   der Sammlung und verschiebt nichts; die Seitenhöhe bleibt gleich. */
+html[data-design] .sam-answ{position:relative;display:flex;margin:4px 0 12px}
+html[data-design] .sam-answ > button.sam-ansicht-knopf{gap:6px;padding:0 16px;font-size:var(--t-m);font-weight:400}
+html[data-design] .sam-ansicht-knopf > b{font-weight:600}
+html[data-design] .sam-ansicht-pfeil{display:inline-block;margin-left:2px;transition:transform var(--dauer, .15s)}
+html[data-design] .sam-ansicht-knopf[aria-expanded="true"] .sam-ansicht-pfeil{transform:rotate(180deg)}
+html[data-design] .sam-answ > .sam-ansicht-menue{position:absolute;top:calc(100% + 6px);left:0;z-index:40;
+  width:min(320px, calc(100vw - 32px));margin:0;box-shadow:0 8px 28px rgba(0,0,0,.22)}
+html[data-design] .sam-answ > .sam-ansicht-menue[hidden]{display:none}
+/* Einklappen: G1a setzt `display:block` mit #out für die Liste und
+   schlug damit die alte Regel `.group.closed .grid` (Feedback Punkt 2). */
+html[data-design] #out section.group.closed > .grid{display:none}
+/* Raster 3 bis 5: glatte Zeilen, alle Felder gleich groß (Punkt 4) */
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .grid{
+  grid-auto-rows:auto;align-items:stretch}
+html[data-design="botanisch"] #out.sam-raster[data-spalten="3"] .grid{row-gap:12px}
+html[data-design="botanisch"] #out.sam-raster[data-spalten="4"] .grid{row-gap:6px}
+html[data-design="botanisch"] #out.sam-raster[data-spalten="5"] .grid{row-gap:5px}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open){margin:0}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .thumb{aspect-ratio:1}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-btn::before{aspect-ratio:1}
+html[data-design]:not([data-design="terrarium"]) #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .thumb{
+  width:100%;height:auto;margin:0;object-fit:cover;display:block}
+/* Ohne Foto steht ein gleich großes leeres Feld (Klartext hatte keins) */
+html[data-design]:not([data-design="terrarium"]) #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-btn:not(:has(.thumb))::before{
+  content:'';display:block;width:100%;background:var(--fl-bildleer)}
+/* Inhalt ab drei Spalten: Bild, Name, Fälligkeit (Punkt 5, F220) */
+html[data-design] #out .card-kurz{display:none}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{
+  display:block;position:static;width:auto;height:auto;margin:0;padding:7px 8px 9px;clip:auto;overflow:hidden;text-align:left}
+html[data-design] #out.sam-raster:is([data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{padding:5px 6px 6px}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-name{
+  display:block;margin:0;font-family:var(--f-body);font-size:var(--t-s);font-weight:600;letter-spacing:0;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
+html[data-design] #out.sam-raster:is([data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-name{font-size:var(--t-xs)}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-kurz{
+  display:flex;align-items:center;gap:5px;margin:3px 0 0;font-family:var(--f-body);font-size:var(--t-xs);font-weight:400;
+  line-height:1.25;color:var(--schrift-2);white-space:nowrap;overflow:hidden}
+html[data-design] #out .card-kurz > span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+html[data-design] #out .card-kurz::before{content:'';flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--ton-still)}
+html[data-design] #out .card-kurz[data-ton="wasser"]::before{background:var(--wasser)}
+html[data-design] #out .card-kurz[data-ton="sicher"]::before{background:var(--sicher)}
+html[data-design] #out .card-kurz[data-ton="gift"]::before{background:var(--gift)}
+html[data-design] #out .card-kurz[data-ton="warn"]::before{background:var(--duenger)}
+html[data-design] #out .card-kurz[data-ton="alarm"]::before{background:var(--alarm)}
+html[data-design] #out .card-kurz[data-ton="ruhe"]::before{background:var(--ruhe)}
+html[data-design] #out .card-kurz[data-ton="bluete"]::before{background:var(--bluete)}
+html[data-design] #out .card-kurz[data-ton="gesund"]::before{background:var(--gesund)}
+html[data-design] #out .card-kurz[data-ton="alarm"]{color:var(--alarm);font-weight:600}
+/* Raster 5: Punkt vor dem Namen, ohne Text (rund 75 px Breite) */
+html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-body{display:flex;align-items:center;gap:4px}
+html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-name{flex:1 1 auto;min-width:0}
+html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-kurz{order:-1;flex:0 0 auto;margin:0;font-size:0;gap:0}
+html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-kurz::before{width:7px;height:7px}
+/* Terrarium bleibt mittig unter der Kristallform */
+html[data-design="terrarium"] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{text-align:center;padding-left:2px;padding-right:2px}
+html[data-design="terrarium"] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"]) .card:not(.open) .card-kurz{justify-content:center}
+html[data-design="terrarium"] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-body{justify-content:center}
+html[data-design="terrarium"] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-name{flex:0 1 auto}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -10797,13 +10853,16 @@ function pflanzeEntfernen(id){
     <div class="filter-marken" id="filter-marken"></div>
   </section>
   <div data-ans="sammlung" id="ctrl-platz" aria-hidden="true"></div>
-  <!-- 4.0-beta.23 (G1a): Liste oder Raster mit 2 bis 5 Spalten -->
-  <div data-ans="sammlung" class="segment sam-stufen" id="sammel-ansicht" role="group" aria-label="Ansicht der Sammlung">
-    <button type="button" data-samstufe="liste" aria-pressed="false">Liste</button>
-    <button type="button" data-samstufe="2" aria-pressed="false" aria-label="2 Spalten">2</button>
-    <button type="button" data-samstufe="3" aria-pressed="false" aria-label="3 Spalten">3</button>
-    <button type="button" data-samstufe="4" aria-pressed="false" aria-label="4 Spalten">4</button>
-    <button type="button" data-samstufe="5" aria-pressed="false" aria-label="5 Spalten">5</button>
+  <!-- 4.0-beta.24 (G1a-2, F218): Ansicht über ein eigenes Aufklappmenü, keine Systemliste -->
+  <div data-ans="sammlung" class="sam-answ" id="sammel-ansicht">
+    <button type="button" class="sam-ansicht-knopf" id="sam-ansicht-knopf" aria-haspopup="true" aria-expanded="false" aria-controls="sam-ansicht-menue">Ansicht: <b id="sam-ansicht-name">Galerie</b><span class="sam-ansicht-pfeil" aria-hidden="true">▾</span></button>
+    <div class="ein-wahl senkrecht wahl-liste sam-ansicht-menue" id="sam-ansicht-menue" role="group" aria-label="Ansicht der Sammlung wählen" hidden>
+      <button type="button" data-samstufe="liste" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Liste</b><i>Schnell, eine Zeile je Pflanze</i></span></button>
+      <button type="button" data-samstufe="2" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Galerie</b><i>Zwei Spalten, große Bilder</i></span></button>
+      <button type="button" data-samstufe="3" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 3</b><i>Bild, Name und wann gießen</i></span></button>
+      <button type="button" data-samstufe="4" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 4</b><i>Bild, Name und wann gießen</i></span></button>
+      <button type="button" data-samstufe="5" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 5</b><i>Bild, Name und ein Punkt fürs Gießen</i></span></button>
+    </div>
   </div>
 
   <div data-ans="sammlung">
@@ -12961,7 +13020,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.23';
+const FASSUNG = '4.0-beta.24';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -16286,20 +16345,21 @@ function karteStand(p){
     ? (STAND_TON[z.code] || (z.def.ton === 'warn' ? 'warn' : 'ruhe')) : null;
   /* Ein laufender Gießstopp ist immer der wichtigere Befund — er
      widerspricht dem, was der Rhythmus sagen wuerde. */
-  if(st.stand === 'stopp')     return {ton:'alarm', text:'Jetzt nicht gießen'};
-  if(zTon === 'alarm')         return {ton:'alarm', text:z.def.name};
+  /* 4.0-beta.24 (G1a-2, F220): `kurz` steht ab drei Spalten auf der Kachel. */
+  if(st.stand === 'stopp')     return {ton:'alarm', text:'Jetzt nicht gießen', kurz:'nicht gießen'};
+  if(zTon === 'alarm')         return {ton:'alarm', text:z.def.name, kurz:z.def.name};
   if(st.stand === 'over' && st.feuchtHeute){
     const rest = feuchtRest(p.id);
     return {ton:'still', text:'Als feucht gemeldet'
-      + (rest > 0 ? ' · in ' + rest + (rest === 1 ? ' Tag' : ' Tagen') + ' wieder ansehen' : '')};
+      + (rest > 0 ? ' · in ' + rest + (rest === 1 ? ' Tag' : ' Tagen') + ' wieder ansehen' : ''), kurz:'feucht'};
   }
-  if(st.stand === 'over')      return {ton:'gift',  text:'Gießen: überfällig'};
-  if(st.stand === 'unbekannt') return {ton:'still', text:'Noch nicht erfasst'};
-  if(st.rest <= 0)             return {ton:'wasser', text:'Gießen: heute'};
-  if(st.rest === 1)            return {ton:'wasser', text:'Gießen: morgen'};
-  if(zTon)                     return {ton:zTon, text:z.def.name};
-  if(st.rest === 2)            return {ton:'wasser', text:'Gießen: übermorgen'};
-  return {ton:'sicher', text:'Alles in Ordnung'};
+  if(st.stand === 'over')      return {ton:'gift',  text:'Gießen: überfällig', kurz:'überfällig'};
+  if(st.stand === 'unbekannt') return {ton:'still', text:'Noch nicht erfasst', kurz:'offen'};
+  if(st.rest <= 0)             return {ton:'wasser', text:'Gießen: heute', kurz:'heute'};
+  if(st.rest === 1)            return {ton:'wasser', text:'Gießen: morgen', kurz:'morgen'};
+  if(zTon)                     return {ton:zTon, text:z.def.name, kurz:z.def.name};
+  if(st.rest === 2)            return {ton:'wasser', text:'Gießen: übermorgen', kurz:'übermorgen'};
+  return {ton:'sicher', text:'Alles in Ordnung', kurz: Number.isFinite(st.rest) ? 'in ' + st.rest + ' T.' : 'in Ordnung'};
 }
 
 /* ── Der Ton fuer den Rand ────────────────────────────────────
@@ -16315,9 +16375,10 @@ function karteZustandTon(p){
   return STAND_TON[z.code] || (z.def.ton === 'warn' ? 'warn' : 'ruhe');
 }
 
-function karteStandHTML(p){
-  const s = karteStand(p);
-  return '<span class="card-stand" data-ton="' + s.ton + '">' + esc(s.text) + '</span>';
+function karteStandHTML(p, s){
+  s = s || karteStand(p);
+  return '<span class="card-stand" data-ton="' + s.ton + '">' + esc(s.text) + '</span>'
+    + '<span class="card-kurz" data-ton="' + s.ton + '"><span>' + esc(s.kurz || s.text) + '</span></span>';
 }
 
 function cardHTML(p){
@@ -16345,7 +16406,8 @@ function cardHTML(p){
   /* Die Karte in der Liste ist nur noch Vorschau. Das Detail lebt im
      Fenster — darum hier kein `id`, sonst gaebe es die Kennung zweimal
      im Dokument. */
-  return `<article class="card" data-karte="${p.id}" data-ton="${karteStand(p).ton}" data-zton="${karteZustandTon(p)}">
+  const ks = karteStand(p);
+  return `<article class="card" data-karte="${p.id}" data-ton="${ks.ton}" data-zton="${karteZustandTon(p)}">
     <button class="card-btn" data-t="${p.id}" aria-haspopup="dialog">
       <span class="sam-haken" aria-hidden="true">✓</span>
       ${thumb}
@@ -16353,7 +16415,7 @@ function cardHTML(p){
         <span class="card-name">${esc(titel)}</span>
         <span class="card-bot">${unter}</span>
         ${lageVon(p)?`<span class="card-lage">${esc(lageVon(p))}</span>`:''}
-        ${karteStandHTML(p)}
+        ${karteStandHTML(p, ks)}
         ${iconRow(p)}${zustandBadge(p)}
         <span class="bar"><span style="width:${K.feuchte}%"></span></span>
       </span>
@@ -16873,7 +16935,10 @@ function rasterSpannenEin(gitter){
      Beobachter startete die nächste Messung. Gemessen wird ohne Leeren
      richtig, weil die Kacheln oben ausgerichtet sind (`align-items:start`)
      und ihre Höhe nicht von der Spanne abhängt. */
-  if(!zeile || zeile > 12){
+  /* 4.0-beta.24 (G1a-2): Ab drei Spalten hat das Raster glatte Zeilen,
+     gemessen wird nur noch die Galerie. */
+  const glatt = typeof samSpalten === 'function' && samSpalten() > 2;
+  if(glatt || !zeile || zeile > 12){
     karten.forEach(k=>{ if(k.style.gridRowEnd) k.style.gridRowEnd = ''; });
     return;
   }
@@ -16916,6 +16981,7 @@ function rasterMarke(){
 function rasterSpannenUebernehmen(){
   const out = document.getElementById('out');
   if(!out || !out.classList.contains('sam-raster')) return;
+  if(typeof samSpalten === 'function' && samSpalten() > 2) return;
   const marke = rasterMarke();
   out.querySelectorAll('.grid > .card[data-karte]').forEach(k=>{
     if(!k.style.getPropertyValue('--bildhoehe'))
@@ -17394,11 +17460,11 @@ function oeffne(id){
 const SAM_ANSICHTEN = ['karten','zeilen','raster'];
 /* Jedes Design bringt eine Vorbelegung mit, keine Vorschrift: wer
    umschaltet, behaelt seine Wahl auch nach einem Designwechsel.
-   Botanisch und Terrarium zeigen das Raster — dort traegt das Bild.
-   Klartext zeigt eine Spalte: ein grosses Foto, ein grosser Name,
-   nichts nebeneinander, was man verwechseln koennte. */
+   4.0-beta.24 (G1a-2, F222): Die Galerie ist der Normalmodus, in allen
+   drei Designs. Die Liste ist der schnelle, vereinfachte Modus. */
 const SAM_STUFEN = ['liste', '2', '3', '4', '5'];
-const SAM_VORGABE = {botanisch:'2', klartext:'liste', terrarium:'2'};
+const SAM_VORGABE = {botanisch:'2', klartext:'2', terrarium:'2'};
+const SAM_NAMEN = {liste:'Liste', '2':'Galerie', '3':'Raster 3', '4':'Raster 4', '5':'Raster 5'};
 function samStufe(){
   const v = S.samStufe == null ? '' : String(S.samStufe);
   if(SAM_STUFEN.includes(v)) return v;
@@ -17423,14 +17489,62 @@ function samAnsichtSetzen(v){
 }
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-samstufe]'); if(!b) return;
+  samMenueZu();
   samStufeSetzen(b.dataset.samstufe);
 });
 function samAnsichtBeschriften(){
   const v = samStufe();
   document.querySelectorAll('[data-samstufe]').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.samstufe === v)));
+  const n = document.getElementById('sam-ansicht-name');
+  if(n) n.textContent = SAM_NAMEN[v] || v;
 }
 samAnsichtBeschriften();
+
+/* ── Aufklappmenü „Ansicht“ (G1a-2, F218) ─────────────────────
+   Ein eigenes Menü statt der Auswahlliste des Systems (Regel 9.10).
+   Es legt einen Verlaufseintrag an, damit die Zurück-Taste es
+   schließt; wer es anders schließt, nimmt den Eintrag wieder weg.
+   Ein Tipp daneben schließt nur und löst sonst nichts aus — sonst
+   öffnete derselbe Tipp eine Karte, während das Zurück noch läuft
+   (T42). */
+var SAM_MENUE_OFFEN = false;
+function samMenueAuf(){
+  const m = document.getElementById('sam-ansicht-menue');
+  const k = document.getElementById('sam-ansicht-knopf');
+  if(!m || SAM_MENUE_OFFEN) return;
+  samAnsichtBeschriften();
+  m.hidden = false;
+  if(k) k.setAttribute('aria-expanded', 'true');
+  SAM_MENUE_OFFEN = true;
+  try{ history.pushState({gkSamMenue:1}, ''); }catch(e){}
+}
+function samMenueZu(ohneZurueck){
+  if(!SAM_MENUE_OFFEN) return;
+  const m = document.getElementById('sam-ansicht-menue');
+  const k = document.getElementById('sam-ansicht-knopf');
+  if(m) m.hidden = true;
+  if(k) k.setAttribute('aria-expanded', 'false');
+  SAM_MENUE_OFFEN = false;
+  if(!ohneZurueck && history.state && history.state.gkSamMenue){
+    try{ history.back(); }catch(e){}
+  }
+}
+window.addEventListener('popstate', ()=>{ if(SAM_MENUE_OFFEN) samMenueZu(true); });
+document.addEventListener('click', e=>{
+  const k = e.target.closest('#sam-ansicht-knopf'); if(!k) return;
+  SAM_MENUE_OFFEN ? samMenueZu() : samMenueAuf();
+});
+document.addEventListener('click', e=>{
+  if(!SAM_MENUE_OFFEN) return;
+  const h = document.getElementById('sammel-ansicht');
+  if(h && h.contains(e.target)) return;
+  e.preventDefault(); e.stopPropagation();
+  samMenueZu();
+}, true);
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape' && SAM_MENUE_OFFEN){ e.preventDefault(); samMenueZu(); }
+});
 
 /* ── Auswahl in der Sammlung (G1a) ───────────────────────────
    Langes Drücken auf eine Zeile oder Kachel startet die Auswahl.
@@ -27467,6 +27581,7 @@ function ansichtZeigen(name, merken){
   if(name === 'sammlung' && typeof rasterSpannenBald === 'function') rasterSpannenBald();
   /* 4.0-beta.23 (G1a): Wer die Sammlung verlässt, beendet die Auswahl. */
   if(name !== 'sammlung' && typeof SAM_WAHL !== 'undefined' && SAM_WAHL) samWahlEnde();
+  if(name !== 'sammlung' && typeof SAM_MENUE_OFFEN !== 'undefined' && SAM_MENUE_OFFEN) samMenueZu();
   const kopf = ANSICHT_KOPF[name];
   if(kopf) $('#kopf-titel').textContent = kopf[1] || '';
   const etikett = document.getElementById('kopf-etikett');
@@ -35822,8 +35937,8 @@ const TOUR_KAPITEL = {
         text: 'Der runde Knopf ist der einzige Weg zum Anlegen und steht immer an derselben Stelle.' },
 
       { ziel: ()=>document.getElementById('sammel-ansicht'),
-        titel: 'Drei Ansichten',
-        text: 'Karten mit allen Angaben, kompakte Zeilen für den schnellen Überblick, Raster für viele Pflanzen auf einmal. Die Wahl bleibt gemerkt. Vermehren, Stammbaum und Gießplan sind in die Werkzeuge gezogen — die Sammlung ist jetzt nur noch die Pflanzenliste.' }
+        titel: 'Ansicht',
+        text: 'Hinter „Ansicht“ wählst du Liste, Galerie oder ein Raster mit drei bis fünf Spalten. Die Wahl bleibt gemerkt.' }
     ]
   },
 

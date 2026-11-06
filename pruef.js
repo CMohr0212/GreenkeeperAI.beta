@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.23', w.__T('FASSUNG') === '4.0-beta.23', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.24', w.__T('FASSUNG') === '4.0-beta.24', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -445,7 +445,7 @@ setTimeout(async () => {
   d.querySelector('[data-design-go="botanisch"]').click();
   pruef('Botanisch belegt Raster vor', w.__T('samAnsicht()') === 'raster', w.__T('samAnsicht()'));
   d.querySelector('[data-design-go="klartext"]').click();
-  pruef('Klartext belegt eine Spalte vor (beta.23: die Liste)', w.__T('samAnsicht()') === 'zeilen', w.__T('samAnsicht()'));
+  pruef('Klartext belegt die Galerie vor (beta.24, F222)', w.__T('samAnsicht()') === 'raster' && w.__T('samStufe()') === '2', w.__T('samStufe()'));
   d.querySelector('[data-design-go="terrarium"]').click();
   pruef('Terrarium belegt Raster vor', w.__T('samAnsicht()') === 'raster', w.__T('samAnsicht()'));
   w.__T("samAnsichtSetzen('zeilen')");
@@ -13942,11 +13942,11 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
 
       /* ── 1, 2: Knopfleiste und gespeicherte Wahl ── */
       const leiste = d.getElementById('sammel-ansicht');
-      const stufen = leiste ? Array.prototype.map.call(leiste.querySelectorAll('button[data-samstufe]'), b => b.dataset.samstufe + '=' + b.textContent.trim()) : [];
-      pruef('beta.23 (G1a): Knopfleiste Liste | 2 | 3 | 4 | 5', stufen.join(',') === 'liste=Liste,2=2,3=3,4=4,5=5', stufen.join(','));
+      const stufen = leiste ? Array.prototype.map.call(leiste.querySelectorAll('button[data-samstufe]'), b => b.dataset.samstufe + '=' + (b.querySelector('.wl-txt b') || b).textContent.trim()) : [];
+      pruef('beta.23 (G1a), seit beta.24 mit Namen: fünf Stufen', stufen.join(',') === 'liste=Liste,2=Galerie,3=Raster 3,4=Raster 4,5=Raster 5', stufen.join(','));
       pruef('beta.23 (G1a): Knopfleiste steht sichtbar über der Sammlung, nicht in der Filterklappe',
         !!leiste && !leiste.hidden && !leiste.closest('#ctrl-klapp') && !!(leiste.compareDocumentPosition(d.getElementById('out')) & 4));
-      pruef('beta.23 (G1a): Knopfleiste ist eine Knopfliste im Grundstil (.segment), keine Auswahlliste', !!leiste && leiste.classList.contains('segment') && !leiste.querySelector('select'));
+      pruef('beta.23 (G1a), seit beta.24: Stufen stehen in einer Knopfliste im Grundstil (.wahl-liste), keine Auswahlliste', !!leiste && !!leiste.querySelector('.wahl-liste [data-samstufe]') && !leiste.querySelector('select'));
       pruef('beta.23 (G1a): Die alte Leiste Karten | Zeilen | Raster ist weg', !d.querySelector('[data-samview]'));
       klick('#sammel-ansicht [data-samstufe="4"]');
       pruef('beta.23 (G1a): Tipp auf „4“ setzt die Stufe', T('samStufe()') === '4' && T('S.samStufe') === '4');
@@ -13960,7 +13960,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T('delete S.samStufe; delete S.samAnsicht');
       pruef('beta.23 (G1a): Vorgabe ohne Wahl: Botanisch 2 Spalten', T('samStufe()') === '2');
       T(`designSetzen('klartext')`);
-      pruef('beta.23 (G1a): Vorgabe ohne Wahl: Klartext Liste', T('samStufe()') === 'liste');
+      pruef('beta.23 (G1a), seit beta.24 (F222): Vorgabe ohne Wahl: Klartext Galerie', T('samStufe()') === '2');
       T(`designSetzen('terrarium')`);
       pruef('beta.23 (G1a): Vorgabe ohne Wahl: Terrarium 2 Spalten', T('samStufe()') === '2');
       T(`designSetzen('botanisch')`);
@@ -13993,12 +13993,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         const gtc = g ? w.getComputedStyle(g).gridTemplateColumns : '';
         pruef(`beta.23 (G1a): Raster ${n}: Regel greift (berechneter Stil)`, gtc.indexOf('repeat(' + n) === 0, gtc);
       }
-      pruef('beta.23 (G1a): Raster 2 und 3 zeigen Name und Art', /#out\.sam-raster:is\(\[data-spalten="2"\],\[data-spalten="3"\]\) \.card:not\(\.open\) \.card-bot\{display:block/.test(g1aStil));
-      pruef('beta.23 (G1a): Raster 4 blendet alles außer Foto und Name aus',
-        /#out\.sam-raster\[data-spalten="4"\] \.card:not\(\.open\) :is\(\.card-bot,\.card-lage,\.card-stand,\.icons,\.zbadge,\.bar,\.warnbox,\.pflegehinweis\)\{display:none\}/.test(g1aStil)
-        && /#out\.sam-raster\[data-spalten="4"\] \.card:not\(\.open\) \.card-name\{[^}]*text-overflow:ellipsis/.test(g1aStil));
-      pruef('beta.23 (G1a): Raster 5 zeigt nur das Foto (Name nur für Vorleser)',
-        /#out\.sam-raster\[data-spalten="5"\] \.card:not\(\.open\) \.card-body\{\s*position:absolute;width:1px;height:1px/.test(g1aStil));
+      pruef('beta.23 (G1a), seit beta.24: Galerie zeigt Name und Art', /#out\.sam-raster\[data-spalten="2"\] \.card:not\(\.open\) \.card-bot\{display:block/.test(g1aStil));
+      /* Inhalt ab drei Spalten: seit beta.24 im Block G1a-2 (F220 ersetzt F180). */
 
       /* ── 7a: keine Knöpfe „Gegossen“ und „Gedüngt“ in Zeile und Kachel ── */
       for(const st of ['liste', '3']){
@@ -14221,6 +14217,200 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(a.samStufe === undefined) delete S.samStufe; else S.samStufe = a.samStufe;
         if(a.samAnsicht === undefined) delete S.samAnsicht; else S.samAnsicht = a.samAnsicht;
         S.gruppierung = a.gruppierung; designSetzen(a.design || 'botanisch'); ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt23)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.24: Plan G1a-2 — Ansicht als Aufklappmenü, Einklappen in
+     jeder Darstellung, Raster 3 bis 5 glatt mit Bild, Name, Fälligkeit,
+     Galerie als Vorgabe (Feedback 06.11., F218 bis F222). Legt Räume und
+     Pflanzen selbst an und stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, samStufe:S.samStufe, samAnsicht:S.samAnsicht,
+      design:S.design, gruppierung:S.gruppierung, ansicht:S.ansicht}`;
+    const alt24 = T(`JSON.stringify(${LAGER})`);
+    const altZu = T('JSON.stringify(Array.from(zu))');
+    try {
+      T(`(function(){
+        var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        if(typeof samWahlEnde === 'function') samWahlEnde();
+        if(typeof samMenueZu === 'function') samMenueZu(true);
+        S.raeume = [];
+        var k = raumAnlegen('Prüf-Küche G1a2'), b = raumAnlegen('Prüf-Bad G1a2');
+        window.__g24 = {k:k, b:b};
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'G1a2 ' + id, art:'Art ' + id, botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', topf:'12',
+          intervallEigen:true, intervall:[7, 7]}, o); };
+        S.eigene = [
+          pf('R1', {raum:k, stellplatz:'Fensterbank'}),
+          pf('R2', {raum:k, stellplatz:'Fensterbank'}),
+          pf('R3', {raum:b, stellplatz:'Boden'}),
+          pf('R4', {raum:b, stellplatz:''})
+        ];
+        S.water = {R1:[vor(7)], R2:[vor(2)], R3:[vor(20)], R4:[vor(6)]};
+        S.giess = S.giess || {}; S.giess.saison = false;
+        S.gruppierung = 'raum';
+        designSetzen('botanisch');
+        S.samStufe = '2';
+        ansichtZeigen('sammlung');
+        sichern(); samAnsichtBeschriften(); render();
+        return 1;
+      })()`);
+      const stil = Array.prototype.map.call(d.querySelectorAll('style'), s => s.textContent).join('\n');
+      const g2Stil = (stil.split('/* ══ Plan G1a-2 (4.0-beta.24)')[1] || '');
+      const out = d.getElementById('out');
+      const huelle = d.getElementById('sammel-ansicht');
+      const knopf = d.getElementById('sam-ansicht-knopf');
+      const menue = d.getElementById('sam-ansicht-menue');
+
+      /* ── 1: Schalterreihe weg, Knopf „Ansicht“ zeigt die Wahl ── */
+      pruef('beta.24 (G1a-2): Keine Schalterreihe mehr über der Sammlung', !d.querySelector('.sam-stufen') && !d.querySelector('.segment [data-samstufe]'));
+      pruef('beta.24 (G1a-2): Knopf „Ansicht“ steht über der Sammlung', !!knopf && !!huelle && !huelle.hidden
+        && !huelle.closest('#ctrl-klapp') && !!(huelle.compareDocumentPosition(out) & 4));
+      pruef('beta.24 (G1a-2): Knopf zeigt den Namen der Wahl', /^Ansicht: Galerie/.test(knopf.textContent.trim()), knopf.textContent.trim());
+      pruef('beta.24 (G1a-2): Knopf trägt den Grundstil (S1, Neben)', /\.sam-answ > button\.sam-ansicht-knopf\{\s*display:inline-flex/.test(stil)
+        && /\.sam-answ > button\.sam-ansicht-knopf\{\s*background:var\(--fl-karte\)/.test(stil));
+      pruef('beta.24 (G1a-2): Menü ist anfangs zu', menue.hidden === true && knopf.getAttribute('aria-expanded') === 'false');
+
+      /* ── 2: Menü mit fünf Einträgen, Haken an der Wahl, keine Systemliste ── */
+      const hoeheVor = d.documentElement.scrollHeight;
+      knopf.click();
+      pruef('beta.24 (G1a-2): Tipp auf „Ansicht“ klappt das Menü auf', menue.hidden === false && knopf.getAttribute('aria-expanded') === 'true' && T('SAM_MENUE_OFFEN') === true);
+      const namen = Array.prototype.map.call(menue.querySelectorAll('[data-samstufe] .wl-txt b'), b => b.textContent);
+      pruef('beta.24 (G1a-2): Menü nennt Liste, Galerie, Raster 3, Raster 4, Raster 5 (F219)', namen.join('|') === 'Liste|Galerie|Raster 3|Raster 4|Raster 5', namen.join('|'));
+      pruef('beta.24 (G1a-2): Gewählte Stufe ist markiert, nur sie', menue.querySelectorAll('[aria-pressed="true"]').length === 1
+        && menue.querySelector('[data-samstufe="2"]').getAttribute('aria-pressed') === 'true');
+      pruef('beta.24 (G1a-2): Keine Auswahlliste des Systems (Regel 9.10)', !huelle.querySelector('select') && !d.querySelector('[data-ans="sammlung"] select#sam-stufe'));
+      pruef('beta.24 (G1a-2): Menü liegt über der Sammlung (position:absolute im Stil)', /\.sam-answ > \.sam-ansicht-menue\{position:absolute/.test(g2Stil));
+      pruef('beta.24 (G1a-2): Hülle des Menüs schneidet nichts ab (kein alter Klassenname)', w.getComputedStyle(huelle).overflow === 'visible' && !huelle.classList.contains('sam-ansicht'), w.getComputedStyle(huelle).overflow);
+      pruef('beta.24 (G1a-2): Menü legt einen Verlaufseintrag für die Zurück-Taste an', T('!!(history.state && history.state.gkSamMenue)') === true);
+
+      /* ── 3: Tipp daneben und Zurück schließen ohne Wahl ── */
+      const r1 = out.querySelector('.card[data-karte="R1"] .card-btn');
+      r1.click();
+      pruef('beta.24 (G1a-2): Tipp daneben schließt das Menü', menue.hidden === true && T('SAM_MENUE_OFFEN') === false);
+      pruef('beta.24 (G1a-2): Tipp daneben öffnet keine Karte', T(`modalOffen('karte-modal')`) === false);
+      pruef('beta.24 (G1a-2): Tipp daneben ändert die Wahl nicht', T('samStufe()') === '2');
+      await warte(120);
+      T(`history.replaceState(null, '')`);
+      knopf.click();
+      w.dispatchEvent(new w.PopStateEvent('popstate', {state: null}));
+      pruef('beta.24 (G1a-2): Zurück-Taste schließt das Menü ohne Wahl', menue.hidden === true && T('samStufe()') === '2' && knopf.getAttribute('aria-expanded') === 'false');
+      T(`history.replaceState(null, '')`);
+      knopf.click();
+      d.dispatchEvent(new w.KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+      pruef('beta.24 (G1a-2): Esc schließt das Menü', menue.hidden === true);
+      await warte(120);
+      T(`history.replaceState(null, '')`);
+
+      /* ── 4: Wahl über das Menü, gespeichert, alte Wahl gilt ── */
+      knopf.click();
+      menue.querySelector('[data-samstufe="4"]').click();
+      pruef('beta.24 (G1a-2): Eintrag wählt und schließt', T('samStufe()') === '4' && menue.hidden === true);
+      pruef('beta.24 (G1a-2): Knopftext folgt der Wahl', /^Ansicht: Raster 4/.test(knopf.textContent.trim()), knopf.textContent.trim());
+      const gesp = JSON.parse(w.localStorage.getItem('gk-beta') || '{}');
+      pruef('beta.24 (G1a-2): Wahl steht im Speicher (bleibt nach Neustart)', gesp.samStufe === '4', String(gesp.samStufe));
+      await warte(120);
+      T(`history.replaceState(null, '')`);
+      T(`S.samStufe = '3'; samAnsichtBeschriften(); render()`);
+      pruef('beta.24 (G1a-2): Eine Wahl aus beta.23 gilt weiter (gleiche Schlüssel)', T('samStufe()') === '3' && /Raster 3/.test(knopf.textContent));
+
+      /* ── 5: Einklappen in jeder Darstellung ── */
+      for(const n of ['liste', '2', '3', '5']){
+        T(`samStufeSetzen('${n}')`);
+        const kopf = out.querySelector('.group-head');
+        const grp = kopf && kopf.closest('.group');
+        kopf.click();
+        const g = grp.querySelector('.grid');
+        const zu1 = w.getComputedStyle(g).display;
+        kopf.click();
+        const auf1 = w.getComputedStyle(grp.querySelector('.grid')).display;
+        pruef(`beta.24 (G1a-2): Raum einklappen blendet die Pflanzen aus (${n})`, zu1 === 'none' && auf1 !== 'none', zu1 + ' / ' + auf1);
+      }
+      pruef('beta.24 (G1a-2): Regel fürs Einklappen trägt #out (schlägt die Liste)', /#out section\.group\.closed > \.grid\{display:none\}/.test(g2Stil));
+
+      /* ── 6: Raster 3, 4, 5 glatt, keine Zeilenspannen ── */
+      for(const des of ['botanisch', 'klartext', 'terrarium']){
+        T(`designSetzen('${des}')`);
+        for(const n of ['3', '4', '5']){
+          T(`samStufeSetzen('${n}')`);
+          const g = out.querySelector('.grid');
+          const cs = w.getComputedStyle(g);
+          pruef(`beta.24 (G1a-2): ${des} Raster ${n}: glatte Zeilen ohne feine Spannen (grid-auto-rows:auto)`, cs.gridAutoRows === 'auto', cs.gridAutoRows);
+          const k1 = out.querySelector('.card[data-karte="R1"]');
+          pruef(`beta.24 (G1a-2): ${des} Raster ${n}: Kachel ohne Rand nach unten`, w.getComputedStyle(k1).marginBottom === '0px', w.getComputedStyle(k1).marginBottom);
+        }
+      }
+      pruef('beta.24 (G1a-2): Bildfelder ab drei Spalten quadratisch', /:is\(\[data-spalten="3"\],\[data-spalten="4"\],\[data-spalten="5"\]\) \.card:not\(\.open\) \.thumb\{aspect-ratio:1\}/.test(g2Stil)
+        && /:is\(\[data-spalten="3"\],\[data-spalten="4"\],\[data-spalten="5"\]\) \.card:not\(\.open\) \.card-btn::before\{aspect-ratio:1\}/.test(g2Stil));
+      T(`designSetzen('botanisch'); samStufeSetzen('3')`);
+      const g3 = out.querySelector('.grid');
+      const k3 = Array.prototype.slice.call(g3.querySelectorAll(':scope > .card'));
+      Object.defineProperty(g3, 'offsetWidth', {configurable:true, get: () => 380});
+      Object.defineProperty(g3, 'clientWidth', {configurable:true, get: () => 380});
+      g3.style.gridAutoRows = '4px';
+      k3.forEach(k => { k.style.gridRowEnd = 'span 30'; });
+      w.rasterSpannenEin(g3);
+      pruef('beta.24 (G1a-2): Ab drei Spalten setzt die Messung keine Zeilenspannen und entfernt alte', k3.length > 0 && k3.every(k => !k.style.gridRowEnd), k3.map(k => k.style.gridRowEnd).join(','));
+      T(`RASTER_SPANNE[rasterMarke() + '|R1'] = 'span 40'; render()`);
+      const r1b = out.querySelector('.card[data-karte="R1"]');
+      pruef('beta.24 (G1a-2): Ab drei Spalten übernimmt das Neuzeichnen keine gemerkten Spannen', !!r1b && !r1b.style.gridRowEnd, r1b && r1b.style.gridRowEnd);
+
+      /* ── 7: Inhalt ab drei Spalten (F220) ── */
+      const kurz = id => { const e = out.querySelector(`.card[data-karte="${id}"] .card-kurz`); return e ? e.textContent : null; };
+      const sichtbar = (id, sel) => { const e = out.querySelector(`.card[data-karte="${id}"] ${sel}`); return !!e && w.getComputedStyle(e).display !== 'none'; };
+      pruef('beta.24 (G1a-2): Kurztext „heute“ bei fälliger Pflanze', kurz('R1') === 'heute', kurz('R1'));
+      pruef('beta.24 (G1a-2): Kurztext „in 5 T.“ bei Pflanze in fünf Tagen', kurz('R2') === 'in 5 T.', kurz('R2'));
+      pruef('beta.24 (G1a-2): Kurztext „überfällig“', kurz('R3') === 'überfällig', kurz('R3'));
+      pruef('beta.24 (G1a-2): Kurztext „morgen“', kurz('R4') === 'morgen', kurz('R4'));
+      pruef('beta.24 (G1a-2): Kurztext trägt denselben Ton wie die Standzeile',
+        out.querySelector('.card[data-karte="R3"] .card-kurz').dataset.ton === out.querySelector('.card[data-karte="R3"] .card-stand').dataset.ton);
+      for(const n of ['3', '4', '5']){
+        T(`samStufeSetzen('${n}')`);
+        pruef(`beta.24 (G1a-2): Raster ${n}: Name sichtbar`, sichtbar('R1', '.card-name'));
+        pruef(`beta.24 (G1a-2): Raster ${n}: Fälligkeit sichtbar (Kurzform)`, sichtbar('R1', '.card-kurz'));
+        pruef(`beta.24 (G1a-2): Raster ${n}: Art, Lage, Standzeile, Zeichen, Balken ausgeblendet`,
+          ['.card-bot', '.card-lage', '.card-stand', '.icons', '.bar'].every(sel => !sichtbar('R1', sel)));
+        const body = out.querySelector('.card[data-karte="R1"] .card-body');
+        pruef(`beta.24 (G1a-2): Raster ${n}: Name steht im Fluss, nicht nur für Vorleser`, w.getComputedStyle(body).position !== 'absolute', w.getComputedStyle(body).position);
+        pruef(`beta.24 (G1a-2): Raster ${n}: Kartenkörper ist ein Block (keine leeren Textzeilen)`, w.getComputedStyle(body).display !== 'inline', w.getComputedStyle(body).display);
+      }
+      pruef('beta.24 (G1a-2): Raster 5 zeigt die Fälligkeit nur als Punkt', /\[data-spalten="5"\] \.card:not\(\.open\) \.card-kurz\{order:-1;flex:0 0 auto;margin:0;font-size:0/.test(g2Stil));
+      pruef('beta.24 (G1a-2): Raster 3 und 4 zeigen Punkt und Kurztext', /\.card-kurz\{\s*display:flex;align-items:center;gap:5px/.test(g2Stil) && /#out \.card-kurz::before\{content:''/.test(g2Stil));
+      pruef('beta.24 (G1a-2): Ohne Foto steht ab drei Spalten ein leeres Bildfeld (alle Designs außer Terrarium)',
+        /:not\(\[data-design="terrarium"\]\) #out\.sam-raster:is\(\[data-spalten="3"\],\[data-spalten="4"\],\[data-spalten="5"\]\) \.card:not\(\.open\) \.card-btn:not\(:has\(\.thumb\)\)::before\{\s*content:''/.test(g2Stil));
+      pruef('beta.24 (G1a-2): Kurztext wird mit … gekürzt', /#out \.card-kurz > span\{[^}]*text-overflow:ellipsis/.test(g2Stil) && !!out.querySelector('.card-kurz > span'));
+      pruef('beta.24 (G1a-2): Name in einer Zeile gekürzt', /:is\(\[data-spalten="3"\],\[data-spalten="4"\],\[data-spalten="5"\]\) \.card:not\(\.open\) \.card-name\{[^}]*white-space:nowrap;overflow:hidden;text-overflow:ellipsis/.test(g2Stil));
+
+      /* ── 8: Galerie und Liste unverändert ── */
+      T(`samStufeSetzen('2')`);
+      pruef('beta.24 (G1a-2): Galerie: Kurztext ausgeblendet, Standzeile und Art stehen', !sichtbar('R1', '.card-kurz') && sichtbar('R1', '.card-stand') && sichtbar('R1', '.card-bot'));
+      T(`samStufeSetzen('liste')`);
+      pruef('beta.24 (G1a-2): Liste: Kurztext ausgeblendet, Standzeile steht', !sichtbar('R1', '.card-kurz') && sichtbar('R1', '.card-stand'));
+      T(`designSetzen('botanisch'); samStufeSetzen('2')`);
+      pruef('beta.24 (G1a-2): Galerie in Botanisch behält feine Zeilen fürs eigene Bildformat (F221)', w.getComputedStyle(out.querySelector('.grid')).gridAutoRows === '4px', w.getComputedStyle(out.querySelector('.grid')).gridAutoRows);
+
+      /* ── 9: Vorgabe für neue Nutzer (F222) ── */
+      for(const des of ['botanisch', 'klartext', 'terrarium']){
+        T(`designSetzen('${des}'); delete S.samStufe; delete S.samAnsicht`);
+        pruef(`beta.24 (G1a-2): Vorgabe ohne Wahl in ${des}: Galerie`, T('samStufe()') === '2', T('samStufe()'));
+      }
+      T(`designSetzen('botanisch')`);
+    } catch(e){
+      pruef('beta.24 (G1a-2): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a, z){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        if(typeof samMenueZu === 'function') samMenueZu(true);
+        history.replaceState(null, '');
+        zu.clear(); JSON.parse(z).forEach(function(n){ zu.add(n); });
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume;
+        if(a.samStufe === undefined) delete S.samStufe; else S.samStufe = a.samStufe;
+        if(a.samAnsicht === undefined) delete S.samAnsicht; else S.samAnsicht = a.samAnsicht;
+        S.gruppierung = a.gruppierung; designSetzen(a.design || 'botanisch'); ansichtZeigen(a.ansicht || 'heute'); sichern(); samAnsichtBeschriften(); render(); return 1; })(${JSON.stringify(alt24)}, ${JSON.stringify(altZu)})`);
     }
   }
 
