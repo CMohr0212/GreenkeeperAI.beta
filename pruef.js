@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.22', w.__T('FASSUNG') === '4.0-beta.22', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.23', w.__T('FASSUNG') === '4.0-beta.23', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -321,14 +321,15 @@ setTimeout(async () => {
   await tick();
 
   /* Abschnittsfenster */
-  const keys = ['doktor','giessplan','substrat','vermehren','stammbaum','grundriss',
+  /* beta.23 (G1a, F212): „grundriss“ ist weg, „raeume“ in den Einstellungen neu */
+  const keys = ['doktor','giessplan','substrat','vermehren','stammbaum','raeume',
                 'sicherung','urlaub','tiere','rundgang','ansicht','tour','rueck','install','melde','patch'];
   pruef('16 Abschnitte auffindbar',
     keys.every(k => w.__T(`!!sekAbschnitt('${k}')`)),
     keys.filter(k => !w.__T(`!!sekAbschnitt('${k}')`)).join(','));
 
   pruef('Kachelgitter gebaut',
-    d.querySelectorAll('.kachelgitter section[data-wz]').length === 6,
+    d.querySelectorAll('.kachelgitter section[data-wz]').length === 5,
     String(d.querySelectorAll('.kachelgitter section[data-wz]').length));
   /* Der Gießplan hat seine Heimat im Gießcenter und darum keine
      eigene Kachel mehr — erreichbar bleibt er trotzdem. */
@@ -444,7 +445,7 @@ setTimeout(async () => {
   d.querySelector('[data-design-go="botanisch"]').click();
   pruef('Botanisch belegt Raster vor', w.__T('samAnsicht()') === 'raster', w.__T('samAnsicht()'));
   d.querySelector('[data-design-go="klartext"]').click();
-  pruef('Klartext belegt eine Spalte vor', w.__T('samAnsicht()') === 'karten', w.__T('samAnsicht()'));
+  pruef('Klartext belegt eine Spalte vor (beta.23: die Liste)', w.__T('samAnsicht()') === 'zeilen', w.__T('samAnsicht()'));
   d.querySelector('[data-design-go="terrarium"]').click();
   pruef('Terrarium belegt Raster vor', w.__T('samAnsicht()') === 'raster', w.__T('samAnsicht()'));
   w.__T("samAnsichtSetzen('zeilen')");
@@ -1187,7 +1188,7 @@ setTimeout(async () => {
   pruef('Sprung Substrat', JSON.parse(await sprung('substrat')).sek === 'substrat');
   pruef('Sprung Sicherung', JSON.parse(await sprung('sicherung')).sek === 'sicherung');
   pruef('Sprung Vermehren', JSON.parse(await sprung('vermehren')).sek === 'vermehren');
-  pruef('Sprung Grundriss', JSON.parse(await sprung('grundriss')).sek === 'grundriss');
+  pruef('Sprung Grundriss entfällt (beta.23, F212)', !w.__T('TOUR_KAPITEL.grundriss'));
   pruef('Sprung Mehr', JSON.parse(await sprung('mehr')).a === 'mehr');
   pruef('Sprung Sammlung', JSON.parse(await sprung('sammlung')).a === 'sammlung');
   const sk = JSON.parse(await sprung('karte'));
@@ -1216,8 +1217,15 @@ setTimeout(async () => {
       pruef('Overlays bleiben verankert in ' + dz,
         kaputt.length === 0, kaputt.join(','));
     });
+    /* beta.23: jsdom rechnet die Regel `@media(min-width:760px)` (sticky)
+       bei 1024 px Fensterbreite mit. Bis beta.22 bestand der Test nur,
+       weil der Sprung in den Grundriss davor einen anderen Zustand
+       hinterließ; allein lief er auch mit beta.22 fehl. Geprüft wird
+       deshalb die Regel fürs Handy selbst. */
+    const stilLeiste = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
     pruef('Die Leiste unten bleibt verankert',
-      w.getComputedStyle(d.querySelector('nav.tabs')).position === 'fixed');
+      /\n\.tabs\{position:fixed;left:0;right:0;bottom:0;/.test(stilLeiste)
+      && !/\n\.tabs\{[^}]*position:(?!fixed)/.test(stilLeiste.replace(/@media[^{]*\{[\s\S]*?\}\s*\}/g, '')));
     /* Der Hintergrund darf die Kinder nicht anfassen. */
     /* Nur im Stilblock suchen \u2014 im Kommentar daneben steht die Regel
        als abschreckendes Beispiel und soll dort stehen bleiben. */
@@ -1651,11 +1659,9 @@ setTimeout(async () => {
   {
     /* Der Planer beginnt in der Raumliste, auch nach einem Besuch
        im Editor. */
-    w.__T("grStufe = 'editor'");
-    w.__T("sektionOeffnen('grundriss')");
-    await tick();
-    pruef('Der Planer beginnt bei den R\u00e4umen', w.__T('grStufe') === 'liste',
-      String(w.__T('grStufe')));
+    /* beta.23 (G1a, F212): Der Planer ist nicht mehr erreichbar. Die
+       Tests darunter prüfen seinen Code, bis Baustein I ihn löscht. */
+    pruef('Der Planer ist nicht mehr erreichbar (beta.23)', w.__T("sektionOeffnen('grundriss')") === false);
     pruef('Die Raumliste ist sichtbar',
       d.getElementById('gr-liste').hidden === false);
 
@@ -3901,13 +3907,9 @@ setTimeout(async () => {
         !/14 cm/.test(ohneTopf) && /nicht eingetragen/.test(ohneTopf));
 
       /* ── Licht am Platz ── */
-      pruef('Licht am Platz steht im Reiter Standort',
-        !!karteAus('A2P').querySelector('[data-kpane="standort"] [data-kblock="licht"]'));
-      const ohnePlan = w.__T(`lichtAmPlatzHTML(allePflanzen().find(x=>x.id==='A2P'))`);
-      pruef('Ohne Platz im Grundriss steht keine Lichtzahl',
-        !/licht-zahl/.test(ohnePlan) && /Grundriss/.test(ohnePlan), ohnePlan.slice(0, 160));
-      pruef('Stattdessen führt ein Knopf in den Grundriss',
-        /data-do="grundriss-fuer"/.test(ohnePlan));
+      /* beta.23 (G1a, F212): Licht am Platz gibt es ohne Grundriss nicht mehr. */
+      pruef('Kein Block „Licht am Platz“ im Reiter Standort (beta.23)',
+        !karteAus('A2P').querySelector('[data-kblock="licht"]') && !karteAus('A2P').querySelector('[data-kblock="grundriss"]'));
       /* Mit Platz: eine Zahl, ein Band, ein Urteil. */
       const mitPlan = w.__T(`(function(){
         const p = allePflanzen().find(x=>x.id==='A2P');
@@ -3916,12 +3918,7 @@ setTimeout(async () => {
         if(!raum) return '';
         S.orte[p.id] = {raum:raum.id, x:Math.round((raum.b||300)/2), y:Math.round((raum.h||300)/2)};
         const h = lichtAmPlatzHTML(p); S.orte = alt; return h; })()`);
-      if(mitPlan){
-        pruef('Mit Platz steht die Sonnenzahl da', /licht-zahl/.test(mitPlan), mitPlan.slice(0, 200));
-        pruef('Und daneben ein Urteil zum Bedarf', /kb-marke (sicher|unklar|gift)/.test(mitPlan));
-      } else {
-        pruef('Mit Platz steht die Sonnenzahl da', true, 'kein Raum im Bestand — übersprungen');
-      }
+      pruef('Auch mit Lage in der Skizze keine Sonnenzahl (beta.23)', !/licht-zahl/.test(mitPlan), mitPlan.slice(0, 200));
 
       /* ── Giftigkeit je Tier ── */
       w.__T(`(function(){ S.tiere = {aktiv:true, arten:['katze','hund']}; })()`);
@@ -4240,9 +4237,9 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Vierzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg)', alle.length === 14, String(alle.length));
+    pruef('Fünfzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu)', alle.length === 15, String(alle.length));
     pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 25,
+      d.querySelectorAll('section[data-mh]').length === 26,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
@@ -5051,7 +5048,7 @@ setTimeout(async () => {
 
   const kacheln = Array.prototype.slice.call(
     d.querySelectorAll('.kachelgitter section[data-wz]'));
-  pruef('sechs Werkzeugkacheln', kacheln.length === 6, String(kacheln.length));
+  pruef('fünf Werkzeugkacheln (beta.23: Grundriss weg)', kacheln.length === 5, String(kacheln.length));
   pruef('jede Kachel hat ein Symbol',
     kacheln.every(k => k.querySelector('.wz-ikon svg')),
     kacheln.filter(k=>!k.querySelector('.wz-ikon svg')).map(k=>k.dataset.wz).join(','));
@@ -5219,12 +5216,12 @@ setTimeout(async () => {
     return r === true ? true : 'noch ' + allePflanzen().length; })()`) === true);
 
   /* — Sammlung — */
-  pruef('Umschalter sitzt in der Filterklappe',
-    !!d.querySelector('#ctrl-klapp #sammel-ansicht'));
+  pruef('Umschalter steht über der Sammlung, nicht in der Filterklappe (beta.23)',
+    !d.querySelector('#ctrl-klapp #sammel-ansicht') && !!d.getElementById('sammel-ansicht'));
   pruef('Umschalter ist erreichbar',
     d.getElementById('sammel-ansicht').hidden === false);
-  pruef('drei Ansichten bleiben',
-    d.querySelectorAll('#sammel-ansicht [data-samview]').length === 3);
+  pruef('fünf Stufen (beta.23: Liste, 2 bis 5)',
+    d.querySelectorAll('#sammel-ansicht [data-samstufe]').length === 5);
   pruef('Terrarium steht auf Raster',
     w.__T('DESIGNS.terrarium.sammlung') === 'raster');
   pruef('Terrarium schneidet Vielecke',
@@ -11197,12 +11194,13 @@ setTimeout(async () => {
       'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
       'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
-      'sch-pflege','sch-licht','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart',
+      'sch-pflege','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart',
       /* seit beta.21 (M2a/M2b): drei Schalter für den Gießmodus */
       'sch-gliste','sch-gmwie','sch-gmzustand'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
-    pruef('beta.5: Alle 31 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 31 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 31, quelle.split('type="checkbox" role="switch"').length - 1);
+    /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter */
+    pruef('beta.5: Alle 30 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 30 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 30, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -13146,20 +13144,21 @@ setTimeout(async () => {
       T(`modusSetzen('sammler'); 1`);
       const alle = () => T(`SCHALTER.map(function(s){ return schalterAn(s.k) ? 1 : 0; }).join('')`);
       /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
-      pruef('beta.18: Sammler schaltet alle sieben Schalter aus (beta.21: Liste an)', alle() === '0000000100', alle());
+      /* beta.23: „licht“ ist weg, neun Schalter */
+      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an)', alle() === '000000100', alle());
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.18: Entdecker schaltet alle sieben Schalter an (beta.21: Liste aus, Kärtchen und Zustandsfrage an)', alle() === '1111111011', alle());
-      pruef('beta.18: Katalog hat zehn Schalter (seit beta.21) mit eigenem Schalter in der Ansicht',
-        T(`SCHALTER.length`) === 10 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+      pruef('beta.18: Entdecker schaltet alle sechs Schalter an (beta.21: Liste aus, Kärtchen und Zustandsfrage an)', alle() === '111111011', alle());
+      pruef('beta.18: Katalog hat neun Schalter (seit beta.23) mit eigenem Schalter in der Ansicht',
+        T(`SCHALTER.length`) === 9 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
       const mt = d.getElementById('modus-text').textContent;
       pruef('beta.18 (F179): Modus heißt „Entdecker (angepasst)“ und „Zurücksetzen“ erscheint', mt.indexOf('Entdecker (angepasst)') === 0 && !d.getElementById('modus-zurueck-box').hidden, mt);
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
-      d.getElementById('sch-pflege').click(); d.getElementById('sch-licht').click();
+      d.getElementById('sch-pflege').click(); d.getElementById('sch-wachstum').click();
       d.getElementById('modus-zurueck').click();
-      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111111011' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '111111011' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       T(`S.pflegehinweise = true; 1`);
       d.querySelector('#modus-wahl [data-modus="sammler"]').click();
       pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
@@ -13179,7 +13178,6 @@ setTimeout(async () => {
         return aus === 'none' && an !== 'none' && !d.body.classList.contains('s-aus-' + k);
       };
       [['pflege','<section class="kblock" data-kblock="pflege"></section>'],
-       ['licht','<section class="kblock" data-kblock="licht"></section>'],
        ['wachstum','<section class="kblock" data-kblock="wachstum"></section>'],
        ['befunde','<section class="kblock" data-kblock="befunde"></section>'],
        ['abstammung','<section class="kblock" data-kblock="abstammung"></section>'],
@@ -13895,6 +13893,334 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
         S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
         S.einfach = a.einfach; S.fotos = a.fotos; S.profil = a.profil; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(alt22)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.23: Plan G1a — Liste und Raster 2 bis 5, Auswahl mit
+     „Gegossen“, Rastermessung ohne Leeren, Grundrissplaner entfernt,
+     Räume in den Einstellungen (F180, F209, F212). Legt Räume und
+     Pflanzen selbst an und stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, feuchtRueck:S.feuchtRueck, orte:S.orte, samStufe:S.samStufe,
+      samAnsicht:S.samAnsicht, design:S.design, gruppierung:S.gruppierung, ansicht:S.ansicht}`;
+    const alt23 = T(`JSON.stringify(${LAGER})`);
+    const heute = () => T('iso(HEUTE)');
+    const dialoge = {n: 0};
+    const altDlg = {prompt: w.prompt, confirm: w.confirm, alert: w.alert};
+    try {
+      T(`(function(){
+        var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        if(typeof samWahlEnde === 'function') samWahlEnde();
+        S.raeume = [];
+        var k = raumAnlegen('Prüf-Küche G1a'), b = raumAnlegen('Prüf-Bad G1a');
+        stellplatzAnlegen(k, 'Hochregal G1a');
+        window.__g23 = {k:k, b:b};
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'G1a ' + id, art:'Art ' + id, botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', topf:'12'}, o); };
+        S.eigene = [
+          pf('Q1', {raum:k, stellplatz:'Fensterbank'}),
+          pf('Q2', {raum:k, stellplatz:'Fensterbank'}),
+          pf('Q3', {raum:k, stellplatz:'Hochregal G1a'}),
+          pf('Q4', {raum:b, stellplatz:'Boden'}),
+          pf('Q5', {raum:b, stellplatz:''})
+        ];
+        S.water = {Q1:[vor(20)], Q2:[vor(20)], Q3:[vor(20)], Q4:[vor(20), iso(HEUTE)], Q5:[vor(20)]};
+        S.feuchtRueck = {Q1:{zahl:2, zuletzt:vor(3)}, Q2:{zahl:1, zuletzt:vor(3)}, Q3:{zahl:1, zuletzt:vor(3)}};
+        S.orte = {Q1:{raum:k, x:40, y:40}};
+        S.gruppierung = 'keine';
+        designSetzen('botanisch');
+        ansichtZeigen('sammlung');
+        sichern(); render();
+        return 1;
+      })()`);
+      const K = T('__g23.k'), B = T('__g23.b');
+
+      /* ── 1, 2: Knopfleiste und gespeicherte Wahl ── */
+      const leiste = d.getElementById('sammel-ansicht');
+      const stufen = leiste ? Array.prototype.map.call(leiste.querySelectorAll('button[data-samstufe]'), b => b.dataset.samstufe + '=' + b.textContent.trim()) : [];
+      pruef('beta.23 (G1a): Knopfleiste Liste | 2 | 3 | 4 | 5', stufen.join(',') === 'liste=Liste,2=2,3=3,4=4,5=5', stufen.join(','));
+      pruef('beta.23 (G1a): Knopfleiste steht sichtbar über der Sammlung, nicht in der Filterklappe',
+        !!leiste && !leiste.hidden && !leiste.closest('#ctrl-klapp') && !!(leiste.compareDocumentPosition(d.getElementById('out')) & 4));
+      pruef('beta.23 (G1a): Knopfleiste ist eine Knopfliste im Grundstil (.segment), keine Auswahlliste', !!leiste && leiste.classList.contains('segment') && !leiste.querySelector('select'));
+      pruef('beta.23 (G1a): Die alte Leiste Karten | Zeilen | Raster ist weg', !d.querySelector('[data-samview]'));
+      klick('#sammel-ansicht [data-samstufe="4"]');
+      pruef('beta.23 (G1a): Tipp auf „4“ setzt die Stufe', T('samStufe()') === '4' && T('S.samStufe') === '4');
+      pruef('beta.23 (G1a): Gewählter Knopf trägt aria-pressed', d.querySelector('#sammel-ansicht [data-samstufe="4"]').getAttribute('aria-pressed') === 'true'
+        && d.querySelector('#sammel-ansicht [data-samstufe="2"]').getAttribute('aria-pressed') === 'false');
+      const gespeichert = JSON.parse(w.localStorage.getItem('gk-beta') || '{}');
+      pruef('beta.23 (G1a): Wahl steht im Speicher (bleibt nach Neustart)', gespeichert.samStufe === '4', String(gespeichert.samStufe));
+      T(`designSetzen('klartext')`);
+      pruef('beta.23 (G1a): Eigene Wahl überlebt den Designwechsel', T('samStufe()') === '4');
+      T(`designSetzen('botanisch')`);
+      T('delete S.samStufe; delete S.samAnsicht');
+      pruef('beta.23 (G1a): Vorgabe ohne Wahl: Botanisch 2 Spalten', T('samStufe()') === '2');
+      T(`designSetzen('klartext')`);
+      pruef('beta.23 (G1a): Vorgabe ohne Wahl: Klartext Liste', T('samStufe()') === 'liste');
+      T(`designSetzen('terrarium')`);
+      pruef('beta.23 (G1a): Vorgabe ohne Wahl: Terrarium 2 Spalten', T('samStufe()') === '2');
+      T(`designSetzen('botanisch')`);
+      T(`S.samAnsicht = 'zeilen'`);
+      pruef('beta.23 (G1a): Alte Wahl „Zeilen“ wird Liste', T('samStufe()') === 'liste');
+      T(`S.samAnsicht = 'karten'`);
+      pruef('beta.23 (G1a): Alte Wahl „Karten“ wird Liste', T('samStufe()') === 'liste');
+      T(`S.samAnsicht = 'raster'`);
+      pruef('beta.23 (G1a): Alte Wahl „Raster“ wird die Spalten des Designs', T('samStufe()') === '2');
+      T(`delete S.samAnsicht`);
+
+      /* ── 3 bis 6: Inhalt je Stufe ── */
+      const stil = Array.prototype.map.call(d.querySelectorAll('style'), s => s.textContent).join('\n');
+      const g1aStil = (stil.split('/* ══ Plan G1a (4.0-beta.23)')[1] || '');
+      T(`samStufeSetzen('liste')`);
+      const out = d.getElementById('out');
+      pruef('beta.23 (G1a): Liste: #out ist sam-zeilen mit einer Spalte', out.classList.contains('sam-zeilen') && out.dataset.spalten === '1');
+      const z1 = out.querySelector('.card[data-karte="Q1"]');
+      pruef('beta.23 (G1a): Liste: Zeile hat Name und Fälligkeit', !!z1 && /G1a Q1/.test(z1.querySelector('.card-name').textContent) && !!z1.querySelector('.card-stand'));
+      pruef('beta.23 (G1a): Liste: Stil zeigt Foto 56 px, Name, Fälligkeit, Zeile 76 px hoch',
+        /#out\.sam-zeilen \.card:not\(\.open\) \.thumb\{display:block;flex:0 0 56px/.test(g1aStil)
+        && /#out\.sam-zeilen \.card:not\(\.open\) \.card-stand\{display:flex/.test(g1aStil)
+        && /#out\.sam-zeilen \.card:not\(\.open\) \.card-btn\{[^}]*min-height:76px/.test(g1aStil));
+      pruef('beta.23 (G1a): Liste: Platzhalter, wenn kein Foto da ist', /#out\.sam-zeilen \.card:not\(\.open\) \.card-btn:not\(:has\(\.thumb\)\)::before\{/.test(g1aStil));
+      for(const n of ['2', '3', '4', '5']){
+        T(`samStufeSetzen('${n}')`);
+        const g = out.querySelector('.grid');
+        pruef(`beta.23 (G1a): Raster ${n}: #out ist sam-raster mit ${n} Spalten`, out.classList.contains('sam-raster') && out.dataset.spalten === n);
+        pruef(`beta.23 (G1a): Raster ${n}: Stil setzt ${n} Spalten`, new RegExp('#out\\.sam-raster\\[data-spalten="' + n + '"\\] \\.grid\\{grid-template-columns:repeat\\(' + n + ',').test(g1aStil));
+        const gtc = g ? w.getComputedStyle(g).gridTemplateColumns : '';
+        pruef(`beta.23 (G1a): Raster ${n}: Regel greift (berechneter Stil)`, gtc.indexOf('repeat(' + n) === 0, gtc);
+      }
+      pruef('beta.23 (G1a): Raster 2 und 3 zeigen Name und Art', /#out\.sam-raster:is\(\[data-spalten="2"\],\[data-spalten="3"\]\) \.card:not\(\.open\) \.card-bot\{display:block/.test(g1aStil));
+      pruef('beta.23 (G1a): Raster 4 blendet alles außer Foto und Name aus',
+        /#out\.sam-raster\[data-spalten="4"\] \.card:not\(\.open\) :is\(\.card-bot,\.card-lage,\.card-stand,\.icons,\.zbadge,\.bar,\.warnbox,\.pflegehinweis\)\{display:none\}/.test(g1aStil)
+        && /#out\.sam-raster\[data-spalten="4"\] \.card:not\(\.open\) \.card-name\{[^}]*text-overflow:ellipsis/.test(g1aStil));
+      pruef('beta.23 (G1a): Raster 5 zeigt nur das Foto (Name nur für Vorleser)',
+        /#out\.sam-raster\[data-spalten="5"\] \.card:not\(\.open\) \.card-body\{\s*position:absolute;width:1px;height:1px/.test(g1aStil));
+
+      /* ── 7a: keine Knöpfe „Gegossen“ und „Gedüngt“ in Zeile und Kachel ── */
+      for(const st of ['liste', '3']){
+        T(`samStufeSetzen('${st}')`);
+        const k1 = out.querySelector('.card[data-karte="Q1"]');
+        const knoepfe = k1 ? Array.prototype.filter.call(k1.querySelectorAll('button'), b => !b.classList.contains('card-btn')) : [null];
+        pruef(`beta.23 (G1a): ${st}: keine Knöpfe in der Kachel außer der Kachel selbst`, !!k1 && knoepfe.length === 0, knoepfe.length);
+        pruef(`beta.23 (G1a): ${st}: kein „Gegossen“ und kein „Gedüngt“ in der Sammlung`,
+          !out.querySelector('[data-do="giessen"]') && !/Gedüngt|Heute gegossen/.test(out.textContent));
+      }
+
+      /* ── 7: langes Drücken, Auswahl, „Gegossen“ ── */
+      T(`samStufeSetzen('3')`);
+      const kb = id => out.querySelector(`.card[data-karte="${id}"] .card-btn`);
+      const druck = (el, typ, x, y) => {
+        const e = new w.MouseEvent(typ, {bubbles:true, cancelable:true, clientX:x || 10, clientY:y || 10, button:0});
+        el.dispatchEvent(e);
+      };
+      ['prompt', 'confirm', 'alert'].forEach(f => { w[f] = () => { dialoge.n++; return null; }; });
+      pruef('beta.23 (G1a): Ohne Auswahl öffnet ein Tipp die Karte', (kb('Q5').click(), T(`modalOffen('karte-modal')`) === true));
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
+      await warte(150);
+      druck(kb('Q1'), 'pointerdown', 50, 50);
+      druck(kb('Q1'), 'pointermove', 50, 80);
+      await warte(650);
+      pruef('beta.23 (G1a): Wischen während des Drückens startet keine Auswahl', T('samWahlAktiv()') === false);
+      druck(kb('Q1'), 'pointerdown', 50, 50);
+      await warte(300);
+      druck(kb('Q1'), 'pointerup', 50, 50);
+      await warte(400);
+      pruef('beta.23 (G1a): Kurzes Drücken startet keine Auswahl', T('samWahlAktiv()') === false);
+      druck(kb('Q1'), 'pointerdown', 50, 50);
+      await warte(650);
+      pruef('beta.23 (G1a): Langes Drücken startet die Auswahl mit dieser Pflanze', T('samWahlAktiv()') === true && T('SAM_WAHL.has("Q1") && SAM_WAHL.size === 1') === true);
+      druck(kb('Q1'), 'pointerup', 50, 50);
+      kb('Q1').click();
+      pruef('beta.23 (G1a): Der Tipp nach dem langen Drücken öffnet nichts und wählt nicht ab',
+        T(`modalOffen('karte-modal')`) === false && T('SAM_WAHL && SAM_WAHL.has("Q1")') === true);
+      const lst = d.getElementById('sam-wahl-leiste');
+      pruef('beta.23 (G1a): Leiste ist sichtbar und zeigt die Zahl', !!lst && !lst.hidden && d.getElementById('sam-wahl-zahl').textContent === '1 Pflanze gewählt');
+      pruef('beta.23 (G1a): Leiste hat nur „Gegossen“ und „Abbrechen“',
+        Array.prototype.map.call(lst.querySelectorAll('button'), b => b.textContent.trim()).sort().join('|') === 'Abbrechen|Gegossen');
+      pruef('beta.23 (G1a): Gewählte Kachel ist markiert', out.querySelector('.card[data-karte="Q1"]').classList.contains('gewaehlt')
+        && kb('Q1').getAttribute('aria-pressed') === 'true' && out.classList.contains('sam-waehlen'));
+      T('_samSchluck = 0');
+      kb('Q2').click(); kb('Q3').click(); kb('Q4').click();
+      pruef('beta.23 (G1a): In der Auswahl wählt ein Tipp, statt die Karte zu öffnen',
+        T(`modalOffen('karte-modal')`) === false && T('SAM_WAHL.size') === 4 && d.getElementById('sam-wahl-zahl').textContent === '4 Pflanzen gewählt');
+      kb('Q3').click();
+      pruef('beta.23 (G1a): Ein zweiter Tipp wählt ab', T('SAM_WAHL.size') === 3 && !out.querySelector('.card[data-karte="Q3"]').classList.contains('gewaehlt'));
+      pruef('beta.23 (G1a): Die Auswahl zeichnet die Sammlung nicht neu', out.querySelector('.card[data-karte="Q1"] .card-btn') === kb('Q1'));
+      /* Sollwert: derselbe Weg wie der Knopf in der Karte, an einer Kopie */
+      const vorWasser = T('JSON.stringify(S.water)');
+      klick('#sam-wahl-giessen');
+      const h = heute();
+      const wl = id => T(`JSON.stringify(S.water[${JSON.stringify(id)}] || [])`);
+      pruef('beta.23 (G1a): „Gegossen“ trägt heute bei allen Gewählten ein', ['Q1', 'Q2'].every(id => JSON.parse(wl(id)).indexOf(h) > -1));
+      pruef('beta.23 (G1a): „Gegossen“ lässt Abgewählte und Ungewählte unverändert',
+        wl('Q3') === JSON.stringify(JSON.parse(vorWasser).Q3) && wl('Q5') === JSON.stringify(JSON.parse(vorWasser).Q5));
+      pruef('beta.23 (G1a): Schon heute gegossene Pflanze bekommt keinen zweiten Eintrag und verliert keinen',
+        JSON.parse(wl('Q4')).filter(x => x === h).length === 1);
+      pruef('beta.23 (G1a): „Gegossen“ löscht den Rückfragenzähler wie der Knopf in der Karte',
+        T('!S.feuchtRueck.Q1 && !S.feuchtRueck.Q2 && !!S.feuchtRueck.Q3') === true);
+      pruef('beta.23 (G1a): Nach „Gegossen“ ist die Auswahl beendet', T('samWahlAktiv()') === false && d.getElementById('sam-wahl-leiste').hidden === true);
+      pruef('beta.23 (G1a): „Gegossen“ fragt nicht über ein Browser-Fenster', dialoge.n === 0, dialoge.n);
+      /* Vergleich mit dem Kartenweg an Q3 */
+      T(`(function(){ window.__k23 = JSON.stringify({w:S.water.Q3, f:S.feuchtRueck.Q3});
+        var ww = JSON.parse(JSON.stringify(S.water.Q3)), ff = S.feuchtRueck.Q3;
+        giessen('Q3'); window.__k23b = JSON.stringify({w:S.water.Q3, f:S.feuchtRueck.Q3 || null});
+        S.water.Q3 = ww; S.feuchtRueck.Q3 = ff; samGegossen(['Q3']); window.__k23c = JSON.stringify({w:S.water.Q3, f:S.feuchtRueck.Q3 || null}); return 1; })()`);
+      pruef('beta.23 (G1a): samGegossen schreibt dasselbe wie giessen() aus der Karte', T('__k23b') === T('__k23c'), T('__k23b') + ' / ' + T('__k23c'));
+      /* 20 Pflanzen auf einmal: einmal speichern */
+      T(`(function(){ for(var i = 0; i < 20; i++) S.eigene.push({id:'QX' + i, eigen:true, name:'X' + i, art:'X', klasse:'B'}); return 1; })()`);
+      T(`window.__sp23 = 0; window.__sichernAlt23 = sichern; sichern = function(){ __sp23++; return __sichernAlt23.apply(this, arguments); }`);
+      T(`samGegossen(S.eigene.filter(function(p){ return /^QX/.test(p.id); }).map(function(p){ return p.id; }))`);
+      pruef('beta.23 (G1a): 20 Pflanzen gegossen, einmal gespeichert', T('__sp23') === 1 && T(`S.eigene.filter(function(p){ return /^QX/.test(p.id) && (S.water[p.id]||[]).indexOf(iso(HEUTE)) > -1; }).length`) === 20, T('__sp23'));
+      T(`sichern = __sichernAlt23; S.eigene = S.eigene.filter(function(p){ return !/^QX/.test(p.id); }); render()`);
+      druck(kb('Q5'), 'pointerdown', 50, 50); await warte(650); druck(kb('Q5'), 'pointerup', 50, 50);
+      klick('#sam-wahl-ab');
+      pruef('beta.23 (G1a): „Abbrechen“ beendet die Auswahl ohne Eintrag', T('samWahlAktiv()') === false && JSON.parse(wl('Q5')).indexOf(h) === -1);
+      druck(kb('Q5'), 'pointerdown', 50, 50); await warte(650); druck(kb('Q5'), 'pointerup', 50, 50);
+      T(`ansichtZeigen('heute')`);
+      pruef('beta.23 (G1a): Wechsel weg von der Sammlung beendet die Auswahl', T('samWahlAktiv()') === false);
+      T(`ansichtZeigen('sammlung')`);
+      const cm = new w.MouseEvent('contextmenu', {bubbles:true, cancelable:true});
+      kb('Q5').dispatchEvent(cm);
+      pruef('beta.23 (G1a): Kein Systemmenü bei langem Druck auf eine Kachel', cm.defaultPrevented === true);
+
+      /* ── 8: Messung leert keine Zeilenspannen ── */
+      T(`designSetzen('botanisch'); samStufeSetzen('2')`);
+      const gitter = out.querySelector('.grid');
+      const karten = Array.prototype.slice.call(gitter.querySelectorAll(':scope > .card'));
+      Object.defineProperty(gitter, 'offsetWidth', {configurable:true, get: () => 380});
+      Object.defineProperty(gitter, 'clientWidth', {configurable:true, get: () => 380});
+      gitter.style.gridAutoRows = '4px';
+      const log = [];
+      karten.forEach(k => {
+        let wert = 'span 30';
+        Object.defineProperty(k.style, 'gridRowEnd', {configurable:true, get: () => wert, set: v => { log.push(v); wert = v; }});
+      });
+      pruef('beta.23 (G1a): Testdaten: Raster mit feinen Zeilen', w.getComputedStyle(gitter).gridAutoRows === '4px', w.getComputedStyle(gitter).gridAutoRows);
+      w.rasterSpannenEin(gitter);
+      pruef('beta.23 (G1a): Messung leert keine Zeilenspanne', log.length > 0 && log.indexOf('') === -1, log.join(','));
+      pruef('beta.23 (G1a): Messung setzt jede Spanne neu', karten.every(k => /^span \d+$/.test(k.style.gridRowEnd)));
+      const id0 = karten[0].dataset.karte;
+      pruef('beta.23 (G1a): Messung merkt sich die Spannen', T(`RASTER_SPANNE[rasterMarke() + '|' + ${JSON.stringify(id0)}]`) === karten[0].style.gridRowEnd);
+      T('render()');
+      const q1 = out.querySelector(`.card[data-karte="${id0}"]`);
+      pruef('beta.23 (G1a): Nach dem Neuzeichnen stehen die Spannen sofort wieder da', !!q1 && /^span \d+$/.test(q1.style.gridRowEnd || ''), q1 && q1.style.gridRowEnd);
+      pruef('beta.23 (G1a): Neue Messung nur bei neuer Breite (Beobachter prüft die Breite)',
+        /e\.target\._gkBreite/.test(T('rasterBeobachten.toString()')) || /_gkBreite/.test(Array.prototype.map.call(d.querySelectorAll('script'), s => s.textContent).join('').split('function rasterBeobachten')[1].slice(0, 900)));
+
+      /* ── 12: Grundrissplaner entfernt, Raum und Stellplatz bleiben ── */
+      pruef('beta.23 (G1a): Kein Werkzeug „Räume und Grundriss“ mehr', !d.querySelector('section[data-wz="grundriss"]')
+        && Array.prototype.every.call(d.querySelectorAll('[data-wz-go="grundriss"]'), b => !!b.closest('#zonen-sec[hidden]')));
+      pruef('beta.23 (G1a): Grundriss ist keine Ansicht mehr', T(`WERKZEUGE.indexOf('grundriss')`) === -1 && T(`sektionOeffnen('grundriss')`) === false);
+      pruef('beta.23 (G1a): Planer-Markup ist versteckt und keiner Ansicht zugeordnet', (() => { const z = d.getElementById('zonen-sec'); return !!z && z.hidden && !z.dataset.ans; })());
+      T(`window.__ort23 = 0; window.__ortAlt23 = pflanzenOrt; pflanzenOrt = function(id){ __ort23++; return __ortAlt23(id); }`);
+      const sst = T(`standortStunden(S.eigene.find(function(p){ return p.id === 'Q1'; }))`);
+      const sli = T(`standortLicht(${JSON.stringify(K)}, 'Fensterbank')`);
+      pruef('beta.23 (G1a): Keine Lichtrechnung mehr, auch mit gespeicherter Lage', sst === null && sli === null && T('__ort23') === 0, T('__ort23'));
+      T(`pflanzenOrt = __ortAlt23`);
+      T(`karteOeffnen('Q1')`);
+      const rumpf = d.getElementById('karte-rumpf');
+      pruef('beta.23 (G1a): Karte zeigt keinen Block „Licht am Platz“ und keinen Grundriss',
+        !!rumpf && !rumpf.querySelector('[data-kblock="licht"]') && !rumpf.querySelector('[data-kblock="grundriss"]')
+        && !rumpf.querySelector('[data-do="grundriss-fuer"]') && !/Grundriss/.test(rumpf.textContent));
+      pruef('beta.23 (G1a): Karte zeigt weiter Raum und Stellplatz', !!rumpf && !!rumpf.querySelector('[data-lage="raum"]') && !!rumpf.querySelector('[data-lage="platz"]'));
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
+      pruef('beta.23 (G1a): Raum und Stellplatz der Pflanzen unverändert', T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'Q1'; }); return p.raum + '|' + p.stellplatz; })()`) === K + '|Fensterbank');
+      pruef('beta.23 (G1a): Lagedaten der Skizze bleiben gespeichert (nichts still gelöscht)', T(`!!(S.orte && S.orte.Q1 && S.orte.Q1.x === 40)`) === true);
+      pruef('beta.23 (G1a): Schalter „Licht am Platz“ ist weg', !d.getElementById('sch-licht') && T(`SCHALTER.some(function(s){ return s.k === 'licht'; })`) === false);
+      pruef('beta.23 (G1a): Tour hat kein Kapitel zum Grundriss', T(`!TOUR_KAPITEL.grundriss && !TOUR_KAPITEL.plan`) === true);
+      pruef('beta.23 (G1a): BOTaniker bietet für „Standort“ kein Werkzeug mehr an', T(`BOT_ABSICHTEN.find(function(a){ return a.key === 'standort'; }).werkzeug`) === undefined);
+      pruef('beta.23 (G1a): Der Doktor-Auftrag nennt keine gemessene Sonne mehr', !/misst die App im/.test(Array.prototype.map.call(d.querySelectorAll('script'), s => s.textContent).join('')));
+
+      /* ── Räume in den Einstellungen ── */
+      const mhSammlung = Array.prototype.find.call(d.querySelectorAll('.mh-gruppe'), g => (g.querySelector('.mh-abschnitt') || {}).textContent === 'Sammlung');
+      pruef('beta.23 (G1a): Einstellungen haben „Räume“ in der Gruppe Sammlung', !!mhSammlung && !!mhSammlung.querySelector('section[data-mh="raeume"]'));
+      pruef('beta.23 (G1a): „Räume“ hat ein Symbol', !!d.querySelector('section[data-mh="raeume"] .mh-ikon svg'));
+      T(`ansichtZeigen('mehr')`);
+      pruef('beta.23 (G1a): „Räume“ öffnet sich', T(`sektionOeffnen('raeume')`) !== false && !!d.querySelector('#sekm-rumpf #rv-inhalt'));
+      const rv = () => d.getElementById('rv-inhalt');
+      const raumZeilen = () => Array.prototype.map.call(rv().querySelectorAll('.rv-zeile [data-rv-raum] b'), b => b.textContent);
+      pruef('beta.23 (G1a): Liste zeigt alle Räume', raumZeilen().join('|') === 'Prüf-Küche G1a|Prüf-Bad G1a', raumZeilen().join('|'));
+      pruef('beta.23 (G1a): Jede Raumzeile hat rechts ⋮', rv().querySelectorAll('.rv-zeile').length === 2
+        && Array.prototype.every.call(rv().querySelectorAll('.rv-zeile'), z => z.lastElementChild.matches('button.rv-mehr[data-rv-menue]') && z.lastElementChild.textContent === '⋮'));
+      pruef('beta.23 (G1a): Raumzeile nennt Pflanzen und Stellplätze', /3 Pflanzen · 6 Stellplätze/.test(rv().textContent) && /2 Pflanzen · 5 Stellplätze/.test(rv().textContent), rv().textContent);
+      pruef('beta.23 (G1a): Keine Auswahlliste des Systems', !rv().querySelector('select'));
+      klick(`#rv-inhalt [data-rv-menue="r:${K}"]`);
+      const menue = Array.prototype.map.call(rv().querySelectorAll('.rv-box button'), b => b.textContent.trim());
+      pruef('beta.23 (G1a): ⋮ öffnet „Umbenennen“ und „Löschen“', menue.join('|') === 'Umbenennen|Löschen', menue.join('|'));
+      pruef('beta.23 (G1a): „Löschen“ ist ein Gefahrknopf', !!rv().querySelector('.rv-box button.loeschen[data-rv-tun="loeschen"]'));
+      klick('#rv-inhalt [data-rv-tun="umbenennen"]');
+      const feld = () => d.getElementById('rv-feld');
+      pruef('beta.23 (G1a): Umbenennen zeigt ein Feld mit dem alten Namen', !!feld() && feld().value === 'Prüf-Küche G1a');
+      feld().value = 'Prüf-Bad G1a';
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Doppelter Raumname wird abgelehnt', T(`raumNameVon(${JSON.stringify(K)})`) === 'Prüf-Küche G1a' && /gibt es schon/.test(rv().textContent));
+      feld().value = 'Prüf-Wohnküche G1a';
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Raum umbenannt', T(`raumNameVon(${JSON.stringify(K)})`) === 'Prüf-Wohnküche G1a' && raumZeilen()[0] === 'Prüf-Wohnküche G1a');
+      pruef('beta.23 (G1a): Pflanzen behalten ihren Raum beim Umbenennen', T(`S.eigene.filter(function(p){ return p.raum === ${JSON.stringify(K)}; }).length`) === 3);
+      klick(`#rv-inhalt [data-rv-raum="${K}"]`);
+      const platzZeilen = () => Array.prototype.map.call(rv().querySelectorAll('.rv-zeile .rv-name b'), b => b.textContent);
+      pruef('beta.23 (G1a): Tipp auf den Raum zeigt seine Stellplätze', platzZeilen().join('|') === T(`stellplaetzeFuer(${JSON.stringify(K)}).join('|')`) && platzZeilen().indexOf('Hochregal G1a') > -1, platzZeilen().join('|'));
+      pruef('beta.23 (G1a): Jede Stellplatzzeile hat ⋮', rv().querySelectorAll('.rv-zeile button.rv-mehr').length === platzZeilen().length);
+      klick('#rv-inhalt [data-rv-menue="p:Fensterbank"]');
+      klick('#rv-inhalt [data-rv-tun="umbenennen"]');
+      feld().value = 'Fensterbrett Süd';
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Stellplatz umbenannt, alter Name weg', platzZeilen().indexOf('Fensterbrett Süd') > -1 && platzZeilen().indexOf('Fensterbank') === -1);
+      pruef('beta.23 (G1a): Pflanzen am umbenannten Stellplatz ziehen mit', T(`S.eigene.filter(function(p){ return p.stellplatz === 'Fensterbrett Süd'; }).map(function(p){ return p.id; }).join()`) === 'Q1,Q2');
+      pruef('beta.23 (G1a): Der Standardplatz bleibt in anderen Räumen', T(`stellplaetzeFuer(${JSON.stringify(B)}).indexOf('Fensterbank') > -1`) === true);
+      klick('#rv-inhalt [data-rv-menue="p:Hochregal G1a"]');
+      klick('#rv-inhalt [data-rv-tun="loeschen"]');
+      pruef('beta.23 (G1a): Löschen fragt im Fenster nach und nennt die Folgen', /Stellplatz „Hochregal G1a“ löschen\? 1 Pflanze verliert den Stellplatz\./.test(rv().textContent));
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Stellplatz gelöscht, Pflanze ohne Stellplatz, Raum bleibt',
+        platzZeilen().indexOf('Hochregal G1a') === -1 && T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'Q3'; }); return p.stellplatz + '|' + p.raum; })()`) === '|' + K);
+      klick('#rv-inhalt [data-rv-menue="p:Boden"]');
+      klick('#rv-inhalt [data-rv-tun="loeschen"]');
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Gelöschter Standardplatz bleibt weg', T(`stellplaetzeFuer(${JSON.stringify(K)}).indexOf('Boden')`) === -1 && T(`stellplaetzeFuer(${JSON.stringify(B)}).indexOf('Boden') > -1`) === true);
+      T(`stellplatzAnlegen(${JSON.stringify(K)}, 'Boden')`);
+      pruef('beta.23 (G1a): Neu angelegt kommt er wieder', T(`stellplaetzeFuer(${JSON.stringify(K)}).filter(function(n){ return n === 'Boden'; }).length`) === 1);
+      T('rvZeichnen()');
+      klick('#rv-inhalt [data-rv-menue="neu"]');
+      feld().value = 'Pflanzenleiter';
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): „+ Neuer Stellplatz“ legt ihn im Raum an', T(`stellplaetzeFuer(${JSON.stringify(K)}).indexOf('Pflanzenleiter') > -1`) === true && platzZeilen().indexOf('Pflanzenleiter') > -1);
+      klick('#rv-inhalt [data-rv-zurueck]');
+      pruef('beta.23 (G1a): „‹ Alle Räume“ führt zurück zur Liste', raumZeilen().length === 2);
+      klick('#rv-inhalt [data-rv-menue="neu"]');
+      feld().value = 'Prüf-Flur G1a';
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): „+ Neuer Raum“ legt ihn an', raumZeilen().indexOf('Prüf-Flur G1a') > -1 && T(`raumListe().length`) === 3);
+      klick(`#rv-inhalt [data-rv-menue="r:${B}"]`);
+      klick('#rv-inhalt [data-rv-tun="loeschen"]');
+      pruef('beta.23 (G1a): Raum löschen nennt die Folgen', /Raum „Prüf-Bad G1a“ löschen\? 2 Pflanzen verlieren Raum und Stellplatz\./.test(rv().textContent), rv().textContent);
+      klick('#rv-inhalt [data-rv-tun="abbr"]');
+      pruef('beta.23 (G1a): Abbrechen löscht nichts', T(`raumListe().length`) === 3);
+      klick(`#rv-inhalt [data-rv-menue="r:${B}"]`);
+      klick('#rv-inhalt [data-rv-tun="loeschen"]');
+      klick('#rv-inhalt [data-rv-tun="ok"]');
+      pruef('beta.23 (G1a): Raum gelöscht, seine Pflanzen bleiben ohne Raum und Stellplatz',
+        T(`raumListe().some(function(r){ return r.id === ${JSON.stringify(B)}; })`) === false
+        && T(`S.eigene.filter(function(p){ return (p.id === 'Q4' || p.id === 'Q5') && !p.raum && !p.stellplatz; }).length`) === 2);
+      T(`(function(){ S.raeume = raumListe().slice(0, 1); rvZeichnen(); return 1; })()`);
+      klick('#rv-inhalt [data-rv-menue^="r:"]');
+      pruef('beta.23 (G1a): Der letzte Raum lässt sich nicht löschen', !!rv().querySelector('button[data-rv-tun="loeschen"][disabled]') && /letzte Raum/.test(rv().textContent));
+      pruef('beta.23 (G1a): Räume ohne Browser-Fenster', dialoge.n === 0, dialoge.n);
+    } catch(e){
+      pruef('beta.23 (G1a): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      ['prompt', 'confirm', 'alert'].forEach(f => { w[f] = altDlg[f]; });
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+        if(typeof samWahlEnde === 'function') samWahlEnde();
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.feuchtRueck = a.feuchtRueck; S.orte = a.orte;
+        if(a.samStufe === undefined) delete S.samStufe; else S.samStufe = a.samStufe;
+        if(a.samAnsicht === undefined) delete S.samAnsicht; else S.samAnsicht = a.samAnsicht;
+        S.gruppierung = a.gruppierung; designSetzen(a.design || 'botanisch'); ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt23)})`);
     }
   }
 

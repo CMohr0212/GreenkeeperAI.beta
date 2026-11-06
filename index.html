@@ -2655,7 +2655,6 @@ body.s-aus-giessart [data-schalter~="giessart"],
 body.s-aus-wachstum [data-schalter~="wachstum"],
 body.s-aus-wachstum .kblock[data-kblock="wachstum"],
 body.s-aus-pflege .kblock[data-kblock="pflege"],
-body.s-aus-licht .kblock[data-kblock="licht"],
 body.s-aus-befunde .kblock[data-kblock="befunde"],
 body.s-aus-abstammung .kblock[data-kblock="abstammung"]{display:none!important}
 body.einfach #zonen-sec{display:none!important}
@@ -4461,6 +4460,86 @@ html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile{display:flex;align-ite
 html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile + div.gm-gw-zeile{border-top:1px solid var(--linie)}
 html[data-design="klartext"] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile + div.gm-gw-zeile{border-top:2px solid var(--schrift)}
 html[data-design] .gm-gw-k .gm-gw-liste > div.gm-gw-zeile .gm-ue-wert{margin-left:auto}
+/* ══ Plan G1a (4.0-beta.23): Liste, Raster 2 bis 5, Auswahl, Räume ══
+   Jede Regel trägt #out, damit sie die älteren Rasterregeln der drei
+   Designs schlägt (die stärkste davon hat keine Kennung). */
+html[data-design] .sam-stufen{margin:4px 0 12px}
+html[data-design] #out.sam-raster[data-spalten="2"] .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html[data-design] #out.sam-raster[data-spalten="3"] .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-design] #out.sam-raster[data-spalten="4"] .grid{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:6px}
+html[data-design] #out.sam-raster[data-spalten="5"] .grid{grid-template-columns:repeat(5,minmax(0,1fr));column-gap:5px}
+html[data-design]:not([data-design="botanisch"]) #out.sam-raster[data-spalten="4"] .grid{gap:6px}
+html[data-design]:not([data-design="botanisch"]) #out.sam-raster[data-spalten="5"] .grid{gap:5px}
+html[data-design="botanisch"] #out.sam-raster[data-spalten="4"] .card,
+html[data-design="botanisch"] #out.sam-raster[data-spalten="5"] .card{margin-bottom:6px;border-radius:var(--r-mittel)}
+html[data-design] #out .card{position:relative}
+/* Zwei und drei Spalten: Name und Art (Abnahme 4) */
+html[data-design] #out.sam-raster:is([data-spalten="2"],[data-spalten="3"]) .card:not(.open) .card-bot{display:block;
+  margin:2px 0 0;font-size:var(--t-xs);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Ab vier Spalten nur Foto und Kurzname, ab fünf nur das Foto (F180). */
+html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) .card-body{padding:5px 6px 6px;text-align:left}
+html[data-design] #out.sam-raster[data-spalten="4"] .card:not(.open) .card-name{display:block;margin:0;
+  font-family:var(--f-body);font-size:var(--t-xs);font-weight:600;letter-spacing:0;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
+html[data-design] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-body{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* Liste: 8 bis 10 Pflanzen je Bildschirm, Foto, Name, Fälligkeit */
+html[data-design] #out.sam-zeilen .grid{display:block}
+html[data-design] #out.sam-zeilen .card:not(.open){margin:0 0 6px;border-radius:var(--r-mittel)}
+html[data-design] #out.sam-zeilen .card:not(.open) .card-btn{display:flex;align-items:center;gap:12px;
+  min-height:76px;padding:10px 12px 10px 10px}
+html[data-design] #out.sam-zeilen .card:not(.open) .thumb{display:block;flex:0 0 56px;width:56px;height:56px;
+  aspect-ratio:1;margin:0;border:0;border-radius:var(--r-klein);object-fit:cover}
+html[data-design] #out.sam-zeilen .card:not(.open) .card-btn:not(:has(.thumb))::before{content:'';display:block;
+  flex:0 0 56px;width:56px;height:56px;margin:0;border-radius:var(--r-klein);background:var(--fl-bildleer)}
+html[data-design] #out.sam-zeilen .card:not(.open) .card-body{flex:1 1 auto;min-width:0;padding:0;background:none;
+  display:flex;flex-direction:column;justify-content:center;gap:3px}
+html[data-design] #out.sam-zeilen .card:not(.open) :is(.card-bot,.card-lage,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-zeilen .card:not(.open) .card-name{margin:0;font-size:var(--t-l);line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-design] #out.sam-zeilen .card:not(.open) .card-stand{display:flex;margin:0;font-size:var(--t-s)}
+html[data-design="klartext"] #out.sam-zeilen .card:not(.open) .card-name{font-size:var(--t-l)}
+/* Auswahl: langes Drücken. Kein Systemmenü, kein Markieren von Text. */
+html[data-design] #out .card-btn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html[data-design] #out .card .thumb{pointer-events:none;-webkit-user-drag:none}
+html[data-design] #out .sam-haken{display:none}
+html[data-design] #out.sam-waehlen .sam-haken{display:grid;place-items:center;position:absolute;top:6px;right:6px;z-index:2;
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--fl-karte);background:rgba(0,0,0,.28);
+  color:transparent;font:700 15px/1 var(--f-body);pointer-events:none}
+html[data-design] #out.sam-waehlen .card.gewaehlt .sam-haken{background:var(--fl-akzent);color:var(--schrift-invers)}
+html[data-design] #out.sam-waehlen .card.gewaehlt{box-shadow:0 0 0 3px var(--fl-akzent)}
+html[data-design] #out.sam-zeilen.sam-waehlen .sam-haken{top:50%;right:12px;transform:translateY(-50%)}
+html[data-design] #out.sam-zeilen.sam-waehlen .card:not(.open) .card-btn{padding-right:48px}
+html[data-design] #out.sam-waehlen{padding-bottom:96px}
+html[data-design] body.sam-waehlen #fab-neu{display:none}
+html[data-design] .sam-wahl-leiste{position:fixed;left:12px;right:12px;z-index:45;
+  bottom:calc(70px + env(safe-area-inset-bottom, 0px));
+  display:flex;align-items:center;gap:8px;padding:10px 10px 10px 16px;
+  background:var(--fl-karte);border:1px solid var(--linie);border-radius:var(--r-gross);
+  box-shadow:0 6px 24px rgba(0,0,0,.18)}
+html[data-design] .sam-wahl-leiste[hidden],html[data-design] .sam-wahl-leiste.ans-aus{display:none}
+html[data-design] .sam-wahl-zahl{flex:1 1 auto;min-width:0;font-family:var(--f-body);font-size:var(--t-m);font-weight:600;color:var(--schrift)}
+html[data-design] .sam-wahl-leiste > button{flex:0 0 auto;margin:0}
+html[data-design="klartext"] .sam-wahl-leiste{border-width:2px;border-color:var(--schrift)}
+/* Räume in den Einstellungen */
+html[data-design] .rv-kopf{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+html[data-design] .rv-kopf > b{font-family:var(--f-display);font-size:var(--t-xl);font-weight:600}
+html[data-design] .rv-neu{margin:0 0 12px}
+html[data-design] .ein-karte.rv-liste > .rv-zeile{display:flex;align-items:center;gap:6px;padding-top:2px;padding-bottom:2px;padding-right:4px}
+html[data-design] .rv-zeile > .rv-name{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;
+  justify-content:center;gap:2px;min-height:var(--tap);margin:0;padding:8px 0;background:none;border:0;border-radius:0;
+  box-shadow:none;text-align:left;color:var(--schrift);font:inherit;letter-spacing:0;text-transform:none}
+html[data-design] .rv-zeile > button.rv-name{cursor:pointer}
+html[data-design] .rv-name > b{font-family:var(--f-body);font-size:var(--t-m);font-weight:600;overflow-wrap:anywhere}
+html[data-design] .rv-name > i{font-style:normal;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .rv-zeile > button.rv-mehr{flex:0 0 auto;display:grid;place-items:center;
+  width:var(--tap);height:var(--tap);min-height:var(--tap);padding:0;font-size:1.5rem;line-height:1;color:var(--schrift)}
+html[data-design] .ein-karte.rv-liste > .rv-box{padding-top:4px;padding-bottom:14px}
+html[data-design] .rv-box > p{margin:0 0 10px;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .rv-box > input{display:block;width:100%;margin:0 0 10px}
+html[data-design] .rv-box > .rv-fehler{color:var(--alarm);font-weight:600}
+html[data-design] .rv-leer{margin:0;padding:14px 16px;font-size:var(--t-s);color:var(--schrift-2)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -6991,13 +7070,8 @@ function anlegenPromptBauen(){
   else if(raumName) kontext.push('Sie soll stehen: ' + raumName + '.');
   else if(platz) kontext.push('Sie soll stehen: ' + platz + '.');
 
-  /* Echte Sonnenstunden schlagen jede Schätzung. Sie liegen nur vor,
-     wenn der Raum eingerichtet ist und die Pflanze schon einen Platz
-     im Grundriss hat — beim Anlegen ist das die Ausnahme. */
-  const std = (typeof standortLicht === 'function') ? standortLicht(hol('f-raum'), platz) : null;
-  if(std && std.stunden != null)
-    kontext.push('An diesem Platz misst die App im ' + std.monat + ' etwa '
-      + (std.text || std.stunden) + ' Stunden direkte Sonne pro Tag.');
+  /* 4.0-beta.23 (G1a, F212): Ohne Grundriss gibt es keine gemessenen
+     Sonnenstunden mehr für den Auftrag. */
 
   const sonne = hol('f-sonne');
   if(sonne && typeof SONNE !== 'undefined' && SONNE[sonne])
@@ -8159,6 +8233,10 @@ function platzUrteil(r, x, y, monat, etage){
    Antwort gibt es nur, wenn der Raum eingerichtet ist und die Stelle
    bekannt ist. Sonst null — die App rät hier nichts zusammen. */
 function standortStunden(p){
+  /* 4.0-beta.23 (G1a, F212): Der Grundriss ist entfernt, damit auch
+     die Lichtrechnung. Die Lagedaten (`S.orte`) bleiben gespeichert,
+     es wird aber nichts mehr daraus gerechnet. */
+  return null;
   if(!p) return null;
   const o = (typeof pflanzenOrt === 'function') ? pflanzenOrt(p.id) : null;
   if(!o || !o.raum) return null;
@@ -8177,6 +8255,8 @@ function standortStunden(p){
    im Grundriss hat: gesucht wird das Möbel, das so heißt wie der
    gewählte Stellplatz. */
 function standortLicht(raumId, platzName){
+  /* 4.0-beta.23 (G1a, F212): Lichtrechnung des Grundrisses entfällt. */
+  return null;
   if(!raumId || !platzName) return null;
   const r = (S.raeume || []).find(x=>x.id === raumId);
   if(!r || r.roh) return null;
@@ -8301,6 +8381,8 @@ function stellplaetzeFuer(raumId){
       if(m.name && !aus.includes(m.name)) aus.push(m.name);
     });
     (r.plaetze || []).forEach(n=>{ if(n && !aus.includes(n)) aus.push(n); });
+    /* 4.0-beta.23 (G1a): in den Einstellungen gelöschte Plätze */
+    if(r.plaetzeAus && r.plaetzeAus.length) return aus.filter(n=>!r.plaetzeAus.includes(n));
   }
   return aus;
 }
@@ -8311,7 +8393,8 @@ function stellplatzAnlegen(raumId, name){
   const r = raumListe().find(x=>x.id === raumId);
   if(r && !stellplaetzeFuer(raumId).includes(n)){
     r.plaetze = r.plaetze || [];
-    r.plaetze.push(n);
+    if(r.plaetzeAus) r.plaetzeAus = r.plaetzeAus.filter(x=>x !== n);
+    if(!stellplaetzeFuer(raumId).includes(n)) r.plaetze.push(n);
     sichern();
   }
   return n;
@@ -8424,7 +8507,7 @@ const DIAGNOSEN = [
    gewicht:{'lang-duenn':6,'klein-blass':5,'panasch-weg':6,'kein-wuchs':3,'blattfall':2,'keine-bluete':3},
    minus:{'flecken-trocken':2},
    erklaerung:'Die Pflanze streckt sich zum Licht: lange dünne Triebe, große Abstände zwischen den Blättern, blasse Farbe. Gestreckte Teile bleiben gestreckt, das wächst sich nicht aus.',
-   sofort:['Schrittweise heller stellen, nicht sofort in die pralle Sonne','Gestreckte Triebe einkürzen, sie treiben buschiger nach','Weniger gießen, solange wenig Licht da ist','Im Grundriss prüfen, wie viele Sonnenstunden der Platz wirklich hat']},
+   sofort:['Schrittweise heller stellen, nicht sofort in die pralle Sonne','Gestreckte Triebe einkürzen, sie treiben buschiger nach','Weniger gießen, solange wenig Licht da ist']},
 
   {id:'sonnenbrand', name:'Sonnenbrand', zustand:'sonnenbrand',
    gewicht:{'flecken-trocken':6,'raender-braun':2,'eingerollt':2},
@@ -10707,30 +10790,51 @@ function pflanzeEntfernen(id){
     </div>
   </div>
 
-  <div data-ans="sammlung" class="sam-ansicht" id="sammel-ansicht" hidden role="group" aria-label="Ansicht der Sammlung">
-    <button data-samview="karten" aria-pressed="true">Karten</button>
-    <button data-samview="zeilen" aria-pressed="false">Zeilen</button>
-    <button data-samview="raster" aria-pressed="false">Raster</button>
-  </div>
-
   <section data-ans="sammlung" class="controls">
     <div class="such-zeile"><input class="search" id="q" type="search" placeholder="Suchen: Name, Art, Symptom, Standort …" aria-label="Sammlung durchsuchen" autocomplete="off"><button class="ctrl-auf" id="btn-ctrl-auf" type="button" aria-label="Filter ein- und ausblenden">Filter</button></div>
     <div class="ctrl-klapp" id="ctrl-klapp" hidden>
-      <div class="ctrl-row" id="ctrl-ansicht"><span class="ctrl-lab">Ansicht</span><span id="ansicht-platz"></span></div>
     </div>
     <div class="filter-marken" id="filter-marken"></div>
   </section>
   <div data-ans="sammlung" id="ctrl-platz" aria-hidden="true"></div>
+  <!-- 4.0-beta.23 (G1a): Liste oder Raster mit 2 bis 5 Spalten -->
+  <div data-ans="sammlung" class="segment sam-stufen" id="sammel-ansicht" role="group" aria-label="Ansicht der Sammlung">
+    <button type="button" data-samstufe="liste" aria-pressed="false">Liste</button>
+    <button type="button" data-samstufe="2" aria-pressed="false" aria-label="2 Spalten">2</button>
+    <button type="button" data-samstufe="3" aria-pressed="false" aria-label="3 Spalten">3</button>
+    <button type="button" data-samstufe="4" aria-pressed="false" aria-label="4 Spalten">4</button>
+    <button type="button" data-samstufe="5" aria-pressed="false" aria-label="5 Spalten">5</button>
+  </div>
 
   <div data-ans="sammlung">
     <div id="such-hinweis"></div>
     <div id="out"></div>
     <p class="empty" id="empty" hidden>Nichts gefunden. Suchbegriff kürzen oder Filter zurücksetzen.</p>
+    <!-- 4.0-beta.23 (G1a): Leiste der Auswahl (langes Drücken auf eine Pflanze) -->
+    <div class="sam-wahl-leiste" id="sam-wahl-leiste" role="region" aria-label="Auswahl" hidden>
+      <span class="sam-wahl-zahl" id="sam-wahl-zahl" aria-live="polite"></span>
+      <button type="button" id="sam-wahl-ab">Abbrechen</button>
+      <button type="button" class="haupt" id="sam-wahl-giessen">Gegossen</button>
+    </div>
   </div>
 
 
 
 
+
+  <!-- 4.0-beta.23 (G1a, F212): Räume und Stellplätze statt Grundriss -->
+  <section data-ans="mehr" class="plan mh" id="raeume-sec" data-mh="raeume">
+    <h2 class="wz-h2">Räume</h2>
+    <div class="wz-kopfzeile">
+      <button class="wz-kopf" data-mh-go="raeume" aria-expanded="false" aria-controls="mh-in-raeume">
+        <span class="wz-t">Räume</span><span class="wz-p" aria-hidden="true">›</span></button>
+      <button class="wz-i" data-mh-info="raeume" aria-expanded="false" aria-label="Wozu ist die Raumliste da?">i</button>
+    </div>
+    <div class="wz-in" id="mh-in-raeume" hidden>
+      <p class="wz-hilfe" hidden>Hier benennst du Räume und Stellplätze um oder löschst sie. Ein Tipp auf einen Raum zeigt seine Stellplätze. Neue legst du hier an oder beim Anlegen einer Pflanze.</p>
+      <div id="rv-inhalt"></div>
+    </div>
+  </section>
 
   <section data-ans="mehr" class="plan mh" id="todo-sec" data-mh="aufgaben">
     <h2 class="wz-h2">Aufgaben</h2>
@@ -11253,7 +11357,10 @@ function pflanzeEntfernen(id){
     </div>
   </section>
 
-  <section data-ans="werkzeuge" class="plan wz" id="zonen-sec" data-wz="grundriss">
+  <!-- 4.0-beta.23 (G1a, F212): Der Grundrissplaner ist entfernt. Das
+       Markup bleibt nur, weil sein Skript beim Start daran bindet;
+       es ist nicht erreichbar und wird mit Baustein I gelöscht. -->
+  <section class="plan wz gr-entfernt" id="zonen-sec" hidden>
     <h2 class="wz-h2">Räume und Grundriss</h2>
     <div class="wz-kopfzeile">
       <button class="wz-kopf" data-wz-go="grundriss" aria-expanded="false" aria-controls="wz-in-grundriss">
@@ -11871,7 +11978,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tiere" aria-expanded="false" aria-label="Wozu ist die Haustier-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tiere" hidden>
-      <p class="wz-hilfe" hidden>Hier legst du fest, ob die App vor giftigen Pflanzen in Reichweite warnen soll — und vor welchen Tieren. Wo eine Pflanze steht, bestimmst du im Grundriss am Möbelstück; dort gibt es das Feld „Für Tiere erreichbar“. Die Angaben stammen aus der Giftpflanzenliste der ASPCA sowie aus Fachlisten für Nager und Ziervögel. Für Hund und Katze ist die Datenlage gut, bei Nagern und Vögeln lückenhaft — was sich nicht belegen ließ, wird als „ungeprüft“ ausgewiesen und nicht als unbedenklich. Im Zweifel gilt: außer Reichweite stellen.</p>
+      <p class="wz-hilfe" hidden>Hier legst du fest, ob die App vor giftigen Pflanzen in Reichweite warnen soll — und vor welchen Tieren. Wie hoch eine Pflanze steht, liest die App aus ihrem Stellplatz. Die Angaben stammen aus der Giftpflanzenliste der ASPCA sowie aus Fachlisten für Nager und Ziervögel. Für Hund und Katze ist die Datenlage gut, bei Nagern und Vögeln lückenhaft — was sich nicht belegen ließ, wird als „ungeprüft“ ausgewiesen und nicht als unbedenklich. Im Zweifel gilt: außer Reichweite stellen.</p>
     <div class="ein-karte"><div class="ctrl-row ein-ctrl"><span class="ctrl-lab">Hast du Haustiere?</span>
       <span class="tier-wahl segment" id="tier-anaus">
         <button class="chip" data-tieraktiv="1" aria-pressed="false">Ja</button>
@@ -11948,8 +12055,6 @@ function pflanzeEntfernen(id){
       <p class="fhint" id="hinweise-text" hidden></p>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-pflege"> <span class="lab" style="display:inline">Pflegeschritte in der Karte</span></label>
-      <label class="fspan check">
-        <input type="checkbox" role="switch" id="sch-licht"> <span class="lab" style="display:inline">Licht am Platz in der Karte</span></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-wachstum"> <span class="lab" style="display:inline">Wachstum in der Karte</span></label>
       <label class="fspan check">
@@ -12856,7 +12961,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.22';
+const FASSUNG = '4.0-beta.23';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15883,13 +15988,8 @@ function lagePaneHTML(p){
       : `<p class="lage-tier">${esc(ERREICHBARKEIT[stufe].name)}: für deine Tiere nicht erreichbar.</p>`;
   }
 
-  /* Steht die Pflanze nicht im Grundriss, sagt das der Block „Licht am
-     Platz“ samt Knopf zum Einzeichnen — ein zweiter Block hier sagte
-     dasselbe noch einmal. */
-  const o = pflanzenOrt(p.id);
-  const imPlan = (o && liste.some(r=>r.id===o.raum))
-    ? `<p class="lage-jetzt">Eingezeichnet in „${esc(raumNameVon(o.raum))}“. <button class="linkbtn" data-do="grundriss-fuer" data-p="${p.id}">Dort ansehen</button></p>`
-    : '';
+  /* 4.0-beta.23 (G1a, F212): Kein Block „Licht am Platz“ und kein
+     Verweis in den Grundriss mehr. */
 
   return kblock('platz', 'Platz', `<div class="lagebox">
       <label><span class="lab">Raum</span>
@@ -15897,8 +15997,7 @@ function lagePaneHTML(p){
       <label><span class="lab">Stellplatz</span>
         <select data-lage="platz" data-p="${p.id}">${sOpt}</select></label>
     </div>`)
-    + lichtAmPlatzHTML(p)
-    + kblock('tiere', 'Tiere', tierZeile) + kblock('grundriss', 'Grundriss', imPlan);
+    + kblock('tiere', 'Tiere', tierZeile);
 }
 
 /* ── Reiter ─────────────────────────────────────────────────
@@ -16248,6 +16347,7 @@ function cardHTML(p){
      im Dokument. */
   return `<article class="card" data-karte="${p.id}" data-ton="${karteStand(p).ton}" data-zton="${karteZustandTon(p)}">
     <button class="card-btn" data-t="${p.id}" aria-haspopup="dialog">
+      <span class="sam-haken" aria-hidden="true">✓</span>
       ${thumb}
       <span class="card-body">
         <span class="card-name">${esc(titel)}</span>
@@ -16690,14 +16790,8 @@ document.addEventListener('keydown', e=>{
    zwei Spalten aufgeht. Sie ist dort die Vorgabe. Weggenommen wird
    trotzdem nichts: wer 60 Pflanzen hat und die Zeilenliste zum
    Suchen braucht, findet sie einen Griff tiefer. */
-(function ansichtUmschalterVerlegen(){
-  const leiste = document.getElementById('sammel-ansicht');
-  const platz = document.getElementById('ansicht-platz');
-  if(!leiste || !platz) return;
-  leiste.hidden = false;
-  leiste.removeAttribute('role');
-  platz.appendChild(leiste);
-})();
+/* 4.0-beta.23 (G1a): Die Knopfleiste steht wieder sichtbar über der
+   Sammlung (F209). Verlegt wird nichts mehr. */
 
 /* ── Bildformat fuer das Raster ───────────────────────────────
    Botanisch setzt die Kachelhoehe aus dem echten Seitenverhaeltnis:
@@ -16768,15 +16862,21 @@ function rasterSpannenEin(gitter){
   if(!gitter || !gitter.offsetWidth) return;
   const karten = Array.prototype.slice.call(
     gitter.querySelectorAll(':scope > .card:not(.open)'));
-  /* Erst raeumen, dann pruefen: ein Designwechsel laesst sonst die
-     Zeilenspannen des vorigen Designs stehen, weil dieselben
-     Karten-Knoten wiederverwendet werden. */
-  karten.forEach(k=>{ k.style.gridRowEnd = ''; });
   const st = getComputedStyle(gitter);
   const zeile = parseFloat(st.gridAutoRows) || 0;
   /* Nur das Botanisch-Raster arbeitet mit feinen Zeilen. Die anderen
-     Designs haben normale Rasterzeilen und brauchen das hier nicht. */
-  if(!zeile || zeile > 12) return;
+     Designs haben normale Rasterzeilen; dort fallen alte Spannen eines
+     Designwechsels weg, ohne dass etwas zusammenfällt.
+     4.0-beta.23 (G1a, Befund T35): Im feinen Raster wird vor der
+     Messung nichts mehr geleert. Bis beta.22 fiel die Seite dabei
+     zusammen, der Browser klemmte den Scrollstand auf 0, und der
+     Beobachter startete die nächste Messung. Gemessen wird ohne Leeren
+     richtig, weil die Kacheln oben ausgerichtet sind (`align-items:start`)
+     und ihre Höhe nicht von der Spanne abhängt. */
+  if(!zeile || zeile > 12){
+    karten.forEach(k=>{ if(k.style.gridRowEnd) k.style.gridRowEnd = ''; });
+    return;
+  }
   /* Zwei Wege zur Hoehe, und der groessere gewinnt. Gemessen wird,
      was dasteht — solange ein Foto noch nicht geladen ist, ist das
      zu wenig. Gerechnet wird aus Spaltenbreite, zugeteiltem Format
@@ -16794,9 +16894,34 @@ function rasterSpannenEin(gitter){
       + (koerper ? koerper.getBoundingClientRect().height : 0) + rand;
     return Math.max(gemessen, gerechnet);
   });
+  _rasterBreite = gitter.clientWidth;
+  gitter._gkBreite = gitter.clientWidth;
+  const marke = rasterMarke();
   karten.forEach((k, i)=>{
     if(!hoehen[i]) return;
-    k.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil(hoehen[i] / zeile));
+    const sp = 'span ' + Math.max(1, Math.ceil(hoehen[i] / zeile));
+    if(k.style.gridRowEnd !== sp) k.style.gridRowEnd = sp;
+    RASTER_SPANNE[marke + '|' + k.dataset.karte] = sp;
+  });
+}
+
+/* 4.0-beta.23 (G1a): Die gemessenen Spannen merkt sich die App je
+   Design, Spaltenzahl und Breite. Nach jedem Neuzeichnen setzt
+   `render()` sie sofort wieder ein, ohne etwas zu messen. */
+var RASTER_SPANNE = {};
+var _rasterBreite = 0;
+function rasterMarke(){
+  return (S.design || '') + '|' + (typeof samSpalten === 'function' ? samSpalten() : 2) + '|' + Math.round(_rasterBreite || 0);
+}
+function rasterSpannenUebernehmen(){
+  const out = document.getElementById('out');
+  if(!out || !out.classList.contains('sam-raster')) return;
+  const marke = rasterMarke();
+  out.querySelectorAll('.grid > .card[data-karte]').forEach(k=>{
+    if(!k.style.getPropertyValue('--bildhoehe'))
+      k.style.setProperty('--bildhoehe', bildStufe(k.dataset.karte).toFixed(3));
+    const sp = RASTER_SPANNE[marke + '|' + k.dataset.karte];
+    if(sp) k.style.gridRowEnd = sp;
   });
 }
 
@@ -16842,8 +16967,11 @@ let _rasterAuge = null;
 function rasterBeobachten(){
   if(typeof ResizeObserver === 'undefined') return;
   if(!_rasterAuge){
+    /* 4.0-beta.23 (G1a): nur eine neue Breite löst eine Messung aus.
+       Eine neue Höhe kommt von den Spannen selbst. */
     _rasterAuge = new ResizeObserver(eintraege => {
-      if(eintraege.some(e => e.contentRect && e.contentRect.width > 0))
+      if(eintraege.some(e => e.contentRect && e.contentRect.width > 0
+          && Math.round(e.contentRect.width) !== Math.round(e.target._gkBreite || 0)))
         rasterSpannenBald();
     });
   }
@@ -17253,7 +17381,13 @@ function oeffne(id){
   karteOeffnen(id);
 }
 
-/* Karten, kompakte Zeilen oder Raster. Der Aufbau der Karte bleibt in
+/* 4.0-beta.23 (G1a): Liste oder Raster mit 2 bis 5 Spalten (F180, F209).
+   `samAnsicht()` bleibt für alle, die nur Liste oder Raster wissen
+   wollen ('zeilen' | 'raster'). Die Karten-Ansicht gibt es nicht mehr.
+   Alte Wahl aus `S.samAnsicht`: Zeilen und Karten werden Liste, Raster
+   die Spaltenzahl des Designs.
+
+   Früher: Karten, kompakte Zeilen oder Raster. Der Aufbau der Karte bleibt in
    allen dreien derselbe — was sich ändert, ist ausschließlich CSS.
    Damit klappt jede Karte weiterhin an Ort und Stelle auf und es gibt
    keine zweite Darstellung, die getrennt gepflegt werden müsste. */
@@ -17263,29 +17397,336 @@ const SAM_ANSICHTEN = ['karten','zeilen','raster'];
    Botanisch und Terrarium zeigen das Raster — dort traegt das Bild.
    Klartext zeigt eine Spalte: ein grosses Foto, ein grosser Name,
    nichts nebeneinander, was man verwechseln koennte. */
-const SAM_VORGABE = {botanisch:'raster', klartext:'karten', terrarium:'raster'};
-function samAnsicht(){
-  if(SAM_ANSICHTEN.includes(S.samAnsicht)) return S.samAnsicht;
-  return SAM_VORGABE[S.design] || 'karten';
+const SAM_STUFEN = ['liste', '2', '3', '4', '5'];
+const SAM_VORGABE = {botanisch:'2', klartext:'liste', terrarium:'2'};
+function samStufe(){
+  const v = S.samStufe == null ? '' : String(S.samStufe);
+  if(SAM_STUFEN.includes(v)) return v;
+  if(S.samAnsicht === 'zeilen' || S.samAnsicht === 'karten') return 'liste';
+  const vor = SAM_VORGABE[S.design] || 'liste';
+  if(S.samAnsicht === 'raster') return vor === 'liste' ? '3' : vor;
+  return vor;
 }
-function samAnsichtSetzen(v){
-  S.samAnsicht = SAM_ANSICHTEN.includes(v) ? v : 'karten';
+function samAnsicht(){ return samStufe() === 'liste' ? 'zeilen' : 'raster'; }
+function samSpalten(){ const v = samStufe(); return v === 'liste' ? 1 : parseInt(v, 10); }
+function samStufeSetzen(v){
+  v = String(v);
+  S.samStufe = SAM_STUFEN.includes(v) ? v : 'liste';
   sichern();
-  document.querySelectorAll('[data-samview]').forEach(b=>
-    b.setAttribute('aria-pressed', String(b.dataset.samview === S.samAnsicht)));
+  samAnsichtBeschriften();
   render();
 }
+/* Ältere Aufrufer kennen nur Liste und Raster. */
+function samAnsichtSetzen(v){
+  samStufeSetzen(v === 'raster' ? (samAnsicht() === 'raster' ? samStufe()
+    : (SAM_VORGABE[S.design] === 'liste' ? '3' : (SAM_VORGABE[S.design] || '3'))) : 'liste');
+}
 document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-samview]'); if(!b) return;
-  samAnsichtSetzen(b.dataset.samview);
+  const b = e.target.closest('[data-samstufe]'); if(!b) return;
+  samStufeSetzen(b.dataset.samstufe);
 });
-/* Nach dem Neuladen stand die Beschriftung fest auf „Karten“, auch
-   wenn die Raster-Ansicht gespeichert war. */
 function samAnsichtBeschriften(){
-  document.querySelectorAll('[data-samview]').forEach(b=>
-    b.setAttribute('aria-pressed', String(b.dataset.samview === samAnsicht())));
+  const v = samStufe();
+  document.querySelectorAll('[data-samstufe]').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.samstufe === v)));
 }
 samAnsichtBeschriften();
+
+/* ── Auswahl in der Sammlung (G1a) ───────────────────────────
+   Langes Drücken auf eine Zeile oder Kachel startet die Auswahl.
+   Danach wählt ein Tipp, statt die Karte zu öffnen. Unten steht die
+   Leiste mit der Zahl und „Gegossen“. Weitere Aktionen kommen mit
+   G3a. `SAM_WAHL` ist null, solange keine Auswahl läuft. */
+var SAM_WAHL = null;
+var SAM_LANG_MS = 500;
+var _samLang = null;      /* {t, x, y, id} während der Finger liegt */
+var _samSchluck = 0;      /* Zeitpunkt, bis zu dem ein Klick verschluckt wird */
+function samWahlAktiv(){ return !!SAM_WAHL; }
+function samWahlStarten(id){
+  SAM_WAHL = new Set(id ? [id] : []);
+  samWahlZeichnen();
+}
+function samWahlEnde(){
+  SAM_WAHL = null;
+  samWahlZeichnen();
+}
+function samWahlUmschalten(id){
+  if(!SAM_WAHL) return;
+  if(SAM_WAHL.has(id)) SAM_WAHL.delete(id); else SAM_WAHL.add(id);
+  if(!SAM_WAHL.size){ samWahlEnde(); return; }
+  samWahlZeichnen();
+}
+/* Zeichnet nur Marken und Leiste, nie die ganze Sammlung: ein Tipp
+   während der Auswahl soll die Seite nicht neu aufbauen. */
+function samWahlZeichnen(){
+  const out = document.getElementById('out');
+  const an = !!SAM_WAHL;
+  document.body.classList.toggle('sam-waehlen', an);
+  if(out){
+    out.classList.toggle('sam-waehlen', an);
+    out.querySelectorAll('.card[data-karte]').forEach(k=>{
+      const g = an && SAM_WAHL.has(k.dataset.karte);
+      k.classList.toggle('gewaehlt', g);
+      const b = k.querySelector('.card-btn');
+      if(!b) return;
+      if(an){ b.setAttribute('aria-pressed', String(g)); b.removeAttribute('aria-haspopup'); }
+      else { b.removeAttribute('aria-pressed'); b.setAttribute('aria-haspopup', 'dialog'); }
+    });
+  }
+  const leiste = document.getElementById('sam-wahl-leiste');
+  if(leiste) leiste.hidden = !an;
+  const zahl = document.getElementById('sam-wahl-zahl');
+  if(zahl) zahl.textContent = an
+    ? (SAM_WAHL.size === 1 ? '1 Pflanze gewählt' : SAM_WAHL.size + ' Pflanzen gewählt') : '';
+}
+/* Antippen einer Karte: true heißt, der Tipp ist verbraucht. */
+function samWahlKlick(id){
+  if(Date.now() < _samSchluck){ _samSchluck = 0; return true; }
+  if(!SAM_WAHL) return false;
+  samWahlUmschalten(id);
+  return true;
+}
+/* „Gegossen“ für alle Gewählten. Schreibt dasselbe wie der Knopf in
+   der Karte (`giessen`): heutiges Datum in `S.water`, Rückfragen-
+   zähler `S.feuchtRueck` weg. Wer heute schon gegossen ist, bleibt
+   unverändert — die Karte würde hier fragen, ob der Eintrag weg soll.
+   Gespeichert wird einmal am Ende, nicht je Pflanze. */
+function samGegossen(ids){
+  const heute = iso(HEUTE);
+  let neu = 0, schon = 0;
+  (ids || []).forEach(id=>{
+    if(!allePflanzen().some(p=>p.id === id)) return;
+    const l = giessTermine(id);
+    if(l.includes(heute)){ schon++; return; }
+    l.push(heute); l.sort();
+    S.water[id] = l;
+    if(S.feuchtRueck && S.feuchtRueck[id]) delete S.feuchtRueck[id];
+    neu++;
+  });
+  if(neu) sichern();
+  return {neu, schon};
+}
+function samLangAbbrechen(){
+  if(_samLang){ clearTimeout(_samLang.t); _samLang = null; }
+}
+document.addEventListener('pointerdown', e=>{
+  const b = e.target.closest && e.target.closest('#out .card-btn');
+  samLangAbbrechen();
+  if(!b || (e.button != null && e.button > 0)) return;
+  const id = b.dataset.t;
+  _samLang = {x: e.clientX, y: e.clientY, id,
+    t: setTimeout(()=>{
+      _samLang = null;
+      _samSchluck = Date.now() + 900;
+      if(SAM_WAHL){ if(!SAM_WAHL.has(id)) samWahlUmschalten(id); }
+      else samWahlStarten(id);
+      if(navigator.vibrate) try{ navigator.vibrate(15); }catch(err){}
+    }, SAM_LANG_MS)};
+}, true);
+document.addEventListener('pointermove', e=>{
+  if(!_samLang) return;
+  if(Math.abs(e.clientX - _samLang.x) > 10 || Math.abs(e.clientY - _samLang.y) > 10) samLangAbbrechen();
+}, true);
+['pointerup', 'pointercancel'].forEach(t=>document.addEventListener(t, samLangAbbrechen, true));
+window.addEventListener('scroll', samLangAbbrechen, {passive:true});
+/* Android öffnet bei langem Druck auf ein Bild sein eigenes Menü. */
+document.addEventListener('contextmenu', e=>{
+  if(e.target.closest && e.target.closest('#out .card-btn')) e.preventDefault();
+});
+document.addEventListener('click', e=>{
+  if(e.target.closest('#sam-wahl-ab')){ samWahlEnde(); return; }
+  if(e.target.closest('#sam-wahl-giessen')){
+    const ids = SAM_WAHL ? [...SAM_WAHL] : [];
+    samGegossen(ids);
+    SAM_WAHL = null;
+    render();
+    samWahlZeichnen();
+  }
+});
+
+/* ── Räume und Stellplätze (G1a, F212) ───────────────────────
+   Ersatz für die Raumliste des Grundrissplaners, in den Einstellungen.
+   Liste der Räume; ein Tipp auf einen Raum zeigt seine Stellplätze.
+   Jede Zeile hat rechts ⋮ mit „Umbenennen“ und „Löschen“. Alles im
+   Fenster, kein Browser-Dialog. Gelöschte Standard- oder Möbelplätze
+   stehen je Raum in `r.plaetzeAus`, damit sie nicht wiederkommen. */
+var RV = {raum:null, menue:null, tun:null, fehler:''};
+function rvPflanzenIm(raumId, platz){
+  return allePflanzen().filter(p=>p.raum === raumId && (platz == null || p.stellplatz === platz));
+}
+function rvAnzahl(n, eins, viele){ return n + ' ' + (n === 1 ? eins : viele); }
+function rvRaumUmbenennen(id, name){
+  const n = (name || '').trim();
+  if(!n) return 'Bitte einen Namen eingeben.';
+  const liste = raumListe();
+  if(liste.some(r=>r.id !== id && r.name.toLowerCase() === n.toLowerCase())) return 'Diesen Raum gibt es schon.';
+  const r = liste.find(x=>x.id === id);
+  if(!r) return 'Raum nicht gefunden.';
+  r.name = n;
+  S.raeume = liste;
+  sichern();
+  return '';
+}
+function rvRaumLoeschen(id){
+  const liste = raumListe();
+  if(liste.length < 2) return 'Der letzte Raum bleibt stehen.';
+  rvPflanzenIm(id).forEach(p=>aenderungSetzen(p.id, {raum:'', stellplatz:''}));
+  S.raeume = liste.filter(r=>r.id !== id);
+  if(S.raumAktiv === id) S.raumAktiv = S.raeume[0] ? S.raeume[0].id : null;
+  sichern();
+  return '';
+}
+function rvPlatzUmbenennen(raumId, alt, name){
+  const n = (name || '').trim();
+  if(!n) return 'Bitte einen Namen eingeben.';
+  const r = raumListe().find(x=>x.id === raumId);
+  if(!r) return 'Raum nicht gefunden.';
+  if(n === alt) return '';
+  if(stellplaetzeFuer(raumId).some(x=>x.toLowerCase() === n.toLowerCase() && x !== alt)) return 'Diesen Stellplatz gibt es schon.';
+  r.plaetze = (r.plaetze || []).filter(x=>x !== alt);
+  if(!(r.plaetze.includes(alt)) && stellplaetzeFuer(raumId).includes(alt)){
+    r.plaetzeAus = r.plaetzeAus || [];
+    if(!r.plaetzeAus.includes(alt)) r.plaetzeAus.push(alt);
+  }
+  r.plaetzeAus = (r.plaetzeAus || []).filter(x=>x !== n);
+  if(!stellplaetzeFuer(raumId).includes(n)) r.plaetze.push(n);
+  rvPflanzenIm(raumId, alt).forEach(p=>aenderungSetzen(p.id, {stellplatz:n}));
+  sichern();
+  return '';
+}
+function rvPlatzLoeschen(raumId, name){
+  const r = raumListe().find(x=>x.id === raumId);
+  if(!r) return 'Raum nicht gefunden.';
+  r.plaetze = (r.plaetze || []).filter(x=>x !== name);
+  if(stellplaetzeFuer(raumId).includes(name)){
+    r.plaetzeAus = r.plaetzeAus || [];
+    if(!r.plaetzeAus.includes(name)) r.plaetzeAus.push(name);
+  }
+  rvPflanzenIm(raumId, name).forEach(p=>aenderungSetzen(p.id, {stellplatz:''}));
+  sichern();
+  return '';
+}
+function rvBoxHTML(art, schluessel, name, n){
+  const fehler = RV.fehler ? '<p class="rv-fehler" role="alert">' + esc(RV.fehler) + '</p>' : '';
+  if(RV.tun === 'menue'){
+    const letzter = art === 'raum' && raumListe().length < 2;
+    return '<div class="rv-box"><div class="gm-zfrage-btns">'
+      + '<button type="button" data-rv-tun="umbenennen">Umbenennen</button>'
+      + '<button type="button" class="loeschen" data-rv-tun="loeschen"' + (letzter ? ' disabled' : '') + '>Löschen</button>'
+      + '</div>' + (letzter ? '<p>Der letzte Raum lässt sich nicht löschen.</p>' : '') + '</div>';
+  }
+  if(RV.tun === 'umbenennen' || RV.tun === 'neu')
+    return '<div class="rv-box">' + fehler
+      + '<input type="text" id="rv-feld" autocomplete="off" aria-label="' + (art === 'raum' ? 'Name des Raums' : 'Name des Stellplatzes')
+      + '" value="' + esc(RV.tun === 'neu' ? '' : name) + '">'
+      + '<div class="gm-zfrage-btns"><button type="button" class="haupt" data-rv-tun="ok">Speichern</button>'
+      + '<button type="button" data-rv-tun="abbr">Abbrechen</button></div></div>';
+  if(RV.tun === 'loeschen'){
+    const folge = n
+      ? (art === 'raum' ? rvAnzahl(n, 'Pflanze verliert', 'Pflanzen verlieren') + ' Raum und Stellplatz.'
+                        : rvAnzahl(n, 'Pflanze verliert', 'Pflanzen verlieren') + ' den Stellplatz.')
+      : 'Keine Pflanze steht dort.';
+    return '<div class="rv-box">' + fehler + '<p>' + esc((art === 'raum' ? 'Raum „' : 'Stellplatz „') + name + '“ löschen? ' + folge) + '</p>'
+      + '<div class="gm-zfrage-btns"><button type="button" class="loeschen" data-rv-tun="ok">Löschen</button>'
+      + '<button type="button" data-rv-tun="abbr">Abbrechen</button></div></div>';
+  }
+  return '';
+}
+function rvZeileHTML(art, schluessel, name, unter, n){
+  const offen = RV.menue === schluessel;
+  const kopf = art === 'raum'
+    ? '<button type="button" class="rv-name" data-rv-raum="' + esc(schluessel.slice(2)) + '"><b>' + esc(name) + '</b><i>' + esc(unter) + '</i></button>'
+    : '<span class="rv-name"><b>' + esc(name) + '</b><i>' + esc(unter) + '</i></span>';
+  return '<div class="rv-zeile">' + kopf
+    + '<button type="button" class="mehr-dazu rv-mehr" data-rv-menue="' + esc(schluessel) + '" aria-expanded="' + offen
+    + '" aria-label="Mehr zu ' + esc(name) + '">⋮</button></div>'
+    + (offen ? rvBoxHTML(art, schluessel, name, n) : '');
+}
+function rvZeichnen(){
+  const box = document.getElementById('rv-inhalt');
+  if(!box) return;
+  let html = '';
+  const neuOffen = RV.menue === 'neu';
+  if(!RV.raum || !raumListe().some(r=>r.id === RV.raum)){
+    RV.raum = null;
+    html += '<div class="gm-zfrage-btns rv-neu"><button type="button" data-rv-menue="neu" aria-expanded="' + neuOffen + '">+ Neuer Raum</button></div>';
+    html += '<div class="ein-karte rv-liste">';
+    if(neuOffen) html += rvBoxHTML('raum', 'neu', '', 0);
+    html += raumListe().map(r=>{
+      const n = rvPflanzenIm(r.id).length;
+      const sp = stellplaetzeFuer(r.id).length;
+      return rvZeileHTML('raum', 'r:' + r.id, r.name, rvAnzahl(n, 'Pflanze', 'Pflanzen') + ' · ' + rvAnzahl(sp, 'Stellplatz', 'Stellplätze'), n);
+    }).join('');
+    html += '</div>';
+  } else {
+    const r = raumListe().find(x=>x.id === RV.raum);
+    html += '<div class="rv-kopf"><button type="button" class="mehr-dazu" data-rv-zurueck>‹ Alle Räume</button><b>' + esc(r.name) + '</b></div>';
+    html += '<div class="gm-zfrage-btns rv-neu"><button type="button" data-rv-menue="neu" aria-expanded="' + neuOffen + '">+ Neuer Stellplatz</button></div>';
+    html += '<div class="ein-karte rv-liste">';
+    if(neuOffen) html += rvBoxHTML('platz', 'neu', '', 0);
+    const plaetze = stellplaetzeFuer(r.id);
+    html += plaetze.length ? plaetze.map(sp=>{
+      const n = rvPflanzenIm(r.id, sp).length;
+      return rvZeileHTML('platz', 'p:' + sp, sp, rvAnzahl(n, 'Pflanze', 'Pflanzen'), n);
+    }).join('') : '<p class="rv-leer">Noch keine Stellplätze.</p>';
+    html += '</div>';
+  }
+  box.innerHTML = html;
+  const feld = document.getElementById('rv-feld');
+  if(feld){ try{ feld.focus(); }catch(e){} }
+}
+function rvAusfuehren(){
+  const feld = document.getElementById('rv-feld');
+  const wert = feld ? feld.value : '';
+  const m = RV.menue || '';
+  let f = '';
+  if(m === 'neu'){
+    if(!RV.raum){
+      if(!wert.trim()) f = 'Bitte einen Namen eingeben.';
+      else if(raumListe().some(r=>r.name.toLowerCase() === wert.trim().toLowerCase())) f = 'Diesen Raum gibt es schon.';
+      else raumAnlegen(wert);
+    } else {
+      if(!wert.trim()) f = 'Bitte einen Namen eingeben.';
+      else if(stellplaetzeFuer(RV.raum).some(x=>x.toLowerCase() === wert.trim().toLowerCase())) f = 'Diesen Stellplatz gibt es schon.';
+      else stellplatzAnlegen(RV.raum, wert);
+    }
+  } else if(m.startsWith('r:')){
+    const id = m.slice(2);
+    f = RV.tun === 'loeschen' ? rvRaumLoeschen(id) : rvRaumUmbenennen(id, wert);
+  } else if(m.startsWith('p:')){
+    const alt = m.slice(2);
+    f = RV.tun === 'loeschen' ? rvPlatzLoeschen(RV.raum, alt) : rvPlatzUmbenennen(RV.raum, alt, wert);
+  }
+  if(f){ RV.fehler = f; rvZeichnen(); return false; }
+  RV.menue = null; RV.tun = null; RV.fehler = '';
+  rvZeichnen();
+  render();
+  return true;
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest || !e.target.closest('#rv-inhalt')) return;
+  const raum = e.target.closest('[data-rv-raum]');
+  if(raum){ RV.raum = raum.dataset.rvRaum; RV.menue = null; RV.tun = null; RV.fehler = ''; rvZeichnen(); return; }
+  if(e.target.closest('[data-rv-zurueck]')){ RV.raum = null; RV.menue = null; RV.tun = null; RV.fehler = ''; rvZeichnen(); return; }
+  const me = e.target.closest('[data-rv-menue]');
+  if(me){
+    const k = me.dataset.rvMenue;
+    if(RV.menue === k){ RV.menue = null; RV.tun = null; }
+    else { RV.menue = k; RV.tun = k === 'neu' ? 'neu' : 'menue'; }
+    RV.fehler = '';
+    rvZeichnen();
+    return;
+  }
+  const t = e.target.closest('[data-rv-tun]');
+  if(!t) return;
+  const a = t.dataset.rvTun;
+  if(a === 'umbenennen' || a === 'loeschen'){ RV.tun = a; RV.fehler = ''; rvZeichnen(); return; }
+  if(a === 'abbr'){ RV.menue = null; RV.tun = null; RV.fehler = ''; rvZeichnen(); return; }
+  if(a === 'ok') rvAusfuehren();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && e.target && e.target.id === 'rv-feld'){ e.preventDefault(); rvAusfuehren(); }
+});
 
 /* Vier Wochen im Voraus: je Tag ein Balken mit der Zahl fälliger
    Pflanzen. Wo sich etwas türmt, sieht man es hier, bevor man verreist.
@@ -17421,6 +17862,12 @@ function render(){
   }
   $('#out').innerHTML = html;
   $('#out').className = 'sam-' + samAnsicht();
+  /* 4.0-beta.23 (G1a): Spaltenzahl, Auswahl, Zeilenspannen der letzten
+     Messung gleich übernehmen — sonst fällt das Botanisch-Raster bis
+     zur nächsten Messung zusammen und der Browser klemmt den Stand. */
+  $('#out').dataset.spalten = String(samSpalten());
+  if(typeof rasterSpannenUebernehmen === 'function') rasterSpannenUebernehmen();
+  if(typeof samWahlZeichnen === 'function') samWahlZeichnen();
   if(typeof giessplanZeichnen === 'function') giessplanZeichnen();
   if(typeof wunschSichtbarkeit === 'function') wunschSichtbarkeit();
   $('#empty').hidden = list.length>0;
@@ -17431,6 +17878,7 @@ function render(){
      folgen ihr, nicht dem Datenbestand. */
   _karteListe = list.map(p=>p.id);
   $('#out').querySelectorAll('.card-btn').forEach(b=>b.onclick=()=>{
+    if(typeof samWahlKlick === 'function' && samWahlKlick(b.dataset.t)) return;
     karteOeffnen(b.dataset.t, b);
   });
   $('#out').querySelectorAll('.group-head').forEach(b=>b.onclick=()=>{
@@ -21300,7 +21748,7 @@ const BOT_ABSICHTEN = [
   {key:'bestimmen', name:'Art bestimmen',                       worte:/was ist das|welche (art|pflanze) ist|bestimm|wie hei(ß|ss)t (die|diese|das)/},
   {key:'problem',   name:'Problem klären', werkzeug:'doktor',   worte:/gelb|braun|fleck|krank|schaedling|schädling|laus|läuse|laeuse|milbe|mücke|muecke|thrips|welk|haengt|hängt|fault|faul|schimmel|problem|stirbt|eingeht|vertrock|matsch|weich|abfall|fallen ab|blaetter fallen|blätter fallen|kaputt/},
   {key:'substrat',  name:'Substrat',      werkzeug:'substrat',  worte:/substrat|erdmischung|mischung|pinienrinde|rinde|perlite|bims|torf|kokos|seramis|pon\b/},
-  {key:'standort',  name:'Standort',      werkzeug:'grundriss', worte:/standort|wohin|wo soll|welches fenster|zu dunkel|zu hell|sonne|licht/},
+  {key:'standort',  name:'Standort',      worte:/standort|wohin|wo soll|welches fenster|zu dunkel|zu hell|sonne|licht/},
   {key:'nachschlagen', name:'Nachschlagen', mehr:'bibliothek',  worte:/steckbrief|nachschlag|was braucht|infos? (zu|über|ueber)/}
 ];
 function botAbsicht(key){ return BOT_ABSICHTEN.find(a => a.key === key) || null; }
@@ -26923,7 +27371,7 @@ const ANSICHTEN = ['heute','sammlung','botaniker','werkzeuge','mehr'];
    Blöcke im Reiter „Werkzeuge“. Damit die vielen vorhandenen Aufrufe
    ansichtZeigen('doktor') und die Verknüpfung ?start=doktor weiter
    funktionieren, werden die alten Namen hier übersetzt. */
-const WERKZEUGE = ['doktor','giessplan','substrat','vermehren','stammbaum','grundriss'];
+const WERKZEUGE = ['doktor','giessplan','substrat','vermehren','stammbaum'];
 /* „Alles auf einer Seite" ist entfallen. Die Einstellung stammt aus
    der Zeit, als die Seiten kurz waren; mit Fenstern ueber die volle
    Hoehe ergibt eine Endlosseite keinen Sinn mehr. Die Konstante
@@ -27017,6 +27465,8 @@ function ansichtZeigen(name, merken){
      Anstoss von hier kostet nichts und wirkt auch dort, wo es
      keinen ResizeObserver gibt. */
   if(name === 'sammlung' && typeof rasterSpannenBald === 'function') rasterSpannenBald();
+  /* 4.0-beta.23 (G1a): Wer die Sammlung verlässt, beendet die Auswahl. */
+  if(name !== 'sammlung' && typeof SAM_WAHL !== 'undefined' && SAM_WAHL) samWahlEnde();
   const kopf = ANSICHT_KOPF[name];
   if(kopf) $('#kopf-titel').textContent = kopf[1] || '';
   const etikett = document.getElementById('kopf-etikett');
@@ -27167,7 +27617,10 @@ function sektionOeffnen(key, ausloeser){
 
   sekZurueckKnopf();
   modalAuf('sek-modal', ausloeser);
-  if(key === 'grundriss' && typeof planRender === 'function') planRender();
+  if(key === 'raeume' && typeof rvZeichnen === 'function'){
+    RV.raum = null; RV.menue = null; RV.tun = null; RV.fehler = '';
+    rvZeichnen();
+  }
   if(key === 'ansicht' && typeof designWahlZeichnen === 'function') designWahlZeichnen();
   if(key === 'ansicht' && typeof dichteZeichnen === 'function') dichteZeichnen();
   if(key === 'wetter' && typeof wetterEinstellungZeichnen === 'function') wetterEinstellungZeichnen();
@@ -27327,6 +27780,7 @@ const WZ_KACHEL = {
 /* Zeichnungen fuer die Menuezeilen. Dieselbe Strichbreite wie auf den
    Werkzeugkacheln, nur kleiner. */
 const MH_IKON = {
+  raeume:    '<path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>',
   sicherung: '<path d="M12 3l7.5 3v5.6c0 4.3-3.1 8-7.5 9.4-4.4-1.4-7.5-5.1-7.5-9.4V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/>',
   urlaub:    '<path d="M4 4h16v16H4zM4 9h16M9 4v16"/>',
   wetter:    '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
@@ -27362,6 +27816,8 @@ const MH_IKON = {
    damit ohne Antippen, was ihn erwartet — und bei Sicherung und
    Einstellungen sogar den aktuellen Stand. */
 const MH_UNTER = {
+  /* 4.0-beta.23 (G1a) */
+  raeume:    ()=>{ const n = raumListe().length; return n === 1 ? 'Ein Raum' : n + ' Räume'; },
   aufgaben:  ()=>{
     const n = allePflanzen().flatMap(aufgabenVon).filter(t=>!t.done).length;
     return n ? (n === 1 ? 'Eine offene Aufgabe' : n + ' offene Aufgaben') : 'Nichts offen';
@@ -27422,7 +27878,7 @@ const MH_STILL = ['ansicht','tiere','rundgang','kidienst','wasser','duenger','rh
                   'bib-arten','bib-rezepte','bib-wissen'];
 
 const MH_GRUPPEN = [
-  {titel:'Sammlung', punkte:['aufgaben','wunsch']},
+  {titel:'Sammlung', punkte:['raeume','aufgaben','wunsch']},
   {titel:'Pflege',   punkte:['giess','wetter','kartei','bibliothek']},
   {titel:'App',      punkte:['sicherung','einstell','tour','install']},
   {titel:'Hilfe',    punkte:['patch','rueck','melde','sprot']}
@@ -28503,7 +28959,6 @@ var MODI = {
 var SCHALTER = [
   {k:'hinweise',   id:'ans-hinweise',   vor:{sammler:false, entdecker:true}},
   {k:'pflege',     id:'sch-pflege',     vor:{sammler:false, entdecker:true}},
-  {k:'licht',      id:'sch-licht',      vor:{sammler:false, entdecker:true}},
   {k:'wachstum',   id:'sch-wachstum',   vor:{sammler:false, entdecker:true}},
   {k:'befunde',    id:'sch-befunde',    vor:{sammler:false, entdecker:true}},
   {k:'abstammung', id:'sch-abstammung', vor:{sammler:false, entdecker:true}},
@@ -29451,12 +29906,6 @@ function dokPromptBauen(){
     zeilen.push('Es handelt sich um: ' + p.art + (p.botanisch ? ' (' + p.botanisch + ')' : '') + '.');
     if(lageVon(p)) zeilen.push('Steht: ' + lageVon(p) + '.');
     if(SONNE[p.sonne]) zeilen.push('Lichtbedarf: ' + SONNE[p.sonne].text + '.');
-    /* Steht sie im Grundriss, kennt die App die tatsächliche
-       Sonnenmenge — die ist belastbarer als jede Schätzung am Foto. */
-    const sl = (typeof standortStunden === 'function') ? standortStunden(p) : null;
-    if(sl && sl.stunden != null)
-      zeilen.push('An diesem Platz misst die App im ' + sl.monat + ' etwa '
-        + (sl.text || sl.stunden) + ' Stunden direkte Sonne pro Tag.');
     const st = giessStatus(p);
     if(st.letzte) zeilen.push('Zuletzt gegossen vor ' + st.tage + ' Tagen, üblicher Abstand ' + ivWort(st.iv) + '.');
     /* Was am Gerät eingetragen wurde, ist belastbarer als jede
@@ -35278,7 +35727,7 @@ const TOUR_KAPITEL = {
       { vor: ()=>ansichtZeigen('werkzeuge'),
         ziel: ()=>document.querySelector('.kachelgitter'),
         titel: 'Die Werkzeuge',
-        text: 'Umtopfen, Substrat mischen, Stecklinge ziehen, Stammbaum, Pflanzendoktor, Grundriss.',
+        text: 'Umtopfen, Substrat mischen, Stecklinge ziehen, Stammbaum, Pflanzendoktor.',
         warte: 320 },
 
       { vor: ()=>ansichtZeigen('mehr'),
@@ -35474,7 +35923,7 @@ const TOUR_KAPITEL = {
       { vor: ()=>ansichtZeigen('werkzeuge'),
         ziel: ()=>document.querySelector('#doktor-sec .wz-kopfzeile'),
         titel: 'Werkzeuge, eines offen',
-        text: 'Der Pflanzendoktor sucht die Ursache, wenn etwas nicht stimmt. Substrat mischen rechnet die Mischung und die Menge für deinen Topf. Räume und Grundriss zeichnet deine Wohnung und rechnet daraus das Licht an jedem Platz. Jedes erklärt sich, sobald du es öffnest.' }
+        text: 'Der Pflanzendoktor sucht die Ursache, wenn etwas nicht stimmt. Substrat mischen rechnet die Mischung und die Menge für deinen Topf. Jedes erklärt sich, sobald du es öffnest.' }
     ]
   },
 
@@ -35523,42 +35972,6 @@ const TOUR_KAPITEL = {
     ]
   },
 
-  grundriss: {
-    hin: ()=>{ sektionOeffnen('grundriss'); },
-    name: 'Räume und Grundriss',
-    schritte: ()=>[
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('gr-liste'),
-        titel: 'Erst die Räume',
-        text: 'Jeder Raum ist eine Karte. Erst wenn Maße, Fenster und Himmelsrichtung stehen, kann die App rechnen — vorher steht „noch nicht eingerichtet“ dabei.',
-        warte: 320 },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('btn-raum-neu'),
-        titel: 'Einen Raum anlegen',
-        text: 'Danach geht es in die Zeichenfläche: Größe festlegen, Wände und Fenster auf die Kanten setzen, den Raum auf dem Kompass drehen. Quer halten hilft sehr.' },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('sekm-info'),
-        titel: 'Freiwillig, aber nützlich',
-        text: 'Der Grundriss ist der aufwendigste Teil der App und der einzige, der echte Sonnenstunden liefert statt einer Schätzung. Nichts davon verbietet dir einen Standort — die App sagt nur, was sie sieht.' }
-    ]
-  },
-
-  plan: {
-    hin: ()=>{ sektionOeffnen('grundriss'); if(typeof grStufe !== 'undefined' && S.raumAktiv){ grStufe = 'editor'; if(typeof planRender === 'function') planRender(); } },
-    name: 'Die Zeichenfläche',
-    schritte: ()=>[
-      { ziel: ()=>document.querySelector('#gr-editor .gr-tabs'),
-        titel: 'Sechs Werkzeuge',
-        text: 'Pflanzen setzen, Möbel stellen, Fläche füllen, Wände und Fenster auf die Kanten ziehen, Licht rechnen, Raummaße ändern. Immer nur eines aktiv — darunter steht, was gerade ein Tippen bewirkt.',
-        warte: 340 },
-      { ziel: ()=>document.querySelector('#gr-editor .raumgrid'),
-        titel: 'Maße und Himmelsrichtung',
-        text: 'Die Drehung ist die wichtigste Angabe überhaupt: Ein Fenster nach Norden bringt an manchen Tagen ein Zehntel des Lichts eines Fensters nach Süden. Der rote Zeiger oben rechts zeigt nach Norden.' },
-      { ziel: ()=>document.querySelector('#gr-editor [data-pmodus="licht"]'),
-        titel: 'Licht rechnen lassen',
-        text: 'Unter Licht siehst du Sonnenstunden über den Tag, einen einzelnen Moment oder die Grundhelligkeit — wahlweise für Sommer, Winter oder jetzt. Daraus kommen die Hinweise auf den Pflanzenkarten.' }
-    ]
-  },
 
   mehr: {
     hin: ()=>{ ansichtZeigen('mehr'); },
