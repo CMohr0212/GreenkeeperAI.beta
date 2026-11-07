@@ -1861,7 +1861,7 @@ header.top .sich-stempel{margin-right:54px;min-height:24px}
   background:none;color:var(--ink-2);cursor:pointer}
 .zr-umschalter button.on{background:var(--ink);border-color:var(--ink);color:var(--schrift-invers);font-weight:600}
 body[data-ansicht="botaniker"]{padding-bottom:150px}
-body[data-ansicht="botaniker"] #fab-neu{display:none!important}
+body[data-ansicht="botaniker"] #fab-neu,body[data-ansicht="botaniker"] #fab-filter{display:none!important}
 .bot-stand{font-family:var(--f-mono, ui-monospace, monospace);font-size:var(--t-xs);letter-spacing:.08em;color:var(--ink-2);margin:0 0 6px}
 .bot-unter{color:var(--ink-2);margin:0;line-height:1.45}
 .bot-strich{height:2px;background:var(--ink);margin:14px 0 12px}
@@ -1984,15 +1984,15 @@ html[data-design="klartext"] .sich-stempel{align-self:flex-start;
 /* ── Feste Überschrift mit i-Knopf (Heute, Anlegen) ── */
 
 /* ── Schwebender Knopf: neue Pflanze ── */
-#fab-neu{position:fixed;right:18px;z-index:45;width:58px;height:58px;border-radius:50%;
+#fab-neu,#fab-filter{position:fixed;right:18px;z-index:45;width:58px;height:58px;border-radius:50%;
   bottom:calc(env(safe-area-inset-bottom) + 74px);
   display:flex;align-items:center;justify-content:center;
   background:var(--paper);color:var(--ink);border:1.5px solid var(--ink);
   box-shadow:var(--sch-schwebend);cursor:pointer;padding:0}
-#fab-neu svg{width:30px;height:30px}
-#fab-neu:active{transform:scale(.94)}
-#fab-neu[hidden]{display:none}
-body.gm-offen #fab-neu{display:none}
+#fab-neu svg,#fab-filter svg{width:30px;height:30px}
+#fab-neu:active,#fab-filter:active{transform:scale(.94)}
+#fab-neu[hidden],#fab-filter[hidden]{display:none}
+body.gm-offen #fab-neu,body.gm-offen #fab-filter{display:none}
 
 /* ── Wegwahl beim Anlegen ── */
 .neu-wahl{margin-bottom:var(--a-3)}
@@ -4505,7 +4505,7 @@ html[data-design] #out.sam-waehlen .card.gewaehlt{box-shadow:0 0 0 3px var(--fl-
 html[data-design] #out.sam-zeilen.sam-waehlen .sam-haken{top:50%;right:12px;transform:translateY(-50%)}
 html[data-design] #out.sam-zeilen.sam-waehlen .card:not(.open) .card-btn{padding-right:48px}
 html[data-design] #out.sam-waehlen{padding-bottom:96px}
-html[data-design] body.sam-waehlen #fab-neu{display:none}
+html[data-design] body.sam-waehlen #fab-neu,html[data-design] body.sam-waehlen #fab-filter{display:none}
 html[data-design] .sam-wahl-leiste{position:fixed;left:12px;right:12px;z-index:45;
   bottom:calc(70px + env(safe-area-inset-bottom, 0px));
   display:flex;align-items:center;gap:8px;padding:10px 10px 10px 16px;
@@ -4596,6 +4596,33 @@ html[data-design="terrarium"] #out.sam-raster:is([data-spalten="3"],[data-spalte
 html[data-design="terrarium"] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"]) .card:not(.open) .card-kurz{justify-content:center}
 html[data-design="terrarium"] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-body{justify-content:center}
 html[data-design="terrarium"] #out.sam-raster[data-spalten="5"] .card:not(.open) .card-name{flex:0 1 auto}
+/* ══ Plan G1b (4.0-beta.26): Filterknopf, Filterfenster, Suchzeile ══
+   Wunsch Chris 07.11. (F224). */
+/* Runder Filterknopf direkt über „Anlegen“: gleiche Größe und Art
+   (Regeln oben gemeinsam mit #fab-neu), 12 px Abstand. */
+html[data-design] #fab-filter{bottom:calc(env(safe-area-inset-bottom) + 144px)}
+html[data-design] #fab-filter svg{width:26px;height:26px}
+html[data-design] #fab-filter > .fab-zahl{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 5px;
+  border-radius:11px;background:var(--fl-akzent);color:var(--schrift-invers);
+  font:600 12px/22px var(--f-body);text-align:center;box-sizing:border-box}
+html[data-design] #fab-filter > .fab-zahl[hidden]{display:none}
+/* Filterfenster als Blatt von unten (höchstens 78 % hoch), Schleier
+   dahinter; ein Tipp auf den Schleier schließt. */
+html[data-design] #filter-huelle{position:fixed;inset:0;z-index:130;display:flex;align-items:flex-end;justify-content:center;
+  background:var(--schleier)}
+html[data-design] #filter-huelle[hidden]{display:none}
+html[data-design] #filter-huelle > #filter-modal.sekm{position:relative;inset:auto;z-index:auto;width:100%;max-width:640px;
+  max-height:78dvh;border-radius:var(--r-gross) var(--r-gross) 0 0;overflow:hidden;box-shadow:0 -8px 28px rgba(0,0,0,.22)}
+html[data-design] #filter-huelle > #filter-modal > .sekm-kopf{border-radius:var(--r-gross) var(--r-gross) 0 0}
+html[data-design] #filter-huelle > #filter-modal > .sekm-rumpf{flex:1 1 auto;min-height:0;padding-top:4px;padding-bottom:16px}
+html[data-design] #filter-modal .filter-unter{margin:10px 4px 6px;font-size:var(--t-s);font-weight:600;color:var(--schrift-2)}
+html[data-design] #filter-modal .filter-unter:first-child{margin-top:0}
+/* Klartext schnitt „Zurücksetzen“ ab (126 statt 119 px Platz) */
+html[data-design] #filter-modal > .as-fuss > button{min-width:max-content}
+/* Suchfeld und „Filter“ immer in einer Zeile (vorher nur angeheftet) */
+html[data-design] section.controls > .such-zeile{display:flex;gap:8px;align-items:stretch}
+html[data-design] section.controls > .such-zeile > #q{flex:1 1 auto;min-width:0;width:auto}
+html[data-design] section.controls > .such-zeile > .ctrl-auf{flex:0 0 auto;display:flex;align-items:center}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -12481,36 +12508,39 @@ function pflanzeEntfernen(id){
   <div class="sekm-rumpf" id="sekm-rumpf"></div>
 </div>
 
-<div id="filter-modal" class="sekm as-fenster" hidden>
+<!-- 4.0-beta.26 (G1b): Blatt von unten in einer Hülle mit Schleier -->
+<div id="filter-huelle" aria-labelledby="filter-titel" hidden>
+<div id="filter-modal" class="sekm as-fenster">
   <div class="sekm-kopf">
     <h2 class="sekm-titel" id="filter-titel" tabindex="-1">Filter und Ansicht</h2>
     <button class="sekm-zu" id="btn-filter-zu" aria-label="Filter schließen">Fertig</button>
   </div>
   <div class="sekm-rumpf">
-    <p class="ein-abschnitt">Sortieren</p>
-    <div class="as-knoepfe" id="filter-sort"></div>
+    <p class="ein-abschnitt">Ort</p>
+    <div id="lage-filter"></div>
 
     <p class="ein-abschnitt">Zustand</p>
     <div class="as-knoepfe" id="filter-zustand"></div>
 
-    <p class="ein-abschnitt">Gießklasse</p>
-    <div class="as-knoepfe" id="filter-klasse"></div>
-
     <p class="ein-abschnitt">Sicherheit</p>
     <div class="as-knoepfe" id="filter-gift"></div>
 
-    <p class="ein-abschnitt">Ort</p>
-    <div id="lage-filter"></div>
+    <p class="ein-abschnitt">Gießklasse</p>
+    <div class="as-knoepfe" id="filter-klasse"></div>
 
     <p class="ein-abschnitt">Gruppieren</p>
     <div class="as-knoepfe" id="filter-gruppen"></div>
     <select id="gruppen" hidden aria-label="Wonach gruppieren"></select>
     <span id="filters" hidden></span>
+
+    <p class="ein-abschnitt">Sortieren</p>
+    <div class="as-knoepfe" id="filter-sort"></div>
   </div>
   <div class="as-fuss">
     <button id="btn-filter-weg" type="button">Zurücksetzen</button>
     <button id="btn-filter-fertig" type="button" class="haupt">Zeigen</button>
   </div>
+</div>
 </div>
 
 <div id="anleg-modal" class="sekm al-fenster" hidden>
@@ -12831,6 +12861,8 @@ function pflanzeEntfernen(id){
   </div>
 </div>
 
+<!-- 4.0-beta.26 (G1b, F224): runder Filterknopf über „Anlegen“ -->
+<button id="fab-filter" type="button" aria-label="Filter" aria-haspopup="dialog" aria-controls="filter-modal" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5h17l-6.6 7.8v5.6l-3.8 1.9v-7.5z"/></svg><span class="fab-zahl" id="fab-filter-zahl" aria-hidden="true" hidden></span></button>
 <button id="fab-neu" type="button" aria-label="Neue Pflanze anlegen" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -13032,7 +13064,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.25';
+const FASSUNG = '4.0-beta.26';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15254,6 +15286,8 @@ const ZUSTAND_FILTER = {
   faellig:    {name:'Heute fällig',    pruef:p=>{ const st = giessStatus(p);
                  return st.stand === 'soon' && st.rest <= 0; }},
   ueber:      {name:'Überfällig',      pruef:p=>giessStatus(p).stand === 'over'},
+  /* 4.0-beta.26 (G1b): laufende Gießpause eines Zustands */
+  pause:      {name:'Gießpause',       pruef:p=>stoppRest(p) > 0},
   trocken:    {name:'Ausgetrocknet',   pruef:p=>{ const z = zustandVon(p);
                  return !!z && /trocken|durst/i.test((z.def && z.def.name) || z.code || ''); }},
   quarantaene:{name:'In Quarantäne',   pruef:p=>{ const z = zustandVon(p);
@@ -15516,17 +15550,32 @@ function ctrlKnopfZeichnen(){
   let auf = false;
   try{ auf = modalOffen('filter-modal'); }catch(e){}
   b.setAttribute('aria-expanded', String(auf));
+  /* 4.0-beta.26 (G1b): Zahl der Filter auch am runden Knopf */
+  const f = document.getElementById('fab-filter');
+  const fz = document.getElementById('fab-filter-zahl');
+  if(f && fz){
+    fz.textContent = n ? String(n) : '';
+    fz.hidden = !n;
+    f.setAttribute('aria-label', n ? 'Filter, ' + n + ' gesetzt' : 'Filter');
+    f.setAttribute('aria-expanded', String(auf));
+  }
+}
+/* 4.0-beta.26 (G1b): Filterknopf oben und runder Knopf öffnen dasselbe Fenster */
+function filterFensterAuf(ausloeser){
+  filterKnoepfeZeichnen();
+  lageFilterStand = '';
+  lageFilterZeichnen();
+  modalAuf('filter-modal', ausloeser);
+  ctrlKnopfZeichnen();
 }
 (function(){
   const b = document.getElementById('btn-ctrl-auf');
   const k = document.getElementById('ctrl-klapp');
   if(!b || !k) return;
   b.setAttribute('aria-controls', 'filter-modal');
-  b.onclick = ()=>{
-    filterKnoepfeZeichnen();
-    lageFilterZeichnen();
-    modalAuf('filter-modal', b);
-  };
+  b.onclick = ()=>filterFensterAuf(b);
+  const f = document.getElementById('fab-filter');
+  if(f) f.onclick = ()=>filterFensterAuf(f);
   ctrlKnopfZeichnen();
   filterMarkenZeichnen();
 })();
@@ -15549,26 +15598,34 @@ function lageFilterZeichnen(){
   lageFilterStand = stand;
 
   if(!raeumeL.length && !plaetze.length){ box.innerHTML = ''; return; }
-  box.innerHTML =
-    `<select class="filter-sel" id="filter-raum" aria-label="Nach Raum filtern">
-      <option value="">Alle Räume</option>
-      ${raeumeL.map(r=>`<option value="${r.id}"${filterRaum===r.id?' selected':''}>${esc(r.name)}</option>`).join('')}
-      <option value="__ohne"${filterRaum==='__ohne'?' selected':''}>Ohne Raum</option>
-    </select>`
-    + `<select class="filter-sel" id="filter-platz" aria-label="Nach Stellplatz filtern">
-      <option value="">Alle Stellplätze</option>
-      ${plaetze.map(n=>`<option value="${esc(n)}"${filterPlatz===n?' selected':''}>${esc(n)}</option>`).join('')}
-      <option value="__ohne"${filterPlatz==='__ohne'?' selected':''}>Ohne Stellplatz</option>
-    </select>`;
-  box.querySelector('#filter-raum').onchange = e=>{
-    filterRaum = e.target.value || null;
-    if(typeof ctrlKnopfZeichnen === 'function') ctrlKnopfZeichnen();
-    render(); };
-  box.querySelector('#filter-platz').onchange = e=>{
-    filterPlatz = e.target.value || null;
-    if(typeof ctrlKnopfZeichnen === 'function') ctrlKnopfZeichnen();
-    render(); };
+  /* 4.0-beta.26 (G1b, Regel 9.10): Knopflisten statt Auswahllisten des
+     Systems. Ein zweiter Tipp auf den gewählten Knopf hebt die Wahl auf. */
+  const knopf = (attr, wert, name, an) =>
+    '<button type="button" class="as-knopf" ' + attr + '="' + esc(wert) + '"'
+    + ' aria-pressed="' + (an ? 'true' : 'false') + '"><b>' + esc(name) + '</b></button>';
+  let h = '';
+  if(raeumeL.length){
+    h += '<p class="filter-unter">Raum</p><div class="as-knoepfe" id="filter-raum">'
+      + raeumeL.map(r => knopf('data-fraum', r.id, r.name, filterRaum === r.id)).join('')
+      + knopf('data-fraum', '__ohne', 'Ohne Raum', filterRaum === '__ohne') + '</div>';
+  }
+  if(plaetze.length){
+    h += '<p class="filter-unter">Stellplatz</p><div class="as-knoepfe" id="filter-platz">'
+      + plaetze.map(n => knopf('data-fplatz', n, n, filterPlatz === n)).join('')
+      + knopf('data-fplatz', '__ohne', 'Ohne Stellplatz', filterPlatz === '__ohne') + '</div>';
+  }
+  box.innerHTML = h;
 }
+
+document.addEventListener('click', e => {
+  const r = e.target.closest('[data-fraum]');
+  const pl = !r && e.target.closest('[data-fplatz]');
+  if(!r && !pl) return;
+  if(r) filterRaum = filterRaum === r.dataset.fraum ? null : r.dataset.fraum;
+  else filterPlatz = filterPlatz === pl.dataset.fplatz ? null : pl.dataset.fplatz;
+  lageFilterStand = '';
+  lageFilterZeichnen(); filterMarkenZeichnen(); ctrlKnopfZeichnen(); render();
+});
 
 /* ══════════════════ Karte ══════════════════ */
 /* Welche Abschnitte offen sind, merkt sich die App abschnittsweise —
@@ -18410,6 +18467,9 @@ function fabZeichnen(){
   let offen = false;
   try{ offen = modalOffen('anleg-modal'); }catch(e){}
   fab.hidden = !sammlung || offen;
+  /* 4.0-beta.26 (G1b): der Filterknopf steht wie „Anlegen“ nur in der Sammlung */
+  const ff = document.getElementById('fab-filter');
+  if(ff) ff.hidden = !sammlung || offen;
 }
 const fabKnopf = document.getElementById('fab-neu');
 if(fabKnopf) fabKnopf.onclick = ()=>{
@@ -18992,7 +19052,9 @@ function _modalWeg(id){
   const vorher = _modalVorher[id];
   delete _modalVorher[id];
   if(vorher && typeof vorher.focus === 'function' && document.contains(vorher)){
-    try{ vorher.focus(); }catch(e){}
+    /* 4.0-beta.26 (G1b): ein Fenster mit `fokusOhneScroll` gibt den Fokus
+       zurück, ohne dass die Seite zum Auslöser springt. */
+    try{ if(d && d.fokusOhneScroll) vorher.focus({preventScroll:true}); else vorher.focus(); }catch(e){}
   }
   if(d && typeof d.nachZu === 'function') d.nachZu(el);
 }
@@ -19157,7 +19219,9 @@ modalAnmelden('sich-pflicht', {
     if(typeof fassungPruefen === 'function') fassungPruefen();
   }
 });
-modalAnmelden('filter-modal', {groesse:'voll', schleier:false});
+/* 4.0-beta.26 (G1b): Blatt in der Hülle mit Schleier; Fokus ohne Scrollen zurück */
+modalAnmelden('filter-modal', {el:'filter-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
+  nachZu: ()=>{ if(typeof ctrlKnopfZeichnen === 'function') ctrlKnopfZeichnen(); }});
 
 modalAnmelden('lightbox', {
   groesse:'voll',

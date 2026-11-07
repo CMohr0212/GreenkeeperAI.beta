@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.25', w.__T('FASSUNG') === '4.0-beta.25', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.26', w.__T('FASSUNG') === '4.0-beta.26', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -3672,8 +3672,9 @@ setTimeout(async () => {
 
     /* Das Blatt fuellt sich beim Oeffnen. */
     w.__T('filterKnoepfeZeichnen()');
-    pruef('Neun Zustaende zur Wahl',
-      d.querySelectorAll('#filter-zustand .as-knopf').length === 9,
+    /* 4.0-beta.26 (G1b): „Gießpause“ kam als zehnter dazu */
+    pruef('Zehn Zustaende zur Wahl',
+      d.querySelectorAll('#filter-zustand .as-knopf').length === 10,
       String(d.querySelectorAll('#filter-zustand .as-knopf').length));
     pruef('Elf Gruppierungen zur Wahl',
       d.querySelectorAll('#filter-gruppen .as-knopf').length === 11,
@@ -14607,6 +14608,163 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.fotos = a.fotos || {}; S.spuelen = a.spuelen; S.anstau = a.anstau;
         S.zustand = a.zustand; S.feuchtRueck = a.feuchtRueck; S.giess = a.giess; S.profil = a.profil;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt25)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.26: Plan G1b — runder Filterknopf über „Anlegen“, Filter-
+     fenster als Blatt mit Schleier, Raum und Stellplatz als Knöpfe,
+     Zustandsfilter „Gießpause“, Fokus ohne Scrollen. Legt Räume und
+     Pflanzen selbst an und stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER = `{eigene:S.eigene, raeume:S.raeume, zustand:S.zustand, ansicht:S.ansicht, gruppierung:gruppierung, sortierung:sortierung}`;
+    const alt26 = T(`JSON.stringify(${LAGER})`);
+    const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
+    const zahlKarten = () => T(`document.querySelectorAll('#out .card').length`);
+    const ids = () => T(`[].map.call(document.querySelectorAll('#out .card'), function(c){ return c.dataset.karte; }).sort().join(',')`);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    T(`window.__a26 = {focus:HTMLElement.prototype.focus}; 1`);
+    try {
+      await zu();
+      T(`(function(){
+        filterZuruecksetzen(); gruppierung = 'keine'; $('#q').value = '';
+        S.raeume = [];
+        var k = raumAnlegen('Prüf-Küche B26'), u = raumAnlegen('Prüf-Bad B26');
+        window.__r26 = {k:k, u:u};
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'B26 ' + id, art:'Prüfart', botanisch:'Testus probus',
+          klasse:'B', sonne:'indirekt', raum:k, stellplatz:'Fensterbank'}, o); };
+        S.eigene = [pf('F1', {name:'Zitronella B26'}), pf('F2', {art:'Glockenblumella'}), pf('F3', {botanisch:'Quarxia vulgaris'}),
+          pf('F4', {notiz:'steht neben dem Schneckenkorb'}), pf('F5', {raum:u, stellplatz:'Regal'}), pf('F6', {raum:'', stellplatz:''}),
+          pf('F7', {raum:u, stellplatz:'Regal'})];
+        S.zustand = {};
+        zustandSetzen('F2', 'wurzelfaeule'); zustandSetzen('F7', 'wurzelfaeule');
+        sichern(); ansichtZeigen('sammlung'); render(); return 1; })()`);
+      const alle = zahlKarten();
+      pruef('beta.26: sieben Prüfpflanzen stehen da', alle === 7, String(alle));
+
+      /* (11) Knopf: da, gleiche Regel wie „Anlegen“, direkt darüber */
+      pruef('beta.26 (11): runder Filterknopf ist da', !!d.getElementById('fab-filter') && /^Filter/.test(d.getElementById('fab-filter').getAttribute('aria-label') || ''));
+      pruef('beta.26 (11): gleiche Größe und Art wie „Anlegen“ (eine gemeinsame Regel)',
+        stil.indexOf('#fab-neu,#fab-filter{position:fixed;right:18px;z-index:45;width:58px;height:58px;border-radius:50%;') !== -1);
+      const mNeu = /#fab-neu,#fab-filter\{[^}]*bottom:calc\(env\(safe-area-inset-bottom\) \+ (\d+)px\)/.exec(stil);
+      const mFi = /html\[data-design\] #fab-filter\{bottom:calc\(env\(safe-area-inset-bottom\) \+ (\d+)px\)\}/.exec(stil);
+      pruef('beta.26 (11): Filterknopf steht 12 px über „Anlegen“ (74 + 58 + 12)',
+        !!mNeu && !!mFi && Number(mFi[1]) === Number(mNeu[1]) + 58 + 12, (mNeu && mNeu[1]) + ' / ' + (mFi && mFi[1]));
+      pruef('beta.26 (11): Filterknopf ist während der Auswahl und im Gießmodus weg',
+        stil.indexOf('html[data-design] body.sam-waehlen #fab-filter{display:none}') !== -1
+        && stil.indexOf('body.gm-offen #fab-filter{display:none}') !== -1);
+      T(`fabZeichnen()`);
+      pruef('beta.26 (11): Filterknopf sichtbar in der Sammlung', d.getElementById('fab-filter').hidden === false);
+      T(`ansichtZeigen('heute'); fabZeichnen()`);
+      pruef('beta.26 (11): Filterknopf weg auf Heute', d.getElementById('fab-filter').hidden === true);
+      T(`ansichtZeigen('sammlung'); modalAuf('anleg-modal'); fabZeichnen()`);
+      pruef('beta.26 (11): Filterknopf weg bei offenem Anlegen', d.getElementById('fab-filter').hidden === true);
+      await zu(); T(`fabZeichnen(); render()`);
+
+      /* (12) Öffnen über den runden Knopf, Wahl wirkt sofort */
+      d.getElementById('fab-filter').click();
+      await warte(30);
+      pruef('beta.26 (12): runder Knopf öffnet das Filterfenster',
+        T(`modalOffen('filter-modal')`) === true && d.getElementById('filter-huelle').hidden === false
+        && d.querySelectorAll('#filter-zustand [data-fzustand]').length > 0, String(T(`modalOffen('filter-modal')`)));
+      pruef('beta.26 (12): Fenster legt einen Verlaufseintrag an (Zurück schließt)',
+        T(`history.state && history.state.gkModal`) === 'filter-modal', String(T(`JSON.stringify(history.state)`)));
+      const reihe = [...d.querySelectorAll('#filter-modal .sekm-rumpf > p.ein-abschnitt')].map(x => x.textContent.trim()).join('|');
+      pruef('beta.26: Reihenfolge Ort, Zustand, Sicherheit, Gießklasse, Gruppieren, Sortieren',
+        reihe === 'Ort|Zustand|Sicherheit|Gießklasse|Gruppieren|Sortieren', reihe);
+      /* (3) keine sichtbare Auswahlliste */
+      pruef('beta.26 (3): keine sichtbare Auswahlliste im Filterfenster und in der Leiste',
+        d.querySelectorAll('#filter-modal select:not([hidden]), section.controls select:not([hidden])').length === 0
+        && d.querySelectorAll('#filter-raum [data-fraum]').length === 3,
+        d.querySelectorAll('#filter-modal select:not([hidden])').length + ' / ' + d.querySelectorAll('#filter-raum [data-fraum]').length);
+      /* (4) Raum */
+      const k = T(`__r26.k`);
+      d.querySelector('#filter-raum [data-fraum="' + k + '"]').click();
+      await warte(10);
+      pruef('beta.26 (4): Raumknopf filtert, Fenster bleibt offen (Wahl wirkt sofort)',
+        ids() === 'F1,F2,F3,F4' && T(`modalOffen('filter-modal')`) === true, ids());
+      pruef('beta.26 (4): gewählter Raumknopf ist gedrückt',
+        d.querySelector('#filter-raum [data-fraum="' + k + '"]').getAttribute('aria-pressed') === 'true');
+      d.querySelector('#filter-raum [data-fraum="' + k + '"]').click();
+      await warte(10);
+      pruef('beta.26 (4): zweiter Tipp hebt die Raumwahl auf', ids() === 'F1,F2,F3,F4,F5,F6,F7' && T(`filterRaum`) === null, ids());
+      d.querySelector('#filter-raum [data-fraum="__ohne"]').click();
+      await warte(10);
+      pruef('beta.26 (4): „Ohne Raum“ filtert', ids() === 'F6', ids());
+      d.querySelector('#filter-raum [data-fraum="__ohne"]').click();
+      /* (5) Stellplatz */
+      d.querySelector('#filter-platz [data-fplatz="Regal"]').click();
+      await warte(10);
+      pruef('beta.26 (5): Stellplatzknopf filtert', ids() === 'F5,F7', ids());
+      d.querySelector('#filter-platz [data-fplatz="Regal"]').click();
+      await warte(10);
+      pruef('beta.26 (5): zweiter Tipp hebt die Stellplatzwahl auf', T(`filterPlatz`) === null && zahlKarten() === 7, String(zahlKarten()));
+      /* (6) Gießpause */
+      const pk = d.querySelector('#filter-zustand [data-fzustand="pause"]');
+      pruef('beta.26 (6): Zustandsknopf „Gießpause“ ist da', !!pk && pk.textContent.trim() === 'Gießpause', pk ? pk.textContent : '-');
+      if(pk) pk.click();
+      await warte(10);
+      pruef('beta.26 (6): Gießpause filtert', ids() === 'F2,F7', ids());
+      /* (7) kombiniert */
+      d.querySelector('#filter-raum [data-fraum="' + k + '"]').click();
+      await warte(10);
+      pruef('beta.26 (7): Raum und Gießpause kombiniert', ids() === 'F2', ids());
+      /* (14) Zahl am runden Knopf */
+      const fz = d.getElementById('fab-filter-zahl');
+      pruef('beta.26 (14): Zahl der Filter am runden Knopf', fz.hidden === false && fz.textContent === '2'
+        && d.getElementById('fab-filter').getAttribute('aria-label') === 'Filter, 2 gesetzt', fz.textContent + ' ' + fz.hidden);
+      /* (13) Schleier schließt */
+      d.getElementById('filter-huelle').dispatchEvent(new w.MouseEvent('click', {bubbles:true}));
+      await warte(120);
+      pruef('beta.26 (13): Tipp daneben (Schleier) schließt das Fenster',
+        T(`modalOffen('filter-modal')`) === false && d.getElementById('filter-huelle').hidden === true);
+      pruef('beta.26 (14): Zahl bleibt nach dem Schließen', fz.textContent === '2' && fz.hidden === false);
+      T(`filterZuruecksetzen(); render()`);
+      pruef('beta.26 (14): ohne Filter keine Zahl', fz.hidden === true && d.getElementById('fab-filter').getAttribute('aria-label') === 'Filter');
+      /* (13) Zurück schließt */
+      await zu();
+      d.getElementById('btn-ctrl-auf').click();
+      await warte(30);
+      pruef('beta.26 (12): Knopf „Filter“ oben öffnet dasselbe Fenster', T(`modalOffen('filter-modal')`) === true);
+      T(`history.back()`);
+      await warte(150);
+      pruef('beta.26 (13): Zurück schließt das Fenster', T(`modalOffen('filter-modal')`) === false);
+      /* (12) Fokus ohne Scrollen zurück auf den Auslöser */
+      await zu();
+      T(`window.__f26 = []; HTMLElement.prototype.focus = function(o){ __f26.push({id:this.id, ps:!!(o && o.preventScroll)}); return __a26.focus.apply(this, arguments); }; 1`);
+      d.getElementById('fab-filter').click();
+      await warte(30);
+      T(`modalZu('filter-modal')`);
+      await warte(150);
+      const fk = T(`JSON.stringify(__f26.filter(function(x){ return x.id === 'fab-filter'; }))`);
+      pruef('beta.26 (12): Fokus geht ohne Scrollen auf den Knopf zurück',
+        /"ps":true/.test(fk) && !/"ps":false/.test(fk), fk);
+      T(`HTMLElement.prototype.focus = __a26.focus; 1`);
+      /* (1)(2) Suche über vier Felder */
+      const such = (v) => { T(`$('#q').value = ${JSON.stringify(v)}; render()`); return ids(); };
+      pruef('beta.26 (1): Suche findet über den Namen', such('zitronella') === 'F1', ids());
+      pruef('beta.26 (1): Suche findet über die Art', such('glockenblumella') === 'F2', ids());
+      pruef('beta.26 (1): Suche findet über den botanischen Namen', such('quarxia') === 'F3', ids());
+      pruef('beta.26 (1): Suche findet über die Notiz', such('schneckenkorb') === 'F4', ids());
+      pruef('beta.26 (2): leere Suche zeigt alles', such('') === 'F1,F2,F3,F4,F5,F6,F7', ids());
+      /* (8) Bestand: Statuspunkt und Zustandsabzeichen */
+      const c2 = d.querySelector('#out .card[data-karte="F2"]');
+      pruef('beta.26 (8): Karte trägt Statuspunkt und Zustandsabzeichen',
+        !!c2 && !!c2.dataset.ton && !!c2.querySelector('.card-kurz[data-ton]') && !!c2.querySelector('.zbadge'));
+      /* (15) Suchzeile */
+      pruef('beta.26 (15): Suchfeld und „Filter“ stehen in einer Zeile (Stiltext)',
+        stil.indexOf('html[data-design] section.controls > .such-zeile{display:flex') !== -1);
+    } catch(e){
+      pruef('beta.26: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        HTMLElement.prototype.focus = __a26.focus;
+        filterZuruecksetzen(); $('#q').value = '';
+        S.eigene = a.eigene; S.raeume = a.raeume; S.zustand = a.zustand; gruppierung = a.gruppierung; sortierung = a.sortierung;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt26)})`);
     }
   }
 
