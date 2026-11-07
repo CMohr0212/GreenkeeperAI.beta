@@ -6596,7 +6596,19 @@ const SICHERER_TREFFER = 300;
    „Kap-Sonnentau“ — und eine Andromeda bekam volle Sonne. Eine
    Kreuzung (×) übernimmt nie Werte einer ihrer Elternarten. */
 function bibKreuzung(bot){ return /\u00d7|\s[x]\s/i.test(' ' + String(bot || '') + ' '); }
+/* 4.0-beta.25: Die Artenliste ändert sich zur Laufzeit nicht, also
+   gilt ein Ergebnis für dieselbe Eingabe immer. render() fragt je
+   Pflanze mehrmals; ohne Merker ging das jedes Mal alle Arten durch. */
+var BIB_EXAKT_MERK;
 function bibExakt(bot, art){
+  const m = BIB_EXAKT_MERK || (BIB_EXAKT_MERK = new Map());
+  const mk = String(bot == null ? '' : bot) + '\u0001' + String(art == null ? '' : art);
+  if(m.has(mk)) return m.get(mk);
+  const r = bibExaktSuchen(bot, art);
+  m.set(mk, r);
+  return r;
+}
+function bibExaktSuchen(bot, art){
   const b = String(bot || '').trim();
   if(b && bibKreuzung(b)) return null;
   if(b){
@@ -13020,7 +13032,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.24';
+const FASSUNG = '4.0-beta.25';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13660,6 +13672,9 @@ function fotoLesen(){
 }
 
 function fotoSchreiben(daten){
+  /* 4.0-beta.25: Wer den grossen Speicher direkt schreibt (Umzug,
+     Zuruecksetzen), macht das gemerkte Kennzeichen ungueltig. */
+  FOTO_SIG = null;
   return fotoDbOeffnen().then(db=>{
     if(!db) return false;
     return new Promise(res=>{
@@ -13684,6 +13699,8 @@ async function fotosVorbereiten(){
     const ausLokal = S.fotos && Object.keys(S.fotos).length ? S.fotos : null;
     S.fotos = Object.assign({}, ausDb, ausLokal || {});
     FOTOS_BEREIT = true;
+    /* Was gerade gelesen wurde, liegt schon im grossen Speicher. */
+    if(!ausLokal) FOTO_SIG = fotoSignatur(S.fotos);
     if(ausLokal) sichern();
   } else {
     const umzug = S.fotos && Object.keys(S.fotos).length ? S.fotos : {};
@@ -13716,7 +13733,50 @@ function speicherAnteil(){
 function groesseKB(objekt){
   try{ return Math.round(new Blob([JSON.stringify(objekt)]).size / 1024); }catch(e){ return 0; }
 }
+/* 4.0-beta.25 (Gießen beschleunigen): Kennzeichen der Fotos ohne
+   JSON.stringify ueber die Bilddaten. Je Foto alle Angaben ausser dem
+   Bild selbst, vom Bild Laenge und Ende. Ein neues, geloeschtes oder
+   ersetztes Foto aendert das Kennzeichen. */
+var FOTO_SIG = null;        /* Kennzeichen der zuletzt in den grossen Speicher geschriebenen Fotos */
+var FOTO_KB_MERK = null;    /* {sig, kb} fuer die Speicheranzeige */
+var SICHERN_SAMMELN = 0;    /* > 0: sichern() merkt nur vor */
+var SICHERN_OFFEN = false;
+function fotoSignatur(fotos){
+  const o = fotos || {};
+  let s = '';
+  Object.keys(o).forEach(id=>{
+    const l = o[id];
+    s += id + '[';
+    if(Array.isArray(l)) l.forEach(f=>{
+      if(!f || typeof f !== 'object'){ s += String(f) + ';'; return; }
+      const rest = {};
+      Object.keys(f).forEach(k=>{ if(k !== 'src') rest[k] = f[k]; });
+      const src = String(f.src || '');
+      s += JSON.stringify(rest) + ':' + src.length + ':' + src.slice(-16) + ';';
+    });
+    else s += typeof l;
+    s += ']';
+  });
+  return s;
+}
+function fotoGroesseKB(){
+  const sig = fotoSignatur(S.fotos);
+  if(FOTO_KB_MERK && FOTO_KB_MERK.sig === sig) return FOTO_KB_MERK.kb;
+  const kb = groesseKB(S.fotos || {});
+  FOTO_KB_MERK = {sig, kb};
+  return kb;
+}
+/* Alles, was fn() speichern will, wird am Ende genau einmal gespeichert. */
+function sichernGesammelt(fn){
+  SICHERN_SAMMELN++;
+  try{ return fn(); }
+  finally{
+    SICHERN_SAMMELN--;
+    if(!SICHERN_SAMMELN && SICHERN_OFFEN){ SICHERN_OFFEN = false; sichern(); }
+  }
+}
 function sichern(){
+  if(SICHERN_SAMMELN){ SICHERN_OFFEN = true; return; }
   try{
     /* Fotos gehen in den grossen Speicher und werden aus dem kleinen
        herausgehalten. Steht der grosse nicht zur Verfügung, bleibt alles
@@ -13724,10 +13784,18 @@ function sichern(){
     if(FOTO_GROSS && FOTOS_BEREIT){
       const ohneFotos = Object.assign({}, S, {fotos: {}});
       localStorage.setItem(KEY, JSON.stringify(ohneFotos));
-      fotoSchreiben(S.fotos || {});
+      /* 4.0-beta.25: Die Fotos nur schreiben, wenn sich eins geändert hat. */
+      const sig = fotoSignatur(S.fotos);
+      if(sig !== FOTO_SIG){
+        const w = fotoSchreiben(S.fotos || {});
+        FOTO_SIG = sig;
+        Promise.resolve(w).then(ok=>{ if(!ok && FOTO_SIG === sig) FOTO_SIG = null; }, ()=>{ if(FOTO_SIG === sig) FOTO_SIG = null; });
+      }
     } else {
       localStorage.setItem(KEY, JSON.stringify(S));
     }
+    /* Blob-URLs weggefallener oder ersetzter Fotos freigeben (beta.25). */
+    if(typeof fotoUrlAufraeumen === 'function') fotoUrlAufraeumen();
     SPEICHER_OK = true;
     statusText();
     const anteil = speicherAnteil();
@@ -14770,6 +14838,49 @@ function fotosVon(id){
 /* Welches Bild steht auf der Kachel? Von Hand gewählt schlägt alles.
    Sonst das neueste Foto — aber nie eines aus dem Pflanzendoktor, das
    zeigt in aller Regel Schäden oder Schädlinge. */
+/* 4.0-beta.25: Fotos in Sammlung und Gießliste als Blob-URL. Als
+   Data-URL stand jedes Bild als Text im HTML, und render() musste bei
+   100 Pflanzen rund 20 MB Text verarbeiten. Je Foto einmal umgewandelt;
+   ändert sich das Bild, wird neu umgewandelt, fällt es weg, freigegeben
+   (fotoUrlAufraeumen in sichern()). Ohne createObjectURL bleibt die
+   Data-URL. */
+var FOTO_URL = null;
+function fotoUrl(f){
+  if(!f || !f.src) return '';
+  const src = String(f.src);
+  if(src.slice(0, 5) !== 'data:' || typeof Blob === 'undefined'
+     || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') return src;
+  const m = FOTO_URL || (FOTO_URL = new Map());
+  const k = f.key || ('#' + src.length + ':' + src.slice(-24));
+  const da = m.get(k);
+  if(da && da.src === src) return da.url;
+  if(da){ try{ URL.revokeObjectURL(da.url); }catch(e){} m.delete(k); }
+  try{
+    const i = src.indexOf(',');
+    const kopf = src.slice(5, i);
+    const typ = kopf.split(';')[0] || 'image/jpeg';
+    const roh = src.slice(i + 1);
+    let teil;
+    if(/;base64/i.test(kopf)){
+      const bin = atob(roh);
+      teil = new Uint8Array(bin.length);
+      for(let j = 0; j < bin.length; j++) teil[j] = bin.charCodeAt(j);
+    } else teil = decodeURIComponent(roh);
+    const url = URL.createObjectURL(new Blob([teil], {type: typ}));
+    m.set(k, {src, url});
+    return url;
+  }catch(e){ return src; }
+}
+function fotoUrlAufraeumen(){
+  if(!FOTO_URL || !FOTO_URL.size) return;
+  const da = new Map();
+  Object.keys(S.fotos || {}).forEach(id => (S.fotos[id] || []).forEach(f => { if(f && f.key) da.set(f.key, f.src); }));
+  FOTO_URL.forEach((v, k) => {
+    if(da.get(k) === v.src) return;
+    try{ URL.revokeObjectURL(v.url); }catch(e){}
+    FOTO_URL.delete(k);
+  });
+}
 function profilFoto(id){
   const fs = fotosVon(id);
   if(!fs.length) return null;
@@ -16391,7 +16502,7 @@ function cardHTML(p){
      werden und liefert nebenbei das echte Seitenverhaeltnis, das
      Botanisch fuer die Zeilenhoehe im Raster braucht. */
   const thumb = pf
-    ? `<img class="thumb" src="${pf.src}" alt="" loading="lazy" decoding="async" data-mass>`
+    ? `<img class="thumb" src="${fotoUrl(pf)}" alt="" loading="lazy" decoding="async" data-mass>`
     : '';
   /* Ueberschrift der Karte: der Spitzname, wenn einer vergeben ist,
      sonst der botanische Name. `nice()` haengt beides aneinander
@@ -18315,7 +18426,7 @@ function statusText(){
     : 'Achtung: In dieser Ansicht ist kein Speicher verfügbar. Änderungen gelten nur, solange die Seite offen ist. Lade die Datei herunter und öffne sie direkt, dann bleibt alles erhalten.',
     SPEICHER_OK ? 'Alles liegt nur auf diesem Gerät.' : 'Achtung: Hier wird nichts gespeichert.');
   const klein = groesseKB(kleinerTeil());
-  const bilder = groesseKB(S.fotos || {});
+  const bilder = fotoGroesseKB();
   const anzahl = Object.values(S.fotos || {}).reduce((a,v)=>a + (v ? v.length : 0), 0);
   erklSetzen($('#storage-size'), (FOTO_GROSS && FOTOS_BEREIT)
     ? 'Notizen, Gießeinträge und Pflanzen belegen rund ' + klein + ' KB von etwa 5000 KB. '
@@ -25142,7 +25253,9 @@ planRender();
 modusHinweisZeichnen();
 
 const _renderVorherPlan = render;
-render = function(){ _renderVorherPlan(); planRender(); };
+/* 4.0-beta.25: Der Planer ist seit beta.23 nicht mehr erreichbar und
+   zeichnet nicht mehr bei jedem render() mit (Code bleibt bis Baustein I). */
+render = function(){ _renderVorherPlan(); };
 
 /* ══════════════════ Vollbild, Zoom und Verschieben ══════════════════ */
 let vollbild = false;
@@ -26874,7 +26987,7 @@ function gmLgKnopfText(g){
 function gmLgBild(z, name){
   const id = z.p ? z.p.id : (z.az && z.az.typ === 'gefaess' ? z.az.ref : null);
   const f = (id && typeof profilFoto === 'function') ? profilFoto(id) : null;
-  return '<span class="gm-ue-bild">' + (f && f.src ? '<img src="' + f.src + '" alt="">'
+  return '<span class="gm-ue-bild">' + (f && f.src ? '<img src="' + fotoUrl(f) + '" alt="">'
     : '<span class="gm-ue-init" aria-hidden="true">' + esc((String(name).trim()[0] || '?').toUpperCase()) + '</span>') + '</span>';
 }
 function gmZeichnenListe(){
@@ -26937,7 +27050,10 @@ function gmGruppeMelden(key){
   const merk = gmIndex;
   gmStill = true;
   try {
-    g.eintraege.forEach(z => { if(g.typ !== 'u' || gmHakenAn(z)) gmListeMelden(g, z, gmHakenAn(z)); });
+    /* 4.0-beta.25: alle Meldungen der Gruppe, gespeichert wird einmal. */
+    sichernGesammelt(() => {
+      g.eintraege.forEach(z => { if(g.typ !== 'u' || gmHakenAn(z)) gmListeMelden(g, z, gmHakenAn(z)); });
+    });
     /* Abgewählte Untersetzer: wie „Rest später“ der Karte, je Karte ein Eintrag. */
     if(g.typ === 'u'){
       const je = {};
@@ -26982,10 +27098,10 @@ function gmTeilEnde(){
     const merk = gmIndex;
     gmStill = true;
     try {
-      g.eintraege.forEach(z => {
+      sichernGesammelt(() => g.eintraege.forEach(z => {
         if(gmHakenAn(z) || gmVerlauf.some(e => e.lg === g.key && e.typ === 'p' && e.id === z.id)) return;
         gmListeMelden(g, z, false);
-      });
+      }));
     } finally {
       gmStill = false;
     }
@@ -27753,6 +27869,9 @@ function sektionOeffnen(key, ausloeser){
   /* Immer mit der Liste beginnen: wer den Stammbaum aufschlägt, will
      wählen, nicht dort weitermachen, wo er letztes Mal aufgehört hat. */
   if(key === 'stammbaum' && typeof sbZeigeListe === 'function') sbZeigeListe();
+  /* 4.0-beta.25: render() baut die Auswahlgitter nur bei offenem Fenster. */
+  if(key === 'doktor' && typeof dokAufbau === 'function') dokAufbau();
+  if(key === 'vermehren' && typeof verAufbau === 'function') verAufbau();
   /* Die Anzucht beginnt immer mit der Übersicht. */
   if(key === 'vermehren' && typeof azZeigen === 'function') azZeigen({art:'liste'});
   /* Der Planer merkte sich, dass er zuletzt im Editor stand — und
@@ -30645,7 +30764,8 @@ dokZeigen();
 dokErgebnis();
 
 const _renderVorherDok = render;
-render = function(){ _renderVorherDok(); if(document.getElementById('dok-liste')) dokAufbau(); };
+/* 4.0-beta.25: nur bei offenem Doktor neu bauen, sonst beim Öffnen. */
+render = function(){ _renderVorherDok(); if(document.getElementById('dok-liste') && _sekOffen && _sekOffen.key === 'doktor') dokAufbau(); };
 
 
 /* ══════════════════ Symptome im Suchfeld erkennen ══════════════════
@@ -33639,7 +33759,8 @@ document.addEventListener('toggle', e=>{
 verRender();
 verStufeZeigen(1);
 const _renderVorherVer = render;
-render = function(){ _renderVorherVer(); if(document.getElementById('ver-gitter')) verAufbau(); };
+/* 4.0-beta.25: nur bei offener Anzucht neu bauen, sonst beim Öffnen. */
+render = function(){ _renderVorherVer(); if(document.getElementById('ver-gitter') && _sekOffen && _sekOffen.key === 'vermehren') verAufbau(); };
 
 /* ══════════════════════════════════════════════════════════════
    RUNDGANG

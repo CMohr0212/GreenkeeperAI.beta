@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.24', w.__T('FASSUNG') === '4.0-beta.24', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.25', w.__T('FASSUNG') === '4.0-beta.25', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -14411,6 +14411,202 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(a.samStufe === undefined) delete S.samStufe; else S.samStufe = a.samStufe;
         if(a.samAnsicht === undefined) delete S.samAnsicht; else S.samAnsicht = a.samAnsicht;
         S.gruppierung = a.gruppierung; designSetzen(a.design || 'botanisch'); ansichtZeigen(a.ansicht || 'heute'); sichern(); samAnsichtBeschriften(); render(); return 1; })(${JSON.stringify(alt24)}, ${JSON.stringify(altZu)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.25: Gießen vieler Pflanzen beschleunigen — Speichern nur
+     einmal je Sammelmeldung, Fotos nur bei Änderung schreiben und messen,
+     Artsuche mit Merker, Auswahlgitter nur bei offenem Fenster, kein
+     Planer in render(), Fotos als Blob-URL. Legt Räume, Pflanzen und
+     Fotos selbst an und stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const d = w.document;
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, fotos:S.fotos, spuelen:S.spuelen, anstau:S.anstau,
+      zustand:S.zustand, feuchtRueck:S.feuchtRueck, giess:S.giess, profil:S.profil, ansicht:S.ansicht}`;
+    const alt25 = T(`JSON.stringify(${LAGER})`);
+    T(`window.__a25 = {groesseKB:groesseKB, fotoSchreiben:fotoSchreiben, dokAufbau:dokAufbau, verAufbau:verAufbau,
+      planRender:planRender, bibExaktSuchen:bibExaktSuchen, gross:FOTO_GROSS, bereit:FOTOS_BEREIT,
+      setItem:Storage.prototype.setItem, cou:URL.createObjectURL, rou:URL.revokeObjectURL}; 1`);
+    try {
+      T(`(function(){
+        var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        window.__z25 = {ls:0, fs:0, g:0, dok:0, ver:0, plan:0, bib:0, cou:0, rou:0};
+        Storage.prototype.setItem = function(k, v){ if(k === KEY) __z25.ls++; return __a25.setItem.apply(this, arguments); };
+        groesseKB = function(o){ if(o === S.fotos) __z25.g++; return __a25.groesseKB(o); };
+        dokAufbau = function(){ __z25.dok++; return __a25.dokAufbau.apply(this, arguments); };
+        verAufbau = function(){ __z25.ver++; return __a25.verAufbau.apply(this, arguments); };
+        planRender = function(){ __z25.plan++; return __a25.planRender.apply(this, arguments); };
+        bibExaktSuchen = function(){ __z25.bib++; return __a25.bibExaktSuchen.apply(this, arguments); };
+        S.raeume = [];
+        var k = raumAnlegen('Prüf-Flur B25'), u = raumAnlegen('Prüf-Bad B25');
+        window.__r25 = {k:k, u:u};
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'B25 ' + id, art:'Prüfart ' + id, botanisch:'Monstera deliciosa',
+          klasse:'B', sonne:'indirekt', topf:'12', intervallEigen:true, intervall:[7, 7], raum:k, stellplatz:'Fensterbank'}, o); };
+        S.eigene = [pf('Q1'), pf('Q2'), pf('Q3'), pf('Q4'), pf('Q5'),
+          pf('U1', {klasse:'S', raum:u, intervallEigen:false, intervall:undefined}),
+          pf('U2', {klasse:'S', raum:u, intervallEigen:false, intervall:undefined})];
+        S.water = {Q1:[vor(9)], Q2:[vor(9)], Q3:[vor(9)], Q4:[vor(9)], Q5:[vor(9)], U1:[vor(9)], U2:[vor(9)]};
+        S.spuelen = {}; S.anstau = {}; S.zustand = {}; S.feuchtRueck = {};
+        S.giess = S.giess || {}; S.giess.saison = false; S.giess.weise = 'unten';
+        S.fotos = {}; S.profil = {};
+        sichern(); render();
+        return 1;
+      })()`);
+
+      /* ── 5, 7: „Alle gegossen“ speichert genau einmal, schreibt wie bisher ── */
+      T(`(function(){ gmStarten(); gmListeAktiv = true; gmPhase = 'liste'; gmAnzeigen(); return 1; })()`);
+      const gr = JSON.parse(T(`JSON.stringify(gmGruppen().map(function(g){ return {key:g.key, typ:g.typ, n:g.eintraege.length}; }))`));
+      const gk = gr.find(g => g.key === 'r:' + T('__r25.k'));
+      const gu = gr.find(g => g.typ === 'u');
+      pruef('beta.25: Testgruppe Flur mit 5 Pflanzen in der Gießliste', !!gk && gk.n === 5, JSON.stringify(gr));
+      pruef('beta.25: Untersetzer-Gruppe mit 2 Pflanzen in der Gießliste', !!gu && gu.n === 2, JSON.stringify(gr));
+      if(gk){
+        T(`__z25.ls = 0; gmGruppeMelden(${JSON.stringify(gk.key)})`);
+        pruef('beta.25 (5): „Alle gegossen“ für 5 Pflanzen speichert genau einmal', T('__z25.ls') === 1, T('__z25.ls'));
+        const heute = T('iso(HEUTE)');
+        const nachW = JSON.parse(T(`JSON.stringify(['Q1','Q2','Q3','Q4','Q5'].map(function(id){ return S.water[id]; }))`));
+        const nachS = JSON.parse(T(`JSON.stringify(['Q1','Q2','Q3','Q4','Q5'].map(function(id){ return S.spuelen[id]; }))`));
+        pruef('beta.25 (7): jede Pflanze trägt heute als Gießtag', nachW.every(l => Array.isArray(l) && l.length === 2 && l[1] === heute), JSON.stringify(nachW));
+        pruef('beta.25 (7): Spülzähler je Pflanze 1 (Gießweise von unten)', nachS.every(n => n === 1), JSON.stringify(nachS));
+        const gesp = JSON.parse(T(`localStorage.getItem(KEY)`));
+        pruef('beta.25 (7): gespeicherter Stand enthält die Meldungen aller 5', ['Q1','Q2','Q3','Q4','Q5'].every(id => (gesp.water[id] || []).indexOf(heute) !== -1 && gesp.spuelen[id] === 1));
+        T(`gmGruppeZurueck(${JSON.stringify(gk.key)})`);
+        const zurW = JSON.parse(T(`JSON.stringify(['Q1','Q2','Q3','Q4','Q5'].map(function(id){ return (S.water[id] || []).indexOf(iso(HEUTE)); }))`));
+        pruef('beta.25 (7): Rückgängig der Gruppe nimmt alle 5 Gießtage zurück', zurW.every(i => i === -1), JSON.stringify(zurW));
+        pruef('beta.25 (7): Rückgängig nimmt die Spülzähler zurück', T(`['Q1','Q2','Q3','Q4','Q5'].every(function(id){ return S.spuelen[id] == null; })`) === true);
+      }
+      /* ── 6: „Alle aufgefüllt“ und Ende von „Nacheinander“ ── */
+      if(gu){
+        T(`__z25.ls = 0; gmGruppeMelden(${JSON.stringify(gu.key)})`);
+        pruef('beta.25 (6): „Alle aufgefüllt“ für 2 Untersetzer speichert genau einmal', T('__z25.ls') === 1, T('__z25.ls'));
+        pruef('beta.25 (6): beide Untersetzer gegossen', T(`['U1','U2'].every(function(id){ return (S.water[id] || []).indexOf(iso(HEUTE)) !== -1; })`) === true);
+      }
+      if(gk){
+        T(`(function(){ var g = gmGruppen().find(function(x){ return x.key === ${JSON.stringify(gk.key)}; });
+          g.eintraege.forEach(function(z, i){ gmHaken[z.id] = i < 2; });
+          gmTeilStarten(g.key);
+          gmMeldenPflanze(gmListe[gmTeil.idx[0]].p || gmListe[gmTeil.idx[0]], 'ja', 'Gegossen');
+          __z25.ls = 0;
+          gmTeilEnde(); return 1; })()`);
+        pruef('beta.25 (6): Ende von „Nacheinander“ speichert höchstens einmal („Später“ schreibt nichts)', T('__z25.ls') <= 1, T('__z25.ls'));
+        pruef('beta.25 (6): nach „Nacheinander“ sind die Abgewählten als „Später“ gemeldet', T(`gmVerlauf.filter(function(e){ return e.lg === ${JSON.stringify(gk.key)} && e.a === 'spaeter'; }).length`) === 3,
+          T(`JSON.stringify(gmVerlauf.map(function(e){ return [e.id, e.a, e.lg]; }))`));
+      }
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
+      await warte(250);
+
+      /* ── 3, 4: Fotospeicher nur bei Änderung ── */
+      T(`(function(){
+        FOTO_GROSS = true; FOTOS_BEREIT = true;
+        window.__fsOk = true;
+        fotoSchreiben = function(){ __z25.fs++; return Promise.resolve(window.__fsOk); };
+        S.fotos = {Q1:[{key:'b25a', src:'data:image/jpeg;base64,' + 'A'.repeat(6000), datum:iso(HEUTE)}]};
+        sichern(); __z25.fs = 0; sichern(); sichern(); return 1; })()`);
+      pruef('beta.25 (3): ohne Fotoänderung schreibt sichern() den Fotospeicher nicht', T('__z25.fs') === 0, T('__z25.fs'));
+      T(`__z25.fs = 0; S.fotos.Q1.push({key:'b25b', src:'data:image/jpeg;base64,' + 'B'.repeat(4000), datum:iso(HEUTE)}); sichern()`);
+      pruef('beta.25 (4): neues Foto → Fotospeicher geschrieben', T('__z25.fs') === 1, T('__z25.fs'));
+      T(`__z25.fs = 0; S.fotos.Q1[1].src = 'data:image/jpeg;base64,' + 'C'.repeat(4000); sichern()`);
+      pruef('beta.25 (4): ersetztes Bild gleicher Länge → Fotospeicher geschrieben', T('__z25.fs') === 1, T('__z25.fs'));
+      T(`__z25.fs = 0; S.fotos.Q1[1].datum = '2026-01-02'; sichern()`);
+      pruef('beta.25 (4): geänderte Angabe am Foto → Fotospeicher geschrieben', T('__z25.fs') === 1, T('__z25.fs'));
+      T(`__z25.fs = 0; S.fotos.Q1 = S.fotos.Q1.slice(0, 1); sichern()`);
+      pruef('beta.25 (4): gelöschtes Foto → Fotospeicher geschrieben', T('__z25.fs') === 1, T('__z25.fs'));
+      T(`__z25.fs = 0; window.__fsOk = false; S.fotos.Q2 = [{key:'b25c', src:'data:image/jpeg;base64,DDDD', datum:iso(HEUTE)}]; sichern()`);
+      await warte(30);
+      T(`window.__fsOk = true; sichern()`);
+      pruef('beta.25 (4): misslungenes Schreiben wird beim nächsten Speichern wiederholt', T('__z25.fs') === 2, T('__z25.fs'));
+
+      /* ── 1, 2: Speicheranzeige ── */
+      T(`__z25.g = 0; statusText(); statusText(); statusText()`);
+      pruef('beta.25 (1): Speicheranzeige rechnet die Fotogröße ohne Änderung nicht neu', T('__z25.g') <= 1, T('__z25.g'));
+      T(`S.fotos.Q3 = [{key:'b25d', src:'data:image/jpeg;base64,' + 'E'.repeat(30000), datum:iso(HEUTE)}]; statusText()`);
+      const kbSoll = T(`Math.round(new Blob([JSON.stringify(S.fotos)]).size / 1024)`);
+      const txt = T(`(document.getElementById('storage-size') || {}).textContent || ''`);
+      pruef('beta.25 (2): Speicheranzeige nennt nach neuem Foto die neue Größe', txt.indexOf(kbSoll + ' KB im großen Bildspeicher') !== -1, kbSoll + ' | ' + txt);
+      T(`delete S.fotos.Q3; statusText()`);
+      const kbSoll2 = T(`Math.round(new Blob([JSON.stringify(S.fotos)]).size / 1024)`);
+      const txt2 = T(`(document.getElementById('storage-size') || {}).textContent || ''`);
+      pruef('beta.25 (2): Speicheranzeige nennt nach gelöschtem Foto die neue Größe', kbSoll2 !== kbSoll && txt2.indexOf(kbSoll2 + ' KB') !== -1, kbSoll2 + ' | ' + txt2);
+      T(`fotoSchreiben = __a25.fotoSchreiben; FOTO_GROSS = __a25.gross; FOTOS_BEREIT = __a25.bereit; 1`);
+
+      /* ── 8: Artsuche mit Merker ── */
+      const bibGleich = T(`(function(){
+        var fehl = [];
+        BIB.forEach(function(a){
+          [[a.bot, ''], ['', a.de], [a.bot + " 'Prüfsorte'", ''], [a.bot + ' (Prüf)', '']].forEach(function(e){
+            var r1 = bibExakt(e[0], e[1]), r2 = __a25.bibExaktSuchen(e[0], e[1]);
+            if(r1 !== r2) fehl.push(e.join('|'));
+          });
+        });
+        [['Philodendron × Prüf', ''], ['Unbekannta prüfensis', ''], ['', 'Schlauchpflanze'], ['', ''], [null, undefined], [12, '']].forEach(function(e){
+          if(bibExakt(e[0], e[1]) !== __a25.bibExaktSuchen(e[0], e[1])) fehl.push(String(e[0]) + '|' + String(e[1]));
+        });
+        return fehl.join(', ');
+      })()`);
+      pruef('beta.25 (8): bibExakt liefert für alle Arten und Testnamen dasselbe wie die Suche', bibGleich === '', bibGleich);
+      T(`__z25.bib = 0; bibExakt('Prüfgattung b25merk', ''); bibExakt('Prüfgattung b25merk', ''); bibExakt('Prüfgattung b25merk', '')`);
+      pruef('beta.25 (8): zweiter und dritter Aufruf ohne Suche', T('__z25.bib') === 1, T('__z25.bib'));
+
+      /* ── 9: Doktor- und Anzucht-Gitter ── */
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); __z25.dok = 0; __z25.ver = 0; render(); return 1; })()`);
+      pruef('beta.25 (9): render() baut das Doktor-Gitter bei geschlossenem Fenster nicht', T('__z25.dok') === 0, T('__z25.dok'));
+      pruef('beta.25 (9): render() baut das Anzucht-Gitter bei geschlossenem Fenster nicht', T('__z25.ver') === 0, T('__z25.ver'));
+      T(`__z25.dok = 0; S.eigene.push({id:'Q9', eigen:true, name:'B25 Neu im Doktor', art:'Prüfart Q9', klasse:'B', raum:__r25.k}); sektionOeffnen('doktor')`);
+      pruef('beta.25 (9): Öffnen des Doktors baut das Gitter', T('__z25.dok') >= 1, T('__z25.dok'));
+      pruef('beta.25 (9): Doktor-Gitter zeigt die neu angelegte Pflanze', T(`(document.getElementById('dok-liste') || {}).textContent || ''`).indexOf('B25 Neu im Doktor') !== -1);
+      T(`__z25.dok = 0; render()`);
+      pruef('beta.25 (9): render() bei offenem Doktor baut das Gitter weiter', T('__z25.dok') >= 1, T('__z25.dok'));
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
+      await warte(250);
+      T(`__z25.ver = 0; sektionOeffnen('vermehren')`);
+      pruef('beta.25 (9): Öffnen der Anzucht baut das Anzucht-Gitter', T('__z25.ver') >= 1, T('__z25.ver'));
+      T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); S.eigene = S.eigene.filter(function(p){ return p.id !== 'Q9'; }); return 1; })()`);
+      await warte(250);
+
+      /* ── 10: kein Planer in render() ── */
+      T(`__z25.plan = 0; render()`);
+      pruef('beta.25 (10): render() ruft planRender nicht', T('__z25.plan') === 0, T('__z25.plan'));
+
+      /* ── 11: Blob-URL in Sammlung und Gießliste ── */
+      T(`(function(){
+        URL.createObjectURL = function(b){ __z25.cou++; return 'blob:pruef/' + __z25.cou; };
+        URL.revokeObjectURL = function(u){ __z25.rou++; };
+        FOTO_URL = null;
+        S.fotos = {Q1:[{key:'b25u', src:'data:image/jpeg;base64,QUJD', datum:iso(HEUTE)}]};
+        ansichtZeigen('sammlung'); render(); return 1; })()`);
+      const src1 = T(`(function(){ var i = document.querySelector('#out .card[data-karte="Q1"] img.thumb'); return i ? i.getAttribute('src') : ''; })()`);
+      pruef('beta.25 (11): Sammlung zeigt das Foto als Blob-URL', /^blob:/.test(src1), src1);
+      T(`render()`);
+      const src2 = T(`(function(){ var i = document.querySelector('#out .card[data-karte="Q1"] img.thumb'); return i ? i.getAttribute('src') : ''; })()`);
+      pruef('beta.25 (11): zweites render() nimmt dieselbe Blob-URL', src2 === src1 && T('__z25.cou') === 1, src2 + ' ' + T('__z25.cou'));
+      const lg = T(`gmLgBild({p:S.eigene.find(function(p){ return p.id === 'Q1'; })}, 'Q1')`);
+      pruef('beta.25 (11): Gießliste zeigt das Foto als Blob-URL', lg.indexOf('src="' + src1 + '"') !== -1, lg);
+      T(`__z25.rou = 0; S.fotos.Q1[0].src = 'data:image/jpeg;base64,REVG'; render()`);
+      const src3 = T(`(function(){ var i = document.querySelector('#out .card[data-karte="Q1"] img.thumb'); return i ? i.getAttribute('src') : ''; })()`);
+      pruef('beta.25 (11): ersetztes Bild bekommt eine neue Blob-URL, die alte wird freigegeben', src3 !== src1 && /^blob:/.test(src3) && T('__z25.rou') === 1, src3 + ' ' + T('__z25.rou'));
+      T(`__z25.rou = 0; S.fotos.Q1 = []; sichern()`);
+      pruef('beta.25 (11): gelöschtes Foto gibt seine Blob-URL frei', T('__z25.rou') === 1 && T('FOTO_URL.size') === 0, T('__z25.rou') + ' ' + T('FOTO_URL.size'));
+      T(`(function(){ URL.createObjectURL = __a25.cou; URL.revokeObjectURL = __a25.rou; FOTO_URL = null;
+        S.fotos = {Q1:[{key:'b25v', src:'data:image/jpeg;base64,R0hJ', datum:iso(HEUTE)}]}; render(); return 1; })()`);
+      const src4 = T(`(function(){ var i = document.querySelector('#out .card[data-karte="Q1"] img.thumb'); return i ? i.getAttribute('src') : ''; })()`);
+      pruef('beta.25 (11): ohne createObjectURL bleibt die Data-URL', src4 === 'data:image/jpeg;base64,R0hJ', src4);
+    } catch(e){
+      pruef('beta.25: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        Storage.prototype.setItem = __a25.setItem; groesseKB = __a25.groesseKB; fotoSchreiben = __a25.fotoSchreiben;
+        dokAufbau = __a25.dokAufbau; verAufbau = __a25.verAufbau; planRender = __a25.planRender; bibExaktSuchen = __a25.bibExaktSuchen;
+        URL.createObjectURL = __a25.cou; URL.revokeObjectURL = __a25.rou; FOTO_URL = null;
+        FOTO_GROSS = __a25.gross; FOTOS_BEREIT = __a25.bereit;
+        gmListeAktiv = false; gmTeil = null;
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.fotos = a.fotos || {}; S.spuelen = a.spuelen; S.anstau = a.anstau;
+        S.zustand = a.zustand; S.feuchtRueck = a.feuchtRueck; S.giess = a.giess; S.profil = a.profil;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt25)})`);
     }
   }
 
