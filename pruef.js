@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.28', w.__T('FASSUNG') === '4.0-beta.28', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.29', w.__T('FASSUNG') === '4.0-beta.29', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -642,7 +642,8 @@ setTimeout(async () => {
 
   pruef('Kartenfenster öffnet', w.__T(`karteOeffnen('${pid}')`) === true);
   await tick();
-  ['schnell', 'ktabs', 'acc', 'Fertig'].forEach((n, i) => {
+  /* 4.0-beta.29 (B1): Der Schritt „Abschnitte klappen auf“ zeigte auf die Aufgabenzeile und ist weg */
+  ['schnell', 'taten', 'ktabs', 'Fertig'].forEach((n, i) => {
     pruef('Karte · Schritt ' + (i+1) + ' (' + n + ')', zielDa('karte', i) === 'da', zielDa('karte', i));
   });
   /* Die feste Leiste unter dem Kopf ist leer: die Karte beginnt mit
@@ -708,8 +709,9 @@ setTimeout(async () => {
       !!d.querySelector('#karte-rumpf [data-kpane="wissen"]'));
     pruef('Fotos sind kein Akkordeon mehr',
       !d.querySelector('#karte-rumpf [data-acc="fotos"]'));
-    pruef('Aufgaben stehen vor den Reitern',
-      !!d.querySelector('#karte-rumpf .detail > [data-acc="aufgaben-zeile"]'));
+    /* 4.0-beta.29 (B1, F279): keine Aufgabenzeile mehr in der Karte */
+    pruef('Keine Aufgabenzeile vor den Reitern',
+      !d.querySelector('#karte-rumpf [data-acc="aufgaben-zeile"]'));
     pruef('Steckbrief liegt im Wissen-Reiter',
       !!d.querySelector('#karte-rumpf [data-kpane="wissen"] [data-kblock="steckbrief"]')
       || !d.querySelector('#karte-rumpf [data-kblock="steckbrief"]'));
@@ -1382,7 +1384,6 @@ setTimeout(async () => {
       S.ereignisse = Object.assign({}, S.ereignisse, {
         SW0:[{id:'se1', datum:iso(HEUTE), typ:'vermehrt', text:'Kopfsteckling', bezug:'SK1'}],
         SK1:[{id:'se2', datum:iso(HEUTE), typ:'entstanden', text:'Kopfsteckling', bezug:'SW0'}]});
-      S.added = Object.assign({}, S.added, {SK1:[{id:'sa1', text:'Im Wasserglas angesetzt'}]});
       sichern(); render(); })()`);
     await tick();
     w.__T("sektionOeffnen('stammbaum')");
@@ -1465,8 +1466,9 @@ setTimeout(async () => {
       d.getElementById('sb-blatt-name').textContent);
     pruef('Ein Ableger zeigt seinen Vermehrungsablauf',
       d.getElementById('sb-blatt-untertitel').textContent === 'Vermehrungsablauf');
-    pruef('Vermehrungsschritt und Ereignis stehen zusammen',
-      d.querySelectorAll('#sb-blatt-inhalt .sb-schritt').length === 2,
+    /* 4.0-beta.29 (B1, F279): Aufgaben stehen nicht mehr als Schritt im Blatt, nur das Ereignis */
+    pruef('Das Ereignis steht im Blatt, keine Aufgabe als Schritt',
+      d.querySelectorAll('#sb-blatt-inhalt .sb-schritt').length === 1,
       String(d.querySelectorAll('#sb-blatt-inhalt .sb-schritt').length));
     pruef('Der Weg in die Karte ist da',
       !!d.querySelector('#sb-blatt-inhalt [data-go="SK1"]'));
@@ -1486,8 +1488,7 @@ setTimeout(async () => {
 
     w.__T(`S.eigene = S.sbMerk || []; delete S.sbMerk;
       ['SW0','SK1','SK2','SE1','SE2'].forEach(id=>{
-        if(S.ereignisse) delete S.ereignisse[id];
-        if(S.added) delete S.added[id]; });
+        if(S.ereignisse) delete S.ereignisse[id]; });
       sichern(); render()`);
     await tick();
     w.__T("modalZu('sek-modal')");
@@ -3815,12 +3816,9 @@ setTimeout(async () => {
         !/km-held-art[^<]*>[^<]*A2P/.test(kopf) && kopf.indexOf('>Efeutute · <i>') > -1,
         (kopf.match(/<p class="km-held-art">.*?<\/p>/) || [''])[0]);
 
-      /* ── Aufgaben als eine Zeile ── */
-      const auf = karteAus('A2P').querySelector('[data-acc="aufgaben-zeile"]');
-      pruef('Aufgaben stehen als eine Zeile mit Unterzeile',
-        !!auf && !!auf.querySelector('.az-unter'));
-      pruef('Ohne offene Aufgabe sagt die Zeile das',
-        /Nichts offen/.test(((auf && auf.querySelector('.az-unter')) || {}).textContent || ''));
+      /* 4.0-beta.29 (B1, F279): Die Aufgabenzeile ist weg */
+      pruef('Keine Aufgabenzeile in der Karte',
+        !karteAus('A2P').querySelector('[data-acc="aufgaben-zeile"]'));
 
       w.__T(`(function(){
         S.eigene = (S.eigene||[]).filter(x=>x.id !== 'A2P');
@@ -4083,10 +4081,10 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Sechzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu)', alle.length === 16, String(alle.length));
-    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg, 25 Abschnitte */
+    pruef('Fünfzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg)', alle.length === 15, String(alle.length));
+    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1), 24 Abschnitte */
     pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 25,
+      d.querySelectorAll('section[data-mh]').length === 24,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
@@ -4095,7 +4093,7 @@ setTimeout(async () => {
       d.querySelector('section[data-mh="kidienst"]').classList.contains('mh-still'));
     pruef('KI-Dienst ist aus den Einstellungen erreichbar',
       !!d.querySelector('#mh-in-einstell [data-mh-go="kidienst"]'));
-    ['aufgaben','wunsch','giess','wetter','bibliothek','sicherung','einstell',
+    ['wunsch','giess','wetter','bibliothek','sicherung','einstell',
      'tour','install','patch','rueck','melde','sprot','ansicht','tiere','rundgang'].forEach(k=>{
       if(k === 'ansicht' || k === 'tiere' || k === 'rundgang') return;
       pruef('Punkt ' + k + ' vorhanden', alle.indexOf(k) !== -1);
@@ -4973,17 +4971,12 @@ setTimeout(async () => {
   pruef('Klartext behält die großen Zeilen',
     stil3.indexOf('html:not([data-design="klartext"]) section[data-mh] .wz-kopf{') !== -1);
 
-  /* — Aufgaben und Wunschliste — */
-  pruef('Aufgaben stehen unter Mehr',
-    d.getElementById('todo-sec').dataset.ans === 'mehr'
-    && d.getElementById('todo-sec').dataset.mh === 'aufgaben');
+  /* — Wunschliste (4.0-beta.29: Aufgaben sind weg) — */
+  pruef('Keine Aufgaben mehr unter Mehr', !d.getElementById('todo-sec'));
   pruef('Wunschliste steht unter Mehr',
     d.getElementById('wunsch-sec').dataset.ans === 'mehr'
     && d.getElementById('wunsch-sec').dataset.mh === 'wunsch');
   w.__T('while(MODAL_STAPEL.length) _modalWeg(modalOben());'); await tick();
-  pruef('Aufgaben öffnen als Fenster', w.__T("sektionOeffnen('aufgaben')") === true);
-  pruef('und der Inhalt ist drin', !!d.querySelector('#sekm-rumpf #alltodo'));
-  await zu('sek-modal');
   pruef('Wunschliste öffnet als Fenster', w.__T("sektionOeffnen('wunsch')") === true);
   pruef('und der Inhalt ist drin', !!d.querySelector('#sekm-rumpf #wunsch'));
   await zu('sek-modal');
@@ -4995,8 +4988,7 @@ setTimeout(async () => {
   pruef('keine Raumknöpfe mehr auf Heute', !d.getElementById('raumknoepfe'));
   pruef('Heute zeigt nur noch das Wetter',
     w.__T("String(render).indexOf('heuteStatusHTML') === -1") === true);
-  pruef('Aufgabenliste nicht mehr auf Heute',
-    !d.querySelector('section[data-ans="heute"] #alltodo'));
+  pruef('Aufgabenliste nirgends mehr', !d.getElementById('alltodo'));
 
   /* — Ortsfrage — */
   pruef('Ortsfrage existiert', w.__T('typeof ortFrageStellen') === 'function');
@@ -6381,8 +6373,7 @@ setTimeout(async () => {
       && pA.substrat === 'erdeRinde' && pA.ablauf === 'ja',
       JSON.stringify(pA && {t:pA.topf, f:pA.topfform, s:pA.substrat, a:pA.ablauf}));
     pruef('Aus der Maßnahme wird beim Anlegen keine Aufgabe',
-      !!pA && (w.__T("(S.added['" + (pA ? pA.id : 'x') + "'] || []).length")) === 0,
-      String(w.__T("(S.added['" + (pA ? pA.id : 'x') + "'] || []).length")));
+      !!pA && w.__T("S.added === undefined && !('todo' in (allePflanzen().filter(function(x){return x.id === '" + (pA ? pA.id : 'x') + "';})[0] || {}))") === true);
 
     /* Der Anstoss zum Doktor. */
     pruef('Die Karte fragt nach dem Doktor',
@@ -6449,7 +6440,7 @@ setTimeout(async () => {
     pruef('Der Doktor behält Topfblock und Maßnahmenauswahl',
       typeof w.__T('topfHTML') === 'function'
       && typeof w.__T('topfMassnahme') === 'function'
-      && typeof w.__T('massnahmenAuswahlHTML') === 'function');
+      && typeof w.__T('massnahmenListeHTML') === 'function');
 
     /* Die Karte zeigt, was eingetragen wurde. */
     pruef('Der Reiter Pflege nennt Substrat und Abzugsloch',
@@ -6972,8 +6963,9 @@ setTimeout(async () => {
         && !d.getElementById('dok-gift') && !d.getElementById('dok-merkmale'));
       pruef('beta.27: Der Doktor setzt keinen Tag',
         hq(`tagEintraege(p.id).length`) === 0, String(hq(`tagEintraege(p.id).length`)));
-      pruef('Die Maßnahmen-Auswahl erscheint weiter',
-        !!d.querySelector('#dok-massnahmen [data-mnwahl]'));
+      /* 4.0-beta.29 (B1): Maßnahmen als Text, ohne Auswahl */
+      pruef('Die Maßnahmen erscheinen weiter, als Text ohne Haken',
+        !!d.querySelector('#dok-massnahmen .mn-liste li') && !d.querySelector('#dok-massnahmen input[type="checkbox"]'));
     }
 
     /* Aufraeumen */
@@ -8136,7 +8128,7 @@ setTimeout(async () => {
     pruef('Die Löschung ist gespeichert',
       Array.isArray(g.eigene) && !g.eigene.some(p => p.id === lid));
     pruef('Gießverlauf und Fotos gehen mit',
-      w.__T(`!S.water['${lid}'] && !S.fotos['${lid}'] && !S.added['${lid}']`) === true);
+      w.__T(`!S.water['${lid}'] && !S.fotos['${lid}']`) === true);
     pruef('Das Kartenfenster ist nach dem Löschen zu', w.__T(`modalOffen('karte-modal')`) === false);
     w.__T(`S = LEERSTAND(); laden(); render();`);
     pruef('Nach dem Neuladen bleibt der Ableger weg',
@@ -10588,8 +10580,9 @@ setTimeout(async () => {
     T(`(function(){ S.gelernteArten = S.gelernteArten || {}; S.gelernteArten['Probeart s2 | '] = {botanisch:'Probeart s2', name:'Probe', klasse:'B', datum:'2026-10-30'}; meldeRender(); })()`);
     const melde = d.querySelector('[data-melde-gel="Probeart s2 | "]');
     pruef('beta.5: Arten melden hat Haken, keine Schalter', !!melde && !melde.hasAttribute('role'), melde ? melde.outerHTML.slice(0, 80) : 'fehlt');
-    const mn = T(`massnahmenAuswahlHTML('t', [{handlung:'Umtopfen'}], '')`);
-    pruef('beta.5: Maßnahmen des Doktors haben Haken, keine Schalter', /type="checkbox"/.test(mn) && !/role="switch"/.test(mn));
+    /* 4.0-beta.29 (B1): Maßnahmen stehen als Text, ohne Haken und ohne Schalter */
+    const mn = T(`massnahmenListeHTML([{handlung:'Umtopfen'}])`);
+    pruef('beta.5: Maßnahmen des Doktors ohne Schalter', !/type="checkbox"/.test(mn) && !/role="switch"/.test(mn) && /Umtopfen/.test(mn));
     pruef('beta.5: Kartei-Auswahl und -Ergebnis haben Haken, keine Schalter',
       !/role="switch"[^>]*data-kartei/.test(quelle) && !/data-kartei[^>]*role="switch"/.test(quelle) && quelle.indexOf('data-karteikasten="alle"') > -1);
 
@@ -14638,6 +14631,147 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = a.eigene; S.water = a.water; S.lernen = a.lernen; S.tagEin = a.tagEin; S.tags = a.tags; S.tagGruppen = a.tagGruppen;
         S.tagVorgabenAus = a.tagVorgabenAus; S.ereignisse = a.ereignisse; S.giess = a.giess; S.raeume = a.raeume; S.samStufe = a.samStufe;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt28)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.29: Etappe B1 — Aufgaben raus (F279). Die Aufgabenliste
+     verschwindet aus Karte, Mehr, Heute-Zahl, Doktor, KI-Doktor, Ableger
+     und Stammbaum; alte Aufgabendaten werden beim Laden und Einlesen
+     gelöscht. Die Wunschliste bleibt. Legt alles selbst an und stellt
+     den Stand der Hauptseite am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER29 = `{eigene:S.eigene, water:S.water, wish:S.wish, giess:S.giess, raeume:S.raeume, ansicht:S.ansicht, samStufe:S.samStufe, acc:S.acc}`;
+    const alt29 = T(`JSON.stringify(${LAGER29})`);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    let w29 = null;
+    try {
+      await zu();
+      /* (1) Namen: keine Definition und kein Aufruf eines entfernten Namens */
+      const namen29 = ['aufgabenVon', 'aufgabeSchluessel', 'aufgabeRest', 'taskGruppenHTML', 'wannVon', 'aufgabenZeileHTML',
+        'aufgabenAusMassnahmen', 'massnahmenAuswahlHTML', 'massnahmenGewaehlt'];
+      const da29 = namen29.filter(n => html.indexOf('function ' + n + '(') !== -1 || html.indexOf(n + '(') !== -1)
+        .concat(['AUFGABE_STOPP', 'massnahmeAuswahl', 'const WANN'].filter(n => html.indexOf(n) !== -1));
+      pruef('beta.29 B1 (1): kein entfernter Name mehr im Code', da29.length === 0, da29.join(','));
+      const added29 = (html.match(/S\.added/g) || []).length, tasks29 = (html.match(/S\.tasks/g) || []).length;
+      pruef('beta.29 B1 (1): S.added und S.tasks nur noch beim Löschen', added29 === 1 && tasks29 === 1 && /delete S\.tasks; delete S\.added; delete S\.deleted;/.test(html),
+        added29 + '/' + tasks29);
+
+      /* Testpflanzen: P1 gerade gegossen, P2 heute fällig */
+      T(`(function(){
+        S.giess.saison = false;
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'T29 ' + id, art:'Prüfart', botanisch:'Testus novem',
+          klasse:'B', sonne:'indirekt', intervallEigen:true, intervall:[14, 14]}, o); };
+        S.eigene = [pf('P1'), pf('P2')];
+        S.water = {P1:[iso(HEUTE)], P2:[tagPlusTage(iso(HEUTE), -14)]};
+        sichern(); render(); return 1; })()`);
+
+      /* (2) Karte ohne Zeile „Aufgaben“ */
+      T(`karteOeffnen('P1')`); await warte(250);
+      const km = d.getElementById('karte-rumpf');
+      pruef('beta.29 B1 (2): Karte offen mit Tags-Zeile', !!km && !!km.querySelector('.detail'));
+      pruef('beta.29 B1 (2): Karte ohne Zeile „Aufgaben“', !!km && !km.querySelector('[data-acc="aufgaben-zeile"]') && !/Aufgaben/.test((km.querySelector('.detail') || {}).textContent || 'Aufgaben'));
+      await zu();
+
+      /* (3) Mehr ohne Abschnitt und Menüpunkt */
+      pruef('beta.29 B1 (3): kein Abschnitt „Aufgaben“ unter Mehr', !d.getElementById('todo-sec') && !d.getElementById('alltodo')
+        && !d.querySelector('[data-mh="aufgaben"]') && !d.querySelector('[data-mh-go="aufgaben"]'));
+      pruef('beta.29 B1 (3): Gruppe „Sammlung“ ohne Punkt „aufgaben“',
+        T(`JSON.stringify(MH_GRUPPEN[0].punkte)`) === '["raeume","tags","wunsch"]', T(`JSON.stringify(MH_GRUPPEN[0].punkte)`));
+
+      /* (4) Zahl am Reiter Heute ohne Aufgaben: P2 fällig, dazu alte Aufgaben im Speicher */
+      T(`(function(){ S.added = {P1:[{id:'x1', text:'Alte Aufgabe'}], P2:[{id:'x2', text:'Noch eine'}]}; S.tasks = {}; zaehlerAktualisieren(); return 1; })()`);
+      const z29 = (d.querySelector('[data-ans-go="heute"] .tab-z') || {}).textContent || '';
+      pruef('beta.29 B1 (4): Zahl am Reiter Heute zählt nur die fällige Pflanze', z29 === '1', z29);
+      /* (7) Stammbaum ohne „Schritt n“ */
+      const sb29 = T(`JSON.stringify(sbBlattPunkte(allePflanzen().find(function(x){ return x.id === 'P1'; })).map(function(x){ return x.titel; }))`);
+      pruef('beta.29 B1 (7): Stammbaum zeigt keine Aufgaben als „Schritt n“', !/Schritt 1/.test(sb29), sb29);
+      /* Alter Stand (Gegenprobe) braucht die Fächer, sonst bricht render() ab */
+      T(`(function(){ S.added = {}; S.tasks = {}; if(typeof aufgabenVon !== 'function'){ delete S.added; delete S.tasks; } zaehlerAktualisieren(); return 1; })()`);
+
+      /* (5) und (6) Doktor */
+      pruef('beta.29 B1 (5): Doktor ohne „Schritte als Aufgaben übernehmen“, Schritte als Text',
+        html.indexOf('dok-tasks') === -1 && html.indexOf('Schritte als Aufgaben') === -1
+        && html.indexOf('<ol class="dg-schritte">${d.sofort.map(') !== -1);
+      let mn29 = '';
+      try { mn29 = T(`massnahmenListeHTML([{ausloeser:'Wurzeln faul', handlung:'Umtopfen', dringlich:'sofort', wiederholung:'einmalig'}, {handlung:'Blätter prüfen', wiederholung:'alle 7 Tage'}])`); } catch(e){ mn29 = 'Fehler: ' + e.message; }
+      pruef('beta.29 B1 (6): KI-Maßnahmen als Text ohne Haken und ohne Übernahme',
+        /Umtopfen — Anlass: Wurzeln faul/.test(mn29) && /Blätter prüfen \(alle 7 Tage\)/.test(mn29)
+        && !/type="checkbox"|mn-nehmen|Aufgabe/.test(mn29), mn29.slice(0, 200));
+      pruef('beta.29 B1 (6): Doktor zeigt die Maßnahmen über die Textliste',
+        /ziel\.innerHTML = topfHTML\(topf\) \+ massnahmenListeHTML\(liste\);/.test(html) && html.indexOf('data-mnwahl') === -1);
+      pruef('beta.29 B1 (7): Ableger legt keine Aufgaben an', html.indexOf('Die zwei wichtigsten Schritte gleich als Aufgaben') === -1);
+
+      /* (9) und (11) Wunschliste: Hinzufügen, Abhaken, Löschen, ohne Auswahlliste */
+      T(`(function(){ S.wish = []; sichern(); render(); return 1; })()`);
+      pruef('beta.29 B1 (9): Wunschliste öffnet als Fenster', T("sektionOeffnen('wunsch')") === true);
+      await warte(150);
+      const wb = () => d.querySelector('#sekm-rumpf #wunsch') || d.getElementById('wunsch');
+      pruef('beta.29 B1 (11): keine Auswahlliste des Systems in der Wunschliste, kein „Wann“',
+        !!wb() && !wb().querySelector('select') && html.indexOf('add-wann') === -1);
+      const inp29 = wb() && wb().querySelector('.addbar input');
+      if(inp29){ inp29.value = 'Monstera Thai'; wb().querySelector('[data-do="add"]').click(); }
+      await warte(80);
+      pruef('beta.29 B1 (9): Wunsch hinzugefügt', T(`S.wish.length === 1 && S.wish[0].text === 'Monstera Thai' && S.wish[0].done === false`) === true,
+        T('JSON.stringify(S.wish)'));
+      const li29 = () => wb() && wb().querySelector('li.task');
+      if(li29()) li29().querySelector('[data-do="toggle"]').click();
+      await warte(80);
+      pruef('beta.29 B1 (9): Wunsch abgehakt', T(`S.wish[0] && S.wish[0].done === true`) === true);
+      if(li29()) li29().querySelector('[data-do="del"]').click();
+      await warte(80);
+      pruef('beta.29 B1 (9): Wunsch gelöscht', T(`S.wish.length`) === 0);
+      await zu();
+
+      /* (8) Start mit alten Aufgabendaten in einer zweiten Seite */
+      const roh29 = T(`(function(){
+        var s = JSON.parse(localStorage.getItem(KEY));
+        s.tasks = {'P1-t0':{done:true}}; s.added = {P1:[{id:'P1-xa', text:'Alt', wann:'jetzt'}]}; s.deleted = {'P1-t1':true};
+        s.acc = Object.assign({}, s.acc, {aufgaben:1, 'aufgaben-zeile':1});
+        s.eigene.forEach(function(p){ p.todo = ['Umtopfen im Frühjahr', 'Düngen']; });
+        return JSON.stringify(s); })()`);
+      const f29 = [];
+      const dom29 = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.localStorage.setItem('gk-beta', roh29);
+        w2.addEventListener('error', e => f29.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(700);
+      w29 = dom29.window;
+      const T29 = c => w29.__T(c);
+      pruef('beta.29 B1 (8): Start mit alten Aufgabendaten ohne Laufzeitfehler', f29.length === 0, f29.join(' | ').slice(0, 300));
+      const karten29 = [].map.call(w29.document.querySelectorAll('#out .card'), c => c.dataset.karte).sort().join(',');
+      pruef('beta.29 B1 (8): beide Pflanzen in der Sammlung', karten29 === 'P1,P2', karten29);
+      const rest29 = T29(`JSON.stringify([S.tasks === undefined, S.added === undefined, S.deleted === undefined, !('aufgaben' in S.acc), !('aufgaben-zeile' in S.acc), S.eigene.every(function(p){ return !('todo' in p); })])`);
+      pruef('beta.29 B1 (8): S.tasks, S.added, S.deleted, S.acc.aufgaben und p.todo gelöscht', rest29 === '[true,true,true,true,true,true]', rest29);
+      T29(`sichern()`);
+      pruef('beta.29 B1 (8): Speicher danach ohne Aufgabendaten', !/"tasks"|"added"|"deleted"|"todo"/.test(w29.localStorage.getItem('gk-beta') || ''));
+      try { w29.close(); } catch(e){} w29 = null;
+      /* Einlesen über den echten Weg (Datei wählen) in der Hauptseite */
+      const sich29 = JSON.stringify(Object.assign({__app:'greenkeeperai', __fassung:'4.0-beta.28'}, JSON.parse(roh29)));
+      const inp = d.getElementById('import-file');
+      Object.defineProperty(inp, 'files', {value:[new w.File([sich29], 'pflanzen-sicherung.json', {type:'application/json'})], configurable:true});
+      inp.onchange(); await warte(400);
+      const imp29 = T(`JSON.stringify([S.eigene.some(function(p){ return p.id === 'P1'; }), S.tasks === undefined, S.added === undefined, S.deleted === undefined, S.eigene.every(function(p){ return !('todo' in p); })])`);
+      pruef('beta.29 B1 (8): eingelesene Sicherung ohne Aufgabendaten', imp29 === '[true,true,true,true,true]', imp29);
+      await zu();
+
+      /* (10) Erster Start: ohne Aufgaben weiter erkannt */
+      pruef('beta.29 B1 (10): „App schon benutzt“ ohne S.added, über Pflanzen und Gießdaten',
+        /const erstinstallation = !S\.fassungGesehen && !\(S\.eigene && S\.eigene\.length\)\s*&& !\(S\.water && Object\.keys\(S\.water\)\.length\);/.test(html));
+      pruef('beta.29 B1: Löschfrage nennt keine Aufgaben mehr', html.indexOf('Gießverlauf und Aufgaben gehen mit') === -1);
+      pruef('beta.29 B1: Tag-Zeile in Botanisch behält 12 px Abstand zu den Knöpfen (Stiltext)',
+        html.indexOf('html[data-design="botanisch"] #karte-rumpf .detail > .tagk{margin-top:12px}') !== -1);
+    } catch(e){
+      pruef('beta.29: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if(w29) w29.close(); } catch(e){}
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.wish = a.wish; S.giess = a.giess; S.raeume = a.raeume; S.samStufe = a.samStufe; S.acc = a.acc;
+        delete S.tasks; delete S.added; delete S.deleted;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt29)})`);
     }
   }
 

@@ -1978,20 +1978,8 @@ body.gm-offen #fab-neu,body.gm-offen #fab-filter{display:none}
 .topfbox h4{margin:0 0 8px;font-family:var(--f-display);font-size:var(--t-l)}
 .topfbox .spec{margin:0}
 
-.mn-wahl{margin-top:var(--a-3);border:1px solid var(--line);border-radius:var(--r-mittel);padding:12px 14px}
-.mn-wahl h4{margin:0 0 4px;font-family:var(--f-display);font-size:var(--t-l)}
-.mn-wahl>.sub{margin:0 0 8px}
-.mn-zeile{display:flex;align-items:flex-start;gap:10px;padding:9px 0;
-  border-top:1px solid var(--line);cursor:pointer;min-height:44px}
-.mn-zeile:first-of-type{border-top:0}
-.mn-zeile input{flex:0 0 auto;margin-top:3px}
-.mn-text{flex:1;min-width:0;font-size:var(--t-m);line-height:1.45}
-.mn-text b{display:block;font-weight:600;overflow-wrap:anywhere}
-.mn-sub{display:block;font-size:var(--t-xs);color:var(--ink-2);margin-top:2px;overflow-wrap:anywhere}
-.mn-eilig{flex:0 0 auto;font-family:var(--f-data);font-size:var(--t-mono);letter-spacing:.06em;
-  text-transform:uppercase;color:var(--terra);border:1px solid var(--terra);
-  border-radius:100px;padding:2px 7px;align-self:flex-start}
-.mn-meld{margin:8px 0 0;font-size:var(--t-s);color:var(--moss)}
+/* 4.0-beta.29 (B1): Maßnahmen nur noch als Text, ohne Haken und Aufgaben */
+.mn-liste{margin-top:var(--a-3)}
 
 /* Ohne die richtigen Aufnahmen kann die KI die Hälfte nicht beurteilen. */
 .fotokrit{margin:var(--a-3) 0;border:1px dashed var(--line);border-radius:var(--r-mittel);
@@ -3217,21 +3205,6 @@ body.vollbild #moebel-bearb.on{position:absolute;left:52px;right:0;bottom:0;z-in
 .pn-arten[open]>summary::before{content:'▾ '}
 .pn-artliste{margin:var(--a-2) 0 0;padding-left:20px;font-size:var(--t-s);
   line-height:1.6;color:var(--peat);max-height:340px;overflow:auto}
-.tgruppe{display:flex;gap:var(--a-2);align-items:flex-start;flex-wrap:wrap;
-  padding:9px 0;border-bottom:1px solid var(--line);list-style:none}
-.tg-zahl{flex:0 0 auto;align-self:center;font:inherit;font-family:var(--f-data);
-  font-size:var(--t-mono);font-weight:700;color:var(--peat);cursor:pointer;
-  background:none;border:0;padding:4px 2px 4px 8px;white-space:nowrap}
-.tg-zahl .caret{display:inline-block;transition:transform .18s}
-.tgruppe.auf .tg-zahl{color:var(--ink)}
-.tgruppe.auf .tg-zahl .caret{transform:rotate(180deg)}
-.tg-kopf{display:block;width:100%;text-align:left;border:0;background:none;padding:0;font:inherit;
-  color:inherit;cursor:pointer}
-.tg-namen{display:block;font-size:var(--t-s);color:var(--ink-2);margin-top:2px;overflow-wrap:anywhere}
-.tg-liste{list-style:none;flex:1 1 100%;margin:var(--a-2) 0 0;padding:0 0 0 var(--a-3);
-  border-left:2px solid var(--line)}
-.tg-liste[hidden]{display:none}
-.tg-liste .task-plant{font-weight:600}
 /* ── Doktor als geführter Ablauf ─────────────────────────── */
 .dok-schritte{list-style:none;display:flex;gap:var(--a-1);margin:0 0 var(--a-4);padding:0;flex-wrap:wrap}
 .dok-schritte li{flex:1 1 auto;min-width:0;font-family:var(--f-data);font-size:var(--t-mono);
@@ -3278,20 +3251,13 @@ body.vollbild #moebel-bearb.on{position:absolute;left:52px;right:0;bottom:0;z-in
   font-size:var(--t-mono);line-height:16px;text-align:center;padding:0 4px}
 .dok-gewaehlt{margin:var(--a-3) 0 0;font-size:var(--t-s);color:var(--ink-2);line-height:1.55;overflow-wrap:anywhere}
 
-/* ── Aufgaben: Titel, Beschreibung, Zeitpunkt ────────────── */
+/* ── Wunschliste: Titel und Beschreibung (4.0-beta.29: ohne Aufgaben) ── */
 .task-titel{display:inline}
-.wann{display:inline-block;margin-left:var(--a-2);font-family:var(--f-data);font-size:var(--t-mono);
-  letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--r-klein);
-  padding:1px 6px;color:var(--peat);vertical-align:2px;white-space:nowrap}
-.wann.warn{color:var(--terra);border-color:var(--terra)}
-.wann.still{opacity:.7}
 .task-mehr{display:inline-block;margin-left:var(--a-2);font:inherit;font-size:var(--t-xs);
   border:0;background:none;color:var(--water);text-decoration:underline;cursor:pointer;padding:0}
 .task-desc{display:block;margin-top:var(--a-2);font-size:var(--t-m);line-height:1.6;color:var(--ink-2);
   border-left:2px solid var(--line);padding-left:var(--a-3)}
 .task-desc[hidden]{display:none}
-.add-wann{flex:0 0 auto;max-width:38%;font-size:var(--t-m)}
-@media(max-width:420px){.addbar{flex-wrap:wrap}.add-wann{max-width:none;flex:1 1 100%}}
 
 /* ── Aktualisierung und Installation ─────────────────────── */
 #update-streifen{position:fixed;left:var(--a-3);right:var(--a-3);bottom:calc(76px + var(--a-3));z-index:90;
@@ -4645,6 +4611,9 @@ html[data-design] .tag-fchip[aria-pressed="true"] .tag-punkt{box-shadow:0 0 0 2p
 html[data-design="klartext"] .tag-leiste{height:var(--tap)}
 html[data-design="klartext"] .tag-leiste > .tag-fchip{height:calc(var(--tap) - 4px)}
 html[data-design] #filter-tags .tag-fgruppe{margin:8px 0 4px;font-size:var(--t-xs);color:var(--schrift-2)}
+/* ══ Plan B1 (4.0-beta.29): Ohne Aufgabenzeile stieß die Tag-Zeile in
+   Botanisch an die Knöpfe; der Abstand der alten Zeile (12 px) bleibt. ══ */
+html[data-design="botanisch"] #karte-rumpf .detail > .tagk{margin-top:12px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -7629,7 +7598,7 @@ function pflanzeAusWahl(wert){
             klasse:a.klasse, sonne:a.licht, typ:a.typ, bib:a.bot,
             gift: giftAusArt(a.bot) || null,
             frostMin:a.frost, duenger:a.duenger, raum:'', stellplatz:'',
-            todo:[], log:[], notiz:''};
+            log:[], notiz:''};
   }
   return allePflanzen().find(x=>x.id===wert) || null;
 }
@@ -10644,7 +10613,7 @@ document.addEventListener('click', e=>{
   if(a === 'bearb-weg'){
     const p = (S.eigene||[]).find(x=>x.id===id);
     if(!p) return;
-    const frage = '„'+nice(p)+'“ wirklich löschen? Fotos, Gießverlauf und Aufgaben gehen mit. Das lässt sich nicht rückgängig machen.';
+    const frage = '„'+nice(p)+'“ wirklich löschen? Fotos und Gießverlauf gehen mit. Das lässt sich nicht rückgängig machen.';
     if(!confirm(frage)) return;
     pflanzeEntfernen(id);
     /* Hier stand `offen.delete(id)`. Die Menge `offen` ist mit der
@@ -10667,7 +10636,7 @@ document.addEventListener('click', e=>{
    Bis 3.30.0 blieben Ereignisse, „gesehen“ und der Umtopfplan liegen. */
 function pflanzeEntfernen(id){
   S.eigene = (S.eigene||[]).filter(x=>x.id!==id);
-  ['water','fotos','tasks','added','zustand','blatt','orte','ereignisse','gesehen','umtopfPlan']
+  ['water','fotos','zustand','blatt','orte','ereignisse','gesehen','umtopfPlan']
     .forEach(k=>{ if(S[k] && typeof S[k] === 'object') delete S[k][id]; });
 }
 
@@ -10929,19 +10898,6 @@ function pflanzeEntfernen(id){
     <div class="wz-in" id="mh-in-raeume" hidden>
       <p class="wz-hilfe" hidden>Hier benennst du Räume und Stellplätze um oder löschst sie. Ein Tipp auf einen Raum zeigt seine Stellplätze. Neue legst du hier an oder beim Anlegen einer Pflanze.</p>
       <div id="rv-inhalt"></div>
-    </div>
-  </section>
-
-  <section data-ans="mehr" class="plan mh" id="todo-sec" data-mh="aufgaben">
-    <h2 class="wz-h2">Aufgaben</h2>
-    <div class="wz-kopfzeile">
-      <button class="wz-kopf" data-mh-go="aufgaben" aria-expanded="false" aria-controls="mh-in-aufgaben">
-        <span class="wz-t">Aufgaben</span><span class="wz-p" aria-hidden="true">›</span></button>
-      <button class="wz-i" id="todo-i" aria-expanded="false" aria-label="Was steht hier?">i</button>
-    </div>
-    <div class="wz-in" id="mh-in-aufgaben" hidden>
-      <p class="wz-hilfe" id="todo-hilfe" hidden>Gesammelt aus allen Steckbriefen. „Jetzt“ steht oben, darunter alles, was in den nächsten sieben Tagen dran ist. Abhaken, bearbeiten und ergänzen geht hier genauso wie in der einzelnen Pflanze.</p>
-      <div id="alltodo"></div>
     </div>
   </section>
 
@@ -12113,7 +12069,7 @@ function pflanzeEntfernen(id){
       </div>
 
       <p class="ein-abschnitt">Auf der Heute-Seite</p>
-      <p class="fhint" data-erkl>Zusatzzeilen über den Aufgaben. Beides lässt sich jederzeit wieder einblenden.</p>
+      <p class="fhint" data-erkl>Zusatzzeilen auf der Heute-Seite. Beides lässt sich jederzeit wieder einblenden.</p>
       <div class="ein-karte">
         <label class="fspan check">
           <input type="checkbox" role="switch" id="ck-wetterzeile"> <span class="lab" style="display:inline">Wetter und Standortklima</span></label>
@@ -12978,7 +12934,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.28';
+const FASSUNG = '4.0-beta.29';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13185,11 +13141,11 @@ const WUNSCH_START = [
   {id:'w2', text:'Grobe Pinienrinde für Aroideen und Orchideen', done:false}
 ];
 const LEERSTAND = () => ({
-  tasks:{}, added:{}, deleted:{}, wish:null, water:{}, fotos:{}, fotosWeg:{}, profil:{},
+  wish:null, water:{}, fotos:{}, fotosWeg:{}, profil:{},
   eigene:[], lernen:{}, neueArten:[], blatt:{}, vorrat:[],
   /* 4.0-beta.27 (G2a+c): Tags statt Zustände */
   tags:null, tagGruppen:[], tagEin:{}, tagVorgabenAus:[],
-  ereignisse:{}, gesehen:{}, orte:{}, acc:{giessen:1, aufgaben:1},
+  ereignisse:{}, gesehen:{}, orte:{}, acc:{giessen:1},
   balkon:null, raeume:null, raumAktiv:null, rundgang:null, meldeMail:'', sammlungOffen:null,
   design:'botanisch', wetter:null,
   letzteSicherung:null, sicherFassung:null, startGesehen:null, grundrissWunsch:null,
@@ -13202,7 +13158,7 @@ const LEERSTAND = () => ({
   /* Wie viel auf einer aufgeklappten Karte steht: knapp, normal,
      voll. Steuert nur, was zugeklappt startet — nichts verschwindet. */
   dichte:'normal',
-  /* Zusatzzeilen über den Aufgaben auf Heute. Das Wetter war bisher
+  /* Zusatzzeilen auf Heute. Das Wetter war bisher
      immer an, die Kennzahlen gab es gar nicht. */
   heuteWetter:true, heuteKennzahlen:false,
   /* Das gewaehlte Gemini-Modell und die zuletzt geholte Liste. Der
@@ -13391,7 +13347,7 @@ function grundwerteErgaenzen(){
       else if(!(k in S)) S[k] = null;
     }
   });
-  if(!S.acc || typeof S.acc !== 'object') S.acc = {giessen:1, aufgaben:1};
+  if(!S.acc || typeof S.acc !== 'object') S.acc = {giessen:1};
   /* wish darf niemals null bleiben, sonst stolpert render() darüber. */
   if(!Array.isArray(S.wish)) S.wish = WUNSCH_START.map(w=>Object.assign({}, w));
   if(!S.tiere || typeof S.tiere !== 'object') S.tiere = {aktiv:null, arten:['katze']};
@@ -13412,7 +13368,7 @@ function grundwerteErgaenzen(){
   ['wzOffen', 'mehrOffen', 'ansichtAlles'].forEach(k=>{ delete S[k]; });
   /* Ebenso alle Sammlungen, die als Liste erwartet werden. */
   ['eigene','neueArten','vorrat'].forEach(k=>{ if(!Array.isArray(S[k])) S[k] = []; });
-  ['tasks','added','deleted','water','fotos','fotosWeg','profil','lernen','blatt',
+  ['water','fotos','fotosWeg','profil','lernen','blatt',
    'ereignisse','gesehen','orte','tagEin'].forEach(k=>{
     if(!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {};
   });
@@ -13423,6 +13379,11 @@ function grundwerteErgaenzen(){
   delete S.dueng; delete S.duengLangzeit;
   if(S.giess && typeof S.giess === 'object')
     DUENG_ALTFELDER.forEach(k => { delete S.giess[k]; });
+  /* 4.0-beta.29 (B1, F279): Die Aufgabenliste ist entfernt, ihre Daten
+     auch (Beta, keine Sicherung). Wiederholbar, ohne Merker. */
+  delete S.tasks; delete S.added; delete S.deleted;
+  if(S.acc && typeof S.acc === 'object'){ delete S.acc.aufgaben; delete S.acc['aufgaben-zeile']; }
+  (S.eigene || []).forEach(p => { if(p && typeof p === 'object') delete p.todo; });
   /* 4.0-beta.27 (G2a+c): Umbau der Zustände, Vorgaben, erreichte Enden */
   if(typeof tagsBereit === 'function') tagsBereit();
   bereinigungAnstossen();
@@ -13780,7 +13741,7 @@ function neueId(){
     if(m) hoechste = Math.max(hoechste, parseInt(m[1], 10));
   };
   (S.eigene || []).forEach(p => pruefen(p.id));
-  ['fotos','water','zustand','added','tasks','ereignisse','gesehen','blatt','umtopfPlan']
+  ['fotos','water','zustand','ereignisse','gesehen','blatt','umtopfPlan']
     .forEach(k => Object.keys(S[k] || {}).forEach(pruefen));
   /* Die Bereinigung (3.31.0) entfernt Reste gelöschter Pflanzen. Die
      höchste Nummer von vorher bleibt gemerkt, damit keine alte
@@ -14600,24 +14561,8 @@ function galerieHTML(p, ruhig){
   return `<div class="gal">${bilder}${add}</div>`;
 }
 
-/* ══════════════════ Aufgaben ══════════════════ */
-function aufgabenVon(p){
-  const liste = [];
-  (p.todo||[]).forEach((t,i)=>{
-    const id = p.id+'-t'+i;
-    if(S.deleted[id]) return;
-    const o = S.tasks[id] || {};
-    liste.push({id, plantName:nice(p), plantId:p.id, text:(o.text!=null?o.text:t),
-                done:!!o.done, wann:o.wann || null, beschreibung:o.beschreibung});
-  });
-  (S.added[p.id]||[]).forEach(a=>{
-    if(S.deleted[a.id]) return;
-    const o = S.tasks[a.id] || {};
-    liste.push({id:a.id, plantName:nice(p), plantId:p.id, text:(o.text!=null?o.text:a.text),
-                done:!!o.done, wann:o.wann || a.wann || null, beschreibung:o.beschreibung!=null?o.beschreibung:a.beschreibung});
-  });
-  return liste;
-}
+/* 4.0-beta.29 (B1, F279): Die Aufgabenliste ist entfernt. Hier bleibt,
+   was die Wunschliste zum Zeichnen braucht. */
 let offeneDone = new Set();
 
 /* ── Titel und Beschreibung ──────────────────────────────────
@@ -14633,33 +14578,13 @@ function aufgabeTeile(t){
   return {titel: text.slice(0, schnitt > 20 ? schnitt : 58) + ' …', beschreibung: text};
 }
 
-/* ── Wann ist es dran ────────────────────────────────────── */
-const WANN = {
-  jetzt:      {name:'Jetzt',           rang:0, ton:'warn'},
-  woche:      {name:'Diese Woche',     rang:1, ton:''},
-  monat:      {name:'Diesen Monat',    rang:2, ton:'still'},
-  irgendwann: {name:'Wenn es soweit ist', rang:3, ton:'still'}
-};
-/* Ohne eigene Angabe aus dem Text schließen, damit die Liste nicht
-   alles in „diese Woche“ wirft. */
-function wannVon(t){
-  if(WANN[t.wann]) return t.wann;
-  const x = (t.text || '').toLowerCase();
-  if(/sofort|dringend|umgehend|nicht mehr gießen|sofortmaßnahme/.test(x)) return 'jetzt';
-  if(/frühjahr|fruehjahr|winter|herbst|frühling|märz|april|oktober|november|saison|nächstes jahr|langfristig|irgendwann|sobald|wenn /.test(x)) return 'irgendwann';
-  if(/^\s*$/.test(x)) return 'woche';
-  return t.id && /-t\d+$/.test(t.id) ? 'monat' : 'woche';
-}
-
 function taskHTML(t, mitPflanze){
   const {titel, beschreibung} = aufgabeTeile(t);
-  const w = wannVon(t);
   const auf = offeneDone.has('b-'+t.id);
   return `<li class="task${t.done?' done':''}" data-task="${t.id}">
     <button class="tick-btn" data-do="toggle" aria-pressed="${t.done}" aria-label="${t.done?'Wieder öffnen':'Erledigt'}">✓</button>
     <span class="task-text">
       ${mitPflanze?`<span class="task-plant">${esc(t.plantName)}</span>`:''}<span class="task-titel">${esc(titel)}</span>
-      ${!t.done && w!=='woche' ? `<span class="wann ${WANN[w].ton}">${esc(WANN[w].name)}</span>` : ''}
       ${beschreibung ? `<button class="task-mehr" data-do="task-mehr" data-k="${t.id}">${auf?'weniger':'mehr'}</button>
         <span class="task-desc"${auf?'':' hidden'}>${esc(beschreibung)}</span>` : ''}
     </span>
@@ -14668,124 +14593,13 @@ function taskHTML(t, mitPflanze){
       <button class="ibtn" data-do="del" aria-label="Löschen">×</button>
     </span></li>`;
 }
-/* Gleiche oder verwandte Aufgaben zusammenfassen.
-   Erst nach gleichem Wortlaut, dann nach gemeinsamem Tätigkeitswort:
-   „Umtopfen“ als Oberaufgabe, darunter „Bernd in Lavagranulat“. */
-const AUFGABE_STOPP = new Set(['nach','noch','oder','eine','einen','einem','beim','beim','über','unter',
-  'wenn','sobald','erst','dann','mehr','ganz','alle','allen','etwa','sein','sind','wird','kann','muss',
-  'nicht','auch','sehr','zwei','drei','viel','wenig','frisch','neue','neuen','neues','gute','guten']);
-
-function aufgabeSchluessel(titel){
-  const worte = norm(titel).split(' ').filter(w=>w.length >= 5 && !AUFGABE_STOPP.has(w));
-  if(!worte.length) return null;
-  /* Verben stehen im Deutschen oft am Ende: „Nährstoffe nachliefern“ */
-  const kandidat = worte.find(w=>/(en|eln|ern)$/.test(w)) || worte[0];
-  const stamm = kandidat.replace(/(ung|en|eln|ern)$/, '');
-  return stamm.length >= 5 ? stamm : null;
-}
-/* Nur kürzen, wenn das gemeinsame Wort vorn steht — sonst bleibt der
-   Titel ganz, damit keine sinnlosen Bruchstücke entstehen. */
-function aufgabeRest(titel, schluessel){
-  const erste = norm(titel).split(' ')[0] || '';
-  if(erste.indexOf(schluessel) !== 0) return titel;
-  const roh = titel.replace(/^\S+\s*/, '').replace(/^[\s,;:.–—-]+/, '').trim();
-  return roh.length > 2 ? roh.charAt(0).toUpperCase() + roh.slice(1) : titel;
-}
-
-function taskGruppenHTML(offenT){
-  const mitTitel = offenT.map(t=>Object.assign({}, t, {titel: aufgabeTeile(t).titel}));
-  /* 1. Runde: wortgleich */
-  const nachText = {};
-  mitTitel.forEach(t=>{ const k = norm(t.titel); (nachText[k] = nachText[k] || []).push(t); });
-
-  /* 2. Runde: alles, was allein blieb, nach gemeinsamem Tätigkeitswort */
-  const bloecke = [];
-  const einzeln = [];
-  Object.keys(nachText).forEach(k=>{
-    const g = nachText[k];
-    if(g.length > 1) bloecke.push({art:'gleich', schluessel:k, titel:g[0].titel, gruppe:g,
-                                   rang: offenT.indexOf(g[0])});
-    else einzeln.push(g[0]);
-  });
-  const nachVerb = {};
-  einzeln.forEach(t=>{
-    const k = aufgabeSchluessel(t.titel);
-    if(!k){ bloecke.push({art:'einzeln', gruppe:[t], rang: offenT.indexOf(t)}); return; }
-    (nachVerb[k] = nachVerb[k] || []).push(t);
-  });
-  Object.keys(nachVerb).forEach(k=>{
-    const g = nachVerb[k];
-    if(g.length > 1){
-      const wort = g[0].titel.split(/\s+/).find(w=>norm(w).indexOf(k) === 0) || k;
-      bloecke.push({art:'verwandt', schluessel:k, gruppe:g, rang: offenT.indexOf(g[0]),
-                    titel: wort.charAt(0).toUpperCase() + wort.slice(1).replace(/[.,;:]$/, '')});
-    } else bloecke.push({art:'einzeln', gruppe:g, rang: offenT.indexOf(g[0])});
-  });
-  bloecke.sort((a,b)=>a.rang - b.rang);
-
-  return `<ul class="tasks">${bloecke.map(bl=>{
-    if(bl.art === 'einzeln') return taskHTML(bl.gruppe[0], true);
-    const auf = offeneDone.has('g-'+bl.schluessel);
-    const namen = bl.gruppe.map(t=>t.plantName).filter(Boolean);
-    /* Die Kennungen der Gruppe wandern an den Haken. Der Schlüssel allein
-       reicht nicht: er entsteht aus dem Wortlaut und kann sich ändern,
-       sobald eine Aufgabe umbenannt wird. */
-    const ids = bl.gruppe.map(t=>t.id).join(' ');
-    return `<li class="tgruppe${auf?' auf':''}" data-tg="${esc(bl.schluessel)}">
-      <button class="tick-btn tg-tick" data-do="tg-fertig" data-ids="${esc(ids)}"
-        aria-label="Alle ${bl.gruppe.length} erledigt: ${esc(bl.titel)}">✓</button>
-      <span class="task-text">
-        <button class="tg-kopf" data-do="tg-auf" data-k="${esc(bl.schluessel)}">${esc(bl.titel)}</button>
-        <span class="tg-namen">${esc(namen.join(', '))}</span>
-      </span>
-      <button class="tg-zahl" data-do="tg-auf" data-k="${esc(bl.schluessel)}"
-        aria-expanded="${auf}" aria-label="Einzeln aufklappen, ${bl.gruppe.length} Pflanzen">${bl.gruppe.length} <span class="caret">▾</span></button>
-      <ul class="tg-liste"${auf?'':' hidden'}>${bl.gruppe.map(t=>{
-        if(bl.art !== 'verwandt') return taskHTML(t, true);
-        const rest = aufgabeRest(t.titel, bl.schluessel);
-        return taskHTML(Object.assign({}, t, {text: rest || t.titel, beschreibung: aufgabeTeile(t).beschreibung}), true);
-      }).join('')}</ul>
-    </li>`;
-  }).join('')}</ul>`;
-}
-
 function taskBlockHTML(tasks, scope, mitPflanze, addPlant){
   const offenT = tasks.filter(t=>!t.done), fertig = tasks.filter(t=>t.done);
   const auf = offeneDone.has(scope);
-  let h;
-  if(scope === 'global'){
-    /* Drei Stufen statt zwei: was jetzt dran ist, steht oben und offen.
-       „Diese Woche“ sammelt alles, was in den nächsten sieben Tagen
-       anfällt — ohne das, was heute schon in „Jetzt“ steht. */
-    const jetzt = offenT.filter(t=>WANN[wannVon(t)].rang === 0);
-    const woche = offenT.filter(t=>WANN[wannVon(t)].rang === 1);
-    const spaeter = offenT.filter(t=>WANN[wannVon(t)].rang > 1);
-    const aufSp = offeneDone.has('spaeter');
-    const aufWo = offeneDone.has('woche');
-    h = jetzt.length
-      ? taskGruppenHTML(jetzt)
-      : `<p style="color:var(--peat);font-style:italic;margin:4px 0 8px">Jetzt ist nichts offen.</p>`;
-    if(woche.length){
-      h += `<div class="done-wrap${aufWo?'':' closed'}" data-scope="woche">
-        <button class="done-head" data-do="fold-woche" aria-expanded="${aufWo}">
-          <span class="caret">▾</span> Diese Woche (${woche.length})</button>
-        ${taskGruppenHTML(woche)}</div>`;
-    }
-    if(spaeter.length){
-      h += `<div class="done-wrap${aufSp?'':' closed'}" data-scope="spaeter">
-        <button class="done-head" data-do="fold-spaeter" aria-expanded="${aufSp}">
-          <span class="caret">▾</span> Später (${spaeter.length})</button>
-        ${taskGruppenHTML(spaeter)}</div>`;
-    }
-  } else {
-    h = offenT.length
+  let h = offenT.length
       ? `<ul class="tasks">${offenT.map(t=>taskHTML(t,mitPflanze)).join('')}</ul>`
       : `<p style="color:var(--peat);font-style:italic;margin:4px 0 8px">Nichts offen.</p>`;
-  }
-  const frisch = fertig.filter(t=>{
-    const d = (S.tasks[t.id]||{}).erledigtAm;
-    return !d || tageSeit(d) <= 7;
-  });
+  const frisch = fertig;
   if(frisch.length){
     h += `<div class="done-wrap${auf?'':' closed'}" data-scope="${esc(scope)}">
       <button class="done-head" data-do="fold" aria-expanded="${auf}"><span class="caret">▾</span> Erledigt (${frisch.length})</button>
@@ -14793,10 +14607,7 @@ function taskBlockHTML(tasks, scope, mitPflanze, addPlant){
   }
   if(addPlant){
     h += `<div class="addbar">
-      <input type="text" placeholder="Neue Aufgabe …" aria-label="Neue Aufgabe">
-      <select class="add-wann" aria-label="Wann">
-        ${Object.keys(WANN).map(k=>`<option value="${k}"${k==='woche'?' selected':''}>${esc(WANN[k].name)}</option>`).join('')}
-      </select>
+      <input type="text" placeholder="Neuer Wunsch …" aria-label="Neuer Wunsch">
       <button class="haupt" data-do="add" data-plant="${addPlant}">Hinzufügen</button></div>`;
   }
   return h;
@@ -15688,24 +15499,6 @@ function kartenZeichen(p){
   return `<span class="icons">${icoSonne(p)}${icoWasser(p)}${icoFrost(p)}${icoDuenger(p)}</span>`;
 }
 
-/* Aufgaben als eine Zeile wie in Mehr: was offen ist, steht in der
-   Unterzeile, das Formular erst nach dem Aufklappen. Bis 3.11.0 stand
-   es offen über den Reitern und schob sie eine halbe Seite nach unten. */
-function aufgabenZeileHTML(p){
-  const alle = aufgabenVon(p);
-  const offen = alle.filter(t=>!t.done);
-  const unter = offen.length
-    ? offen.length + ' offen · ' + String(offen[0].text || '').trim()
-    : 'Nichts offen';
-  /* Eigener Merkschlüssel: „aufgaben“ stand ab Werk auf offen. Die
-     Zeile startet zu und bleibt offen, sobald man sie einmal aufklappt. */
-  return `<details class="acc acc-zeile" data-acc="aufgaben-zeile"${accOffen('aufgaben-zeile')?' open':''}>
-    <summary><svg class="az-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11"/></svg>
-      <span class="acc-t"><b class="az-titel">Aufgaben</b><span class="az-unter">${esc(unter)}</span></span></summary>
-    <div class="acc-in">${taskBlockHTML(alle, 'k-'+p.id, false, p.id)}</div></details>`;
-}
-
-
 function giessAbschnitt(p){
   const tipp = giesstippRest(p);
   const st = giessStatus(p);
@@ -16361,7 +16154,6 @@ function kartenDetailHTML(p){
       ${typeof anzuchtMutterHTML === 'function' ? anzuchtMutterHTML(p) : ''}
       ${warnungenHTML(p)}
       ${pflegeHinweiseHTML(p)}
-      ${aufgabenZeileHTML(p)}
       ${tagKarteHTML(p)}
       ${kartenReiter(p.id, [
         {key:'pflege', titel:'Pflege', inhalt:
@@ -17354,11 +17146,6 @@ const SB_TON_WORT = {wachstum:'Wachstum', pflege:'Pflege',
 function sbBlattPunkte(p){
   const punkte = [];
 
-  (S.added[p.id] || []).forEach((a, i) => {
-    punkte.push({datum:null, ton:'vermehrung', titel:'Schritt ' + (i + 1),
-                 text:a.text || '', erledigt:!!a.done});
-  });
-
   ereignisse(p.id).forEach(e => {
     const art = EREIGNIS_ARTEN[e.typ] || {};
     const and = e.bezug ? allePflanzen().find(x => x.id === e.bezug) : null;
@@ -18070,8 +17857,6 @@ function render(){
   if(typeof sbListeRendern === 'function' && sbAnsicht === 'liste'
      && document.getElementById('sb-liste')) sbListeRendern(
        (document.getElementById('sb-such')||{}).value || '');
-  const alleTasks = alle.flatMap(aufgabenVon);
-  $('#alltodo').innerHTML = taskBlockHTML(alleTasks, 'global', true, null);
   $('#wunsch').innerHTML = taskBlockHTML(S.wish.map(x=>({id:x.id, text:x.text, done:!!x.done, plantName:''})), 'wunsch', false, '__wunsch');
   planTabellen();
 }
@@ -18149,12 +17934,6 @@ document.addEventListener('click', e=>{
     const box = btn.closest('.addbar').querySelector('input');
     const text = box.value.trim(); if(!text) return;
     if(btn.dataset.plant==='__wunsch'){ S.wish.push({id:'w'+Date.now().toString(36), text, done:false}); }
-    else {
-      const pid = btn.dataset.plant;
-      const wahl = box.parentElement.querySelector('.add-wann');
-      (S.added[pid] = S.added[pid]||[]).push({id:pid+'-x'+Date.now().toString(36), text,
-        wann: wahl ? wahl.value : 'woche'});
-    }
     box.value=''; sichern(); render(); return;
   }
 
@@ -18163,46 +17942,16 @@ document.addEventListener('click', e=>{
     if(offeneDone.has(k)) offeneDone.delete(k); else offeneDone.add(k);
     render(); return;
   }
-  if(a==='fold-spaeter'){
-    if(offeneDone.has('spaeter')) offeneDone.delete('spaeter'); else offeneDone.add('spaeter');
-    render(); return;
-  }
-  if(a==='fold-woche'){
-    if(offeneDone.has('woche')) offeneDone.delete('woche'); else offeneDone.add('woche');
-    render(); return;
-  }
-  if(a==='tg-auf'){
-    const k = 'g-' + btn.dataset.k;
-    if(offeneDone.has(k)) offeneDone.delete(k); else offeneDone.add(k);
-    render(); return;
-  }
-  /* Die ganze Gruppe auf einmal. Wünsche und echte Aufgaben liegen an
-     verschiedenen Stellen, darum beide Wege. Bleibt danach nur noch eine
-     offene Aufgabe übrig, zerfällt die Gruppe von selbst — sie entsteht
-     ohnehin erst beim Zeichnen aus dem Wortlaut. */
-  if(a==='tg-fertig'){
-    const ids = String(btn.dataset.ids||'').split(' ').filter(Boolean);
-    ids.forEach(id=>{
-      if(id.charAt(0)==='w'){ const i = wunschIndex(id); if(i>-1) S.wish[i].done = true; }
-      else S.tasks[id] = Object.assign({}, S.tasks[id], {done:true, erledigtAm: iso(HEUTE)});
-    });
-    sichern(); render(); return;
-  }
   const li = btn.closest('.task'); if(!li || !li.dataset.task) return;
   const id = li.dataset.task, istWunsch = id.charAt(0)==='w';
+  if(!istWunsch) return;
 
   if(a==='toggle'){
-    if(istWunsch){ const i=wunschIndex(id); if(i>-1) S.wish[i].done = !S.wish[i].done; }
-    else {
-      const fertig = !li.classList.contains('done');
-      S.tasks[id] = Object.assign({}, S.tasks[id],
-        {done: fertig, erledigtAm: fertig ? iso(HEUTE) : null});
-    }
+    const i=wunschIndex(id); if(i>-1) S.wish[i].done = !S.wish[i].done;
     sichern(); render();
   }
   if(a==='del'){
-    if(istWunsch){ const i=wunschIndex(id); if(i>-1) S.wish.splice(i,1); }
-    else S.deleted[id] = true;
+    const i=wunschIndex(id); if(i>-1) S.wish.splice(i,1);
     sichern(); render();
   }
   if(a==='edit'){
@@ -18216,8 +17965,7 @@ document.addEventListener('click', e=>{
     const speichern = ()=>{
       const neu = ta.value.trim();
       if(neu){
-        if(istWunsch){ const i=wunschIndex(id); if(i>-1) S.wish[i].text = neu; }
-        else S.tasks[id] = Object.assign({}, S.tasks[id], {text:neu});
+        const i=wunschIndex(id); if(i>-1) S.wish[i].text = neu;
         sichern();
       }
       render();
@@ -19803,10 +19551,10 @@ document.addEventListener('click', e=>{
   raumGiessen(b.dataset.raumgiess);
 });
 
-/* ══════════════════ Maßnahmen zu Aufgaben ══════════════════
-   Eine Stelle für beide Wege: die KI-Antwort beim Anlegen und die
-   Diagnose im Pflanzendoktor. Beide liefern Maßnahmen als Text, beide
-   sollen daraus echte Aufgaben machen, statt sie nur anzuzeigen. */
+/* ══════════════════ Maßnahmen ══════════════════
+   4.0-beta.29 (B1, F279): Maßnahmen der KI im Doktor stehen nur noch als
+   Text da. Aufgaben gibt es nicht mehr; wer etwas vormerken will, setzt
+   einen Tag. */
 /* ── Maßnahmen ───────────────────────────────────────────────
    Neues Format je Zeile: Auslöser | Handlung | Dringlichkeit |
    Wiederholung. Hält sich die KI nicht daran, wird die Zeile als
@@ -19856,9 +19604,8 @@ function massnahmeTrivial(m, p){
   return false;
 }
 
-/* Eine Maßnahme in einen Aufgabentext gießen. Der Auslöser steht
-   mit dabei, weil eine Aufgabe ohne Grund in zwei Wochen niemand
-   mehr einordnen kann. */
+/* Eine Maßnahme als eine Zeile Text. Der Auslöser steht mit dabei,
+   weil ein Schritt ohne Grund später niemand mehr einordnen kann. */
 function massnahmeText(m){
   let t = m.handlung || '';
   if(m.wiederholung && !/^einmalig$/i.test(m.wiederholung.trim()))
@@ -19868,113 +19615,14 @@ function massnahmeText(m){
 }
 
 
-/* Derselbe Weg, aber mit einer schon ausgewählten Liste. */
-function aufgabenAusMassnahmen(pflanzeId, liste, herkunft){
-  const p = allePflanzen().find(x=>x.id === pflanzeId);
-  if(!liste || !liste.length) return 0;
-  const bestand = new Set(((S.added[pflanzeId]||[])).map(a=>(a.text||'').toLowerCase()));
-  let neu = 0;
-  liste.forEach(m=>{
-    const text = massnahmeText(m);
-    if(!text || bestand.has(text.toLowerCase())) return;   /* nicht doppelt anlegen */
-    /* „sofort“ gehört unter Jetzt, alles andere kann warten. */
-    const eilig = /sofort|dringend|umgehend/i.test(m.dringlich || '');
-    S.added[pflanzeId] = S.added[pflanzeId] || [];
-    S.added[pflanzeId].push({
-      id: 'a-' + Date.now() + '-' + Math.random().toString(36).slice(2,7),
-      text, wann: eilig ? 'jetzt' : 'woche', quelle: herkunft || 'ki', angelegt: iso(HEUTE)
-    });
-    bestand.add(text.toLowerCase());
-    neu++;
-  });
-  /* Nachschauen, ob es geholfen hat — sonst gerät die Sache in Vergessenheit.
-     Steht der Punkt schon auf der Liste, kommt kein zweiter dazu: nach drei
-     Doktorbesuchen standen sonst drei gleichlautende Zeilen da, ohne dass
-     man unterscheiden konnte, welche zu welchem Besuch gehört. */
-  const nachText = 'Nachsehen, ob sich ' + (p ? nice(p) : 'die Pflanze') + ' erholt';
-  if(neu && !bestand.has(nachText.toLowerCase())){
-    S.added[pflanzeId].push({
-      id: 'a-' + Date.now() + '-nach',
-      text: nachText,
-      wann:'woche', quelle: herkunft || 'ki', angelegt: iso(HEUTE)
-    });
-    bestand.add(nachText.toLowerCase());
-    neu++;
-  }
-  sichern();
-  return neu;
-}
-
-/* ── Maßnahmen zur Auswahl stellen ────────────────────────
-   Bisher wanderten alle Vorschläge ungefragt auf die Aufgabenliste.
-   Jetzt steht jeder mit einem Haken da: was nicht passt, wird
-   abgewählt, statt später einzeln wieder gelöscht zu werden. */
-let massnahmeAuswahl = {};        /* Kennung → Liste geparster Maßnahmen */
-
-function massnahmenAuswahlHTML(kennung, liste, kopf){
-  massnahmeAuswahl[kennung] = liste || [];
+/* Maßnahmen als Liste zum Lesen, ohne Haken und ohne Übernahme. */
+function massnahmenListeHTML(liste, kopf){
   if(!liste || !liste.length) return '';
-  const DRING = {sofort:'sofort', dringend:'sofort', umgehend:'sofort'};
-  return `<div class="mn-wahl" data-mnwahl="${esc(kennung)}">
-    <h4>${esc(kopf || 'Was jetzt zu tun ist')}</h4>
-    <p class="sub">Hak ab, was auf die Aufgabenliste soll. Alles andere bleibt außen vor.</p>
-    ${liste.map((m,i)=>{
-      const eilig = !!DRING[norm(m.dringlich || '')];
-      return `<label class="mn-zeile">
-        <input type="checkbox" data-mn="${esc(kennung)}" data-i="${i}" checked>
-        <span class="mn-text">
-          <b>${esc(m.handlung || '')}</b>
-          <span class="mn-sub">${m.ausloeser ? esc(m.ausloeser) : ''}${
-            m.ausloeser && (m.dringlich || m.wiederholung) ? ' · ' : ''}${
-            esc([m.dringlich, m.wiederholung].filter(x=>x && !/^einmalig$/i.test(x)).join(' · '))}</span>
-        </span>
-        ${eilig ? '<span class="mn-eilig">sofort</span>' : ''}
-      </label>`;
-    }).join('')}
-    <div class="tools">
-      <button class="haupt" data-do="mn-nehmen" data-k="${esc(kennung)}">Ausgewählte als Aufgaben</button>
-      <button data-do="mn-keine" data-k="${esc(kennung)}">Keine übernehmen</button>
-    </div>
-    <p class="mn-meld" hidden></p>
+  return `<div class="mn-liste">
+    <p class="dg-schritt-kopf">${esc(kopf || 'Was jetzt zu tun ist')}</p>
+    <ol class="dg-schritte">${liste.map(m=>`<li>${esc(massnahmeText(m))}</li>`).join('')}</ol>
   </div>`;
 }
-
-/* Was steht angehakt in der Liste? */
-function massnahmenGewaehlt(kennung){
-  const liste = massnahmeAuswahl[kennung] || [];
-  const raus = [];
-  document.querySelectorAll('[data-mn="' + kennung + '"]').forEach(el=>{
-    if(el.checked && liste[parseInt(el.dataset.i, 10)]) raus.push(liste[parseInt(el.dataset.i, 10)]);
-  });
-  return raus;
-}
-
-document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-do="mn-nehmen"], [data-do="mn-keine"]');
-  if(!b) return;
-  e.preventDefault(); e.stopPropagation();
-  const kennung = b.dataset.k;
-  const kasten = document.querySelector('[data-mnwahl="' + kennung + '"]');
-  const meld = kasten ? kasten.querySelector('.mn-meld') : null;
-  const sag = t => { if(meld){ meld.hidden = false; meld.textContent = t; } };
-  if(b.dataset.do === 'mn-keine'){
-    massnahmeAuswahl[kennung] = [];
-    if(kasten) kasten.innerHTML = '<p class="sub">Keine Aufgabe angelegt.</p>';
-    return;
-  }
-  /* Beim Anlegen gibt es die Pflanze noch nicht — dort wird die
-     Auswahl nur gemerkt und beim Speichern übernommen. */
-  const id = kasten ? kasten.dataset.pfl : null;
-  const gewaehlt = massnahmenGewaehlt(kennung);
-  if(!gewaehlt.length){ sag('Nichts ausgewählt.'); return; }
-  if(!id){ sag(gewaehlt.length + (gewaehlt.length === 1 ? ' Schritt vorgemerkt' : ' Schritte vorgemerkt')
-    + ' — sie werden beim Anlegen zu Aufgaben.'); return; }
-  const n = aufgabenAusMassnahmen(id, gewaehlt, kasten.dataset.quelle || 'ki');
-  sag(n ? n + (n === 1 ? ' Aufgabe angelegt.' : ' Aufgaben angelegt.') + ' Zu finden bei „Heute“ und in der Karte.'
-        : 'Diese Schritte stehen schon auf der Liste.');
-  massnahmeAuswahl[kennung] = [];
-  render();
-});
 
 /* Einzelnen Hinweis ausblenden. Gemerkt wird je Pflanze und Anlass,
    damit ein weggeklickter Standorthinweis nicht auch den Hinweis zu
@@ -22454,7 +22102,6 @@ function fassungPruefen(){
   /* Erst die Sicherung, dann „Neu in Fassung …“. */
   if(typeof sicherungPflichtOffen === 'function' && sicherungPflichtOffen() && !_sichPflichtFrei) return;
   const erstinstallation = !S.fassungGesehen && !(S.eigene && S.eigene.length)
-    && !(S.added && Object.keys(S.added).length)
     && !(S.water && Object.keys(S.water).length);
   S.fassungGesehen = FASSUNG;
   sichern();
@@ -22739,8 +22386,8 @@ $('#btn-paste-los').onclick = ()=>{
   if(AW && AW.quelle === 'ki'){ AW.fuer = awFormArt(); AW.schluessel = awSchluessel(AW.fuer.bot || AW.fuer.art, AW.fuer.sorte); }
   if(d.sortenmerkmale && !/^keine?$|^unbekannt$/.test(norm(d.sortenmerkmale)))
     uebernommen.push('Sortenmerkmale gelesen');
-  /* Für den Anlegen-Knopf merken: die Maßnahmen sollen gleich als
-     Aufgaben mitkommen, sobald die Pflanze eine ID hat. */
+  /* Für den Anlegen-Knopf merken: Pflegetexte, Vermehrung und
+     Sortenmerkmale kommen mit „Anlegen“ auf die Karte. */
   letzteKiAntwort = d;
   /* Die Antwort steht in den Feldern — dann gehoert der Blick auf die
      naechste Stufe, nicht auf einen Knopf, der noch bestaetigt werden
@@ -23046,8 +22693,8 @@ document.addEventListener('change', e=>{
 formLageZeichnen();
 
 /* ── Anlegen ─────────────────────────────────────────────── */
-/* Zuletzt eingelesene KI-Antwort, damit ihre Maßnahmen beim Anlegen
-   direkt zu Aufgaben werden. */
+/* Zuletzt eingelesene KI-Antwort; „Anlegen“ übernimmt daraus
+   Pflegetexte, Vermehrung und Sortenmerkmale. */
 let letzteKiAntwort = null;
 /* Die gerade angelegte Pflanze. Solange sie hier steht, traegt ihre
    Karte den Anstoss zum Doktor. */
@@ -23086,7 +22733,7 @@ async function alSpeichern(){
     intervall: KLASSE_IV[kl] || [8,12],
     bib: a ? a.bot : null,
     eltern:null, linie:null, seit:iso(HEUTE),
-    notiz: $('#f-notiz').value.trim(), todo:[], log:[],
+    notiz: $('#f-notiz').value.trim(), log:[],
     giessart: $('#f-giessart').value || '',
     wichtig: $('#f-wichtig').value.trim(),
     /* Auffangnetz fuer Gattungen, die die Tabelle nicht kennt.
@@ -27677,7 +27324,6 @@ const MH_IKON = {
   patch:     '<path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
   melde:     '<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
   install:   '<path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 18h16"/>',
-  aufgaben:  '<path d="M4 6h4v4H4zM4 14h4v4H4z"/><path d="M11 8h9M11 16h9"/>',
   wunsch:    '<path d="M12 20s-7-4.4-7-9.2A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7-1.2c0 4.8-7 13.2-7 13.2z"/>',
   giess:     '<path d="M4 10h9v6.5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M13 12l5.4-3.4v6.8L13 12"/><path d="M6.5 10V8.2a2.5 2.5 0 0 1 5 0V10"/>',
   bibliothek:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v13a1.7 1.7 0 0 0-1.7-1.5H4z"/>'
@@ -27704,10 +27350,6 @@ const MH_UNTER = {
   raeume:    ()=>{ const n = raumListe().length; return n === 1 ? 'Ein Raum' : n + ' Räume'; },
   /* 4.0-beta.27 (G2a+c) */
   tags:      ()=>{ const n = tagListe().length; return n === 1 ? 'Ein Tag' : n + ' Tags'; },
-  aufgaben:  ()=>{
-    const n = allePflanzen().flatMap(aufgabenVon).filter(t=>!t.done).length;
-    return n ? (n === 1 ? 'Eine offene Aufgabe' : n + ' offene Aufgaben') : 'Nichts offen';
-  },
   wunsch:    ()=>{
     const n = (S.wish||[]).filter(w=>!w.done).length;
     return n ? (n === 1 ? 'Ein Eintrag' : n + ' Einträge') : 'Leer';
@@ -27764,7 +27406,7 @@ const MH_STILL = ['ansicht','tiere','rundgang','kidienst','wasser','rhythmus','u
                   'bib-arten','bib-wissen'];
 
 const MH_GRUPPEN = [
-  {titel:'Sammlung', punkte:['raeume','tags','aufgaben','wunsch']},
+  {titel:'Sammlung', punkte:['raeume','tags','wunsch']},
   {titel:'Pflege',   punkte:['giess','wetter','kartei','bibliothek']},
   {titel:'App',      punkte:['sicherung','einstell','tour','install']},
   {titel:'Hilfe',    punkte:['patch','rueck','melde','sprot']}
@@ -28633,8 +28275,7 @@ function zaehlerAktualisieren(){
   const z = heuteZahlen();
   const faellig = z.ueber + z.heute
     + document.querySelectorAll('#stichtage .stich-row').length;
-  const offen = alle.flatMap(aufgabenVon).filter(t=>!t.done).length;
-  setzeZahl('heute', faellig + offen);
+  setzeZahl('heute', faellig);
   setzeZahl('sammlung', (S.wish||[]).filter(w=>!w.done).length);
   /* Am Reiter „Werkzeuge“ steht bewusst keine Zahl: Konflikte im Grundriss
      sind Hinweise zum Nachdenken, keine Aufgaben, die abgearbeitet werden. */
@@ -29582,9 +29223,6 @@ function dokErgebnis(){
         ${d.gegen?`<p class="dg-gegen">${esc(d.gegen)}</p>`:''}
         <p class="dg-schritt-kopf">Was jetzt zu tun ist</p>
         <ol class="dg-schritte">${d.sofort.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
-        ${dokPflanze && dokPflanze.indexOf('bib:') !== 0 ? `<div class="tools">
-          <button class="haupt" data-do="dok-tasks" data-d="${d.id}">Schritte als Aufgaben übernehmen</button>
-        </div>` : '<p class="dg-hinweis">Wähle oben eine Pflanze aus, dann kannst du die Schritte direkt übernehmen.</p>'}
       </div>`;
     }).join('');
 }
@@ -29847,21 +29485,6 @@ document.addEventListener('click', e=>{
   }
   /* Die Kästen „Abgleich“, „andere Art“, „Sortenmerkmale“ und die
      Giftfrage sind mit 3.21.0 in die Kartei gezogen. */
-  if(btn.dataset.do === 'dok-tasks'){
-    const d = DIAGNOSEN.find(x=>x.id===btn.dataset.d);
-    if(!d || !dokPflanze) return;
-    const liste = S.added[dokPflanze] = S.added[dokPflanze] || [];
-    let neu = 0;
-    d.sofort.forEach(t=>{
-      if(!liste.some(x=>x.text===t)){
-        liste.push({id:'d'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:t});
-        neu++;
-      }
-    });
-    sichern(); render();
-    dokKiHinweis(neu + ' ' + (neu===1?'Schritt':'Schritte') + ' als Aufgaben übernommen. Zu finden bei „Heute“ und in der Karte der Pflanze.', 'ok');
-    return;
-  }
   if(btn.dataset.do === 'dok-neu'){
     dokSchritt = 2; dokWeg = null; dokKiFertig = false; dokKiDaten = null;
     dokSymptome.clear(); dokAntworten = {};
@@ -30135,10 +29758,7 @@ function dokMassnahmenZeigen(d){
     .filter(m=>!massnahmeTrivial(m, p));
   const ausTopf = topfMassnahme(topf);
   if(ausTopf) liste.unshift(ausTopf);
-  const wahl = massnahmenAuswahlHTML('dok', liste);
-  ziel.innerHTML = topfHTML(topf) + wahl;
-  const kasten = ziel.querySelector('[data-mnwahl]');
-  if(kasten){ kasten.dataset.pfl = dokPflanze; kasten.dataset.quelle = 'doktor'; }
+  ziel.innerHTML = topfHTML(topf) + massnahmenListeHTML(liste);
 }
 
 /* Fotos aus dem Doktor zeigen meist Schäden. Sie landen in der
@@ -31878,17 +31498,13 @@ function ablegerAnlegen(mutterId, methodeId){
     eltern: mutterId, linie:null, seit: iso(HEUTE),
     notiz: m.name + ' am ' + heute + ', genommen von ' + nice(mutter) + '.\n'
          + 'Erwartete Bewurzelung in etwa ' + Math.round(m.dauer/7) + ' Wochen.',
-    todo:[], log:[]
+    log:[]
   };
   /* Ein Steckling ist dieselbe Art und Sorte wie die Mutter — er erbt
      alles, was dafür gilt. */
   Object.assign(p, ablegerErbe(mutter, b));
   S.eigene = S.eigene || [];
   S.eigene.push(p);
-  /* Die zwei wichtigsten Schritte gleich als Aufgaben */
-  const liste = S.added[id] = S.added[id] || [];
-  m.schritte.slice(0, 2).forEach(t=>liste.push(
-    {id:'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:t}));
   /* Beide Verlaeufe bekommen ihren Eintrag. Bisher stand die
      Abstammung nur im Steckbrief des Ablegers — bei der Mutter war
      nirgends zu sehen, dass ihr etwas abgenommen wurde. */
@@ -32097,7 +31713,7 @@ function azPflanzeFrei(r){
   const p = {id, eigen:true, name: azHerkunft(r), art: r.art || '', botanisch: r.botanisch || '',
     sorte: r.sorte || '', sortenmerkmale:'', familie:'', klasse:'B', raum:'', stellplatz:'',
     bib:null, eltern:null, linie:null, seit: iso(HEUTE),
-    notiz:'', todo:[], log:[]};
+    notiz:'', log:[]};
   S.eigene = S.eigene || [];
   S.eigene.push(p);
   if(typeof ereignisDazu === 'function') ereignisDazu(id, 'entstanden', r.methode + ' aus der Anzucht');
@@ -35511,11 +35127,6 @@ const TOUR_KAPITEL = {
         text: 'Pflege für das, was jetzt ansteht: Zustand, Gießen, Düngen. Standort für Raum und Stellplatz samt Tierwarnung. Verlauf für das, was war: Gießabstände, Einträge, Befunde, Notizen. Wissen für alles über die Art. Welcher Reiter offen ist, merkt sich die App für alle Karten.' },
 
       { fenster: 'karte-modal',
-        ziel: ()=>document.querySelector('#karte-rumpf .acc'),
-        titel: 'Abschnitte klappen auf',
-        text: 'Was du hier aufklappst, ist auch bei der nächsten Pflanze aufgeklappt. So siehst du überall dasselbe, ohne jedes Mal zu suchen.' },
-
-      { fenster: 'karte-modal',
         ziel: ()=>document.getElementById('karte-zu'),
         titel: 'Fertig — und weiterblättern',
         text: '„Fertig“ schließt das Fenster, der Zurück-Knopf des Geräts genauso. Mit den Pfeilen links und rechts vom Namen gehst du zur nächsten Pflanze, ohne den Umweg über die Liste.' }
@@ -35542,11 +35153,7 @@ const TOUR_KAPITEL = {
 
       { ziel: ()=>document.getElementById('stichtage'),
         titel: 'Stichtage',
-        text: 'Dünger, Umtopfen und ablaufende Zustände stehen als Termine hier. Einzelne lassen sich in den Kalender des Geräts legen.' },
-
-      { ziel: ()=>document.getElementById('todo-sec'),
-        titel: 'Alle offenen Punkte',
-        text: 'Was an Aufgaben aus Doktor, Rundgang und den Karten zusammengekommen ist, sammelt sich hier an einer Stelle.' }
+        text: 'Dünger, Umtopfen und ablaufende Zustände stehen als Termine hier. Einzelne lassen sich in den Kalender des Geräts legen.' }
     ]
   },
 
@@ -35756,8 +35363,7 @@ function tourErledigt(key){
   try{
     kennt = !!(S.startGesehen
       || (S.eigene && S.eigene.length)
-      || (S.water && Object.keys(S.water).length)
-      || (S.added && Object.keys(S.added).length));
+      || (S.water && Object.keys(S.water).length));
   }catch(e){ kennt = false; }
   if(kennt) Object.keys(TOUR_KAPITEL).forEach(k=>{ t.kapitel[k] = 1; });
   sichern();
