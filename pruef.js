@@ -166,7 +166,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.26', w.__T('FASSUNG') === '4.0-beta.26', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.27', w.__T('FASSUNG') === '4.0-beta.27', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -1372,9 +1372,9 @@ setTimeout(async () => {
         duenger:'normal', seit:iso(HEUTE), probleme:[], katzentext:'',
         beob:[], todo:[], log:[], notiz:''});
       S.dueng = {}; S.duengLangzeit = {};
-      if(S.zustand) delete S.zustand['DG1'];
+      if(S.tagEin) delete S.tagEin['DG1'];
       S.giess = {art:'leitung', haerte:'', dgArt:'fluessig',
-                 winterpause:false, saison:true, saisonStaerke:'normal'};
+                 saison:true, saisonStaerke:'normal'};
       sichern(); render(); return 'DG1'; })()`);
     await tick();
 
@@ -1413,23 +1413,14 @@ setTimeout(async () => {
     /* 3.28.1: festes Datum statt Kalendermonat. Die App rechnet mit der
        Jahreskurve (etwa Mitte Oktober bis Anfang März), der Test vorher
        mit Oktober bis Februar — Anfang Oktober und Anfang März lief er rot. */
-    w.__T("S.giess.winterpause = true; sichern()");
     const HEUTE_VOR_DP = w.__T('HEUTE.getTime()');
     const sperreAm = (j, mo) => { w.__T('HEUTE = new Date(' + j + ', ' + mo + ', 15)');
       return ((w.__T(`duengSperre(allePflanzen().find(x=>x.id==='${dp}'))`)||{}).code === 'winter'); };
     const imJanuar = sperreAm(2027, 0), imJuli = sperreAm(2027, 6);
     w.__T('HEUTE = new Date(' + HEUTE_VOR_DP + ')');
-    pruef('Winterpause greift im Januar, nicht im Juli',
-      imJanuar === true && imJuli === false, 'Januar ' + imJanuar + ' / Juli ' + imJuli);
-    w.__T("S.giess.winterpause = false; sichern()");
-
-    /* Frisch umgetopft \u2014 die Verknuepfung zum Umtopf-Assistenten */
-    w.__T(`zustandSetzen('${dp}', 'frisch')`);
-    pruef('Frisch umgetopft sperrt das D\u00fcngen',
-      (w.__T(`duengSperre(allePflanzen().find(x=>x.id==='${dp}'))`)||{}).code === 'frisch');
-    pruef('Der Grund steht im Klartext dabei',
-      /Substrat/.test((w.__T(`duengSperre(allePflanzen().find(x=>x.id==='${dp}'))`)||{}).text || ''));
-    w.__T(`if(S.zustand) delete S.zustand['${dp}']; sichern()`);
+    /* 4.0-beta.27 (F265): Der Winterschalter ist weg, im Winter sperrt nichts mehr. */
+    pruef('beta.27 (F265): keine Winterpause im Januar und im Juli',
+      imJanuar === false && imJuli === false, 'Januar ' + imJanuar + ' / Juli ' + imJuli);
 
     /* Langzeitduenger \u2014 feste Sperre statt Rechnung */
     w.__T(`S.duengLangzeit = {'${dp}': iso(HEUTE)}; sichern()`);
@@ -1453,10 +1444,10 @@ setTimeout(async () => {
     pruef('R\u00fccknahme geht', w.__T(`(function(){
       duengWeg('${dp}'); return (S.dueng['${dp}']||[]).length; })()`) === 0);
 
-    /* Gesperrt heisst: gar nicht eintragbar. */
-    w.__T(`zustandSetzen('${dp}', 'frisch')`);
+    /* Gesperrt heisst: gar nicht eintragbar. (4.0-beta.27: über „nie“ statt Zustand) */
+    w.__T(`(function(){ S.eigene.find(x=>x.id==='${dp}').duenger = 'nie'; sichern(); })()`);
     pruef('Gesperrt l\u00e4sst sich nichts eintragen', w.__T(`duengen('${dp}')`) === false);
-    w.__T(`if(S.zustand) delete S.zustand['${dp}']; sichern()`);
+    w.__T(`(function(){ S.eigene.find(x=>x.id==='${dp}').duenger = 'normal'; sichern(); })()`);
 
     /* Kein Nachholen: 90 Tage her ergibt einen Termin, nicht vier. */
     w.__T(`S.dueng['${dp}'] = [iso(new Date(Date.now() - 90*86400000))]; sichern()`);
@@ -1474,9 +1465,9 @@ setTimeout(async () => {
     pruef('Sie nennt die Bedarfsstufe',
       /Normal/.test(w.__T(`duengAbschnittHTML(allePflanzen().find(x=>x.id==='${dp}'))`)));
     pruef('Gesperrt zeigt sie den Grund statt eines Knopfes', w.__T(`(function(){
-      zustandSetzen('${dp}', 'frisch');
+      S.eigene.find(x=>x.id==='${dp}').duenger = 'nie';
       const h = duengAbschnittHTML(allePflanzen().find(x=>x.id==='${dp}'));
-      if(S.zustand) delete S.zustand['${dp}'];
+      S.eigene.find(x=>x.id==='${dp}').duenger = 'normal';
       return h.indexOf('gesperrt') !== -1 && h.indexOf('dg-knopf') === -1; })()`));
     pruef('Die Zeile auf Heute erscheint',
       /dg-zeile/.test(w.__T('duengZeileHTML()')), w.__T('duengZeileHTML()').slice(0, 40));
@@ -1508,11 +1499,10 @@ setTimeout(async () => {
     /* Aufraeumen */
     w.__T(`S.eigene = (S.eigene||[]).filter(x=>x.id!=='${dp}');
       delete S.dueng['${dp}']; delete S.duengLangzeit['${dp}'];
-      if(S.zustand) delete S.zustand['${dp}'];
+      if(S.tagEin) delete S.tagEin['${dp}'];
       if(S.ereignisse) delete S.ereignisse['${dp}'];
       if(S.edits) delete S.edits['${dp}'];
-      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:true,
-                 saison:true, saisonStaerke:'normal'};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', saison:true, saisonStaerke:'normal'};
       filterDueng = false; sichern(); render()`);
     await tick();
     pruef('Testpflanze wieder entfernt',
@@ -3073,9 +3063,9 @@ setTimeout(async () => {
       w.__T(`ereignisse('${kid}')[0].bezug`) === mid);
     pruef('Beide Ereignisarten sind bekannt',
       !!w.__T('EREIGNIS_ARTEN.vermehrt') && !!w.__T('EREIGNIS_ARTEN.entstanden'));
-    pruef('Sie stehen nicht als Rundgangsknopf zur Wahl',
-      w.__T("STANDARD_KNOEPFE.indexOf('vermehrt')") === -1
-      && w.__T("STANDARD_KNOEPFE.indexOf('entstanden')") === -1);
+    pruef('Sie stehen nicht als Knopf im Verlauf',
+      w.__T("statusHTML({id:'X-1'}).indexOf('data-typ=\"vermehrt\"')") === -1
+      && w.__T("statusHTML({id:'X-1'}).indexOf('data-typ=\"entstanden\"')") === -1);
 
     /* Abstammungsblock über dem Zeitstrahl */
     const abM = w.__T(`abstammungHTML(allePflanzen().find(x=>x.id==='${mid}'))`);
@@ -3348,11 +3338,11 @@ setTimeout(async () => {
 
     /* Kein Feld darf beim Umbau verschwunden sein. */
     ['f-name','f-bot','f-art','f-typ','f-notiz','f-wichtig','f-paste','f-fotos',
-     'f-zustand','f-klasse','f-sonne','f-giftig','f-giessart','f-raum','f-stellplatz',
+     'f-klasse','f-sonne','f-giftig','f-giessart','f-raum','f-stellplatz',
      'bib-liste','bib-gewaehlt','paste-box','paste-meld','neu-unsicher',
      'f-topfform','f-topf','f-substrat','f-ablauf','al-topf',
      'al-weiter','btn-neu-leeren','btn-neu-cancel','btn-bib','btn-paste-los',
-     'btn-paste-auf','btn-ki-kopie','ki-text','neu-bibbox','neu-kibox','f-quar'
+     'btn-paste-auf','btn-ki-kopie','ki-text','neu-bibbox','neu-kibox'
     ].forEach(id => pruef('Feld ' + id + ' hat den Umbau ueberlebt', !!d.getElementById(id)));
 
     w.__T('alStart()');
@@ -3388,9 +3378,8 @@ setTimeout(async () => {
 
     /* Auswahlknoepfe statt Auswahlfeld */
     w.__T('alStufeZeigen(3)');
-    pruef('Zustand hat Knoepfe',
-      d.querySelectorAll('#f-zustand-knoepfe .al-knopf').length > 1,
-      String(d.querySelectorAll('#f-zustand-knoepfe .al-knopf').length));
+    pruef('beta.27: Anlegen fragt keinen Zustand mehr',
+      !d.getElementById('f-zustand') && !d.getElementById('f-zustand-knoepfe') && !d.getElementById('f-quar'));
     w.__T('alStufeZeigen(4)');
     pruef('Giessklasse hat vier Knoepfe',
       d.querySelectorAll('#f-klasse-knoepfe .al-knopf').length === 4);
@@ -3646,21 +3635,21 @@ setTimeout(async () => {
     pruef('Ableger stehen unter ihrer Mutter', gr().indexOf('Aus Rudi') > -1, gr().join('|'));
 
     /* Zustandsfilter, mehrfach waehlbar. */
-    w.__T("gruppierung = 'keine'; filterZustand.add('steckling'); render()");
-    pruef('Der Ablegerfilter greift', karten() === 1, String(karten()));
+    w.__T("gruppierung = 'keine'; tagVorgabenSichern(false); tagSetzen('fd', 'tv-pause'); S.eigene.find(function(p){ return p.id === 'fb'; }).giessart = 'wasser'; filterZustand.add('pause'); render()");
+    pruef('beta.27: Der Filter Gießpause greift über den Tag', karten() === 1, String(karten()));
     pruef('Der aktive Filter steht als Marke da',
       d.querySelectorAll('.filter-marke').length === 1);
     pruef('Der Knopf zaehlt ihn mit',
       !!d.querySelector('#btn-ctrl-auf .ctrl-zahl'));
-    w.__T("filterZustand.add('gesund'); render()");
-    pruef('Zwei Zustaende heissen „eines von beiden“', karten() === 4, String(karten()));
+    w.__T("filterZustand.add('wasser'); render()");
+    pruef('Zwei Filter heissen „eines von beiden“', karten() === 2, String(karten()));
     d.querySelectorAll('.filter-marke')[0].click();
     await tick();
     pruef('Eine Marke laesst sich wegtippen',
       w.__T('filterZustand.size') === 1);
 
     /* Sortieren. */
-    w.__T("filterZustand.clear(); sortierung = 'name'; render()");
+    w.__T("filterZustand.clear(); if(S.tagEin) delete S.tagEin.fd; sortierung = 'name'; render()");
     const ersteId = w.__T("_karteListe[0]");
     pruef('Alphabetisch steht Bego1 vorn', ersteId === 'fb', String(ersteId));
     w.__T("sortierung = 'faellig'; render()");
@@ -3672,12 +3661,13 @@ setTimeout(async () => {
 
     /* Das Blatt fuellt sich beim Oeffnen. */
     w.__T('filterKnoepfeZeichnen()');
-    /* 4.0-beta.26 (G1b): „Gießpause“ kam als zehnter dazu */
-    pruef('Zehn Zustaende zur Wahl',
-      d.querySelectorAll('#filter-zustand .as-knopf').length === 10,
+    /* 4.0-beta.26 (G1b): „Gießpause“ kam als zehnter dazu; 4.0-beta.27: die
+       Zustandsfilter sind weg, es bleiben fünf */
+    pruef('beta.27: Fünf Filter unter „Gießen“ zur Wahl',
+      d.querySelectorAll('#filter-zustand .as-knopf').length === 5,
       String(d.querySelectorAll('#filter-zustand .as-knopf').length));
-    pruef('Elf Gruppierungen zur Wahl',
-      d.querySelectorAll('#filter-gruppen .as-knopf').length === 11,
+    pruef('beta.27: Zehn Gruppierungen zur Wahl (ohne Zustand)',
+      d.querySelectorAll('#filter-gruppen .as-knopf').length === 10,
       String(d.querySelectorAll('#filter-gruppen .as-knopf').length));
     pruef('Vier Sortierungen zur Wahl',
       d.querySelectorAll('#filter-sort .as-knopf').length === 4);
@@ -3765,12 +3755,13 @@ setTimeout(async () => {
       pruef('Im Reiter Standort kein Aufklapper', !kv.querySelector('[data-kpane="standort"] details.acc'));
       /* Zustand */
       const pfl = kv.querySelector('[data-kpane="pflege"]');
-      pruef('Zustand ist die erste Zeile im Reiter Pflege',
-        !!pfl && !!pfl.firstElementChild && pfl.firstElementChild.classList.contains('zustand'));
+      pruef('beta.27: Reiter Pflege beginnt mit dem Gießen, die Tags stehen über den Reitern',
+        !!pfl && !!pfl.firstElementChild && pfl.firstElementChild.dataset.kblock === 'giessen'
+        && !!kv.querySelector('.tagk') && !kv.querySelector('[data-kpane] .tagk') && !kv.querySelector('.zustand'));
       pruef('Topf und Substrat steht im Reiter Pflege',
         !!kv.querySelector('[data-kpane="pflege"] [data-kblock="topf"]'));
-      pruef('Zustand steht nicht im Gießen-Block',
-        !kv.querySelector('[data-kblock="giessen"] [data-zsel]'));
+      pruef('beta.27: keine Zustandsauswahl in der Karte',
+        !kv.querySelector('[data-zsel]'));
       pruef('Gießabstände stehen im Verlauf, nicht in Pflege',
         !kv.querySelector('[data-kpane="pflege"] .verlauf, [data-kpane="pflege"] .wachstum'));
       /* Namen */
@@ -3872,7 +3863,7 @@ setTimeout(async () => {
       pruef('Gegenprobe: ohne intervallEigen zählt der Wert nicht',
         ohneMerkmal !== ivEigen, ivEigen + ' / ' + ohneMerkmal);
       /* Gelerntes darf den eigenen Rhythmus nicht verschieben. */
-      w.__T(`(function(){ S.zustand = S.zustand || {}; S.zustand.A2P = {lernFaktor:1.6}; })()`);
+      w.__T(`(function(){ S.lernen = S.lernen || {}; S.lernen.A2P = {lernFaktor:1.6}; })()`);
       pruef('Gelerntes verschiebt den eigenen Rhythmus nicht',
         w.__T(`intervallVon(allePflanzen().find(x=>x.id==='A2P'))`) === ivEigen,
         String(w.__T(`intervallVon(allePflanzen().find(x=>x.id==='A2P'))`)));
@@ -3882,7 +3873,7 @@ setTimeout(async () => {
         delete p.intervall; return intervallVon(p); })()`);
       pruef('Gegenprobe: ohne eigenen Rhythmus wirkt der gelernte Faktor',
         mitLern > ivBasis, ivBasis + ' → ' + mitLern);
-      w.__T(`(function(){ delete S.zustand.A2P; })()`);
+      w.__T(`(function(){ delete S.lernen.A2P; })()`);
       w.__T(`aenderungSetzen('A2P', {intervallEigen:false})`);
       pruef('„Zurück zur Gießklasse“ stellt den Ausgangswert her',
         w.__T(`intervallVon(allePflanzen().find(x=>x.id==='A2P'))`) === ivBasis);
@@ -4044,7 +4035,7 @@ setTimeout(async () => {
         todo:[], log:[], notiz:'', intervall:[7,7], intervallEigen:true};
       S.eigene = (S.eigene||[]).filter(x=>x.id !== 'A3P');
       S.eigene.push(p);
-      S.zustand = S.zustand || {}; delete S.zustand.A3P;
+      S.lernen = S.lernen || {}; delete S.lernen.A3P;
       S.ereignisse = S.ereignisse || {}; delete S.ereignisse.A3P;
       sichern(); })()`);
     giessen3(['2026-08-01', '2026-08-08']);
@@ -4084,7 +4075,7 @@ setTimeout(async () => {
     /* ── Uebernehmen ── */
     w.__T(`(function(){
       aenderungSetzen('A3P', {intervall:[7,7], intervallEigen:true});
-      const e = S.zustand.A3P || (S.zustand.A3P = {});
+      const e = S.lernen.A3P || (S.lernen.A3P = {});
       e.ivVorschlag = {saison: (sommer() ? 's' : 'w'), wert:14, von:7,
                        richtung:'hoch', datum:iso(HEUTE)};
       e.lernFaktor = 1.6; sichern(); })()`);
@@ -4105,7 +4096,7 @@ setTimeout(async () => {
        wird geoeffnet und der Knopf angeklickt. */
     w.__T(`(function(){
       aenderungSetzen('A3P', {intervall:[7,7], intervallEigen:true});
-      S.zustand.A3P = {lernFaktor:1.6}; sichern(); })()`);
+      S.lernen.A3P = {lernFaktor:1.6}; sichern(); })()`);
     pruef('Vorbedingung: ein gelernter Faktor liegt vor',
       w.__T(`lernFaktorVon('A3P')`) === 1.6);
     w.__T(`karteOeffnen('A3P')`);
@@ -4166,7 +4157,7 @@ setTimeout(async () => {
        dort sehr wohl etwas. ── */
     w.__T(`(function(){
       aenderungSetzen('A3P', {intervallEigen:false});
-      S.zustand.A3P = {}; sichern(); })()`);
+      S.lernen.A3P = {}; sichern(); })()`);
     const ohneEigen = iv();
     giessen3(['2026-09-01']);
     schritt('hoch');
@@ -4179,7 +4170,7 @@ setTimeout(async () => {
     w.__T(`(function(){
       S.eigene = (S.eigene||[]).filter(x=>x.id !== 'A3P');
       if(S.edits) delete S.edits.A3P;
-      if(S.zustand) delete S.zustand.A3P;
+      if(S.lernen) delete S.lernen.A3P;
       if(S.water) delete S.water.A3P;
       if(S.ereignisse) delete S.ereignisse.A3P;
       sichern(); })()`);
@@ -4238,9 +4229,9 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Fünfzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu)', alle.length === 15, String(alle.length));
+    pruef('Sechzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu)', alle.length === 16, String(alle.length));
     pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 26,
+      d.querySelectorAll('section[data-mh]').length === 27,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
@@ -4327,11 +4318,10 @@ setTimeout(async () => {
     w.__T('S.heuteKennzahlen = true');
     const kz = w.__T('kennzahlenHTML()');
     pruef('Eingeschaltet erscheint die Leiste', /kennzahlen/.test(kz), kz.slice(0, 60));
-    pruef('Drei Felder', (kz.match(/kz-feld/g) || []).length === 3);
-    pruef('Gesund als Anteil', /\d+\/\d+/.test(kz));
+    pruef('beta.27: Zwei Felder (ohne „Gesund“)', (kz.match(/kz-feld/g) || []).length === 2 && !/Gesund/.test(kz));
     const k = w.__T('JSON.stringify(kennzahlen())');
     const kk = JSON.parse(k);
-    pruef('Gesund nie größer als die Sammlung', kk.gesund <= kk.gesamt, k);
+    pruef('beta.27: Kennzahlen ohne „gesund“', !('gesund' in kk) && kk.gesamt >= 0, k);
     pruef('Gießtreue liegt zwischen 0 und 100',
       kk.treue === null || (kk.treue >= 0 && kk.treue <= 100), k);
     w.__T('S.heuteWetter = false');
@@ -4479,13 +4469,13 @@ setTimeout(async () => {
       w.__T(`(function(){
         const p = allePflanzen().find(function(x){ return x.id === '${pid2}'; });
         p.duenger = 'normal';
-        if(S.zustand[p.id]) delete S.zustand[p.id].umgetopft;
       })()`);
       const pauseAm = (m, t) => alsWaere(2026, m, t,
         `(duengSperre(allePflanzen().find(function(x){ return x.id === '${pid2}'; })) || {}).code`);
-      pruef('Im Januar ruht das Düngen', pauseAm(1, 15) === 'winter', String(pauseAm(1, 15)));
+      /* 4.0-beta.27 (F265): keine Winterpause mehr, in keinem Monat */
+      pruef('beta.27 (F265): Im Januar ruht das Düngen nicht mehr', pauseAm(1, 15) !== 'winter', String(pauseAm(1, 15)));
       pruef('Im Juni nicht', pauseAm(6, 15) !== 'winter', String(pauseAm(6, 15)));
-      pruef('Im November ruht es', pauseAm(11, 15) === 'winter', String(pauseAm(11, 15)));
+      pruef('beta.27 (F265): Im November ebenso nicht', pauseAm(11, 15) !== 'winter', String(pauseAm(11, 15)));
       pruef('Im September noch nicht', pauseAm(9, 15) !== 'winter', String(pauseAm(9, 15)));
       /* Und der Übergang ist keiner mit Kante: der 30. September und
          der 1. Oktober sagen dasselbe. */
@@ -4507,12 +4497,10 @@ setTimeout(async () => {
     pruef('und wieder aktiv',
       !d.getElementById('saison-wahl').classList.contains('aus'));
 
-    d.getElementById('ck-winterpause').checked = false;
-    d.getElementById('ck-winterpause').dispatchEvent(new w.Event('change', {bubbles:true}));
-    pruef('Winterpause lässt sich abstellen', w.__T("giessEinst().winterpause") === false);
+    pruef('beta.27 (F265): kein Schalter Winterpause mehr', !d.getElementById('ck-winterpause'));
 
     /* Zuruecksetzen fuer die folgenden Pruefungen */
-    w.__T("S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:true, saison:true, saisonStaerke:'normal'}; sichern()");
+    w.__T("S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', saison:true, saisonStaerke:'normal'}; sichern()");
   }
 
   /* ══ Rueckweg aus verschachtelten Abschnittsfenstern ═══════════
@@ -4680,13 +4668,9 @@ setTimeout(async () => {
     pruef('Er nennt Gr\u00f6\u00dfe und Grund',
       /18 cm/.test(w.__T(`ereignisse('${pid3}').find(e=>e.typ==='umgetopft').text`)));
 
-    /* D\u00fcngesperre: EREIGNIS_ARTEN.umgetopft setzt zustand frisch,
-       ZUSTAENDE.frisch sperrt 28 Tage. */
-    pruef('Zustand steht auf „frisch umgetopft\u201c',
-      w.__T(`zustandVon(allePflanzen().find(x=>x.id==='${pid3}')).code`) === 'frisch',
-      String(w.__T(`zustandVon(allePflanzen().find(x=>x.id==='${pid3}')).code`)));
-    pruef('Die D\u00fcngesperre l\u00e4uft vier Wochen',
-      w.__T('ZUSTAENDE.frisch.tage') === 28);
+    /* 4.0-beta.27: Umtopfen setzt keinen Zustand und keinen Tag mehr. */
+    pruef('beta.27: Umtopfen setzt keinen Tag',
+      w.__T(`tagEintraege('${pid3}').length`) === 0);
 
     /* Stecklinge: dieselbe Bahn wie im Vermehren-Werkzeug */
     pruef('Zwei Stecklinge angelegt', erg.kinder.length === 2, String(erg.kinder.length));
@@ -4775,7 +4759,7 @@ setTimeout(async () => {
 
     w.__T(`S.ereignisse['${pid3}'] = (S.ereignisse['${pid3}']||[])
       .filter(e=>e.typ!=='umgetopft');
-      if(S.zustand) delete S.zustand['${pid3}']; sichern()`);
+      if(S.tagEin) delete S.tagEin['${pid3}']; sichern()`);
 
     /* Vollbild: Pflanzen setzen und M\u00f6bel wieder verlassen. */
     w.__T("pModus='pflanzen'; vollbild=true; schubladeFuellen()");
@@ -5278,12 +5262,14 @@ setTimeout(async () => {
       (stil3.match(new RegExp('--' + t + ':', 'g')) || []).length >= 4,
       String((stil3.match(new RegExp('--' + t + ':', 'g')) || []).length));
   });
-  const tonVon = (code) => w.__T(`(function(){
-    S.zustand['PRUEF-2'] = {code:'${code}', seit:null, bis:null};
-    const t = karteStand({id:'PRUEF-2', klasse:'normal'}).ton;
-    delete S.zustand['PRUEF-2']; return t; })()`);
-  pruef('Quarantaene schlaegt Alarm', tonVon('quarantaene') === 'alarm', tonVon('quarantaene'));
-  pruef('Schaedlinge ebenso', tonVon('schaedlinge') === 'alarm', tonVon('schaedlinge'));
+  /* 4.0-beta.27: Ton kommt aus dem Gießstand; ein Tag ohne Gießwirkung färbt nicht. */
+  const tonVon = (vorgabe) => w.__T(`(function(){
+    tagVorgabenSichern(false); delete S.tagEin['PRUEF-2'];
+    if('${vorgabe}') tagSetzen('PRUEF-2', 'tv-${vorgabe}');
+    const t = karteStand({id:'PRUEF-2', klasse:'B'}).ton;
+    delete S.tagEin['PRUEF-2']; return t; })()`);
+  pruef('Gießpause schlaegt Alarm', tonVon('pause') === 'alarm', tonVon('pause'));
+  pruef('Quarantäne ist eine Markierung ohne Alarm', tonVon('quarantaene') !== 'alarm', tonVon('quarantaene'));
   pruef('Winterruhe ist kein Alarm', tonVon('winterruhe') !== 'alarm', tonVon('winterruhe'));
   pruef('Karte traegt ihren Ton als Merkmal',
     /<article class="card" data-karte="[^"]*" data-ton="/.test(karte1), karte1.slice(0,90));
@@ -5306,14 +5292,14 @@ setTimeout(async () => {
     (stil3.match(/\.sam-raster \.card\[data-zton="[a-z]+"\]\{--zst:/g) || []).length >= 5);
   /* Der Rand meldet den Zustand, nicht die naechste Aufgabe:
      gesund leuchtet gruen, auch wenn heute gegossen werden muss. */
-  const zton = (code) => w.__T(`(function(){
-    if(${code === null}) { delete S.zustand['PRUEF-3']; }
-    else S.zustand['PRUEF-3'] = {code:'${code}', seit:null, bis:null};
-    const t = karteZustandTon({id:'PRUEF-3', klasse:'normal'});
-    delete S.zustand['PRUEF-3']; return t; })()`);
-  pruef('gesund leuchtet gruen', zton('gesund') === 'gesund', zton('gesund'));
+  const zton = (vorgabe) => w.__T(`(function(){
+    tagVorgabenSichern(false); delete S.tagEin['PRUEF-3'];
+    if(${vorgabe === null ? 'false' : 'true'}) tagSetzen('PRUEF-3', 'tv-${vorgabe}');
+    const t = karteZustandTon({id:'PRUEF-3', klasse:'B'});
+    delete S.tagEin['PRUEF-3']; return t; })()`);
+  pruef('Quarantäne leuchtet gruen (Markierung ohne Wirkung)', zton('quarantaene') === 'gesund', zton('quarantaene'));
   pruef('ohne Eintrag ebenso', zton(null) === 'gesund', zton(null));
-  pruef('Quarantaene leuchtet rot', zton('quarantaene') === 'alarm', zton('quarantaene'));
+  pruef('Gießpause leuchtet rot', zton('pause') === 'alarm', zton('pause'));
   pruef('Gruen fuer gesund ist ein eigener Wert',
     (stil3.match(/--gesund:/g) || []).length >= 4,
     String((stil3.match(/--gesund:/g) || []).length));
@@ -5337,7 +5323,7 @@ setTimeout(async () => {
     && d.getElementById('kopf-lage').textContent === '');
   w.__T("ansichtZeigen('heute')"); await tick();
   pruef('alle Flaechen auf Heute tragen dieselbe Haut',
-    /"botanisch"\] \.haupttat,[\s\S]{0,160}"botanisch"\] \.nt,[\s\S]{0,80}"botanisch"\] \.wt-leiste,/.test(stil3));
+    /"botanisch"\] \.haupttat,[\s\S]{0,160}"botanisch"\] \.nt,[\s\S]{0,80}"botanisch"\] \.wt-leiste\{/.test(stil3));
   pruef('kein Umrissknopf mehr auf dem Gruen',
     !/\.wrap \.nt\{[^}]*background:rgba\(245,242,234/.test(stil3));
   /* Das gekachelte Blattmuster ist einem Papierbild gewichen, das
@@ -5713,7 +5699,7 @@ setTimeout(async () => {
   /* ══════════ Anstau ist kein Rhythmus ══════════
      Klasse S kennt zwei Zustände, nicht zwei Enden einer Kurve.
      Geprüft wird an einer echten Karnivore aus der Bibliothek. */
-  const karSicher = w.__T("JSON.stringify({e: S.eigene, z: S.zustand})");
+  const karSicher = w.__T("JSON.stringify({e: S.eigene, z: S.lernen, t: S.tagEin})");
   const KLASSE_S_WINTER = w.__T('KLASSE_IV.S[1]');
   w.__T(`(function(){
     S.eigene.push({id:'KARN1', name:'Prüfvenus', art:'Dionaea muscipula',
@@ -5729,15 +5715,14 @@ setTimeout(async () => {
     String(w.__T("intervallVon(allePflanzen().find(x=>x.id==='KARN1'))")));
   pruef('Und das heißt im Text auch täglich',
     w.__T('ivWort(1)') === 'täglich' && w.__T('ivWort(6)') === 'alle 6 Tage');
-  /* Der Zustand kommt vom Menschen, nicht vom Kalender. */
-  w.__T("zustandSetzen('KARN1', 'karnivore-ruhe')");
+  /* Die Ruhe kommt vom Menschen, nicht vom Kalender (4.0-beta.27: Tag „Winterruhe“). */
+  w.__T("tagVorgabenSichern(false); tagSetzen('KARN1', 'tv-winterruhe')");
   const ruheIv = w.__T("intervallVon(allePflanzen().find(x=>x.id==='KARN1'))");
   pruef('In der Winterruhe gilt der Winterwert der Klasse',
     ruheIv === KLASSE_S_WINTER, ruheIv + ' statt ' + KLASSE_S_WINTER);
-  pruef('Der Faktor des Zustands zählt nicht ein zweites Mal',
-    ruheIv < Math.round(KLASSE_S_WINTER * w.__T("SPEZIAL['karnivore-ruhe'].f")),
-    'Faktor ' + w.__T("SPEZIAL['karnivore-ruhe'].f"));
-  w.__T("zustandSetzen('KARN1', 'gesund')");
+  pruef('Der Prozentwert des Tags zählt im Anstau nicht ein zweites Mal',
+    ruheIv < Math.round(KLASSE_S_WINTER * 1.5), 'Ruhe ' + ruheIv);
+  w.__T("delete S.tagEin.KARN1");
   pruef('Zurück aus der Ruhe wieder alle 3 Tage',
     w.__T("intervallVon(allePflanzen().find(x=>x.id==='KARN1'))") === 3);
   /* Kein anderer Rhythmus wird davon angefasst. */
@@ -5758,7 +5743,7 @@ setTimeout(async () => {
       return v;
     })()`) === w.__T(`Math.max(1, Math.round(9
       * (typeof saisonFaktor === 'function' ? saisonFaktor() : 1)))`));
-  w.__T("(function(){ const a = " + karSicher + "; S.eigene = a.e; S.zustand = a.z; sichern(); })()");
+  w.__T("(function(){ const a = " + karSicher + "; S.eigene = a.e; S.lernen = a.z; S.tagEin = a.t; sichern(); })()");
 
 
   /* ══════════ Akkordeon, Lampenstand, Pflanzenschalter ══════════ */
@@ -6175,7 +6160,7 @@ setTimeout(async () => {
         botanisch:'Begonia maculata', klasse:'B'});
       S.eigene.push({id:'LRN2', eigen:true, name:'Lernfalle', art:'Lernfalle',
         botanisch:'Dionaea muscipula', klasse:'S'});
-      if(S.zustand){ delete S.zustand.LRN1; delete S.zustand.LRN2; }
+      if(S.lernen){ delete S.lernen.LRN1; delete S.lernen.LRN2; }
       if(S.water){ delete S.water.LRN1; delete S.water.LRN2; }
       sichern();
     })()`);
@@ -6189,10 +6174,10 @@ setTimeout(async () => {
       String(w.__T("lernFaktorVon('LRN1')")));
     /* Ein einzelner Schritt kann in der Rundung verschwinden — dass er
        im Abstand wirklich ankommt, zeigt sich am gesetzten Faktor. */
-    w.__T("S.zustand.LRN1 = {lernFaktor: 1.3};");
+    w.__T("S.lernen.LRN1 = {lernFaktor: 1.3};");
     pruef('Der Faktor kommt im Abstand an', iv('LRN1') > roh,
       roh + ' → ' + iv('LRN1'));
-    w.__T("S.zustand.LRN1 = {};");
+    w.__T("S.lernen.LRN1 = {};");
     w.__T("lernSchritt(allePflanzen().find(function(x){return x.id==='LRN1';}), 'hoch')");
 
     /* Dieselbe Wartezeit ist eine Beobachtung, nicht zehn. */
@@ -6209,9 +6194,9 @@ setTimeout(async () => {
 
     /* Der Deckel der Gruppe hält. */
     w.__T(`(function(){
-      S.zustand.LRN1 = {lernFaktor: 1};
+      S.lernen.LRN1 = {lernFaktor: 1};
       for(var i = 0; i < 40; i++){
-        S.zustand.LRN1.lernMarke = 'r' + i;
+        S.lernen.LRN1.lernMarke = 'r' + i;
         lernSchritt(allePflanzen().find(function(x){return x.id==='LRN1';}), 'runter');
       }
     })()`);
@@ -6222,19 +6207,19 @@ setTimeout(async () => {
     /* Am Anschlag und mit zwei Trockenmeldungen wird der Verdacht
        ausgesprochen — bei Dünnblättrigen auf den Wurzelbund. */
     const v = JSON.parse(w.__T(`(function(){
-      S.zustand.LRN1.trockenZahl = 2;
+      S.lernen.LRN1.trockenZahl = 2;
       return JSON.stringify(umtopfVerdacht(allePflanzen().find(function(x){return x.id==='LRN1';})) || null);
     })()`));
     pruef('Der Umtopfverdacht wird ausgesprochen', v && v.art === 'wurzelbund',
       JSON.stringify(v));
     pruef('Ein Anschlag allein reicht nicht',
       w.__T(`(function(){
-        S.zustand.LRN1.trockenZahl = 0;
+        S.lernen.LRN1.trockenZahl = 0;
         return umtopfVerdacht(allePflanzen().find(function(x){return x.id==='LRN1';})) === null;
       })()`) === true);
 
     /* Neue Erde ist eine neue Pflanze. */
-    w.__T("S.zustand.LRN1.trockenZahl = 2; lernZuruecksetzen('LRN1');");
+    w.__T("S.lernen.LRN1.trockenZahl = 2; lernZuruecksetzen('LRN1');");
     pruef('Umgetopft setzt das Gelernte zurück',
       w.__T("lernFaktorVon('LRN1')") === 1
       && w.__T("umtopfVerdacht(allePflanzen().find(function(x){return x.id==='LRN1';})) === null") === true);
@@ -6250,7 +6235,7 @@ setTimeout(async () => {
     w.__T(`(function(){
       var p = S.eigene.find(function(x){return x.id==='LRN1';});
       p.intervallEigen = true; p.intervall = [9, 12];
-      S.zustand.LRN1 = {};
+      S.lernen.LRN1 = {};
     })()`);
     w.__T("lernSchritt(allePflanzen().find(function(x){return x.id==='LRN1';}), 'hoch')");
     pruef('Ein eigener Rhythmus wird nicht überschrieben',
@@ -6258,7 +6243,7 @@ setTimeout(async () => {
 
     w.__T(`(function(){
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,3) !== 'LRN'; });
-      if(S.zustand){ delete S.zustand.LRN1; delete S.zustand.LRN2; }
+      if(S.lernen){ delete S.lernen.LRN1; delete S.lernen.LRN2; }
       sichern();
     })()`);
   }
@@ -6274,7 +6259,7 @@ setTimeout(async () => {
         botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt'});
       S.eigene.push({id:'GMT2', eigen:true, name:'Kartenfalle', art:'Kartenfalle',
         botanisch:'Dionaea muscipula', klasse:'S', sonne:'indirekt'});
-      if(S.zustand){ delete S.zustand.GMT1; delete S.zustand.GMT2; }
+      if(S.lernen){ delete S.lernen.GMT1; delete S.lernen.GMT2; }
       gmListe = allePflanzen().filter(function(p){ return String(p.id).slice(0,3) === 'GMT'; });
       gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmBefunde = [];
       gmZeichnen();
@@ -6298,11 +6283,11 @@ setTimeout(async () => {
       && knoepfe().indexOf('data-gm="spaeter"') !== -1);
 
     /* Gelerntes wird auf der Karte begründet. */
-    w.__T("S.zustand.GMT1 = {lernFaktor: 1.5}; gmZeichnen();");
+    w.__T("S.lernen.GMT1 = {lernFaktor: 1.5}; gmZeichnen();");
     /* 4.0-beta.13 (F149): kein Lernhinweis mehr, auch bei Lernfaktor 1,5. */
     pruef('beta.13: Kein Hinweis „Aus deinen Rückmeldungen“ auf der Karte',
       inhalt().indexOf('Aus deinen Rückmeldungen') === -1 && inhalt().indexOf('gm-hinweis') === -1, inhalt().slice(-200));
-    w.__T("S.zustand.GMT1 = {}; gmZeichnen();");
+    w.__T("S.lernen.GMT1 = {}; gmZeichnen();");
 
     /* Im Anstau gibt es nichts zu lernen, also auch keinen Knopf. */
     w.__T("gmIndex = 1; gmZeichnen();");
@@ -6313,39 +6298,10 @@ setTimeout(async () => {
     pruef('Und der Gießweg sagt Anstau',
       /class="gm-weg[^"]*" data-gm-wie="anstau"/.test(inhalt()) && inhalt().indexOf('Moorbeet im Anstau') === -1, (inhalt().match(/class="gm-weg[^>]*>/) || ['kein Gießweg'])[0]);
 
-    /* Der Zustand wird dort gefragt, wo man vor der Pflanze steht. */
-    w.__T(`(function(){
-      gmIndex = 0; gmZugefragt = {}; zustandSetzen('GMT1', 'hunger'); gmZeichnen();
-    })()`);
-    pruef('Die Karte fragt den Zustand ab',
-      inhalt().indexOf('gm-zfrage') !== -1
-      && inhalt().indexOf('data-gm-z="vorbei"') !== -1,
-      inhalt().slice(-200));
-    pruef('Der Zustand steht dabei nicht zweimal',
-      (inhalt().match(/Ausgehungert/g) || []).length === 1,
-      String((inhalt().match(/Ausgehungert/g) || []).length));
-    const zv = d.querySelector('[data-gm-z="vorbei"]');
-    if(zv) zv.dispatchEvent(new w.Event('click', {bubbles:true}));
-    await tick();
-    pruef('„Vorbei“ räumt den Zustand weg',
-      w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code") === 'gesund',
-      String(w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code")));
-    /* seit 4.0-beta.14 steht ohne Topfgröße die Topffrage im selben
-       Kasten (.gm-zfrage); die Zustandsfrage erkennt man an data-gm-z. */
-    pruef('Und die Frage steht nicht noch einmal da',
-      d.getElementById('gm-inhalt').innerHTML.indexOf('data-gm-z=') === -1);
-    /* „Bleibt" verschiebt den Stichtag und fragt in diesem Durchgang
-       nicht weiter. */
-    w.__T(`(function(){
-      gmZugefragt = {}; zustandSetzen('GMT1', 'hunger'); gmZeichnen();
-    })()`);
-    const zb = d.querySelector('[data-gm-z="bleibt"]');
-    if(zb) zb.dispatchEvent(new w.Event('click', {bubbles:true}));
-    await tick();
-    pruef('„Bleibt“ lässt den Zustand stehen',
-      w.__T("zustandVon(allePflanzen().find(function(x){return x.id==='GMT1';})).code") === 'hunger'
-      && d.getElementById('gm-inhalt').innerHTML.indexOf('data-gm-z=') === -1);
-    w.__T("zustandSetzen('GMT1', 'gesund'); gmZugefragt = {}; gmZeichnen();");
+    /* 4.0-beta.27 (F267): keine Zustandsfrage mehr auf der Gießkarte */
+    w.__T(`(function(){ gmIndex = 0; gmZeichnen(); })()`);
+    pruef('beta.27: Die Gießkarte fragt keinen Zustand mehr',
+      inhalt().indexOf('data-gm-z=') === -1 && inhalt().indexOf('Ist der Zustand vorbei') === -1);
 
     /* Das Bild traegt die Karte — zu klein wirkte sie verloren. */
     pruef('Die Karte hat einen Rahmen und ein großes Bild',
@@ -6356,7 +6312,7 @@ setTimeout(async () => {
        Pruefung darauf, dass lernSchritt funktioniert, sagt nichts
        darueber, ob ihn jemand aufruft. */
     w.__T(`(function(){
-      gmIndex = 0; S.zustand.GMT1 = {}; if(S.water) delete S.water.GMT1;
+      gmIndex = 0; S.lernen.GMT1 = {}; if(S.water) delete S.water.GMT1;
       gmZeichnen();
     })()`);
     const druecken = wert => {
@@ -6369,7 +6325,7 @@ setTimeout(async () => {
     pruef('„Noch feucht“ lernt am Knopf', daGewesen && w.__T("lernFaktorVon('GMT1')") > 1,
       String(w.__T("lernFaktorVon('GMT1')")));
 
-    w.__T("(function(){ gmIndex = 0; S.zustand.GMT1 = {}; if(S.water) delete S.water.GMT1; gmZeichnen(); })()");
+    w.__T("(function(){ gmIndex = 0; S.lernen.GMT1 = {}; if(S.water) delete S.water.GMT1; gmZeichnen(); })()");
     const daTrocken = druecken('trocken');
     await tick();
     pruef('„War staubtrocken“ lernt am Knopf', daTrocken && w.__T("lernFaktorVon('GMT1')") < 1,
@@ -6378,12 +6334,12 @@ setTimeout(async () => {
       w.__T("giessLog('GMT1')[0]") === w.__T('iso(HEUTE)'),
       String(w.__T("giessLog('GMT1')[0]")));
 
-    w.__T("(function(){ gmIndex = 0; S.zustand.GMT1 = {}; if(S.water) delete S.water.GMT1; gmZeichnen(); })()");
+    w.__T("(function(){ gmIndex = 0; S.lernen.GMT1 = {}; if(S.water) delete S.water.GMT1; gmZeichnen(); })()");
 
     /* Die Abschlusskarte sammelt, was unterwegs auffiel. */
     w.__T(`(function(){
       gmBefunde = [{id:'GMT1', name:'Kartenpflanze', text:'Trocknet schneller aus, als der Topf hergibt.'}];
-      S.zustand.GMT1 = {lernFaktor: 0.6, trockenZahl: 2};
+      S.lernen.GMT1 = {lernFaktor: 0.6, trockenZahl: 2};
       gmZeichnenEnde();
     })()`);
     pruef('Die Abschlusskarte nennt den Befund',
@@ -6401,7 +6357,7 @@ setTimeout(async () => {
     w.__T(`(function(){
       gmListe = []; gmIndex = 0; gmBefunde = [];
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,3) !== 'GMT'; });
-      if(S.zustand){ delete S.zustand.GMT1; delete S.zustand.GMT2; }
+      if(S.lernen){ delete S.lernen.GMT1; delete S.lernen.GMT2; }
       sichern();
     })()`);
   }
@@ -6707,7 +6663,7 @@ setTimeout(async () => {
         klasse:'B', sonne:'hell', typ:'Kletterpflanze',
         intervall:[8,12], todo:[], log:[], notiz:'',
         topf:'', topfform:'', substrat:'', ablauf:''});
-      if(S.zustand){ delete S.zustand.BT1; delete S.zustand.BT2; }
+      if(S.lernen){ delete S.lernen.BT1; delete S.lernen.BT2; }
       sichern();
     })()`);
 
@@ -6760,11 +6716,11 @@ setTimeout(async () => {
 
     /* Frisch umgetopft: ohneTopf nimmt die Zeile heraus, und an eine
        entfernte Zeile haengt mitIstWerten nichts. */
-    w.__T("dokPflanze = 'BT1'; zustandSetzen('BT1', 'frisch');");
+    w.__T("dokPflanze = 'BT1';");
     const frisch = w.__T('dokPromptBauen()');
-    pruef('Frisch umgetopft: keine TOPF-Zeile und kein Zusatz',
-      !/^TOPF:/m.test(frisch) && frisch.indexOf('Durchmesser von 14 cm eingetragen') === -1);
-    w.__T("(function(){ if(S.zustand) delete S.zustand.BT1; sichern(); })()");
+    pruef('beta.27: ohne Zustand steht die TOPF-Zeile immer im Auftrag',
+      /^TOPF:/m.test(frisch));
+    w.__T("(function(){ if(S.lernen) delete S.lernen.BT1; sichern(); })()");
 
     pruef('ANTWORT_FORMAT bleibt zeichengleich', w.__T('ANTWORT_FORMAT') === fmt0);
 
@@ -6808,7 +6764,7 @@ setTimeout(async () => {
     w.__T(`(function(){
       dokPflanze = null;
       S.eigene = S.eigene.filter(function(x){ return String(x.id).slice(0,2) !== 'BT'; });
-      if(S.zustand){ delete S.zustand.BT1; delete S.zustand.BT2; }
+      if(S.lernen){ delete S.lernen.BT1; delete S.lernen.BT2; }
       sichern(); render();
     })()`);
     await tick();
@@ -6868,7 +6824,7 @@ setTimeout(async () => {
       delete S.dueng['DGP1'];
       S.giess.dgStart = iso(HEUTE);
       /* 3.28.1: sonst sperrt die Winterpause von Oktober bis März. */
-      S.giess.winterpause = false;
+      
       sichern();
     `);
     pruef('Eine nie geduengte Pflanze zaehlt ab dem Stichtag',
@@ -7195,9 +7151,9 @@ setTimeout(async () => {
         klasse:${JSON.stringify(kl)}, sonne:'indirekt', duenger:'normal'});
       if(S.dueng) delete S.dueng[${JSON.stringify(id)}];
       if(S.water) delete S.water[${JSON.stringify(id)}];
-      if(S.zustand) delete S.zustand[${JSON.stringify(id)}];
+      if(S.tagEin) delete S.tagEin[${JSON.stringify(id)}];
       /* 3.28.1: sonst sperrt die Winterpause von Oktober bis März. */
-      S.giess.winterpause = false;
+      
       sichern();
       return allePflanzen().find(function(x){ return x.id === ${JSON.stringify(id)}; });
     })()`);
@@ -7324,7 +7280,7 @@ setTimeout(async () => {
 
     /* Die Notbremse: ein Einzelgänger wartet nicht ewig. */
     w.__T(`(function(){
-      S.giess.dgArt = 'fluessig'; S.giess.winterpause = false;
+      S.giess.dgArt = 'fluessig'; 
       delete S.giess.dgSchwelle; S.giess.dgSchwelle = 5;
       delete S.giess.dgNot; delete S.giess.dgZuletzt;
       if(S.dueng) delete S.dueng.DG1;
@@ -7332,7 +7288,7 @@ setTimeout(async () => {
       S.water.DG1 = [];
       for(var i = 8; i > 0; i--) S.water.DG1.push(iso(new Date(HEUTE.getTime() - i*86400000)));
       gmListe = [allePflanzen().find(function(x){return x.id==='DG1';})];
-      gmIndex = 0; gmDuengetag = false; gmBefunde = []; gmZugefragt = {};
+      gmIndex = 0; gmDuengetag = false; gmBefunde = []; 
       gmZeichnen();
     })()`);
     pruef('Die Notbremse löst unter der Schwelle aus',
@@ -7340,44 +7296,16 @@ setTimeout(async () => {
       d.getElementById('gm-inhalt').innerHTML.slice(0, 120));
     /* Aber sie überstimmt keine Sperre. */
     w.__T(`(function(){
-      S.zustand = S.zustand || {};
-      zustandSetzen('DG1', 'frisch');
+      allePflanzen().find(function(x){return x.id==='DG1';}).duenger = 'nie';
       gmIndex = 0; gmDuengetag = false; gmZeichnen();
     })()`);
-    /* Der Zustand darf das Giessen nie anhalten — er streckt es nur
-       leicht. Ein Missverstaendnis an dieser Stelle kostet Pflanzen. */
-    pruef('Frisch umgetopft hält das Gießen nicht an',
-      w.__T('ZUSTAENDE.frisch.f') < 1.3 && w.__T('ZUSTAENDE.frisch.f') > 1
-      && w.__T('ZUSTAENDE.frisch.ton') === 'info'
-      && /nicht düngen/.test(w.__T('ZUSTAENDE.frisch.tasks.join("|")'))
-      && !/nicht gießen|kein Gießen/i.test(w.__T('ZUSTAENDE.frisch.tasks.join("|")')),
-      String(w.__T('ZUSTAENDE.frisch.f')));
-    pruef('Und ein Umtopf-Zustand verlängert das Intervall nur wenig',
-      w.__T(`(function(){
-        S.eigene.push({id:'FRX', eigen:true, name:'Frischling', art:'Frischling',
-          botanisch:'Begonia maculata', klasse:'B', sonne:'indirekt'});
-        var p = function(){ return allePflanzen().find(function(x){return x.id==='FRX';}); };
-        if(S.zustand) delete S.zustand.FRX;
-        var ohne = intervallVon(p());
-        zustandSetzen('FRX', 'frisch');
-        var mit = intervallVon(p());
-        zustandSetzen('FRX', 'gesund');
-        S.eigene = S.eigene.filter(function(x){ return x.id !== 'FRX'; });
-        if(S.zustand) delete S.zustand.FRX;
-        sichern();
-        return mit <= ohne + 3 && mit >= ohne;
-      })()`) === true);
-    pruef('Frisch umgetopft sperrt den Dünger sechs Wochen',
-      w.__T('DUENG_FRISCH_TAGE') === 42
-      && w.__T('ZUSTAENDE.frisch.tage') === 28,
-      String(w.__T('DUENG_FRISCH_TAGE')) + ' / ' + String(w.__T('ZUSTAENDE.frisch.tage')));
     pruef('Die Notbremse überstimmt keine Sperre',
       d.getElementById('gm-inhalt').innerHTML.indexOf('Heute ist Düngetag') === -1);
-    w.__T("zustandSetzen('DG1', 'gesund'); delete S.giess.dgSchwelle;");
+    w.__T("allePflanzen().find(function(x){return x.id==='DG1';}).duenger = 'normal'; delete S.giess.dgSchwelle;");
 
     /* Der Weg des Fingers durch die Vorbereitungskarte. */
     w.__T(`(function(){
-      S.giess.dgArt = 'fluessig'; S.giess.dgSchwelle = 1; S.giess.winterpause = false;
+      S.giess.dgArt = 'fluessig'; S.giess.dgSchwelle = 1; 
       if(S.dueng){ delete S.dueng.DG1; }
       if(!S.water) S.water = {};
       S.water.DG1 = [];
@@ -7385,7 +7313,7 @@ setTimeout(async () => {
       gmListe = [allePflanzen().find(function(x){return x.id==='DG1';}),
                  allePflanzen().find(function(x){return x.id==='DG2';})];
       gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0;
-      gmBefunde = []; gmZugefragt = {}; gmDuengetag = false;
+      gmBefunde = []; gmDuengetag = false;
       gmZeichnen();
     })()`);
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
@@ -7447,7 +7375,7 @@ setTimeout(async () => {
       if(S.dueng){ delete S.dueng.DG1; }
       S.water.DG1 = [];
       for(var i = 4; i > 0; i--) S.water.DG1.push(iso(new Date(HEUTE.getTime() - i*86400000)));
-      if(S.zustand) delete S.zustand.DG1;
+      if(S.lernen) delete S.lernen.DG1;
       gmIndex = 0; gmDuengetag = 'ja'; gmZeichnen();
     })()`);
     const tr = d.querySelector('#gm-knoepfe [data-gm="trocken"]');
@@ -7462,9 +7390,9 @@ setTimeout(async () => {
       ['DG1','DG2','DG3'].forEach(function(id){
         if(S.dueng) delete S.dueng[id];
         if(S.water) delete S.water[id];
-        if(S.zustand) delete S.zustand[id];
+        if(S.tagEin) delete S.tagEin[id];
       });
-      delete S.giess.dgSchwelle; S.giess.winterpause = true;
+      delete S.giess.dgSchwelle; 
       sichern();
     })()`);
   }
@@ -7594,8 +7522,8 @@ setTimeout(async () => {
       pruef('Der Doktor zeigt keinen der vier Steckbrief-Kästen',
         !d.getElementById('dok-abgleich') && !d.getElementById('dok-art')
         && !d.getElementById('dok-gift') && !d.getElementById('dok-merkmale'));
-      pruef('Der Doktor setzt den Zustand weiter',
-        hq(`zustandVon(p).code`) === 'trocken', String(hq(`zustandVon(p).code`)));
+      pruef('beta.27: Der Doktor setzt keinen Tag',
+        hq(`tagEintraege(p.id).length`) === 0, String(hq(`tagEintraege(p.id).length`)));
       pruef('Die Maßnahmen-Auswahl erscheint weiter',
         !!d.querySelector('#dok-massnahmen [data-mnwahl]'));
     }
@@ -7606,7 +7534,7 @@ setTimeout(async () => {
       ['dok-massnahmen','dok-ergebnis','dok-abgleich-hinweis','dok-paste'].forEach(function(i){
         var z = document.getElementById(i); if(!z) return;
         if('value' in z && z.tagName === 'TEXTAREA') z.value = ''; else z.innerHTML = ''; });
-      if(S.zustand) delete S.zustand.HQ1;
+      if(S.lernen) delete S.lernen.HQ1;
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'HQ'; });
       if(S.edits) delete S.edits.HQ1;
       sichern();
@@ -8366,7 +8294,7 @@ setTimeout(async () => {
     /* ══ Das Abgleich-Fenster (3.21.0) ══ */
     {
       const karteIst = () => w.__T(`JSON.stringify(allePflanzen().filter(function(p){
-        return String(p.id).slice(0,2)==='KB'; })) + JSON.stringify(S.zustand || {})`);
+        return String(p.id).slice(0,2)==='KB'; })) + JSON.stringify(S.lernen || {})`);
       w.__T(`(function(){
         delete S.kartei; KARTEI_CTRL = {};
         S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KB'; });
@@ -8533,7 +8461,7 @@ setTimeout(async () => {
         !kb('p.familie') && kb('p.duenger') === 'normal' && !kb('p.speicher'),
         kb('JSON.stringify([p.familie, p.duenger, p.speicher])'));
       pruef('Sortenmerkmale landen in sortenmerkmale, nicht in merkmale', kb('p.merkmale') === 'Bib');
-      pruef('Der Zustand bleibt, wie er war', kb('zustandVon(p).code') !== 'wurzelfaeule');
+      pruef('beta.27: Die Kartei setzt keinen Tag', kb('tagEintraege(p.id).length') === 0);
       await tick();
       pruef('3.24.0: Danach ist die Pflanze durch und das Fenster zu',
         w.__T(`modalOffen('kartei-abgleich')`) === false);
@@ -11162,7 +11090,7 @@ setTimeout(async () => {
       S.water['BS4-1'] = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 20))];
       try{ while(MODAL_STAPEL.length) _modalWeg(modalOben()); }catch(e){}
       gmListe = [allePflanzen().find(function(x){ return x.id === 'BS4-1'; })];
-      gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmBefunde = []; gmZugefragt = {}; gmDuengetag = false;
+      gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmBefunde = []; gmDuengetag = false;
       gmZeichnen();
     })()`);
     const fuss = d.getElementById('gm-knoepfe');
@@ -11191,17 +11119,19 @@ setTimeout(async () => {
       .map(r => ({sel:r[0].trim(), rumpf:r[1]}));
 
     /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet; seit beta.11 23 (Gießmodus: Sammelkarten) */
-    const SCH = ['ut-langzeit','ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-vollstaerke','ck-winterpause','ck-saison',
+    const SCH = ['ut-langzeit','ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-vollstaerke','ck-saison',
       'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
       'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
       'sch-pflege','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart',
       /* seit beta.21 (M2a/M2b): drei Schalter für den Gießmodus */
-      'sch-gliste','sch-gmwie','sch-gmzustand'];
+      'sch-gliste','sch-gmwie'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
-    /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter */
-    pruef('beta.5: Alle 30 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 30 tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 30, quelle.split('type="checkbox" role="switch"').length - 1);
+    /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter;
+       beta.27: Winterpause und Zustandsfrage weg, 28 im Markup (die Schalter
+       der Tags entstehen beim Zeichnen) */
+    pruef('beta.5: Alle 28 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
+    pruef('beta.5: Genau diese 28 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 33, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -11215,7 +11145,7 @@ setTimeout(async () => {
       !/role="switch"[^>]*data-kartei/.test(quelle) && !/data-kartei[^>]*role="switch"/.test(quelle) && quelle.indexOf('data-karteikasten="alle"') > -1);
 
     /* Aussehen: Schalter 52 × 32 rechts neben dem Text, Haken 24 px */
-    const wp = d.getElementById('ck-winterpause');
+    const wp = d.getElementById('ck-saison');
     pruef('beta.5: Schalter ist 52 × 32 groß', cs(wp).width === '52px' && cs(wp).height === '32px', cs(wp).width + ' × ' + cs(wp).height);
     pruef('beta.5: Schalter steht rechts vom Text', cs(wp.closest('label')).flexDirection === 'row-reverse' && cs(wp.closest('label')).justifyContent === 'space-between',
       cs(wp.closest('label')).flexDirection);
@@ -11229,11 +11159,12 @@ setTimeout(async () => {
       /input\[type=checkbox\]\[role=switch\]\{[^}]*appearance:none/.test(stil) && /input\[type=checkbox\]:not\(\[role=switch\]\)\{[^}]*appearance:none/.test(stil));
 
     /* Bedienung unverändert: Antippen ändert und speichert den Wert */
-    T(`giessEinst().winterpause = false; giessCenterZeichnen();`);
+    T(`giessEinst().saison = false; giessCenterZeichnen();`);
     wp.checked = false; wp.click();
-    const wpAn = T(`giessEinst().winterpause`);
+    const wpAn = T(`giessEinst().saison`);
     wp.click();
-    pruef('beta.5: Schalter Winterpause schaltet an und wieder aus', wpAn === true && T(`giessEinst().winterpause`) === false, wpAn);
+    pruef('beta.5: Schalter Saison schaltet an und wieder aus', wpAn === true && T(`giessEinst().saison`) === false, wpAn);
+    T(`giessEinst().saison = true; giessCenterZeichnen();`);
     /* seit beta.18: der Schalter „Einfacher Modus“ ist der Modus Sammler */
     const einVorher = T('modusVon()');
     d.querySelector('#modus-wahl [data-modus="sammler"]').click();
@@ -11266,7 +11197,7 @@ setTimeout(async () => {
     const lab = regeln.filter(r => /(^|,)\s*(\.fgrid span\.lab|\.al-feld>\.lab|\.raummass \.rm-f span)\s*(,|$)/.test(r.sel) && /uppercase|var\(--f-data\)/.test(r.rumpf)).map(r => r.sel);
     pruef('beta.5: Beschriftungen über Feldern sind nicht mehr in Versalien', lab.length === 0, lab.join(' | '));
     pruef('beta.5: Felder haben die getönte Fläche der Vorschau', /select, textarea\{[^}]*background:var\(--fl-tief\)[^}]*border-radius:var\(--r-mittel\)|select, textarea\{[^}]*border-radius:var\(--r-mittel\);background:var\(--fl-tief\)/.test(stil.replace(/\s*\n\s*/g, '')));
-    pruef('beta.5: Felder im Anlegen-Formular stehen hell auf der getönten Fläche', /:is\(\.formwrap, \.zustand[^{]*\{background-color:var\(--fl-karte\)\}/.test(stil.replace(/\s*\n\s*/g, ' ')));
+    pruef('beta.5: Felder im Anlegen-Formular stehen hell auf der getönten Fläche', /:is\(\.formwrap, \.bibbox[^{]*\{background-color:var\(--fl-karte\)\}/.test(stil.replace(/\s*\n\s*/g, ' ')));
   }
 
   /* ══ 4.0-beta.6: Grundstil S3 — Einstellungen ══
@@ -11338,7 +11269,7 @@ setTimeout(async () => {
     const seg = ['dichte-wahl', 'haerte-wahl', 'saison-wahl', 'tier-anaus'].filter(id => !d.getElementById(id).classList.contains('segment'));
     pruef('beta.6: Kartendichte, Härte, Stärke und Haustiere sind Segmente', seg.length === 0, seg.join(', '));
     pruef('beta.6: Gewähltes Segment ist gefüllt', /\.segment > button\[aria-pressed="true"\]\{[^}]*background:var\(--fl-akzent\)/.test(stil));
-    const felder = ['ein-kanne', 'ein-dosis', 'ein-schwelle', 'ein-dgtag', 'ck-vollstaerke', 'ck-winterpause', 'ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'ans-hinweise', 'tour-aus']
+    const felder = ['ein-kanne', 'ein-dosis', 'ein-schwelle', 'ein-dgtag', 'ck-vollstaerke', 'ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'ans-hinweise', 'tour-aus']
       .filter(id => !d.getElementById(id).closest('.ein-karte'));
     pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
     pruef('beta.6: Ort und Modell stehen als Feld mit Knopf', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select + #btn-ki-modelle'));
@@ -11546,7 +11477,7 @@ setTimeout(async () => {
      Fächer am Ende zurück und fängt Laufzeitfehler als Fehlschlag. */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'raeume', 'giess', 'anzucht', 'orte'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'raeume', 'giess', 'anzucht', 'orte'];
     const alt9 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
     const kn = () => d.getElementById('gm-knoepfe').innerHTML;
@@ -11555,7 +11486,7 @@ setTimeout(async () => {
       T(`(function(){
         let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {};
-        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'pflanze', winterpause:true});
+        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'pflanze'});
         var k = raumAnlegen('Prüf-Küche F9'), b = raumAnlegen('Prüf-Bad F9');
         stellplatzAnlegen(k, 'Zplatz A'); stellplatzAnlegen(k, 'Zplatz B');
         window.__f9 = {k:k, b:b};
@@ -11578,8 +11509,8 @@ setTimeout(async () => {
         ];
         S.water = {};
         S.eigene.forEach(function(p){ S.water[p.id] = [vor(150)]; });
-        S.zustand = {};
-        zustandSetzen('F3', 'quarantaene');
+        S.lernen = {}; S.tagEin = {}; tagVorgabenSichern(false);
+        tagSetzen('F3', 'tv-quarantaene');
         var p12 = S.eigene.find(function(x){ return x.id === 'F12'; });
         S.water.F12 = [vor(intervallVon(p12) - 1)];
         sichern();
@@ -11589,8 +11520,8 @@ setTimeout(async () => {
       T('gmStarten()');
       const ids = JSON.parse(T('JSON.stringify(gmListe.map(function(x){ return x.untersetzer ? "U:" + x.pflanzen.map(function(p){ return p.id; }).join(",") : (x.anzucht ? "AZ" : x.id); }))'));
       const ix = id => ids.indexOf(id);
-      pruef('beta.9: Laufweg: Räume in Listenfolge, im Raum nach Stellplatz, gesunde vor Quarantäne',
-        ix('F4') === 0 && ix('F3') === 1 && ix('F2') === 2 && ix('F1') > ix('F2') && ix('F8') > ix('F2') && ix('F5') > ix('F1') && ix('F5') > ix('F8'), ids.join(' '));
+      pruef('beta.9: Laufweg: Räume in Listenfolge, im Raum nach Stellplatz, dann Listenfolge (beta.27: Quarantäne ohne Wirkung)',
+        ix('F3') === 0 && ix('F4') === 1 && ix('F2') === 2 && ix('F1') > ix('F2') && ix('F8') > ix('F2') && ix('F5') > ix('F1') && ix('F5') > ix('F8'), ids.join(' '));
       pruef('beta.9: Laufweg: Anstau gesammelt am Ende auf der Untersetzer-Karte',
         ids[ids.length - 1] === 'U:F6' && ix('F6') === -1, ids.join(' '));
       pruef('beta.9: giessListe() bleibt unverändert', /\.sort\(\(a,b\)=>\{\s*const w = s=>s\.stand==='over'/.test(T('String(giessListe)')));
@@ -11697,20 +11628,22 @@ setTimeout(async () => {
         klick('#gm-rueck');
         pruef('beta.9: Rückgängig nach „' + a + '“: Stand vorher gleich Stand danach', weiter && T('gmIndex') === 0 && stand('F4') === vorher && T('gmVerlauf.length') === 0, stand('F4'));
       });
-      /* Zustandsfrage auf der Karte wird mit zurückgenommen */
-      T(`gmVerlauf = []; gmSnaps = {}; gmZugefragt = {}; zustandSetzen('F2', 'trocken'); gmIndex = gmListe.findIndex(function(x){ return x.id === 'F2'; }); gmZeichnen()`);
+      /* beta.27: Die Notiz „Gießpause vorbei“ kommt mit Rückgängig zurück */
+      T(`(function(){ gmVerlauf = []; gmSnaps = {}; S.tagEin.F2 = [{e:'eF2', t:'tv-pause', von:'2020-01-01', bis:'2020-01-05', ende:'2020-01-05', notiz:'', er:true, giessNotiz:true}];
+        gmIndex = gmListe.findIndex(function(x){ return x.id === 'F2'; }); gmZeichnen(); })()`);
       const vorF2 = stand('F2');
       const iF2 = T('gmIndex');
-      klick('[data-gm-z="vorbei"]');
+      const notizDa = /gm-tagnotiz/.test(inh());
       klick('#gm-knoepfe [data-gm="ja"]');
+      const notizWeg = T(`tagGiessNotizen(allePflanzen().find(function(x){ return x.id === 'F2'; })).length`) === 0;
       klick('#gm-rueck');
-      pruef('beta.9: Rückgängig nimmt auch die Antwort auf die Zustandsfrage zurück', T('gmIndex') === iF2 && stand('F2') === vorF2 && /data-gm-z="vorbei"/.test(inh()));
-      T("zustandSetzen('F2', 'gesund')");
+      pruef('beta.9 (beta.27): Rückgängig bringt die Gießnotiz zurück', notizDa && notizWeg && T('gmIndex') === iF2 && stand('F2') === vorF2 && /gm-tagnotiz/.test(inh()));
+      T("delete S.tagEin.F2");
       /* Alle Fächer, die ein Tipp schreiben kann */
       const faecherOk = T(`(function(){
         var id = 'F4';
         GM_SNAP_FAECHER.forEach(function(k){ if(!S[k] || typeof S[k] !== 'object') S[k] = {}; S[k][id] = k === 'water' ? ['2020-01-01'] : {wert:k}; });
-        var liste = ['water','zustand','feuchtRueck','dueng','gesehen','anstau','spuelen'];
+        var liste = ['water','lernen','tagEin','feuchtRueck','dueng','gesehen','anstau','spuelen'];
         liste.forEach(function(k){ if(!S[k] || typeof S[k] !== 'object') S[k] = {}; S[k][id] = k === 'water' ? ['2020-01-01'] : {wert:k}; });
         var lesen = function(){ return JSON.stringify(liste.map(function(k){ return S[k][id]; })); };
         var sn = gmSnapPflanze(id), vor = lesen();
@@ -11718,14 +11651,14 @@ setTimeout(async () => {
         gmSnapZurueck(sn);
         return lesen() === vor;
       })()`);
-      pruef('beta.9: Rückgängig deckt Gießverlauf, Zustand, Feucht-Meldung, Dünger, „gesehen“, Anstau und Durchspülen ab', faecherOk === true);
-      T("delete S.zustand.F4; delete S.feuchtRueck.F4; delete S.dueng.F4; delete S.gesehen.F4; delete S.anstau.F4; delete S.spuelen.F4");
+      pruef('beta.9: Rückgängig deckt Gießverlauf, Gelerntes, Tags, Feucht-Meldung, Dünger, „gesehen“, Anstau und Durchspülen ab', faecherOk === true);
+      T("delete S.lernen.F4; delete S.tagEin.F4; delete S.feuchtRueck.F4; delete S.dueng.F4; delete S.gesehen.F4; delete S.anstau.F4; delete S.spuelen.F4");
 
       /* E Abschlusskarte mit Liste und Neu-Melden */
       T(`(function(){
         S.feuchtRueck = {};
         ['F4','F3','F2'].forEach(function(id){ S.water[id] = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 150))]; });
-        gmStarten(); gmIndex = 0; gmZeichnen();
+        gmStarten(); gmIndex = gmListe.findIndex(function(x){ return x.id === 'F4'; }); gmZeichnen();
       })()`);
       const vorF4 = stand('F4');
       klick('#gm-knoepfe [data-gm="ja"]');
@@ -11766,8 +11699,8 @@ setTimeout(async () => {
       const grenzen = T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'F6'; });
         S.anstau.F6 = 14; anstauSchritt(p, 1); var o = S.anstau.F6; S.anstau.F6 = 1; anstauSchritt(p, -1); var u = S.anstau.F6; return o + '/' + u; })()`);
       pruef('beta.9: Anstau-Grenzen 1 bis 14 Tage', grenzen === '14/1', grenzen);
-      const ruhe = T(`(function(){ zustandSetzen('F6', 'karnivore-ruhe'); var p = allePflanzen().find(function(x){ return x.id === 'F6'; });
-        var r = intervallVon(p) === Math.max(1, Math.round(KLASSE_IV.S[1])) && !gmAnstauHeute(p); zustandSetzen('F6', 'gesund'); return r; })()`);
+      const ruhe = T(`(function(){ tagSetzen('F6', 'tv-winterruhe'); var p = allePflanzen().find(function(x){ return x.id === 'F6'; });
+        var r = intervallVon(p) === Math.max(1, Math.round(KLASSE_IV.S[1])) && !gmAnstauHeute(p); delete S.tagEin.F6; return r; })()`);
       pruef('beta.9: Winterruhe der Karnivore bleibt wie bisher', ruhe === true);
       T("S.anstau = {}");
       pruef('beta.9: Karte, Reiter Pflege: „Untersetzer: alle 3 Tage nachsehen“', /Untersetzer: alle 3 Tage nachsehen/.test(T("giessAbschnitt(allePflanzen().find(function(x){ return x.id === 'F6'; }))")));
@@ -11807,7 +11740,7 @@ setTimeout(async () => {
   /* ══ 4.0-beta.10: Plan G1 — Icons, Hinweiskärtchen, „Heute dran“, Beta-Testwerkzeug ══ */
   {
     const T = c => w.__T(c);
-    const alt10 = T("JSON.stringify({eigene:S.eigene, water:S.water, zustand:S.zustand, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, anzucht:S.anzucht === undefined ? null : S.anzucht})");
+    const alt10 = T("JSON.stringify({eigene:S.eigene, water:S.water, lernen:S.lernen, tagEin:S.tagEin, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, anzucht:S.anzucht === undefined ? null : S.anzucht})");
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
     const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n').replace(/\s*\n\s*/g, ' ');
     try {
@@ -11822,7 +11755,7 @@ setTimeout(async () => {
           {id:'G3', eigen:true, name:'Carla', art:'Monstera', botanisch:'Monstera deliciosa', klasse:'B', topf:'14'}
         ];
         S.water = {G1:[vor(2)], G2:[vor(2)], G3:[vor(2)]};
-        S.zustand = {};
+        S.lernen = {};
         sichern();
       })()`);
 
@@ -11888,7 +11821,7 @@ setTimeout(async () => {
      Gießmodus-Übersicht und Sammelkarten. Jeder Test legt seine Daten selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'raeume', 'giess', 'anzucht', 'orte', 'gelernteArten', 'kiModelle', 'kiModell'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'raeume', 'giess', 'anzucht', 'orte', 'gelernteArten', 'kiModelle', 'kiModell'];
     const alt11 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const fetch0 = w.fetch;
     const warte = ms => new Promise(r => setTimeout(r, ms));
@@ -12126,7 +12059,7 @@ setTimeout(async () => {
         ];
         S.water = {};
         S.eigene.forEach(function(p){ S.water[p.id] = [vor(60)]; });
-        S.zustand = {};
+        S.lernen = {};
         sichern();
       })()`);
       T('gmStarten()');
@@ -12255,7 +12188,7 @@ setTimeout(async () => {
      Jeder Test legt seine Daten selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'anzucht', 'profil', 'duengLangzeit', 'kiModelle', 'kiModell'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'anzucht', 'profil', 'duengLangzeit', 'kiModelle', 'kiModell'];
     const alt12 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const heute0 = T('HEUTE.getTime()');
     const warte = ms => new Promise(r => setTimeout(r, ms));
@@ -12268,9 +12201,9 @@ setTimeout(async () => {
     const pfl = (id, o) => Object.assign({id, name:'Probe ' + id, art:'Probeart ' + id, botanisch:'Testgattung probe' + id.toLowerCase(), sorte:'',
       klasse:'B', intervallEigen:true, intervall:[7, 7], topf:12, eigen:true}, o || {});
     const setzen = (liste, water) => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
-      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.zustand = {}; S.feuchtRueck = {}; S.dueng = {};
+      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.lernen = {}; S.feuchtRueck = {}; S.dueng = {};
       S.gesehen = {}; S.anstau = {}; S.spuelen = {}; S.duengLangzeit = {};
-      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:false, saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
       gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte'; sichern(); return 1; })()`);
     const tage = (modus, liste) => T(`(function(){ var g = giessEinst(); g.tageModus = ${JSON.stringify(modus)}; g.giesstage = ${JSON.stringify(liste)}; sichern(); return 1; })()`);
     const termin = (letzte, iv, kl) => JSON.parse(T(`JSON.stringify(gtTermin('${letzte}', ${iv}, '${kl}'))`) || 'null');
@@ -12486,8 +12419,8 @@ setTimeout(async () => {
       pruef('beta.12: Wüstenkakteen behalten ihre Höchstzahl je Saison (F141)', fae('A4') === false && T(`duengGrenze(allePflanzen().find(function(p){ return p.id === 'A4'; })).code`) === 'saison');
       pruef('beta.12: Sperren bleiben: Art „nie“ und Karnivore', fae('A2') === false && fae('A3') === false);
       T(`S.dueng = {}; 1`);
-      T(`HEUTE = new Date(2027, 0, 15, 12); giessEinst().winterpause = true; 1`);
-      pruef('beta.12: Winterpause sperrt nur, wenn der Schalter an ist', fae('A1') === false && (T(`giessEinst().winterpause = false; 1`), fae('A1') === true));
+      T(`HEUTE = new Date(2027, 0, 15, 12); 1`);
+      pruef('beta.12 (beta.27, F265): Im Januar sperrt keine Winterpause mehr', fae('A1') === true);
       T(`HEUTE = new Date(${heute0}); 1`);
       T(`S.dueng = {A1:['2026-03-01'], A5:['2026-03-01']}; giessEinst().dgWann = 'tag'; 1`);
       const zeileTag = T(`duengZeileHTML()`);
@@ -12543,7 +12476,7 @@ setTimeout(async () => {
      Bearbeiten-Leiste. Jeder Test legt seine Daten selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess'];
     const alt13 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const warte = ms => new Promise(r => setTimeout(r, ms));
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
@@ -12552,44 +12485,23 @@ setTimeout(async () => {
     const pfl = (id, o) => Object.assign({id, name:'Probe ' + id, art:'Probeart ' + id, botanisch:'Testgattung probe' + id.toLowerCase(), sorte:'',
       klasse:'B', intervallEigen:true, intervall:[10, 10], topf:12, eigen:true}, o || {});
     const setzen = (liste, water, zustand) => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
-      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.zustand = ${JSON.stringify(zustand || {})};
+      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.lernen = ${JSON.stringify(zustand || {})}; S.tagEin = {};
       S.feuchtRueck = {}; S.dueng = {}; S.gesehen = {}; S.anstau = {}; S.spuelen = {};
-      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:false, saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
       gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte'; sichern(); return 1; })()`);
     const zuKarte = id => { klick('[data-gm="los"]'); let g = 0;
       while(T(`gmListe[gmIndex] && gmListe[gmIndex].id`) !== id && g++ < 4) klick('[data-gm="spaeter"]'); };
     try {
-      /* A: Eintrag nur mit Gelerntem ist kein Zustand */
-      setzen([pfl('Z1'), pfl('Z2')], {Z1:[vor(11)], Z2:[vor(11)]}, {Z1:{lernFaktor:0.9, lernMarke:'x'}, Z2:{code:'neu', seit:vor(5), bis:null, lernFaktor:1.2}});
-      pruef('beta.13: zustandVon: Eintrag nur mit Lernfaktor gilt als „gesund“',
-        T(`zustandVon(allePflanzen().find(function(x){ return x.id === 'Z1'; })).code`) === 'gesund');
-      pruef('beta.13: zustandVon: unbekannter Code gilt als „gesund“',
-        T(`(function(){ S.zustand.Z1.code = 'gibtsnicht'; var c = zustandVon(allePflanzen().find(function(x){ return x.id === 'Z1'; })).code; delete S.zustand.Z1.code; return c; })()`) === 'gesund');
+      /* A (seit beta.27): Das Gelernte liegt in S.lernen; Rückgängig stellt es wieder her */
+      setzen([pfl('Z1'), pfl('Z2')], {Z1:[vor(11)], Z2:[vor(11)]}, {Z2:{lernFaktor:1.2}});
       T('gmStarten()');
-      zuKarte('Z1');
-      pruef('beta.13: Gießkarte einer gesunden Pflanze mit Gelerntem fragt nicht nach dem Zustand',
-        T(`gmListe[gmIndex].id`) === 'Z1' && !d.querySelector('#gm-inhalt .gm-zfrage') && inh().indexOf('Ist der Zustand vorbei') === -1, inh().slice(-300));
-      klick('[data-gm="spaeter"]');
-      pruef('beta.13: Gießkarte mit echtem Zustand fragt weiter', T(`gmListe[gmIndex] && gmListe[gmIndex].id`) === 'Z2' && !!d.querySelector('#gm-inhalt .gm-zfrage [data-gm-z="vorbei"]'));
-      const ivMit = T(`intervallVon(allePflanzen().find(function(x){ return x.id === 'Z2'; }))`);
-      klick('#gm-inhalt [data-gm-z="vorbei"]');
-      /* A2: Gelerntes bleibt, der Zustand und sein Einfluss gehen */
-      pruef('beta.13: „Vorbei“ behält den Lernfaktor und nimmt den Zustand weg',
-        T(`JSON.stringify(S.zustand.Z2)`) === JSON.stringify({lernFaktor:1.2}), T(`JSON.stringify(S.zustand.Z2)`));
-      const ivOhne = T(`intervallVon(allePflanzen().find(function(x){ return x.id === 'Z2'; }))`);
-      pruef('beta.13: Nach „Vorbei“ gilt wieder der normale Abstand (10 statt 11 Tage)', ivMit === 11 && ivOhne === 10, ivMit + ' → ' + ivOhne);
-      /* Rückgängig nimmt eine Meldung zurück, samt Antwort auf die Zustandsfrage */
+      zuKarte('Z2');
+      pruef('beta.13 (beta.27): Gießkarte fragt keinen Zustand', T(`gmListe[gmIndex] && gmListe[gmIndex].id`) === 'Z2' && !d.querySelector('#gm-inhalt [data-gm-z]'));
       klick('[data-gm="ja"]');
       klick('#gm-rueck');
-      pruef('beta.13: „Rückgängig“ nach „Gegossen“ stellt Zustand und Lernfaktor wieder her',
-        T(`S.zustand.Z2 && S.zustand.Z2.code`) === 'neu' && T(`S.zustand.Z2 && S.zustand.Z2.lernFaktor`) === 1.2, T(`JSON.stringify(S.zustand.Z2)`));
+      pruef('beta.13 (beta.27): „Rückgängig“ nach „Gegossen“ lässt den Lernfaktor in S.lernen stehen',
+        T(`S.lernen.Z2 && S.lernen.Z2.lernFaktor`) === 1.2 && T(`!S.zustand`) === true, T(`JSON.stringify(S.lernen.Z2)`));
       T("modalZu('giessmodus')"); await warte(60);
-      T(`zustandSetzen('Z1', 'neu')`);
-      pruef('beta.13: Ein neuer Zustand behält das Gelernte', T(`S.zustand.Z1.code`) === 'neu' && T(`S.zustand.Z1.lernFaktor`) === 0.9 && T(`S.zustand.Z1.lernMarke`) === 'x');
-      T(`zustandSetzen('Z1', 'gesund')`);
-      pruef('beta.13: Zurück auf „gesund“ behält das Gelernte', T(`JSON.stringify(S.zustand.Z1)`) === JSON.stringify({lernFaktor:0.9, lernMarke:'x'}), T(`JSON.stringify(S.zustand.Z1)`));
-      T(`S.zustand.Z3 = {code:'neu', seit:'${vor(1)}', bis:null}; zustandSetzen('Z3', 'gesund')`);
-      pruef('beta.13: Ohne Gelerntes verschwindet der Eintrag ganz', T(`S.zustand.Z3 === undefined`) === true);
 
       /* B: Gießwege-Zeilen im Klappbereich */
       const stil = Array.from(d.querySelectorAll('style')).map(x => x.textContent).join('\n');
@@ -12639,7 +12551,7 @@ setTimeout(async () => {
      Jeder Test legt seine Daten selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'raeume'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen', 'giess', 'raeume'];
     const alt14 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const heute14 = T('HEUTE.getTime()');
     const warte = ms => new Promise(r => setTimeout(r, ms));
@@ -12649,9 +12561,9 @@ setTimeout(async () => {
     const pfl = (id, o) => Object.assign({id, name:'Probe ' + id, art:'Probeart ' + id, botanisch:'Testgattung probe' + id.toLowerCase(), sorte:'',
       klasse:'B', intervallEigen:true, intervall:[10, 10], topf:'12', eigen:true}, o || {});
     const setzen = (liste, water) => T(`(function(){ let m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
-      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.zustand = {};
+      S.eigene = ${JSON.stringify(liste)}; S.water = ${JSON.stringify(water || {})}; S.lernen = {};
       S.feuchtRueck = {}; S.dueng = {}; S.gesehen = {}; S.anstau = {}; S.spuelen = {};
-      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', winterpause:false, saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
+      S.giess = {art:'leitung', haerte:'', dgArt:'fluessig', saison:false, saisonStaerke:'normal', kanne:3, dosis:5};
       gmListe = []; gmIndex = 0; gmVerlauf = []; gmSnaps = {}; gmMit = {}; gmNeuMelden = null; gmPhase = 'karte'; sichern(); return 1; })()`);
     const zuKarte = id => { klick('[data-gm="los"]'); let g = 0;
       while(T(`gmListe[gmIndex] && gmListe[gmIndex].id`) !== id && g++ < 6) klick('[data-gm="spaeter"]'); };
@@ -12815,7 +12727,7 @@ setTimeout(async () => {
      selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const FAECHER = ['eigene', 'water', 'zustand', 'giess', 'raeume'];
+    const FAECHER = ['eigene', 'water', 'lernen', 'tagEin', 'giess', 'raeume'];
     const alt15 = T(`JSON.stringify({${FAECHER.map(k => k + ':(S.' + k + ' === undefined ? null : S.' + k + ')').join(',')}})`);
     const heute15 = T('HEUTE.getTime()');
     const warte = ms => new Promise(r => setTimeout(r, ms));
@@ -13073,7 +12985,7 @@ setTimeout(async () => {
      Tauchbad-Richtwert. Jeder Test legt seine Daten selbst an. ══ */
   {
     const T = c => w.__T(c);
-    const alt17 = T(`JSON.stringify({eigene:S.eigene, giess:S.giess, zustand:S.zustand})`);
+    const alt17 = T(`JSON.stringify({eigene:S.eigene, giess:S.giess, lernen:S.lernen, tagEin:S.tagEin})`);
     const heute17 = T('HEUTE.getTime()');
     try {
       T(`S.giess.saison = false; HEUTE = new Date(2026, 6, 15, 12); 1`);
@@ -13081,7 +12993,7 @@ setTimeout(async () => {
       pruef('beta.17: Testmischungen haben die Stufen viel, mittel, wenig',
         T(`mixWasserStufe(${JSON.stringify(VIEL)}).stufe`) === 'viel' && T(`mixWasserStufe(${JSON.stringify(MITTEL)}).stufe`) === 'mittel' && T(`mixWasserStufe(${JSON.stringify(WENIG)}).stufe`) === 'wenig');
       const pf = o => Object.assign({id:'MB1', name:'Testi', art:'Testart', botanisch:'Testus testus', klasse:'B', gruppe:'laub', giessart:'durch'}, o);
-      const iv = o => T(`(function(){ S.eigene = [${JSON.stringify(pf(o))}]; S.zustand = {}; return intervallVon(allePflanzen()[0]); })()`);
+      const iv = o => T(`(function(){ S.eigene = [${JSON.stringify(pf(o))}]; S.lernen = {}; return intervallVon(allePflanzen()[0]); })()`);
       const roh = T(`(function(){ var p = ${JSON.stringify(pf({}))}; var b = intervallBasis(p); return jahresMischung(b[0], b[1], jahresLage()); })()`);
       pruef('beta.17 (F166): Mix viel streckt den Abstand ×1,2', iv({mix:VIEL}) === Math.max(1, Math.round(roh * 1.2)), iv({mix:VIEL}) + ' / ' + roh);
       pruef('beta.17 (F166): Mix wenig kürzt den Abstand ×0,8', iv({mix:WENIG}) === Math.max(1, Math.round(roh * 0.8)), iv({mix:WENIG}) + ' / ' + roh);
@@ -13109,7 +13021,7 @@ setTimeout(async () => {
       const ue = weise => T(`(function(){
         S.eigene = [${JSON.stringify(pf({id:'MB1', topf:20, mix:MITTEL}))}, ${JSON.stringify(pf({id:'MB2', name:'Zwei', topf:12, mix:VIEL}))},
           ${JSON.stringify(pf({id:'MB3', name:'Drei', mix:VIEL}))}, ${JSON.stringify(pf({id:'MB4', name:'Vier', topf:30, klasse:'S', gruppe:'moorbeet', giessart:'anstau'}))}];
-        S.zustand = {}; S.giess.weise = '${weise}';
+        S.lernen = {}; S.giess.weise = '${weise}';
         gmListe = allePflanzen().slice(); gmIndex = 0; gmZeichnenUebersicht();
         var e = document.querySelector('.gm-ue-auf'); return e ? e.textContent : ''; })()`);
       const lit = l => { const R = l / 2, r = R * 0.7, h = l * 0.85; return Math.max(0.05, Math.round(Math.PI * h / 3 * (R*R + R*r + r*r) / 1000 * (l === 20 ? 0.18 : 0.25) * 100) / 100); };
@@ -13120,7 +13032,7 @@ setTimeout(async () => {
     } catch(e) {
       pruef('beta.17: Block läuft ohne Laufzeitfehler', false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
     } finally {
-      T(`(function(){ var a = ${alt17}; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; HEUTE = new Date(${heute17}); gmListe = []; sichern(); return 1; })()`);
+      T(`(function(){ var a = ${alt17}; S.eigene = a.eigene; S.giess = a.giess; S.lernen = a.lernen; S.tagEin = a.tagEin; HEUTE = new Date(${heute17}); gmListe = []; sichern(); return 1; })()`);
     }
   }
 
@@ -13130,7 +13042,7 @@ setTimeout(async () => {
   {
     const T = c => w.__T(c);
     const d = w.document;
-    const alt18 = T(`JSON.stringify({modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise, raeume:S.raeume, eigene:S.eigene, giess:S.giess, zustand:S.zustand})`);
+    const alt18 = T(`JSON.stringify({modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise, raeume:S.raeume, eigene:S.eigene, giess:S.giess, lernen:S.lernen, tagEin:S.tagEin})`);
     const altPrompt = w.prompt;
     const quelle18 = () => fs.readFileSync('index.html', 'utf8');
     try {
@@ -13146,11 +13058,12 @@ setTimeout(async () => {
       const alle = () => T(`SCHALTER.map(function(s){ return schalterAn(s.k) ? 1 : 0; }).join('')`);
       /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
       /* beta.23: „licht“ ist weg, neun Schalter */
-      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an)', alle() === '000000100', alle());
+      /* beta.27: „Zustandsfrage beim Gießen“ ist weg, acht Schalter */
+      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an)', alle() === '00000010', alle());
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.18: Entdecker schaltet alle sechs Schalter an (beta.21: Liste aus, Kärtchen und Zustandsfrage an)', alle() === '111111011', alle());
-      pruef('beta.18: Katalog hat neun Schalter (seit beta.23) mit eigenem Schalter in der Ansicht',
-        T(`SCHALTER.length`) === 9 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+      pruef('beta.18: Entdecker schaltet alle sechs Schalter an (beta.21: Liste aus, Kärtchen an)', alle() === '11111101', alle());
+      pruef('beta.18: Katalog hat acht Schalter (seit beta.27) mit eigenem Schalter in der Ansicht',
+        T(`SCHALTER.length`) === 8 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
       const mt = d.getElementById('modus-text').textContent;
@@ -13159,7 +13072,7 @@ setTimeout(async () => {
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
       d.getElementById('sch-pflege').click(); d.getElementById('sch-wachstum').click();
       d.getElementById('modus-zurueck').click();
-      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '111111011' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '11111101' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       T(`S.pflegehinweise = true; 1`);
       d.querySelector('#modus-wahl [data-modus="sammler"]').click();
       pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
@@ -13188,7 +13101,7 @@ setTimeout(async () => {
       pruef('beta.18: Keine Stelle hängt mehr am alten Einfach-Ausblenden', quelle18().indexOf('nur-experte') === -1);
 
       /* Schalter ändern keine Rechnung */
-      const rech = T(`(function(){ S.giess.saison = false; S.zustand = {};
+      const rech = T(`(function(){ S.giess.saison = false; S.lernen = {};
         S.eigene = [{id:'M1A-1', eigen:true, name:'Probe', art:'Probeart', botanisch:'Probea m1a', klasse:'B', topf:'14', substrat:'erde', quellen:{}, todo:[], log:[]}];
         var p = allePflanzen()[0], r = [];
         modusSetzen('entdecker'); r.push(intervallVon(p) + '/' + giessMengeL(p));
@@ -13249,7 +13162,7 @@ setTimeout(async () => {
     } finally {
       w.prompt = altPrompt;
       T(`(function(){ var a = ${alt18}; S.modus = a.modus; S.schalter = a.schalter; S.einfach = a.einfach; S.pflegehinweise = a.ph;
-        S.raeume = a.raeume; S.eigene = a.eigene; S.giess = a.giess; S.zustand = a.zustand; AL_LAGE_NEU = '';
+        S.raeume = a.raeume; S.eigene = a.eigene; S.giess = a.giess; S.lernen = a.lernen; S.tagEin = a.tagEin; AL_LAGE_NEU = '';
         formularLeeren(); einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })()`);
     }
   }
@@ -13526,11 +13439,11 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
     const kn = () => d.getElementById('gm-knoepfe').innerHTML;
     const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
-    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, lernen:S.lernen, tagEin:S.tagEin, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
       spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise}`;
     const alt21 = T(`JSON.stringify(${LAGER})`);
     const zurueck = v => T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
-      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.lernen = a.lernen; S.tagEin = a.tagEin; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
       S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
       S.einfach = a.einfach; S.pflegehinweise = a.ph; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(v)})`);
     const faecher = id => T(`JSON.stringify(GM_SNAP_FAECHER.map(function(k){ return (S[k] && S[k][${JSON.stringify(id)}] !== undefined) ? S[k][${JSON.stringify(id)}] : null; }))`);
@@ -13538,8 +13451,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const aufbau21 = () => T(`(function(){
       var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
       history.replaceState(null, '');
-      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
-      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.lernen = {}; S.gesehen = {};
+      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', saison:false, dgWann:'jedes', dgArt:'fluessig',
         tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
       var k = raumAnlegen('Prüf-Küche L21'), b = raumAnlegen('Prüf-Bad L21');
       stellplatzAnlegen(k, 'Lplatz A'); stellplatzAnlegen(k, 'Lplatz B');
@@ -13614,7 +13527,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.21 (M2a): Abwählen zählt den Knopf herunter', kText(B) === 'Alle gegossen (1)' && T('gmHaken.L6') === false, kText(B));
 
       /* 6 Gleiche Fächer wie die Einzelmeldung */
-      const stand = T(`JSON.stringify({water:S.water, dueng:S.dueng, zustand:S.zustand, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anstau:S.anstau, spuelen:S.spuelen, giess:S.giess})`);
+      const stand = T(`JSON.stringify({water:S.water, dueng:S.dueng, lernen:S.lernen, tagEin:S.tagEin, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anstau:S.anstau, spuelen:S.spuelen, giess:S.giess})`);
       const vorF = faecher('L4');
       T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); gmStarten(); gmIndex = gmListe.findIndex(function(x){ return x.id === 'L4'; }); gmZeichnen(); 1`);
       klick('[data-gm="ja"]');
@@ -13686,11 +13599,11 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const inh = () => d.getElementById('gm-inhalt').innerHTML;
     const kn = () => d.getElementById('gm-knoepfe').innerHTML;
     const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
-    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, lernen:S.lernen, tagEin:S.tagEin, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
       spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach, ph:S.pflegehinweise}`;
     const alt21b = T(`JSON.stringify(${LAGER})`);
     const zurueck = v => T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
-      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+      S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.lernen = a.lernen; S.tagEin = a.tagEin; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
       S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
       S.einfach = a.einfach; S.pflegehinweise = a.ph; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(v)})`);
     const faecher = id => T(`JSON.stringify(GM_SNAP_FAECHER.map(function(k){ return (S[k] && S[k][${JSON.stringify(id)}] !== undefined) ? S[k][${JSON.stringify(id)}] : null; }))`);
@@ -13698,8 +13611,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const aufbau21 = () => T(`(function(){
       var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
       history.replaceState(null, '');
-      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
-      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+      S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.lernen = {}; S.gesehen = {};
+      S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', saison:false, dgWann:'jedes', dgArt:'fluessig',
         tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
       var k = raumAnlegen('Prüf-Küche L21'), b = raumAnlegen('Prüf-Bad L21');
       stellplatzAnlegen(k, 'Lplatz A'); stellplatzAnlegen(k, 'Lplatz B');
@@ -13731,13 +13644,14 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     try {
       /* 7 Vorgaben */
       T(`modusSetzen('sammler'); 1`);
-      const sv = T(`schalterAn('gmwie') + '/' + schalterAn('gmzustand')`);
+      const sv = T(`String(schalterAn('gmwie'))`);
       T(`modusSetzen('entdecker'); 1`);
-      const ev = T(`schalterAn('gmwie') + '/' + schalterAn('gmzustand')`);
-      pruef('beta.21 (M2b): Kärtchen und Zustandsfrage sind bei Sammler aus, bei Entdecker an', sv === 'false/false' && ev === 'true/true', sv + ' · ' + ev);
-      pruef('beta.21 (M2b): Beide Schalter stehen unter Ansicht › Anzeige', ['sch-gmwie', 'sch-gmzustand'].every(id => {
+      const ev = T(`String(schalterAn('gmwie'))`);
+      pruef('beta.21 (M2b): Kärtchen ist bei Sammler aus, bei Entdecker an', sv === 'false' && ev === 'true', sv + ' · ' + ev);
+      pruef('beta.21 (M2b, beta.27): Der Schalter Kärtchen steht unter Ansicht › Anzeige, „Zustandsfrage“ ist weg', ['sch-gmwie'].every(id => {
         const e = d.getElementById(id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })
-        && /Hinweiskärtchen beim Gießen/.test(d.getElementById('schalter-karte').textContent) && /Zustandsfrage beim Gießen/.test(d.getElementById('schalter-karte').textContent));
+        && /Hinweiskärtchen beim Gießen/.test(d.getElementById('schalter-karte').textContent) && !/Zustandsfrage beim Gießen/.test(d.getElementById('schalter-karte').textContent)
+        && !d.getElementById('sch-gmzustand'));
 
       /* 1 bis 4 Nacheinander */
       aufbau21();
@@ -13779,17 +13693,17 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         && T(`gmVerlauf.length`) === 0);
 
       /* Gießpause in der Liste */
-      T(`zustandSetzen('L4', 'wurzelfaeule'); 1`);
+      T(`tagVorgabenSichern(false); tagSetzen('L4', 'tv-pause'); 1`);
       neuStart();
       klick('[data-gm="liste"]');
       const h4 = d.querySelector('#gm-inhalt [data-gm-hk="L4"]');
       /* 4.0-beta.22 (F204): statt abgewählt fehlt sie ganz. */
       pruef('beta.21 (M2b): Eine Pflanze in der Gießpause steht nicht in der Liste, die Gruppe zählt eine weniger', !h4
         && /Alle gegossen \(1\)/.test(d.querySelector('#gm-inhalt [data-gm-lga="' + B + '"]').textContent));
-      T(`zustandSetzen('L4', 'gesund'); 1`);
+      T(`delete S.tagEin.L4; 1`);
 
       /* 5 Hinweiskärtchen */
-      T(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'L2'; }); p.topf = ''; giessEinst().topfOhne = {}; zustandSetzen('L2', 'quarantaene'); modusSetzen('sammler'); return 1; })()`);
+      T(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'L2'; }); p.topf = ''; giessEinst().topfOhne = {}; tagSetzen('L2', 'tv-quarantaene'); modusSetzen('sammler'); return 1; })()`);
       neuStart();
       pruef('beta.21 (M2b): Kärtchen aus: in der Übersicht kein Knopf, der Weg als Text', !d.querySelector('#gm-inhalt .gm-wie-knopf') && !!d.querySelector('#gm-inhalt .gm-wie-text')
         && !d.querySelector('#gm-inhalt [data-gm-wie]') && d.querySelectorAll('#gm-inhalt .gm-gw-zeile.gm-gw-text').length > 0);
@@ -13801,10 +13715,10 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.21 (M2b): Ein Tipp auf den Weg öffnet kein Kärtchen', T(`modalOffen('gm-wie')`) === false);
 
       /* 6 Zustandsfrage */
-      pruef('beta.21 (M2b): Zustandsfrage aus: keine Frage auf der Karte, die Topffrage bleibt', !d.querySelector('#gm-inhalt [data-gm-z]') && !!d.querySelector('#gm-inhalt .gm-topffrage')
+      pruef('beta.21 (M2b): keine Zustandsfrage auf der Karte, die Topffrage bleibt', !d.querySelector('#gm-inhalt [data-gm-z]') && !!d.querySelector('#gm-inhalt .gm-topffrage')
         && !!d.querySelector('#gm-inhalt [data-gm-topf="ja"]'));
       T(`modusSetzen('entdecker'); gmZeichnen(); 1`);
-      pruef('beta.21 (M2b): Entdecker: Zustandsfrage und Topffrage stehen da', !!d.querySelector('#gm-inhalt [data-gm-z="vorbei"]') && !!d.querySelector('#gm-inhalt .gm-topffrage'));
+      pruef('beta.21 (M2b, beta.27): Entdecker: Topffrage steht da, eine Zustandsfrage nicht', !d.querySelector('#gm-inhalt [data-gm-z]') && !!d.querySelector('#gm-inhalt .gm-topffrage'));
       const wk = d.querySelector('#gm-inhalt button.gm-weg[data-gm-wie]');
       pruef('beta.21 (M2b): Entdecker: der Weg ist wieder ein Knopf zum Kärtchen', !!wk);
       if(wk) wk.click();
@@ -13826,7 +13740,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const T = c => w.__T(c);
     const d = w.document;
     const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
-    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, zustand:S.zustand, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, lernen:S.lernen, tagEin:S.tagEin, dueng:S.dueng, giess:S.giess, anstau:S.anstau,
       spuelen:S.spuelen, feuchtRueck:S.feuchtRueck, gesehen:S.gesehen, anzucht:S.anzucht, modus:S.modus, schalter:S.schalter, einfach:S.einfach,
       fotos:S.fotos, profil:S.profil}`;
     const alt22 = T(`JSON.stringify(${LAGER})`);
@@ -13836,8 +13750,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T(`(function(){
         var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         history.replaceState(null, '');
-        S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.zustand = {}; S.gesehen = {};
-        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', winterpause:false, saison:false, dgWann:'jedes', dgArt:'fluessig',
+        S.raeume = []; S.anzucht = null; S.anstau = {}; S.spuelen = {}; S.feuchtRueck = {}; S.dueng = {}; S.lernen = {}; S.gesehen = {};
+        S.giess = Object.assign({}, giessEinst(), {art:'leitung', weise:'unten', saison:false, dgWann:'jedes', dgArt:'fluessig',
           tageModus:'', sammelU:true, sammelAz:true, gwOffen:false});
         var k = raumAnlegen('Prüf-Küche L22'), b = raumAnlegen('Prüf-Bad L22');
         window.__l22 = {k:k, b:b};
@@ -13852,7 +13766,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         ];
         S.water = {};
         S.eigene.forEach(function(p){ S.water[p.id] = [vor(150)]; });
-        ['P2', 'P4', 'U1'].forEach(function(id){ S.zustand[id] = {code:'wurzelfaeule', seit:iso(HEUTE)}; });
+        tagVorgabenSichern(false); S.tagEin = {};
+        ['P2', 'P4', 'U1'].forEach(function(id){ tagSetzen(id, 'tv-pause'); });
         S.fotos = S.fotos || {}; S.profil = S.profil || {};
         S.fotos.P1 = [{key:'f22', src:${JSON.stringify(BILD)}, datum:iso(HEUTE)}];
         var g = azGefaessAnlegen({name:'Glas L22', medium:'wasser', start:vor(30)});
@@ -13891,7 +13806,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.22 (M2c): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
     } finally {
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
-        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.zustand = a.zustand; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.lernen = a.lernen; S.tagEin = a.tagEin; S.dueng = a.dueng; S.giess = a.giess; S.anstau = a.anstau;
         S.spuelen = a.spuelen; S.feuchtRueck = a.feuchtRueck; S.gesehen = a.gesehen; S.anzucht = a.anzucht; S.modus = a.modus; S.schalter = a.schalter;
         S.einfach = a.einfach; S.fotos = a.fotos; S.profil = a.profil; einfachSetzen(modusVon() === 'sammler'); schalterAnwenden(); sichern(); return 1; })(${JSON.stringify(alt22)})`);
     }
@@ -14425,7 +14340,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const d = w.document;
     const warte = ms => new Promise(r => setTimeout(r, ms));
     const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, fotos:S.fotos, spuelen:S.spuelen, anstau:S.anstau,
-      zustand:S.zustand, feuchtRueck:S.feuchtRueck, giess:S.giess, profil:S.profil, ansicht:S.ansicht}`;
+      lernen:S.lernen, tagEin:S.tagEin, feuchtRueck:S.feuchtRueck, giess:S.giess, profil:S.profil, ansicht:S.ansicht}`;
     const alt25 = T(`JSON.stringify(${LAGER})`);
     T(`window.__a25 = {groesseKB:groesseKB, fotoSchreiben:fotoSchreiben, dokAufbau:dokAufbau, verAufbau:verAufbau,
       planRender:planRender, bibExaktSuchen:bibExaktSuchen, gross:FOTO_GROSS, bereit:FOTOS_BEREIT,
@@ -14451,7 +14366,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
           pf('U1', {klasse:'S', raum:u, intervallEigen:false, intervall:undefined}),
           pf('U2', {klasse:'S', raum:u, intervallEigen:false, intervall:undefined})];
         S.water = {Q1:[vor(9)], Q2:[vor(9)], Q3:[vor(9)], Q4:[vor(9)], Q5:[vor(9)], U1:[vor(9)], U2:[vor(9)]};
-        S.spuelen = {}; S.anstau = {}; S.zustand = {}; S.feuchtRueck = {};
+        S.spuelen = {}; S.anstau = {}; S.lernen = {}; S.feuchtRueck = {};
         S.giess = S.giess || {}; S.giess.saison = false; S.giess.weise = 'unten';
         S.fotos = {}; S.profil = {};
         sichern(); render();
@@ -14606,7 +14521,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         FOTO_GROSS = __a25.gross; FOTOS_BEREIT = __a25.bereit;
         gmListeAktiv = false; gmTeil = null;
         S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.fotos = a.fotos || {}; S.spuelen = a.spuelen; S.anstau = a.anstau;
-        S.zustand = a.zustand; S.feuchtRueck = a.feuchtRueck; S.giess = a.giess; S.profil = a.profil;
+        S.lernen = a.lernen; S.tagEin = a.tagEin; S.feuchtRueck = a.feuchtRueck; S.giess = a.giess; S.profil = a.profil;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt25)})`);
     }
   }
@@ -14619,7 +14534,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const T = c => w.__T(c);
     const d = w.document;
     const warte = ms => new Promise(r => setTimeout(r, ms));
-    const LAGER = `{eigene:S.eigene, raeume:S.raeume, zustand:S.zustand, ansicht:S.ansicht, gruppierung:gruppierung, sortierung:sortierung}`;
+    const LAGER = `{eigene:S.eigene, raeume:S.raeume, lernen:S.lernen, tagEin:S.tagEin, ansicht:S.ansicht, gruppierung:gruppierung, sortierung:sortierung}`;
     const alt26 = T(`JSON.stringify(${LAGER})`);
     const stil = [...d.querySelectorAll('style')].map(x => x.textContent).join('\n');
     const zahlKarten = () => T(`document.querySelectorAll('#out .card').length`);
@@ -14638,8 +14553,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = [pf('F1', {name:'Zitronella B26'}), pf('F2', {art:'Glockenblumella'}), pf('F3', {botanisch:'Quarxia vulgaris'}),
           pf('F4', {notiz:'steht neben dem Schneckenkorb'}), pf('F5', {raum:u, stellplatz:'Regal'}), pf('F6', {raum:'', stellplatz:''}),
           pf('F7', {raum:u, stellplatz:'Regal'})];
-        S.zustand = {};
-        zustandSetzen('F2', 'wurzelfaeule'); zustandSetzen('F7', 'wurzelfaeule');
+        S.lernen = {};
+        tagVorgabenSichern(false); S.tagEin = {}; tagSetzen('F2', 'tv-pause'); tagSetzen('F7', 'tv-pause');
         sichern(); ansichtZeigen('sammlung'); render(); return 1; })()`);
       const alle = zahlKarten();
       pruef('beta.26: sieben Prüfpflanzen stehen da', alle === 7, String(alle));
@@ -14672,8 +14587,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.26 (12): Fenster legt einen Verlaufseintrag an (Zurück schließt)',
         T(`history.state && history.state.gkModal`) === 'filter-modal', String(T(`JSON.stringify(history.state)`)));
       const reihe = [...d.querySelectorAll('#filter-modal .sekm-rumpf > p.ein-abschnitt')].map(x => x.textContent.trim()).join('|');
-      pruef('beta.26: Reihenfolge Ort, Zustand, Sicherheit, Gießklasse, Gruppieren, Sortieren',
-        reihe === 'Ort|Zustand|Sicherheit|Gießklasse|Gruppieren|Sortieren', reihe);
+      pruef('beta.26 (beta.27): Reihenfolge Ort, Gießen, Tags, Wirkung, Sicherheit, Gießklasse, Gruppieren, Sortieren',
+        reihe === 'Ort|Gießen|Tags|Wirkung|Sicherheit|Gießklasse|Gruppieren|Sortieren', reihe);
       /* (3) keine sichtbare Auswahlliste */
       pruef('beta.26 (3): keine sichtbare Auswahlliste im Filterfenster und in der Leiste',
         d.querySelectorAll('#filter-modal select:not([hidden]), section.controls select:not([hidden])').length === 0
@@ -14749,10 +14664,10 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.26 (1): Suche findet über den botanischen Namen', such('quarxia') === 'F3', ids());
       pruef('beta.26 (1): Suche findet über die Notiz', such('schneckenkorb') === 'F4', ids());
       pruef('beta.26 (2): leere Suche zeigt alles', such('') === 'F1,F2,F3,F4,F5,F6,F7', ids());
-      /* (8) Bestand: Statuspunkt und Zustandsabzeichen */
+      /* (8) Bestand: Statuspunkt; das Zustandsabzeichen ist mit beta.27 weg */
       const c2 = d.querySelector('#out .card[data-karte="F2"]');
-      pruef('beta.26 (8): Karte trägt Statuspunkt und Zustandsabzeichen',
-        !!c2 && !!c2.dataset.ton && !!c2.querySelector('.card-kurz[data-ton]') && !!c2.querySelector('.zbadge'));
+      pruef('beta.26 (8, beta.27): Karte trägt Statuspunkt, kein Zustandsabzeichen',
+        !!c2 && !!c2.dataset.ton && !!c2.querySelector('.card-kurz[data-ton]') && !c2.querySelector('.zbadge'));
       /* (15) Suchzeile */
       pruef('beta.26 (15): Suchfeld und „Filter“ stehen in einer Zeile (Stiltext)',
         stil.indexOf('html[data-design] section.controls > .such-zeile{display:flex') !== -1);
@@ -14763,8 +14678,332 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         history.replaceState(null, '');
         HTMLElement.prototype.focus = __a26.focus;
         filterZuruecksetzen(); $('#q').value = '';
-        S.eigene = a.eigene; S.raeume = a.raeume; S.zustand = a.zustand; gruppierung = a.gruppierung; sortierung = a.sortierung;
+        S.eigene = a.eigene; S.raeume = a.raeume; S.lernen = a.lernen; S.tagEin = a.tagEin; gruppierung = a.gruppierung; sortierung = a.sortierung;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt26)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.27: Plan G2a+c (Etappe A) — Tag-System statt Zustände.
+     Vorgaben, Gießregel, Prozent, Dauer, Erinnerung, Gießnotiz, Düngesperre,
+     Setzen/Beenden/Datum/Entfernen, Notiz, Chipleiste und Filter, Suche,
+     Umbau, Doktor und Ableger, keine Systemliste, Winterruhe, keine
+     Ereignisknöpfe, Regeln. Legt Pflanzen, Tags und Gruppen selbst an und
+     stellt den Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER = `{eigene:S.eigene, water:S.water, lernen:S.lernen, tagEin:S.tagEin, tags:S.tags, tagGruppen:S.tagGruppen,
+      tagVorgabenAus:S.tagVorgabenAus, ereignisse:S.ereignisse, giess:S.giess, raeume:S.raeume, ansicht:S.ansicht,
+      gruppierung:gruppierung, sortierung:sortierung}`;
+    const alt27 = T(`JSON.stringify(${LAGER})`);
+    const heute27 = T('HEUTE.getTime()');
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const vor = n => T(`tagPlusTage(iso(HEUTE), -(${n}))`);
+    const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+    const kl = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
+    const tagIn = () => d.getElementById('tag-inhalt');
+    const ids = () => T(`[].map.call(document.querySelectorAll('#out .card'), function(c){ return c.dataset.karte; }).sort().join(',')`);
+    try {
+      await zu();
+      T(`(function(){
+        filterZuruecksetzen(); gruppierung = 'keine'; $('#q').value = '';
+        S.giess.saison = false;
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'T27 ' + id, art:'Prüfart', botanisch:'Testus septem',
+          klasse:'B', sonne:'indirekt', intervallEigen:true, intervall:[14, 14]}, o); };
+        S.eigene = [pf('A1'), pf('A2'), pf('A3'), pf('A4'), pf('A5', {klasse:'S', intervallEigen:false, intervall:null})];
+        S.water = {A1:[iso(HEUTE)], A2:[iso(HEUTE)], A3:[iso(HEUTE)], A4:[iso(HEUTE)]};
+        S.tags = null; S.tagGruppen = []; S.tagEin = {}; S.tagVorgabenAus = []; S.ereignisse = {}; S.lernen = {};
+        tagVorgabenSichern(false);
+        sichern(); ansichtZeigen('sammlung'); render(); return 1; })()`);
+
+      /* (1) Acht Vorgaben, kein zweites Befüllen, gelöschte bleiben weg bis „wiederherstellen“ */
+      const namen = T(`tagListe().map(function(t){ return t.name; }).join('|')`);
+      pruef('beta.27 (1): acht Vorgaben', namen === 'Gießpause|Gießabstand verkürzen|Gießabstand verlängern|Dünger|Neues Blatt|Blatt verloren|Quarantäne|Winterruhe', namen);
+      T(`tagVorgabenSichern(false); tagVorgabenSichern(false)`);
+      pruef('beta.27 (1): zweites Befüllen legt nichts doppelt an', T(`tagListe().length`) === 8, String(T(`tagListe().length`)));
+      T(`tagLoeschen('tv-blatt'); tagVorgabenSichern(false)`);
+      pruef('beta.27 (1): eine gelöschte Vorgabe kommt beim Start nicht zurück', !T(`!!tagDef('tv-blatt')`));
+      T(`tagVorgabenSichern(true)`);
+      pruef('beta.27 (1): „Vorgaben wiederherstellen“ holt sie zurück', T(`!!tagDef('tv-blatt') && tagListe().length === 8`) === true);
+      pruef('beta.27 (1): Vorgaben: Dünger trägt die Wirkung Dünger, Quarantäne ist ein Zeitraum ohne Wirkung',
+        T(`tagDef('tv-duenger').duenger === true && tagDef('tv-duenger').art === 'einmalig'
+          && tagDef('tv-quarantaene').art === 'zeitraum' && tagWirkungen(tagDef('tv-quarantaene')).length === 0`) === true);
+
+      /* (3) Prozent-Vorschau im Fenster und das berechnete Intervall */
+      T(`karteOeffnen('A1')`); await warte(150);
+      pruef('beta.27 (10 Karte): Zeile „Tags“ mit „+ Tag“ über den Reitern', !!d.querySelector('#karte-modal .tagk [data-tag-auf="A1"]'));
+      kl('#karte-modal [data-tag-auf="A1"]'); await warte(40);
+      pruef('beta.27 (9): „+ Tag“ öffnet das Fenster', T(`modalOffen('tag-fenster')`) === true && !!tagIn().querySelector('[data-tagw="tv-kuerzer"]'));
+      kl('#tag-inhalt [data-tagw="tv-kuerzer"]');
+      const vs1 = (d.getElementById('tagf-vorschau') || {}).textContent;
+      pruef('beta.27 (3): Vorschau mit dem Wert des Tags (25 %)', vs1 === '14 → 11 Tage (−25 %)', vs1);
+      const pz = d.getElementById('tagf-pz'); pz.value = '50'; pz.dispatchEvent(new w.Event('input', {bubbles:true}));
+      const vs2 = d.getElementById('tagf-vorschau').textContent;
+      pruef('beta.27 (3): Vorschau folgt dem Prozentfeld', vs2 === '14 → 7 Tage (−50 %)', vs2);
+      kl('#tag-inhalt [data-tagf="setzen"]'); await warte(80);
+      const iv1 = T(`intervallVon(${P('A1')})`);
+      pruef('beta.27 (3): gesetztes Intervall gleich der Vorschau (14 × 0,5)', iv1 === 7, String(iv1));
+      pruef('beta.27 (3): Abstand ohne Tag bleibt 14', T(`intervallVon(${P('A1')}, true)`) === 14);
+
+      /* (2) Gießregel: ein zweiter Gießtag ersetzt den ersten */
+      await zu(); T(`karteOeffnen('A1')`); await warte(150);
+      kl('#karte-modal [data-tag-auf="A1"]'); await warte(40);
+      kl('#tag-inhalt [data-tagw="tv-pause"]');
+      kl('#tag-inhalt [data-tagf="setzen"]');
+      const warnT = (d.getElementById('tagf-warn') || {}).textContent || '';
+      pruef('beta.27 (2): zweiter Gießtag zeigt „Ersetzen?“ mit dem laufenden Tag',
+        /Gießabstand verkürzen/.test(warnT) && /nur ein Gießtag/.test(warnT) && /Ersetzen/.test(tagIn().querySelector('[data-tagf="setzen"]').textContent), warnT);
+      kl('#tag-inhalt [data-tagf="setzen"]'); await warte(80);
+      const lauf2 = T(`tagLaufend(${P('A1')}).filter(function(x){ return x.t.giess; }).map(function(x){ return x.t.id; }).join(',')`);
+      pruef('beta.27 (2): danach läuft nur die Gießpause', lauf2 === 'tv-pause', lauf2);
+      pruef('beta.27 (2): der ersetzte Tag steht mit „ersetzt durch“ im Verlauf',
+        T(`ereignisse('A1').some(function(e){ return e.typ === 'tag' && e.text === 'Gießabstand verkürzen ersetzt durch Gießpause'; })`) === true);
+
+      /* (7) Gießpause aus dem Tag, Intervall nur bei Gießwirkung */
+      pruef('beta.27 (7): Gießpause aus dem Tag: Stand „stopp“, 14 Tage', T(`giessStatus(${P('A1')}).stand`) === 'stopp' && T(`stoppRest(${P('A1')})`) === 14, String(T(`stoppRest(${P('A1')})`)));
+      T(`tagSetzen('A2', 'tv-quarantaene')`);
+      pruef('beta.27 (7): Quarantäne ändert weder Intervall noch Pause', T(`intervallVon(${P('A2')})`) === 14 && T(`stoppRest(${P('A2')})`) === 0);
+      T(`tagSetzen('A3', 'tv-laenger', {pz:100})`);
+      pruef('beta.27 (7): Verlängern um 100 % ergibt 28 Tage, keine Pause', T(`intervallVon(${P('A3')})`) === 28 && T(`stoppRest(${P('A3')})`) === 0);
+      T(`tagSetzen('A4', 'tv-pause', {dauer:0})`);
+      pruef('beta.27 (7): Gießpause ohne Dauer läuft bis „Beenden“', T(`stoppRest(${P('A4')}) >= TAG_OFFEN && stoppText(${P('A4')}) === 'bis du die Gießpause beendest'`) === true);
+      pruef('beta.27 (7): Gießkarte nennt die Gießpause', /Gießpause bis du die Gießpause beendest/.test(T(`giessHinweisFuer(${P('A4')}).text`)), T(`giessHinweisFuer(${P('A4')}).text`));
+      T(`delete S.tagEin.A4`);
+
+      /* (4) Dauer endet automatisch mit Verlaufseintrag */
+      T(`(function(){ delete S.tagEin.A2; tagSetzen('A2', 'tv-pause', {von:'${vor(5)}', dauer:3, er:false}); return 1; })()`);
+      pruef('beta.27 (4): abgelaufene Pause hält nicht mehr an', T(`stoppRest(${P('A2')})`) === 0);
+      T(`tagAblauf()`);
+      const e4 = JSON.parse(T(`JSON.stringify(tagEintraege('A2')[0])`));
+      pruef('beta.27 (4): Ende eingetragen am Tag der Dauer', e4.ende === vor(2) && e4.bis === vor(2), JSON.stringify(e4));
+      pruef('beta.27 (4): Verlaufseintrag „Gießpause beendet“ mit dem Enddatum',
+        T(`ereignisse('A2').some(function(e){ return e.text === 'Gießpause beendet' && e.datum === '${vor(2)}'; })`) === true);
+      T(`tagAblauf()`);
+      pruef('beta.27 (4): zweiter Lauf trägt nichts doppelt ein', T(`ereignisse('A2').filter(function(e){ return e.text === 'Gießpause beendet'; }).length`) === 1);
+
+      /* (5) Erinnerung: Hinweiszeile nur mit Haken, bleibt bis „Gesehen“ */
+      T(`(function(){ delete S.tagEin.A3; delete S.tagEin.A4;
+        tagSetzen('A3', 'tv-pause', {von:'${vor(4)}', dauer:2, er:true});
+        tagSetzen('A4', 'tv-pause', {von:'${vor(4)}', dauer:2, er:false});
+        tagAblauf(); return 1; })()`);
+      const hin3 = T(`tagKarteHTML(${P('A3')})`), hin4 = T(`tagKarteHTML(${P('A4')})`);
+      pruef('beta.27 (5): Hinweiszeile „Gießpause vorbei“ nur bei aktivem Haken',
+        /class="tag-hinweis"/.test(hin3) && /Gießpause vorbei/.test(hin3) && !/tag-hinweis/.test(hin4));
+      T(`karteOeffnen('A3')`); await warte(150);
+      T(`render()`);
+      pruef('beta.27 (5): die Zeile bleibt nach dem Neuzeichnen', !!d.querySelector('#karte-modal .tag-hinweis'));
+      kl('#karte-modal [data-tag-gesehen]'); await warte(60);
+      pruef('beta.27 (5): „Gesehen“ nimmt die Zeile weg', !/tag-hinweis/.test(T(`tagKarteHTML(${P('A3')})`)));
+
+      /* (6) Gießnotiz in Gießkarte und Gießliste, weg nach dem Gießen */
+      await zu();
+      T(`S.water.A3 = ['${vor(20)}']; S.water.A4 = ['${vor(20)}']`);
+      pruef('beta.27 (6): Gießnotiz nur bei aktivem Haken', T(`tagGiessNotizen(${P('A3')}).join('|')`) === 'Gießpause vorbei' && T(`tagGiessNotizen(${P('A4')}).length`) === 0);
+      T(`(function(){ gmListe = [${P('A3')}]; gmIndex = 0; gmSnaps = {}; gmVerlauf = []; gmZeichnen(); return 1; })()`);
+      pruef('beta.27 (6): Gießkarte zeigt „Gießpause vorbei“', /gm-tagnotiz[^>]*>Gießpause vorbei/.test(d.getElementById('gm-inhalt').innerHTML));
+      T(`(function(){ gmListe = [${P('A3')}, ${P('A4')}]; gmHaken = {}; gmZeichnenListe(); return 1; })()`);
+      const zeile3 = d.querySelector('#gm-inhalt [data-gm-hk="A3"]'), zeile4 = d.querySelector('#gm-inhalt [data-gm-hk="A4"]');
+      pruef('beta.27 (6): Gießliste zeigt die Notiz in der Zeile',
+        !!zeile3 && /Gießpause vorbei/.test(zeile3.closest('label').textContent) && !!zeile4 && !/vorbei/.test(zeile4.closest('label').textContent));
+      T(`giessen('A3')`);
+      pruef('beta.27 (6): nach dem Gießen ist die Notiz weg', T(`tagGiessNotizen(${P('A3')}).length`) === 0);
+      T(`(function(){ S.tagEin.A4 = [{e:'x4', t:'tv-pause', von:'${vor(9)}', bis:'${vor(2)}', ende:'${vor(2)}', notiz:'', er:true, giessNotiz:true}]; samGegossen(['A4']); return 1; })()`);
+      pruef('beta.27 (6): auch „Gegossen“ aus der Auswahl nimmt sie weg', T(`tagGiessNotizen(${P('A4')}).length`) === 0);
+
+      /* (8) Düngesperre: nur ein Hinweis, „Trotzdem setzen“ setzt */
+      T(`(function(){ S.tagEin.A2 = []; tagSpeichern({name:'Mittel T27', art:'zeitraum', duengSperre:true, dauer:10}); return 1; })()`);
+      const sperrId = T(`tagListe().find(function(t){ return t.name === 'Mittel T27'; }).id`);
+      T(`tagSetzen('A2', '${sperrId}')`);
+      T(`karteOeffnen('A2')`); await warte(150);
+      kl('#karte-modal [data-tag-auf="A2"]'); await warte(40);
+      kl('#tag-inhalt [data-tagw="tv-duenger"]');
+      kl('#tag-inhalt [data-tagf="setzen"]');
+      const w8 = (d.getElementById('tagf-warn') || {}).textContent || '';
+      pruef('beta.27 (8): Hinweis „sperrt gerade das Düngen“, Knopf „Trotzdem setzen“',
+        /Mittel T27.*sperrt gerade das Düngen/.test(w8) && tagIn().querySelector('[data-tagf="setzen"]').textContent === 'Trotzdem setzen', w8);
+      kl('#tag-inhalt [data-tagf="setzen"]'); await warte(80);
+      pruef('beta.27 (8): danach ist Dünger trotzdem eingetragen', T(`tagEintraege('A2').some(function(e){ return e.t === 'tv-duenger'; })`) === true);
+
+      /* (20) Regeln „frühestens wieder nach n Tagen“ und „nicht zusammen mit“ */
+      T(`(function(){ tagSpeichern({name:'Langzeit T27', art:'einmalig', duenger:true, abstand:30});
+        tagSpeichern({name:'Neem T27', art:'zeitraum', schaedling:true});
+        var neem = tagListe().find(function(t){ return t.name === 'Neem T27'; });
+        tagSpeichern({name:'Raubmilben T27', art:'zeitraum', nichtMit:[neem.id]}); return 1; })()`);
+      const lz = T(`tagListe().find(function(t){ return t.name === 'Langzeit T27'; }).id`);
+      const neem = T(`tagListe().find(function(t){ return t.name === 'Neem T27'; }).id`);
+      const raub = T(`tagListe().find(function(t){ return t.name === 'Raubmilben T27'; }).id`);
+      T(`tagSetzen('A1', '${lz}', {von:'${vor(10)}'})`);
+      const r20 = JSON.parse(T(`JSON.stringify(tagHinweise('A1', '${lz}'))`)).map(x => x.art).join(',');
+      pruef('beta.27 (20): „frühestens wieder nach 30 Tagen“ meldet einen Hinweis', r20 === 'abstand', r20);
+      T(`tagSetzen('A1', '${neem}')`);
+      const r20b = JSON.parse(T(`JSON.stringify(tagHinweise('A1', '${raub}'))`)).map(x => x.art).join(',');
+      pruef('beta.27 (20): „nicht zusammen mit“ meldet einen Hinweis', r20b === 'nichtMit', r20b);
+      await zu(); T(`karteOeffnen('A1')`); await warte(150);
+      kl('#karte-modal [data-tag-auf="A1"]'); await warte(40);
+      kl(`#tag-inhalt [data-tagw="${raub}"]`);
+      kl('#tag-inhalt [data-tagf="setzen"]');
+      const k20 = tagIn().querySelector('[data-tagf="setzen"]').textContent;
+      kl('#tag-inhalt [data-tagf="setzen"]'); await warte(80);
+      pruef('beta.27 (20): Verstoß sperrt nicht: „Trotzdem setzen“ setzt den Tag', k20 === 'Trotzdem setzen'
+        && T(`tagLaufend(${P('A1')}).some(function(x){ return x.t.id === '${raub}'; })`) === true, k20);
+
+      /* (10) Notiz höchstens 200 Zeichen */
+      const lang = 'x'.repeat(250);
+      T(`tagSetzen('A5', 'tv-blatt', {notiz:'${lang}'})`);
+      pruef('beta.27 (10): Notiz wird auf 200 Zeichen gekürzt', T(`tagEintraege('A5')[0].notiz.length`) === 200);
+      await zu(); T(`karteOeffnen('A5')`); await warte(150);
+      kl('#karte-modal [data-tag-auf="A5"]'); await warte(40);
+      kl('#tag-inhalt [data-tagw="tv-quarantaene"]');
+      pruef('beta.27 (10): Notizfeld lässt höchstens 200 Zeichen zu', (d.getElementById('tagf-notiz') || {}).maxLength === 200);
+
+      /* (15) Keine Auswahlliste des Systems */
+      pruef('beta.27 (15): keine Systemliste im Fenster „Tag setzen“', !d.querySelector('#tag-fenster select'));
+      await zu();
+
+      /* (9) Setzen, Datum ändern, Beenden, Entfernen über Chip und Fenster */
+      T(`(function(){ S.tagEin.A5 = []; tagSetzen('A5', 'tv-quarantaene', {von:'${vor(3)}', notiz:'Neuzugang'}); return 1; })()`);
+      T(`karteOeffnen('A5')`); await warte(150);
+      const chip = d.querySelector('#karte-modal .tag-chip[data-tag-e]');
+      pruef('beta.27 (9): Chip zeigt Name und Ende', !!chip && /Quarantäne/.test(chip.textContent) && /bis /.test(chip.textContent), chip && chip.textContent);
+      chip.click(); await warte(40);
+      pruef('beta.27 (9): Chip öffnet den Eintrag mit „Beenden“ und „Entfernen“', !!tagIn().querySelector('[data-tagf="beenden"]') && !!tagIn().querySelector('[data-tagf="entfernen"]'));
+      d.getElementById('tagf-datum').value = vor(1);
+      kl('#tag-inhalt [data-tagf="speichern"]'); await warte(80);
+      const e9 = JSON.parse(T(`JSON.stringify(tagEintraege('A5')[0])`));
+      pruef('beta.27 (9): Datum geändert, Ende wandert mit, Verlaufseintrag', e9.von === vor(1) && e9.bis === T(`tagPlusTage('${vor(1)}', 21)`)
+        && T(`ereignisse('A5').some(function(e){ return /Datum auf/.test(e.text); })`) === true, JSON.stringify(e9));
+      T(`karteOeffnen('A5')`); await warte(150);
+      d.querySelector('#karte-modal .tag-chip[data-tag-e]').click(); await warte(40);
+      kl('#tag-inhalt [data-tagf="beenden"]'); await warte(80);
+      pruef('beta.27 (9): „Beenden“ trägt das Ende ein, der Chip ist weg', !!T(`tagEintraege('A5')[0].ende`) && T(`tagLaufend(${P('A5')}).length`) === 0
+        && T(`ereignisse('A5').some(function(e){ return e.text === 'Quarantäne beendet'; })`) === true);
+      T(`tagSetzen('A5', 'tv-blatt')`);
+      pruef('beta.27 (9): ein einmaliger Tag steht im Verlauf, nicht als Chip', T(`tagLaufend(${P('A5')}).length`) === 0
+        && T(`ereignisse('A5').some(function(e){ return e.typ === 'tag' && /^Neues Blatt/.test(e.text); })`) === true);
+      T(`(function(){ var e = tagEintraege('A5')[0]; e.ende = null; return 1; })()`);
+      T(`karteOeffnen('A5')`); await warte(150);
+      d.querySelector('#karte-modal .tag-chip[data-tag-e]').click(); await warte(40);
+      kl('#tag-inhalt [data-tagf="entfernen"]');
+      const frage9 = tagIn().querySelector('[data-tagf="entfernen"]').textContent;
+      kl('#tag-inhalt [data-tagf="entfernen"]'); await warte(80);
+      pruef('beta.27 (9): „Entfernen“ fragt einmal nach und löscht den Eintrag', frage9 === 'Wirklich entfernen?'
+        && !T(`tagEintraege('A5').some(function(e){ return e.t === 'tv-quarantaene'; })`)
+        && T(`ereignisse('A5').some(function(e){ return e.text === 'Quarantäne entfernt'; })`) === true, frage9);
+      await zu();
+
+      /* (11) Chipleiste: nur getragene Tags, ODER in einer Gruppe, UND zwischen Gruppen */
+      T(`(function(){
+        var g = tagGruppeSpeichern(null, 'Schädlinge T27', '#86599a').gruppe;
+        tagListe().forEach(function(t){ if(t.name === 'Neem T27' || t.name === 'Raubmilben T27') t.gruppe = g.id; });
+        S.tagEin = {};
+        tagSetzen('A1', '${neem}'); tagSetzen('A2', '${raub}'); tagSetzen('A3', '${neem}'); tagSetzen('A3', 'tv-quarantaene');
+        S.tagEin.A3[0].notiz = 'Spinnmilbenbefall unten';
+        filterZuruecksetzen(); $('#q').value = ''; render(); return 1; })()`);
+      const leiste = [...d.querySelectorAll('#tag-leiste [data-ftag]')].map(b => b.dataset.ftag).sort().join(',');
+      pruef('beta.27 (11): Chipleiste zeigt nur die getragenen Tags', leiste === [neem, raub, 'tv-quarantaene'].sort().join(',') && d.getElementById('tag-leiste').hidden === false, leiste);
+      kl(`#tag-leiste [data-ftag="${neem}"]`); kl(`#tag-leiste [data-ftag="${raub}"]`);
+      pruef('beta.27 (11): zwei Tags derselben Gruppe: ODER', ids() === 'A1,A2,A3', ids());
+      kl('#tag-leiste [data-ftag="tv-quarantaene"]');
+      pruef('beta.27 (11): dazu ein Tag einer anderen Gruppe: UND', ids() === 'A3', ids());
+      T(`filterZuruecksetzen(); filterWirk.add('schaedling'); render()`);
+      pruef('beta.27 (11): Filter nach Wirkung „Schädlingsbekämpfung“', ids() === 'A1,A3', ids());
+      T(`filterZuruecksetzen(); filterKnoepfeZeichnen(); render()`);
+      pruef('beta.27 (11): Filterfenster hat die Abschnitte Tags und Wirkung', d.querySelectorAll('#filter-tags [data-ftag]').length === 3 && d.querySelectorAll('#filter-wirk [data-fwirk]').length === 6);
+      pruef('beta.27 (11): Chipleiste hat eine feste Höhe (Stiltext)', /html\[data-design\] \.tag-leiste\{[^}]*height:44px/.test([...d.querySelectorAll('style')].map(x => x.textContent).join('\n')));
+
+      /* (12) Suche findet Tag-Namen und Notizen */
+      const such = q => { T(`$('#q').value = ${JSON.stringify(q)}; render()`); return ids(); };
+      pruef('beta.27 (12): Suche findet den Tag-Namen', such('raubmilben t27') === 'A2', ids());
+      pruef('beta.27 (12): Suche findet die Notiz am Eintrag', such('spinnmilbenbefall') === 'A3', ids());
+      such('');
+
+      /* (13) Umbau: Zustände verworfen, Gelerntes in S.lernen, kein zweiter Umbau */
+      const umbau = JSON.parse(T(`(function(){
+        var merk = JSON.stringify({e:S.ereignisse, g:S.giess, u:S.tagUmbau, l:S.lernen});
+        S.tagUmbau = 0; S.lernen = {};
+        S.zustand = {A1:{code:'wurzelfaeule', seit:'2026-10-01', bis:null, medium:null, lernFaktor:1.3, giessSchub:2}, A2:{code:'neu', seit:'2026-10-01'}};
+        S.ereignisse = {A1:[{id:'u1', datum:'2026-10-01', typ:'blatt', text:''}, {id:'u2', datum:'2026-10-01', typ:'foto', text:''}, {id:'u3', datum:'2026-10-02', typ:'schaedling', text:''}]};
+        S.eigene.find(function(x){ return x.id === 'A1'; }).uebergang = 5;
+        S.giess.winterpause = true;
+        var n1 = tagUmbau();
+        var r = {z: S.zustand === undefined, l: S.lernen.A1, l2: S.lernen.A2 === undefined, ev: S.ereignisse.A1.map(function(e){ return e.typ; }).join(','),
+          ue: 'uebergang' in S.eigene.find(function(x){ return x.id === 'A1'; }), wp: 'winterpause' in S.giess, n1: n1};
+        S.zustand = {A1:{code:'x', lernFaktor:9}};
+        r.n2 = tagUmbau(); r.l3 = S.lernen.A1 ? S.lernen.A1.lernFaktor : null;
+        delete S.zustand;
+        var a = JSON.parse(merk); S.ereignisse = a.e; S.giess = a.g; S.tagUmbau = a.u; S.lernen = a.l;
+        return JSON.stringify(r); })()`));
+      pruef('beta.27 (13): Umbau verwirft die Zustände', umbau.z === true && umbau.l2 === true, JSON.stringify(umbau));
+      pruef('beta.27 (13): das Gelernte liegt danach in S.lernen', !!umbau.l && umbau.l.lernFaktor === 1.3 && umbau.l.giessSchub === 2 && !('code' in umbau.l), JSON.stringify(umbau.l));
+      pruef('beta.27 (13): Einträge der entfernten Knöpfe sind gelöscht, Foto bleibt', umbau.ev === 'foto', umbau.ev);
+      pruef('beta.27 (13): alte Umstellungsfelder und Winterschalter sind weg', umbau.ue === false && umbau.wp === false);
+      pruef('beta.27 (13): kein zweiter Umbau', umbau.n2 === 0 && umbau.l3 === 1.3, JSON.stringify(umbau));
+      const imp = T(`(function(){
+        var merk = JSON.stringify(S);
+        S = Object.assign(LEERSTAND(), {eigene:[], zustand:{Q1:{code:'neu', lernFaktor:0.8}}});
+        grundwerteErgaenzen();
+        var r = (S.zustand === undefined) + '|' + (S.lernen.Q1 && S.lernen.Q1.lernFaktor) + '|' + tagListe().length;
+        S = JSON.parse(merk); return r; })()`);
+      pruef('beta.27 (13): auch beim Einlesen einer alten Sicherung', imp === 'true|0.8|8', imp);
+
+      /* (14) Doktor und Ableger setzen keinen Tag; Befund kurz im Verlauf */
+      T(`S.tagEin.A4 = []; S.ereignisse.A4 = []`);
+      T(`dokBefundVerlauf('A4', '${'Wurzelfäule an der Basis. '.repeat(15)}')`);
+      const bef = T(`ereignisse('A4').filter(function(e){ return e.typ === 'notiz'; }).map(function(e){ return e.text; })[0] || ''`);
+      pruef('beta.27 (14): Befund als Kurznotiz im Verlauf, höchstens 200 Zeichen', /^Befund: Wurzelfäule/.test(bef) && bef.length <= 200, String(bef.length));
+      pruef('beta.27 (14): derselbe Befund steht nicht doppelt', T(`dokBefundVerlauf('A4', '${'Wurzelfäule an der Basis. '.repeat(15)}')`) === false);
+      pruef('beta.27 (14): der Doktor setzt keinen Tag', T(`tagEintraege('A4').length`) === 0);
+      const abl = T(`(function(){ var vor = Object.keys(S.tagEin || {}).length; var k = ablegerAnlegen('A4', 'kopfsteckling');
+        var neu = k && (k.id || k); return (Object.keys(S.tagEin || {}).length === vor) + '|' + (neu ? tagEintraege(neu).length : 'x'); })()`);
+      pruef('beta.27 (14): der Ableger setzt keinen Tag', /^true\|(0|x)$/.test(abl), abl);
+      pruef('beta.27 (14): der Quelltext kennt keinen Zustand-Setzweg mehr',
+        !/zustandSetzen|zustandVon|ZUSTAENDE|data-gm-z=|dok-zustand/.test(fs.readFileSync('index.html', 'utf8')));
+
+      /* (18) Winterruhe ist fest: nicht löschbar, nicht umbenennbar, Prozent je Pflanze */
+      pruef('beta.27 (18): Winterruhe lässt sich nicht löschen', T(`tagLoeschen('tv-winterruhe')`) === false && T(`!!tagDef('tv-winterruhe')`) === true);
+      T(`tagSpeichern({id:'tv-winterruhe', name:'Anders', giess:'kuerzer', art:'einmalig', dauer:90, pz:40})`);
+      const wr = JSON.parse(T(`JSON.stringify(tagDef('tv-winterruhe'))`));
+      pruef('beta.27 (18): Name, Art und Wirkung bleiben, Dauer und Prozent sind änderbar',
+        wr.name === 'Winterruhe' && wr.art === 'zeitraum' && wr.giess === 'laenger' && wr.dauer === 90 && wr.pz === 40, JSON.stringify(wr));
+      T(`(function(){ S.tagEin.A2 = []; tagSetzen('A2', 'tv-winterruhe', {pz:100}); return 1; })()`);
+      pruef('beta.27 (18): Prozent je Pflanze wirkt aufs Intervall (14 → 28)', T(`intervallVon(${P('A2')})`) === 28);
+      T(`tagSetzen('A5', 'tv-winterruhe')`);
+      pruef('beta.27 (18): Winterruhe einer Karnivore: Anstau ruht', T(`anstauLage(${P('A5')})`) === 'ruhe');
+      T(`sektionOeffnen('tags')`); await warte(60);
+      pruef('beta.27 (8 Einstellungen): „Mehr → Tags“ listet alle Tags', d.querySelectorAll('#tv-inhalt [data-tv-edit]').length === T(`tagListe().length`));
+      kl('#tv-inhalt [data-tv-edit="tv-winterruhe"]');
+      pruef('beta.27 (18): im Formular: Name gesperrt, kein „Tag löschen“', d.getElementById('tv-name').disabled === true && !d.querySelector('#tv-inhalt [data-tv="loeschen"]'));
+      pruef('beta.27 (15): keine Systemliste unter „Mehr → Tags“ (Formular)', !d.querySelector('#tv-inhalt select'));
+      kl('#tv-inhalt [data-tv="zurueck"]');
+      kl('#tv-inhalt [data-tv="neu"]');
+      d.getElementById('tv-name').value = 'Neu T27';
+      kl('#tv-inhalt [data-tv-giess="kuerzer"]');
+      kl('#tv-inhalt [data-tv="speichern"]');
+      pruef('beta.27 (8): neuer Tag mit Gießwirkung gespeichert', T(`(function(){ var t = tagListe().find(function(x){ return x.name === 'Neu T27'; }); return !!t && t.giess === 'kuerzer' && t.pz === 25; })()`) === true);
+      kl('#tv-inhalt [data-tv="gneu"]');
+      d.getElementById('tv-gname').value = 'Pflege T27';
+      kl('#tv-inhalt [data-tv-farbe="#c05f86"]');
+      kl('#tv-inhalt [data-tv="gspeichern"]');
+      pruef('beta.27 (8): eigene Gruppe mit Farbe angelegt', T(`tagGruppen().some(function(g){ return g.name === 'Pflege T27' && g.farbe === '#c05f86'; })`) === true);
+      pruef('beta.27 (15): keine Systemliste unter „Mehr → Tags“ (Liste)', !d.querySelector('#tv-inhalt select'));
+      await zu();
+
+      /* (19) keine Ereignisknöpfe, keine Zustandsfrage, kein Schalter */
+      const st = T(`statusHTML(${P('A1')})`);
+      pruef('beta.27 (19): Verlauf ohne Ereignisknöpfe, nur „Nur angesehen“',
+        (st.match(/data-do="ereignis"/g) || []).length === 1 && /data-typ="gesehen"/.test(st), String((st.match(/data-do="ereignis"/g) || []).length));
+      pruef('beta.27 (19): kein Schalter „Zustandsfrage“, keine Nachfrage auf Heute',
+        !d.getElementById('sch-gmzustand') && T(`SCHALTER.some(function(x){ return x.k === 'gmzustand'; })`) === false && !d.getElementById('stichtage'));
+    } catch(e){
+      pruef('beta.27: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        filterZuruecksetzen(); $('#q').value = ''; gmListe = []; HEUTE = new Date(${heute27});
+        S.eigene = a.eigene; S.water = a.water; S.lernen = a.lernen; S.tagEin = a.tagEin; S.tags = a.tags; S.tagGruppen = a.tagGruppen;
+        S.tagVorgabenAus = a.tagVorgabenAus; S.ereignisse = a.ereignisse; S.giess = a.giess; S.raeume = a.raeume;
+        gruppierung = a.gruppierung; sortierung = a.sortierung;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt27)})`);
     }
   }
 

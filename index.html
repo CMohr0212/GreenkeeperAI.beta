@@ -369,8 +369,7 @@ html[data-design="botanisch"] body::before{
    #CDD9C5 zu #F1F4ED sind knapp anderthalb Stufen. */
 html[data-design="botanisch"] .haupttat,
 html[data-design="botanisch"] .nt,
-html[data-design="botanisch"] .wt-leiste,
-html[data-design="botanisch"] .stich{
+html[data-design="botanisch"] .wt-leiste{
   background:var(--fl-karte);
   color:var(--schrift);
   border:1px solid var(--linie);
@@ -383,7 +382,6 @@ html[data-design="botanisch"] .nt{padding:14px 15px}
 html[data-design="botanisch"] .nt svg{stroke:var(--schrift-2)}
 html[data-design="botanisch"] .haupttat.leer{
   background:var(--fl-tief);color:var(--schrift-2)}
-html[data-design="botanisch"] .stich{padding:14px 16px;border-radius:var(--r-mittel)}
 
 /* ── Trefferflaechen ──────────────────────────────────────────
    --tap ist die Mindestgroesse. In Botanisch und Terrarium steht
@@ -758,23 +756,6 @@ html[data-design="klartext"] .abstammung{border:2px solid var(--linie);
 .fhint{display:block;font-size:var(--t-s);color:var(--ink-2);line-height:1.5;margin-top:5px}
 .linkbtn{background:none;border:0;padding:0;font:inherit;font-size:inherit;color:var(--water);text-decoration:underline;cursor:pointer}
 
-.zbadge{display:inline-flex;align-items:center;gap:4px;font-size:var(--t-xs);letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--r-klein);padding:2px 6px;margin-top:6px;color:var(--ink-2);max-width:100%;overflow-wrap:anywhere}
-.zbadge svg{width:12px;height:12px;flex:0 0 auto}
-.zbadge.warn{color:var(--terra);border-color:var(--terra)}
-.zbadge.good{color:var(--moss);border-color:var(--moss)}
-.zustand{border:1px solid var(--line);border-radius:var(--r-klein);padding:12px;margin:8px 0 4px;background:var(--sand)}
-.zsel{display:block}
-.zsel select{width:100%;margin-top:4px}
-.ztext{font-size:var(--t-m);line-height:1.6;margin:9px 0 0;color:var(--ink-2)}
-.zstopp{font-size:var(--t-m);line-height:1.55;margin:9px 0 0;color:var(--terra)}
-.zvor,.zbis{font-size:var(--t-s);margin:8px 0 0;color:var(--ink-2)}
-.stich{border:1px solid var(--terra);border-radius:var(--r-mittel);padding:13px;margin-top:12px;background:var(--paper)}
-.stich h3{margin:0 0 9px;font-size:var(--t-xs);letter-spacing:.09em;text-transform:uppercase;color:var(--terra)}
-.stich-row{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
-.stich-row:first-of-type{border-top:0;padding-top:0;margin-top:0}
-.stich-q{margin:0 0 8px;font-size:var(--t-md);line-height:1.5;overflow-wrap:anywhere}
-.stich-q span{font-size:var(--t-m);color:var(--ink-2)}
-.stich-btns{display:flex;flex-wrap:wrap;gap:8px}
 .modal[hidden]{display:none}
 /* ── Die Schichten der App ────────────────────────────────────
    Vollbildbühne 80 · Lichtkasten 100 · Sektionsfenster 120 ·
@@ -2667,7 +2648,7 @@ body.einfach #zonen-sec{display:none!important}
   flex:1 1 auto;text-align:center}
 /* Offene Abschnitte der Karte: Überschrift und Inhalt, ohne Aufklapper */
 .kblock{margin:0 0 16px}
-.kblock+.kblock,.zustand+.kblock,.lagebox+.kblock{border-top:1px solid var(--line);padding-top:14px}
+.kblock+.kblock,.lagebox+.kblock{border-top:1px solid var(--line);padding-top:14px}
 .kblock-h{display:flex;align-items:center;gap:8px;margin:0 0 8px;
   font-family:var(--f-display);font-size:var(--t-md);font-weight:600}
 .kblock-t{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -2739,7 +2720,6 @@ body.einfach #zonen-sec{display:none!important}
 .sam-zeilen .card:not(.open) .thumb,
 .sam-zeilen .card:not(.open) .icons,
 .sam-zeilen .card:not(.open) .bar,
-.sam-zeilen .card:not(.open) .zbadge,
 .sam-zeilen .card:not(.open) .warnbox,
 .sam-zeilen .card:not(.open) .pflegehinweis{display:none}
 .sam-zeilen .card:not(.open) .card-body{padding:11px 13px}
@@ -2771,7 +2751,6 @@ body.einfach #zonen-sec{display:none!important}
 .sam-raster .card:not(.open) .ico svg{width:13px;height:13px;flex:0 0 13px}
 .sam-raster .card:not(.open) .card-bot,
 .sam-raster .card:not(.open) .card-lage,
-.sam-raster .card:not(.open) .zbadge,
 .sam-raster .card:not(.open) .warnbox,
 .sam-raster .card:not(.open) .pflegehinweis,
 .sam-raster .card:not(.open) .bar{display:none}
@@ -2937,10 +2916,6 @@ html[data-design="terrarium"] .sam-raster .card-body{
 }
 html[data-design="terrarium"] .sam-raster .card .bar{box-shadow:var(--glanz)}
 
-.quar-anbieten{border:1px solid var(--line);border-radius:var(--r-mittel);padding:12px;background:var(--sand)}
-.quar-anbieten p{margin:0 0 10px;font-size:var(--t-s);line-height:1.55;color:var(--peat)}
-.zmed{margin:10px 0}
-.zmed .lab{display:block;margin-bottom:6px}
 .aqua{border:1px solid var(--line);border-radius:var(--r-mittel);padding:16px;background:var(--sand)}
 .aqua h3{margin:0 0 10px}
 .aqua-liste{margin:0 0 12px;padding-left:1.15em}
@@ -3610,10 +3585,9 @@ html[data-design="botanisch"] #karte-rumpf .ktab[aria-selected="true"]{backgroun
   border-bottom:2px solid var(--fl-akzent)}
 
 /* Blöcke: eine weiche Kachel je Abschnitt */
-html[data-design="botanisch"] #karte-rumpf .kblock,
-html[data-design="botanisch"] #karte-rumpf .ktab-pane>.zustand{margin:0 0 12px;padding:16px 16px 17px;border:0;border-radius:var(--r-gross);
+html[data-design="botanisch"] #karte-rumpf .kblock{margin:0 0 12px;padding:16px 16px 17px;border:0;border-radius:var(--r-gross);
   background:var(--fl-karte);box-shadow:var(--sch-karte)}
-html[data-design="botanisch"] #karte-rumpf .kblock+.kblock,html[data-design="botanisch"] #karte-rumpf .zustand+.kblock,html[data-design="botanisch"] #karte-rumpf .lagebox+.kblock{border-top:0;padding-top:16px}
+html[data-design="botanisch"] #karte-rumpf .kblock+.kblock,html[data-design="botanisch"] #karte-rumpf .lagebox+.kblock{border-top:0;padding-top:16px}
 html[data-design="botanisch"] #karte-rumpf .kblock-h{align-items:baseline;gap:10px;margin:0 0 10px;font-family:var(--f-display);
   font-weight:500;font-size:var(--t-xl);line-height:1.2}
 html[data-design="botanisch"] #karte-rumpf .kblock-h .acc-z{border:0;padding:0;font-family:var(--f-body);font-size:var(--t-xs);
@@ -3625,15 +3599,6 @@ html[data-design="botanisch"] #karte-rumpf dl.spec dt,html[data-design="botanisc
 html[data-design="botanisch"] #karte-rumpf dl.spec dt{padding-right:12px;font-family:var(--f-body);letter-spacing:0;text-transform:none;color:var(--schrift-3)}
 html[data-design="botanisch"] #karte-rumpf dl.spec dd{margin:0}
 html[data-design="botanisch"] #karte-rumpf dl.spec dt:first-of-type,html[data-design="botanisch"] #karte-rumpf dl.spec dt:first-of-type+dd{border-top:0;padding-top:2px}
-html[data-design="botanisch"] #karte-rumpf .zustand .zsel{display:flex;align-items:center;gap:12px}
-html[data-design="botanisch"] #karte-rumpf .zustand .zsel+*{margin-top:12px}
-html[data-design="botanisch"] #karte-rumpf .zustand .ztext,html[data-design="botanisch"] #karte-rumpf .zustand .zstopp{font-size:var(--t-m);line-height:1.5}
-html[data-design="botanisch"] #karte-rumpf .zustand .zsel .lab{flex:1;font-family:var(--f-display);font-weight:500;font-size:var(--t-xl);
-  letter-spacing:0;text-transform:none;color:var(--schrift)}
-/* Der Pfeil bleibt der des Systems: ein eigener waere ein zweites
-   gekacheltes Bild im Stylesheet, und genau das soll hier keins mehr
-   geben. Geaendert werden nur Flaeche, Radius und Hoehe. */
-html[data-design="botanisch"] #karte-rumpf .zustand .zsel select,
 html[data-design="botanisch"] #karte-rumpf .lagebox select{flex:0 1 58%;min-width:0;max-width:58%;width:auto;min-height:var(--tap);margin:0}
 html[data-design="botanisch"] #karte-rumpf .lagebox{margin:0}
 html[data-design="botanisch"] #karte-rumpf .lagebox select{width:100%;max-width:none}
@@ -3783,10 +3748,9 @@ html[data-design] :is(input:not([type]), input[type=text], input[type=number], i
 html[data-design] select:focus, html[data-design] textarea:focus{border-color:var(--fl-akzent);background-color:var(--fl-erhoben)}
 /* Felder auf getönten Flächen (Formulare, Zustand, Bibliothek, Bearbeiten)
    stehen hell, sonst verschwinden sie in der Fläche */
-:is(.formwrap, .zustand, .bibbox, .bearb, .quar-anbieten, .aqua, .dok-rueck)
+:is(.formwrap, .bibbox, .bearb, .aqua, .dok-rueck)
   :is(input:not([type]), input[type=text], input[type=number], input[type=search], input[type=date],
   input[type=time], input[type=password], input[type=email], input[type=url], input[type=tel], select, textarea){background-color:var(--fl-karte)}
-html[data-design="botanisch"] #karte-rumpf .ktab-pane>.zustand :is(select, input, textarea){background-color:var(--fl-tief)}
 /* Beschriftung über einem Feld (Vorschau .f-lab) */
 span.lab{font-family:var(--f-body);font-size:var(--t-s);font-weight:600;letter-spacing:0;
   text-transform:none;color:var(--schrift-2)}
@@ -3794,7 +3758,6 @@ span.lab{font-family:var(--f-body);font-size:var(--t-s);font-weight:600;letter-s
 :not(.fgrid) > label.fspan.zeile > .lab{margin:0 2px 6px}
 :not(.fgrid) > label.fspan.check{min-height:var(--feld-h);margin:0 0 4px}
 /* Sonderformen */
-.zustand .zsel + *{margin-top:12px}
 .sb-suche input{padding-left:38px}
 .raummass .rm-f input{padding:0 10px}
 
@@ -4488,7 +4451,7 @@ html[data-design] #out.sam-zeilen .card:not(.open) .card-btn:not(:has(.thumb))::
   flex:0 0 56px;width:56px;height:56px;margin:0;border-radius:var(--r-klein);background:var(--fl-bildleer)}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-body{flex:1 1 auto;min-width:0;padding:0;background:none;
   display:flex;flex-direction:column;justify-content:center;gap:3px}
-html[data-design] #out.sam-zeilen .card:not(.open) :is(.card-bot,.card-lage,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-zeilen .card:not(.open) :is(.card-bot,.card-lage,.icons,.bar,.warnbox,.pflegehinweis){display:none}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-name{margin:0;font-size:var(--t-l);line-height:1.25;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-stand{display:flex;margin:0;font-size:var(--t-s)}
@@ -4564,7 +4527,7 @@ html[data-design]:not([data-design="terrarium"]) #out.sam-raster:is([data-spalte
   content:'';display:block;width:100%;background:var(--fl-bildleer)}
 /* Inhalt ab drei Spalten: Bild, Name, Fälligkeit (Punkt 5, F220) */
 html[data-design] #out .card-kurz{display:none}
-html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.zbadge,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.bar,.warnbox,.pflegehinweis){display:none}
 html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{
   display:block;position:static;width:auto;height:auto;margin:0;padding:7px 8px 9px;clip:auto;overflow:hidden;text-align:left}
 html[data-design] #out.sam-raster:is([data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{padding:5px 6px 6px}
@@ -4623,6 +4586,101 @@ html[data-design] #filter-modal > .as-fuss > button{min-width:max-content}
 html[data-design] section.controls > .such-zeile{display:flex;gap:8px;align-items:stretch}
 html[data-design] section.controls > .such-zeile > #q{flex:1 1 auto;min-width:0;width:auto}
 html[data-design] section.controls > .such-zeile > .ctrl-auf{flex:0 0 auto;display:flex;align-items:center}
+/* ══ Plan G2a+c (4.0-beta.27): Tags in Karte, Fenster, Einstellungen, Filter ══
+   Farben: jede Wirkung und jede eigene Gruppe bringt ihre Farbe als
+   --tagf mit; der Punkt trägt sie, der Chip nur einen Rand in ihr. */
+html[data-design] .tag-punkt{display:inline-block;flex:0 0 auto;width:12px;height:12px;border-radius:50%;
+  box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+html[data-design="klartext"] .tag-punkt{width:14px;height:14px;box-shadow:0 0 0 2px var(--schrift)}
+/* Karte */
+html[data-design] .tagk{margin:0 0 12px;padding:12px 16px;border:1px solid var(--linie);border-radius:var(--r-mittel);
+  background:var(--fl-karte)}
+html[data-design="botanisch"] .tagk{border:0;border-radius:var(--r-gross);box-shadow:var(--sch-karte)}
+html[data-design="klartext"] .tagk{border:2px solid var(--schrift)}
+html[data-design] .tagk-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px}
+html[data-design] .tagk-kopf > .lab{margin:0}
+html[data-design] .tagk .tag-plus{flex:0 0 auto;min-height:40px;padding:0 14px;border:1px solid var(--linie);
+  border-radius:999px;background:var(--fl-tief);color:var(--schrift);font-family:var(--f-body);font-size:var(--t-s);
+  font-weight:600;letter-spacing:0;text-transform:none;cursor:pointer}
+html[data-design="klartext"] .tagk .tag-plus{min-height:var(--tap);border:2px solid var(--schrift);font-size:var(--t-m)}
+html[data-design] .tag-chips{display:flex;flex-wrap:wrap;gap:8px}
+html[data-design] .tag-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:36px;padding:4px 12px 4px 10px;
+  border:1.5px solid var(--tagf, var(--linie));border-radius:999px;background:var(--fl-karte);color:var(--schrift);
+  font-family:var(--f-body);font-size:var(--t-s);font-weight:500;letter-spacing:0;text-transform:none;line-height:1.2;
+  cursor:pointer;text-align:left}
+html[data-design] .tag-chip > span:not(.tag-punkt){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-design] .tag-chip small{font-size:var(--t-xs);color:var(--schrift-2);white-space:nowrap}
+html[data-design="klartext"] .tag-chip{min-height:var(--tap);border-width:2px;font-size:var(--t-m)}
+html[data-design] .tag-leer{margin:0}
+html[data-design] .tag-wirk{margin:10px 0 0;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .tag-hinweis{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;
+  padding:8px 10px 8px 12px;border-radius:var(--r-mittel);background:var(--ton-alarm, rgba(166,85,58,.07));
+  font-size:var(--t-s);color:var(--schrift)}
+html[data-design] .tag-hinweis > button{flex:0 0 auto;min-height:36px;padding:0 12px;border:1px solid var(--linie);
+  border-radius:var(--r-mittel);background:var(--fl-karte);color:var(--schrift);font-family:var(--f-body);
+  font-size:var(--t-s);font-weight:600;letter-spacing:0;text-transform:none;cursor:pointer}
+html[data-design="klartext"] .tag-hinweis > button{min-height:var(--tap);border:2px solid var(--schrift)}
+/* Gießliste und Gießkarte: Notiz „… vorbei“ */
+html[data-design] .gm-ue-pfl-t > i.gm-tagnotiz{font-style:normal;font-weight:600;color:var(--fl-akzent)}
+html[data-design] #gm-inhalt .gm-hinweis.gm-tagnotiz{font-weight:600}
+/* Fenster „Tag setzen“ (#tag-fenster, Kind von <body>) */
+html[data-design] #tag-fenster .tag-box{position:relative;display:flex;flex-direction:column;max-height:calc(100dvh - 44px);
+  padding:20px 0 12px;text-align:left}
+html[data-design] #tag-fenster h3{margin:0 64px 8px 18px;font-size:1.2rem}
+html[data-design] #tag-zu{position:absolute;top:10px;right:10px;width:var(--tap);height:var(--tap);border-radius:50%;
+  border:1px solid var(--linie);background:var(--fl-karte);color:var(--schrift);font-size:1.35rem;line-height:1;cursor:pointer}
+html[data-design] #tag-fenster .tag-inhalt{overflow-y:auto;padding:0 18px 4px}
+html[data-design] #tag-fenster .tag-inhalt > .ein-abschnitt{margin:14px 0 6px}
+html[data-design] #tag-fenster .tag-wahl{border:0;border-radius:0;background:none}
+html[data-design] #tag-fenster .tag-wahl > button .wl-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+html[data-design] #tag-fenster .tag-wahl > button .wl-txt i{font-style:normal;font-size:var(--t-xs);color:var(--schrift-2)}
+html[data-design] .tag-unter{margin:0 0 4px;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .tag-gewaehlt{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
+html[data-design] .tag-gewaehlt > span:not(.tag-punkt){display:flex;flex-direction:column;gap:2px}
+html[data-design] .tag-gewaehlt i{font-style:normal;font-size:var(--t-xs);color:var(--schrift-2)}
+html[data-design] .tag-datum{margin-top:6px}
+html[data-design] #tag-fenster .tag-datumfeld{width:100%;margin:0 0 12px}
+html[data-design] #tag-fenster label.fspan{display:flex;flex-direction:column;gap:6px;margin:0 0 4px}
+html[data-design] #tag-fenster label.fspan.zeile{flex-direction:row;align-items:center;justify-content:space-between}
+html[data-design] #tag-fenster label.fspan.zeile input{flex:0 0 110px;width:110px}
+html[data-design] #tag-fenster textarea{width:100%;min-height:72px;resize:vertical}
+html[data-design] .tag-zahl{margin:0 0 10px;text-align:right}
+html[data-design] .tag-vorschau{margin:0 0 12px;font-size:var(--t-s);font-weight:600;color:var(--fl-akzent)}
+html[data-design] .tag-warn{margin:4px 0 10px;padding:10px 12px;border-radius:var(--r-mittel);background:var(--ton-alarm, rgba(166,85,58,.07))}
+html[data-design] .tag-warn p{margin:0;font-size:var(--t-s);line-height:1.45}
+html[data-design] .tag-warn p + p{margin-top:6px}
+html[data-design] .tag-fuss{margin-top:10px}
+html[data-design] .tag-weg{margin-top:14px}
+html[data-design] .tag-zurueck{margin:0 0 4px}
+/* Einstellungen → Tags */
+html[data-design] .tv-liste{padding:0}
+html[data-design] .tv-liste > .tv-zeile{display:flex;align-items:center;gap:12px;width:100%;min-height:var(--feld-h);margin:0;
+  padding:10px 16px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--schrift);text-align:left;
+  font-family:var(--f-body);font-size:var(--t-m);font-weight:400;letter-spacing:0;text-transform:none;cursor:pointer}
+html[data-design] .tv-liste > .tv-zeile + .tv-zeile{border-top:1px solid var(--linie)}
+html[data-design="klartext"] .tv-liste > .tv-zeile + .tv-zeile{border-top:2px solid var(--schrift)}
+html[data-design] .tv-zeile .wl-txt{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;min-width:0}
+html[data-design] .tv-zeile .wl-txt i{font-style:normal;font-size:var(--t-xs);color:var(--schrift-2)}
+html[data-design] .tv-farben{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+html[data-design] .tv-farbe{width:40px;height:40px;padding:0;border:2px solid transparent;border-radius:50%;cursor:pointer;
+  box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+html[data-design] .tv-farbe[aria-pressed="true"]{border-color:var(--schrift);box-shadow:0 0 0 3px var(--fl-karte) inset}
+html[data-design] .tv-fehler{margin:8px 0;color:var(--alarm, #a6553a);font-weight:600}
+html[data-design] #tv-inhalt .as-knopf[disabled]{opacity:.5;cursor:default}
+html[data-design] #tv-inhalt label.fspan{display:flex;flex-direction:column;gap:6px}
+html[data-design] #tv-inhalt label.fspan.zeile{flex-direction:row;align-items:center;justify-content:space-between}
+html[data-design] #tv-inhalt label.fspan.zeile input{flex:0 0 110px;width:110px}
+/* Chipleiste unter Suche und „Filter“: feste Höhe, waagerecht wischbar */
+html[data-design] .tag-leiste{display:flex;flex-wrap:nowrap;gap:8px;height:44px;margin:8px 0 0;padding:0 0 4px;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+html[data-design] .tag-leiste[hidden]{display:none}
+html[data-design] .tag-leiste::-webkit-scrollbar{display:none}
+html[data-design] .tag-leiste > .tag-fchip{flex:0 0 auto;height:40px;min-height:40px}
+html[data-design] .tag-fchip[aria-pressed="true"]{background:var(--tagf);color:#fff;border-color:var(--tagf)}
+html[data-design] .tag-fchip[aria-pressed="true"] .tag-punkt{box-shadow:0 0 0 2px #fff}
+html[data-design="klartext"] .tag-leiste{height:var(--tap)}
+html[data-design="klartext"] .tag-leiste > .tag-fchip{height:calc(var(--tap) - 4px)}
+html[data-design] #filter-tags .tag-fgruppe{margin:8px 0 4px;font-size:var(--t-xs);color:var(--schrift-2)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -5925,237 +5983,6 @@ const MERKMAL_TEXT = {
 
 const BIB_FELDER = ['bot','de','en','fam','klasse','licht','giftig','duenger','frost','typ','spez','schaedlingHinweis'];
 
-/* ── Zustände, die für jede Pflanze gelten ────────────────────
-   f      = Faktor auf das Gießintervall (größer = seltener gießen)
-   tage   = Vorschlag, wie lange der Zustand läuft (0 = ohne Stichtag)
-   stopp  = Tage, in denen gar nicht gegossen wird
-   frage  = was die App am Stichtag wissen will
-*/
-const ZUSTAENDE = {
-  gesund: {name:'Gesund', kurz:'läuft normal', f:1, tage:0, ton:'ok',
-    text:'Nichts Auffälliges. Es gilt die normale Empfehlung für die Art.', tasks:[]},
-
-  neu: {name:'Frisch gekauft', kurz:'Eingewöhnung', f:1.1, tage:21, ton:'info',
-    text:'Neue Pflanzen kommen aus dem Gewächshaus und stehen unter Stress. Drei Wochen nicht düngen, nicht umtopfen, nicht umstellen. Erst beobachten.',
-    frage:'Hat sie sich eingelebt — neue Blätter, keine Blattverluste mehr?',
-    tasks:['Auf Schädlinge kontrollieren, besonders Blattunterseiten','Nicht düngen, nicht umtopfen in dieser Zeit']},
-
-  frisch: {name:'Frisch umgetopft', kurz:'Wurzeln wachsen an', f:1.15, tage:28, ton:'info',
-    text:'Nach dem Umtopfen sind die Wurzeln verletzt und nehmen weniger Wasser auf. Frisches Substrat hält außerdem länger feucht. Also weiter gießen, nur eine Spur zurückhaltender — und sechs Wochen keinen Dünger, der ist im neuen Substrat ohnehin drin.',
-    frage:'Wächst sie wieder — neuer Trieb oder neues Blatt sichtbar?',
-    tasks:['Sechs Wochen nicht düngen','Weiter gießen, nur etwas zurückhaltender — normal wieder, wenn neuer Zuwachs kommt']},
-
-  aquakultur: {name:'Umstellung Wasser → Erde', kurz:'Wasserwurzeln bauen um', f:0.55, tage:42, ton:'info',
-    text:'Wasserwurzeln sind weich und können in Erde kaum Wasser aufnehmen. Die Pflanze muss erst Erdwurzeln bilden, das dauert vier bis sechs Wochen. Solange durchgehend leicht feucht halten, niemals durchtrocknen lassen, und nicht düngen.',
-    frage:'Steht sie stabil und bildet neue Blätter? Dann kann sie auf normales Gießen umsteigen.',
-    tasks:['Substrat gleichmäßig leicht feucht halten, nie ganz austrocknen','Kein Dünger in der Umstellungszeit','Hohe Luftfeuchte hilft: heller Platz ohne pralle Sonne']},
-
-  steckling: {name:'Steckling, bewurzelt gerade', kurz:'noch keine Wurzeln', f:0.5, tage:35, ton:'info',
-    text:'Ohne Wurzeln kann der Steckling kein Wasser aufnehmen und verliert es nur über die Blätter. Deshalb gleichmäßig feucht, hohe Luftfeuchte, kein direktes Sonnenlicht und auf keinen Fall Dünger.',
-    frage:'Hat er Wurzeln gebildet — Widerstand beim leichten Ziehen oder neuer Trieb?',
-    danach:'frisch',
-    medien:{
-      wasser:   {name:'Im Wasserglas',
-        text:'Wasser alle drei bis vier Tage wechseln, Gefäß dabei ausspülen. Nur der Schnitt steht im Wasser, kein Blatt. Wasserwurzeln sind weich — je länger sie werden, desto schwerer der spätere Umzug in Erde. Bei zwei bis drei Zentimetern umsetzen.',
-        tasks:['Wasser alle drei bis vier Tage wechseln','Blätter dürfen das Wasser nicht berühren','Bei 2–3 cm Wurzellänge in Substrat umsetzen']},
-      substrat: {name:'Im Substrat',
-        text:'Gleichmäßig feucht, aber nicht nass. Eine durchsichtige Haube oder ein Beutel hält die Luftfeuchte oben; täglich kurz lüften, sonst schimmelt es. Zugkontrolle erst nach drei Wochen — vorher reißt man die ersten Wurzeln ab.',
-        tasks:['Gleichmäßig feucht halten, Staunässe vermeiden','Haube täglich kurz lüften','Erst nach drei Wochen vorsichtig am Steckling ziehen']},
-      moos:     {name:'In Sphagnum',
-        text:'Das Moos ausgedrückt feucht, nicht tropfnass. Es speichert viel und bleibt trotzdem luftig, deshalb wurzeln darin auch heikle Arten. Sobald Wurzeln zwei bis drei Zentimeter haben, umsetzen — im Moos allein bekommt die Pflanze auf Dauer zu wenig Nährstoffe.',
-        tasks:['Moos ausgedrückt feucht halten, nie tropfnass','Hell, aber ohne direkte Sonne','Bei 2–3 cm Wurzellänge in Substrat umsetzen']}
-    },
-    tasks:['Kein Dünger, bis Wurzeln da sind','Warm und hell, aber ohne direkte Sonne']},
-
-  quarantaene: {name:'Quarantäne', kurz:'getrennt von den anderen', f:1, tage:21, ton:'warn', trennen:true,
-    text:'Neuzugänge und befallene Pflanzen gehören für drei Wochen getrennt. Das ist die wirksamste Einzelmaßnahme gegen Schädlinge in einer Sammlung: die meisten Arten brauchen genau diese Zeit für einen vollständigen Generationswechsel, und was übersehen wurde, zeigt sich in dieser Spanne. Eigener Raum oder wenigstens ein Platz ohne Blattkontakt zu anderen. Gegossen wird normal — Quarantäne ist keine Krankheit.',
-    frage:'Drei Wochen um. Auf Blattunterseiten, Blattachseln und Erdoberfläche nichts gefunden?',
-    tasks:['Getrennt aufstellen, kein Blattkontakt zu anderen Pflanzen',
-           'Alle drei bis vier Tage Blattunterseiten und Blattachseln mit einer Lupe ansehen',
-           'Werkzeug und Hände nach dem Anfassen reinigen, bevor andere Pflanzen drankommen',
-           'Nicht vermehren, solange die Quarantäne läuft']},
-
-  wurzelfaeule: {name:'Wurzelfäule / Staunässe', kurz:'zu viel Wasser gehabt', f:2.6, tage:42, stopp:14, ton:'warn',
-    text:'Faule Wurzeln nehmen kein Wasser mehr auf. Die Pflanze lässt die Blätter hängen und wirkt durstig — genau deshalb wird oft nachgegossen und alles wird schlimmer. Richtig ist das Gegenteil: austopfen, faule Wurzeln abschneiden, in luftiges, eher magere Substrat setzen, Drainageloch prüfen und erst einmal gar nicht gießen.',
-    frage:'Ist sie über den Berg — fester Stand, keine neuen gelben Blätter, vielleicht neuer Zuwachs?',
-    tasks:['Austopfen, Wurzeln prüfen: braune, weiche, riechende Teile abschneiden','Abzugsloch prüfen, notfalls bohren','Luftiges Substrat mit grobem Anteil, kein feiner Sand','Untersetzer immer leer lassen','Erste zwei Wochen gar nicht gießen','Nicht düngen, solange keine gesunden Wurzeln da sind']},
-
-  trocken: {name:'Ausgetrocknet', kurz:'zu lange kein Wasser', f:0.7, tage:21, ton:'warn',
-    text:'Stark ausgetrocknete Erde nimmt Wasser oben kaum noch an, es läuft am Ballen vorbei. Deshalb tauchen: Topf in einen Eimer stellen, bis keine Blasen mehr aufsteigen, dann gut abtropfen lassen. Danach eine Weile aufmerksamer gießen.',
-    frage:'Ist der Ballen wieder gleichmäßig durchfeuchtet und steht die Pflanze aufrecht?',
-    tasks:['Einmal gründlich tauchen statt oberflächlich gießen','Vertrocknete Blätter erst entfernen, wenn klar ist, was nachkommt']},
-
-  regeneration: {name:'Erholung', kurz:'baut sich wieder auf', f:1.35, tage:35, ton:'info',
-    text:'Nach Rückschnitt, Wurzelschaden oder überstandener Krankheit hat die Pflanze weniger Blattmasse und weniger Wurzeln. Sie braucht deshalb weniger Wasser als sonst, aber Zeit und Licht. Dünger erst, wenn sichtbar neuer Zuwachs kommt.',
-    frage:'Ist neuer Zuwachs da und sieht sie wieder stabil aus?',
-    tasks:['Weniger gießen als üblich, die Pflanze verdunstet weniger','Dünger erst bei sichtbarem neuen Wuchs','Nicht gleichzeitig umtopfen und zurückschneiden']},
-
-  hunger: {name:'Ausgehungert', kurz:'Nährstoffmangel', f:1, tage:42, ton:'warn',
-    text:'Typisch nach längerer Zeit in reinem Wasser oder in altem, verbrauchtem Substrat: kleine, blasse Blätter, dünne Triebe, lange Abstände zwischen den Blättern. Wasser allein enthält keine Nährstoffe. Entweder in frisches Substrat setzen oder sehr schwach, aber regelmäßig düngen.',
-    frage:'Sind die neuen Blätter wieder größer und kräftiger gefärbt?',
-    tasks:['In frisches Substrat setzen oder schwach dosiert düngen','Schwache, vergeilte Triebe einkürzen','Lichtangebot prüfen — Hunger und Lichtmangel sehen sich ähnlich']},
-
-  schaedlinge: {name:'Schädlingsbefall', kurz:'in Behandlung', f:1, tage:28, ton:'warn',
-    text:'Erst bestimmen, dann behandeln: Spinnmilben machen feine Gespinste und trockene Sprenkel, Trauermücken schwirren über der Erde, Woll- und Schmierläuse sitzen als weiße Watte in den Blattachseln, Schildläuse als braune Buckel auf Stiel und Blattader. Wichtig ist die Wiederholung — einmal behandeln reicht fast nie.',
-    frage:'Ist der Befall weg — bei zwei Kontrollen im Abstand von einer Woche nichts mehr gefunden?',
-    tasks:['Pflanze von den anderen trennen','Blattunterseiten und Blattachseln kontrollieren','Behandlung nach 7 Tagen wiederholen, dann noch einmal','Nachbarpflanzen ebenfalls prüfen']},
-
-  winterruhe: {name:'Winterruhe', kurz:'Wachstumspause', f:2.2, tage:0, ton:'info',
-    text:'In der Ruhephase wächst die Pflanze kaum und verbraucht wenig Wasser. Kühler, heller Stand, deutlich seltener gießen, kein Dünger. Falsch ist warm und dunkel — dann treibt sie schwach aus und vergeilt.',
-    frage:'Ist die Ruhephase vorbei — Tage länger, neuer Trieb sichtbar?',
-    tasks:['Deutlich seltener gießen','Kein Dünger bis zum Frühjahr','Untersetzer leer halten']},
-
-  bluete: {name:'Blüte oder Fruchtansatz', kurz:'erhöhter Bedarf', f:0.85, tage:0, ton:'info',
-    text:'Blüten und Früchte kosten Wasser und Nährstoffe. Gleichmäßig gießen, denn Schwankungen führen bei Frucht­pflanzen zu Rissen und Blütenendfäule. Auf kalium­betonten Dünger umstellen.',
-    frage:'Ist die Blüte oder Ernte durch?',
-    tasks:['Gleichmäßiger gießen, Schwankungen vermeiden','Auf blüh- oder fruchtbetonten Dünger wechseln','Verblühtes regelmäßig entfernen']},
-
-  sonnenbrand: {name:'Sonnenbrand', kurz:'zu schnell umgestellt', f:1, tage:28, ton:'warn',
-    text:'Helle, trocken-papierne Flecken auf den sonnenzugewandten Blättern, oft nach einem Umzug nach draußen oder ans Südfenster. Verbrannte Stellen wachsen nicht nach. Die Pflanze schrittweise gewöhnen: erst Schatten, dann Morgensonne, über zwei Wochen mehr.',
-    frage:'Sind die neuen Blätter unbeschädigt?',
-    tasks:['Schattieren und über zwei Wochen langsam angewöhnen','Verbrannte Blätter erst entfernen, wenn neue da sind','Mittags nicht auf nasse Blätter gießen']},
-
-  kaelteschaden: {name:'Kälteschaden', kurz:'zu kalt gestanden', f:1.6, tage:35, ton:'warn',
-    text:'Glasige, dann braun-schwarz werdende Blätter nach kalter Zugluft oder einer Nacht zu weit draußen. Kalte Wurzeln nehmen kaum Wasser auf, deshalb jetzt sparsam gießen — sonst kommt Fäulnis dazu. Warm und hell stellen und abwarten.',
-    frage:'Sind keine neuen Schäden mehr dazugekommen?',
-    tasks:['Deutlich sparsamer gießen, bis neuer Trieb kommt','Nicht düngen','Zugluftquelle abstellen, Abstand zur Fensterscheibe']}
-};
-
-/* ── Zustände, die nur bestimmte Arten betreffen ──────────────
-   Werden über den Code im Feld "spez" der Art zugeordnet.
-*/
-const SPEZIAL = {
-  'karnivore-ruhe': {name:'Winterruhe der Karnivore', kurz:'sieht tot aus, ist sie nicht', f:1.6, tage:0, ton:'info',
-    text:'Ab Oktober zieht sie ein: Fallen werden schwarz, Blätter sterben ab, übrig bleibt ein kümmerlicher Rest. Das ist kein Sterben, sondern Pflicht. Drei bis vier Monate bei 0 bis 10 °C, hell, Untersetzer leer, Substrat nur klamm. Wer sie warm durchkultiviert, verliert sie innerhalb von ein bis zwei Jahren.',
-    frage:'Ist es März und treibt sie wieder aus?',
-    tasks:['Untersetzer leeren, nur klamm halten','Abgestorbene Fallen erst im Frühjahr abschneiden','Ab März zurück in die Sonne, Anstau wieder auffüllen']},
-
-  'karnivore-fallen': {name:'Fallen werden schwarz', kurz:'meist normal', f:1, tage:21, ton:'info',
-    text:'Einzelne schwarze Fallen sind normal — jede Falle klappt nur wenige Male, dann stirbt sie ab. Alarmierend wird es, wenn alle gleichzeitig schwarz werden. Dann sind fast immer Leitungswasser, Dünger oder Blumenerde die Ursache: Karnivoren vertragen nur Regen- oder Osmosewasser und ausschließlich ungedüngtes Torf-Sand-Substrat.',
-    frage:'Kommen wieder gesunde, grüne Fallen nach?',
-    tasks:['Nur Regen- oder Osmosewasser verwenden','Niemals düngen, keine normale Blumenerde','Fallen nicht mit dem Finger auslösen']},
-
-  'sukk-weich': {name:'Blätter weich und faltig', kurz:'fast immer zu viel Wasser', f:2.8, stopp:14, tage:42, ton:'warn',
-    text:'Der häufigste Irrtum bei Sukkulenten: weiche, matschige oder gelbliche Blätter sehen nach Durst aus, kommen aber fast immer von zu viel Wasser. Trockenheit macht Blätter schrumpelig und ledrig, aber nicht weich. Also erst prüfen — matschig und dunkel heißt gießen sofort einstellen, austopfen, Wurzeln ansehen.',
-    frage:'Sind die Blätter wieder fest und ist kein weiterer Verlust dazugekommen?',
-    tasks:['Gießen sofort einstellen, Ballen komplett durchtrocknen lassen','Wurzeln prüfen, weiche Teile abschneiden','Mineralisch und grob umtopfen, Untersetzer leer']},
-
-  'sukk-vergeilt': {name:'Vergeilt, lang gezogen', kurz:'zu wenig Licht', f:1.2, tage:0, ton:'warn',
-    text:'Der Trieb wird lang und dünn, die Blätter stehen weit auseinander und sind blass — die Pflanze streckt sich zum Licht. Das wächst sich nicht aus, gestreckte Teile bleiben gestreckt. Heller stellen, aber langsam angewöhnen, sonst gibt es Sonnenbrand. Den zu langen Teil kann man abschneiden und als Steckling neu bewurzeln.',
-    frage:'Wächst der neue Zuwachs kompakt?',
-    tasks:['Schrittweise heller stellen, nicht sofort in die pralle Sonne','Gestreckten Kopf abschneiden und neu bewurzeln','Weniger gießen, bis mehr Licht da ist']},
-
-  'bogenhanf-weich': {name:'Blätter knicken um', kurz:'Überwässerung', f:3, stopp:21, tage:56, ton:'warn',
-    text:'Beim Bogenhanf ist ein weiches, an der Basis umknickendes Blatt das klassische Zeichen für zu viel Wasser, nicht für zu wenig. Die Wurzeln faulen von unten. Sofort austopfen, faule Rhizomteile großzügig wegschneiden, Schnittflächen antrocknen lassen und in fast rein mineralisches Substrat setzen. Wochenlang nicht gießen.',
-    frage:'Stehen die Blätter wieder fest und ist keins mehr umgeknickt?',
-    tasks:['Austopfen und Rhizom auf weiche Stellen prüfen','Schnittflächen zwei Tage antrocknen lassen','Sehr grobes, mineralisches Substrat, Untersetzer immer leer','Drei Wochen gar nicht gießen']},
-
-  'panasch-verlust': {name:'Panaschierung verschwindet', kurz:'zu wenig Licht', f:1, tage:0, ton:'info',
-    text:'Weiße oder gelbe Blattanteile enthalten kein Chlorophyll. Steht die Pflanze zu dunkel, produziert sie rein grüne Blätter, weil grün mehr Licht ausnutzt. Heller stellen, ohne pralle Mittagssonne. Rein grün gewordene Triebe kann man zurückschneiden, sonst übernehmen sie, weil sie schneller wachsen.',
-    frage:'Sind die neuen Blätter wieder gezeichnet?',
-    tasks:['Heller stellen, aber ohne pralle Mittagssonne','Komplett grüne Triebe bis zum gezeichneten Blatt zurückschneiden']},
-
-  'aroid-luftwurzel': {name:'Luftwurzeln überall', kurz:'sucht Halt', f:1, tage:0, ton:'info',
-    text:'Kletternde Aroideen bilden Luftwurzeln, um sich an Bäumen festzuhalten. Das ist kein Problem, sondern ein Angebot: an einer feuchten Moosstange werden daraus richtige Wurzeln, und die Blätter werden deutlich größer. Ohne Kletterhilfe bleiben die Blätter klein. Luftwurzeln nicht abschneiden, sondern in die Erde oder ans Moos leiten.',
-    frage:'Hat sie eine Kletterhilfe bekommen und hält sie sich fest?',
-    tasks:['Moosstange oder Kokosstab anbieten','Luftwurzeln ans Moos leiten, nicht abschneiden','Moosstange mitgießen, damit sie feucht bleibt']},
-
-  'monstera-fenster': {name:'Blätter ohne Schlitze', kurz:'noch jung oder zu dunkel', f:1, tage:0, ton:'info',
-    text:'Junge Monstera-Blätter sind immer ganzrandig, die Löcher kommen erst mit dem Alter. Bleiben sie auch bei großen Blättern aus, fehlt Licht oder Halt. Mehr helles indirektes Licht und eine Kletterhilfe sind die zwei Hebel — an einer Moosstange wird fast jedes neue Blatt größer und stärker geschlitzt als das vorige.',
-    frage:'Hat das neueste Blatt Einschnitte?',
-    tasks:['Heller stellen, indirekt','Moosstange anbieten','Geduld: jedes neue Blatt wird stärker geschlitzt als das davor']},
-
-  'calathea-raender': {name:'Braune, trockene Blattränder', kurz:'Luft oder Wasserqualität', f:0.9, tage:28, ton:'warn',
-    text:'Pfeilwurzgewächse sind zwei Dinge sehr übel: trockene Heizungsluft und kalkhaltiges Leitungswasser. Beides zeigt sich zuerst als knuspriger brauner Rand. Abgestandenes, kalkarmes Wasser oder Regenwasser nehmen, gleichmäßig feucht halten, Luftfeuchte erhöhen. Braune Ränder werden nicht wieder grün, entscheidend sind die neuen Blätter.',
-    frage:'Sind die neu aufgerollten Blätter sauber und randlos braun?',
-    tasks:['Auf Regen- oder abgestandenes Wasser umstellen','Luftfeuchte erhöhen, Abstand zur Heizung','Nie ganz austrocknen lassen']},
-
-  'blaetter-rollen': {name:'Blätter rollen sich ein', kurz:'Trockenstress', f:0.85, tage:21, ton:'warn',
-    text:'Eingerollte Blätter sind der Versuch, Verdunstung zu verringern — die Pflanze hat zu wenig Wasser, zu viel Sonne oder zu trockene Luft. Bei Pfeilwurzgewächsen ist es zusätzlich ein Tagesrhythmus: abends hochgeklappt, morgens wieder flach, das ist normal und kein Alarm.',
-    frage:'Bleiben die Blätter tagsüber wieder flach?',
-    tasks:['Gleichmäßiger gießen','Standort auf pralle Sonne und Heizungsluft prüfen']},
-
-  'orchid-ruhe': {name:'Nach der Blüte', kurz:'Blütenstiel entscheiden', f:1.3, tage:0, ton:'info',
-    text:'Ist der Blütenstiel noch grün, kann man ihn über dem zweiten oder dritten Auge kürzen, dann treibt oft ein Seitentrieb nach. Ist er braun und vertrocknet, komplett an der Basis abschneiden. Danach etwas sparsamer gießen. Ein Temperaturunterschied von etwa 5 °C zwischen Tag und Nacht löst die nächste Blüte aus.',
-    frage:'Kommt ein neuer Blütenstiel oder ein neues Blatt?',
-    tasks:['Grünen Stiel über dem 2. Auge kürzen, braunen ganz entfernen','Nachts etwas kühler stellen, das löst die Blüte aus','Sparsamer gießen, weiter tauchen statt gießen']},
-
-  'orchid-wurzel': {name:'Wurzeln beurteilen', kurz:'silbrig oder grün?', f:1, tage:0, ton:'info',
-    text:'Der beste Gießmesser bei Orchideen sind die Wurzeln: silbrig-grau heißt durstig, sattgrün heißt versorgt. Braune, weiche, hohle Wurzeln sind tot und gehören weg. Luftwurzeln außerhalb des Topfes sind normal und dürfen dort bleiben. Gegossen wird durch Tauchen, danach vollständig abtropfen lassen — im Topf darf nie Wasser stehen.',
-    frage:'Sind die Wurzeln überwiegend fest und grün?',
-    tasks:['Tauchen statt gießen, danach gut abtropfen lassen','Hohle und braune Wurzeln beim nächsten Umtopfen entfernen','Kein Wasser im Übertopf stehen lassen']},
-
-  'kraut-verholzt': {name:'Verholzt und kahl von unten', kurz:'Schnitt versäumt', f:1.1, tage:0, ton:'info',
-    text:'Rosmarin, Lavendel, Thymian und Salbei verkahlen von innen, wenn man sie nicht schneidet. Wichtig: nie ins alte Holz schneiden, daraus treibt kaum etwas nach. Immer nur den grünen, beblätterten Teil um etwa ein Drittel kürzen, am besten nach der Blüte und noch einmal leicht im Frühjahr.',
-    frage:'Treibt sie nach dem Schnitt wieder buschig aus?',
-    tasks:['Nur den grünen Teil schneiden, nie ins alte Holz','Nach der Blüte um ein Drittel einkürzen','Ältere, völlig verholzte Pflanzen ersetzen statt retten']},
-
-  'kraut-schossen': {name:'Schießt in die Blüte', kurz:'Ernte wird bitter', f:0.9, tage:0, ton:'info',
-    text:'Basilikum, Koriander, Rucola und Petersilie stellen das Blattwachstum ein, sobald sie blühen, und werden bitter oder scharf. Blütenansätze früh ausknipsen, dann bleibt die Pflanze länger im Blatt. Ausgelöst wird das Schossen durch Hitze, Trockenheit und zu wenig Wurzelraum.',
-    frage:'Bildet sie wieder Blattmasse statt Blütenstände?',
-    tasks:['Blütenansätze regelmäßig ausknipsen','Gleichmäßig gießen, Hitzestress vermeiden','Bei Koriander und Rucola alle paar Wochen neu aussäen']},
-
-  'supermarkt-topf': {name:'Supermarkttopf, zu dicht', kurz:'zu viele Pflanzen im Topf', f:0.85, tage:28, ton:'warn',
-    text:'Im Supermarkttopf stecken oft fünfzig bis hundert Sämlinge in einem kleinen Ballen. Sie konkurrieren um alles und kippen nach zwei Wochen zusammen. Der Trick: den Ballen in drei bis vier Teile zerlegen, jedes Teil einzeln in einen größeren Topf mit frischer Erde. Aus einem sterbenden Supermarktbasilikum werden so vier kräftige Pflanzen.',
-    frage:'Sind die geteilten Portionen angewachsen und stehen sie aufrecht?',
-    tasks:['Ballen in 3–4 Portionen teilen und einzeln topfen','Größere Töpfe mit frischer Kräutererde','Erste Woche nach dem Teilen halbschattig stellen']},
-
-  'ficus-blattfall': {name:'Wirft Blätter ab', kurz:'reagiert auf Umzug', f:1.2, tage:35, ton:'warn',
-    text:'Feigen sind Gewohnheitstiere. Standortwechsel, Zugluft, kalte Füße oder eine Änderung der Lichtmenge quittieren sie mit Blattfall — oft erst zwei Wochen später. Die richtige Reaktion ist Nichtstun: Platz nicht noch einmal wechseln, gleichmäßig und eher sparsam gießen, warten. Meist treibt sie nach vier bis sechs Wochen neu aus.',
-    frage:'Hat der Blattfall aufgehört und kommt neuer Austrieb?',
-    tasks:['Standort jetzt nicht noch einmal wechseln','Zugluft und kalten Boden abstellen','Sparsamer gießen, solange wenig Blattmasse da ist']},
-
-  'palme-spitzen': {name:'Braune Blattspitzen', kurz:'Luft, Kalk oder Salz', f:0.95, tage:0, ton:'info',
-    text:'Bei Palmen und Grünlilien sind braune Spitzen fast immer trockene Luft, kalkhaltiges Wasser oder Düngersalze im Substrat. Weiche Wassergabe, gelegentlich gründlich durchspülen, Luftfeuchte erhöhen. Braune Spitzen nur bis kurz vor das grüne Gewebe abschneiden, sonst wird der Rand erneut braun.',
-    frage:'Bleiben die neu ausgetriebenen Wedel sauber?',
-    tasks:['Kalkarmes Wasser nehmen','Substrat einmal gründlich durchspülen, um Salze auszuwaschen','Spitzen knapp im Braunen abschneiden, nicht ins Grüne']},
-
-  'farn-braun': {name:'Wedel werden braun', kurz:'zu trocken', f:0.8, tage:28, ton:'warn',
-    text:'Farne verzeihen kein Austrocknen, ein einziges Mal reicht oft für braune Wedel. Sie kommen aus dem feuchten Unterholz: gleichmäßig feucht, nie nass stehend, hohe Luftfeuchte, kein direktes Sonnenlicht. Braune Wedel bodennah abschneiden, aus dem Herz kommt Neues nach.',
-    frage:'Rollen sich neue, gesunde Wedel auf?',
-    tasks:['Nie ganz austrocknen lassen','Luftfeuchte erhöhen, Abstand zur Heizung','Braune Wedel bodennah abschneiden']},
-
-  'knolle-einzug': {name:'Zieht ein', kurz:'Knolle geht schlafen', f:3.5, tage:0, ton:'info',
-    text:'Blätter werden gelb und sterben ab, obwohl nichts falsch läuft — Knollenpflanzen ziehen zu ihrer Zeit einfach ein. Jetzt das Gießen zurückfahren und ganz einstellen, die Knolle trocken und kühl ruhen lassen. Erst wenn ein neuer Trieb erscheint, wieder gießen und düngen. Wer durchgießt, bringt die Knolle zum Faulen.',
-    frage:'Zeigt sich ein neuer Trieb?',
-    tasks:['Gießen langsam einstellen, Knolle trocken ruhen lassen','Eingezogene Blätter erst entfernen, wenn sie ganz vergilbt sind','Erst bei neuem Trieb wieder gießen und düngen']},
-
-  'alocasia-einzug': {name:'Verliert alle Blätter', kurz:'meist Ruhephase', f:2.6, tage:0, ton:'info',
-    text:'Alocasien ziehen im Winter oft komplett ein und sehen aus wie tot. Solange die Knolle fest ist, lebt die Pflanze. Kühl bis normal warm, sehr sparsam gießen, kein Dünger — und im Frühjahr kommt sie zurück. Wer weiter gießt wie im Sommer, verliert die Knolle an Fäulnis.',
-    frage:'Ist ein neuer Trieb erschienen?',
-    tasks:['Sehr sparsam gießen, Knolle nur klamm halten','Kein Dünger bis zum neuen Trieb','Knolle auf Festigkeit prüfen, weich heißt Fäulnis']},
-
-  'zitrus-chlorose': {name:'Gelbe Blätter mit grünen Adern', kurz:'Eisenmangel', f:1, tage:35, ton:'warn',
-    text:'Bei Zitrus ist das Muster verräterisch: Blattfläche gelb, Adern bleiben grün. Meist ist nicht zu wenig Eisen da, sondern der Boden zu kalkhaltig, sodass die Pflanze es nicht aufnehmen kann. Regenwasser statt Leitungswasser, spezieller Zitrusdünger, notfalls Eisenchelat. Auch zu kalte, nasse Wurzeln lösen es aus.',
-    frage:'Sind die neuen Blätter wieder gleichmäßig grün?',
-    tasks:['Auf Regenwasser oder abgestandenes Wasser umstellen','Zitrusdünger geben, bei akutem Mangel Eisenchelat','Wurzelbereich nicht kalt und nass stehen lassen']},
-
-  'weihnachtsstern-dunkel': {name:'Färbt sich nicht', kurz:'braucht lange Nächte', f:1, tage:56, ton:'info',
-    text:'Die roten Hochblätter entstehen nur, wenn die Pflanze über Wochen wirklich lange Nächte bekommt: ab Ende September acht bis zehn Wochen lang täglich zwölf bis vierzehn Stunden völlige Dunkelheit — Karton drüber oder dunkler Raum. Schon eine Straßenlaterne oder das Zimmerlicht reicht, um es zu verhindern.',
-    frage:'Färben sich die oberen Blätter?',
-    tasks:['Täglich 12–14 Stunden komplett abdunkeln','Wirklich lichtdicht, auch Zimmerlicht stört','Tagsüber hell und warm stellen']},
-
-  'pilea-kindel': {name:'Kindel am Fuß', kurz:'Nachwuchs', f:1, tage:0, ton:'ok',
-    text:'Rund um den Stamm schieben sich kleine Ableger aus der Erde. Sobald sie etwa fünf Zentimeter hoch sind, kann man sie mit einem sauberen Messer knapp unter der Erde abtrennen — sie haben meist schon eigene Wurzeln — und einzeln topfen. Die Mutterpflanze stört das nicht.',
-    frage:'Sind die Kindel abgetrennt und getopft?',
-    tasks:['Kindel ab etwa 5 cm Höhe unter der Erde abtrennen','Einzeln topfen, erste Woche gleichmäßig feucht halten','Im Stammbaum als Ableger eintragen']},
-
-  'tomate-geiz': {name:'Geiztriebe und Blütenendfäule', kurz:'typisch bei Tomaten', f:0.8, tage:0, ton:'info',
-    text:'Zwei Dinge entscheiden über die Ernte: Geiztriebe in den Blattachseln regelmäßig ausbrechen, damit die Kraft in die Früchte geht, und gleichmäßig gießen. Schwarze, eingesunkene Stellen am Fruchtende sind Blütenendfäule — kein Pilz, sondern Kalzium­mangel durch schwankende Wasserversorgung.',
-    frage:'Läuft die Ernte und sind die Früchte sauber?',
-    tasks:['Geiztriebe wöchentlich ausbrechen','Gleichmäßig gießen, am besten morgens an die Wurzel','Nicht über die Blätter gießen, das fördert Braunfäule']},
-
-  'erdbeere-auslaeufer': {name:'Ausläufer', kurz:'Ernte oder Vermehrung', f:1, tage:0, ton:'info',
-    text:'Ausläufer kosten Kraft. Wer ernten will, schneidet sie ab. Wer vermehren will, lässt zwei bis drei stehen und drückt die kleinen Rosetten in einen Topf daneben, bis sie eigene Wurzeln haben. Nach drei Jahren lässt die Ertragskraft nach, dann lohnt es, die alten Pflanzen durch Ausläufer zu ersetzen.',
-    frage:'Sind die Ausläufer entschieden — abgeschnitten oder bewurzelt?',
-    tasks:['Für mehr Ernte alle Ausläufer entfernen','Für Nachwuchs 2–3 Rosetten in Töpfe leiten','Pflanzen nach 3 Jahren austauschen']},
-
-  'kaktus-korken': {name:'Verkorkung am Fuß', kurz:'meist harmlos', f:1, tage:0, ton:'info',
-    text:'Braune, harte, trockene Verfärbung von unten nach oben ist normale Alterung — die Haut verholzt. Kritisch wird es nur, wenn die Stelle weich, dunkel oder nass ist, dann ist es Fäulnis. Der Unterschied liegt im Anfassen: hart und trocken heißt Alter, weich heißt Problem.',
-    frage:'Ist die Stelle weiterhin trocken und hart?',
-    tasks:['Stelle antasten: hart und trocken ist unbedenklich','Bei weicher, dunkler Stelle sofort das Gießen einstellen']}
-};
-
 /* ── Verwechslungsgruppen ─────────────────────────────────────
    Arten, die verwechselt werden. Die App schlägt bei der Auswahl
    die anderen aus derselben Gruppe zusätzlich vor, jeweils mit
@@ -6677,8 +6504,6 @@ function merkmalVon(bot){
   return '';
 }
 
-/* ══════════════════ Zustände ══════════════════ */
-function zustandDef(code){ return ZUSTAENDE[code] || SPEZIAL[code] || null; }
 
 /* Bibliothekseintrag zu einer Pflanze der Sammlung finden */
 function bibVon(p){
@@ -6693,161 +6518,429 @@ function bibVon(p){
      botanischer dasteht. */
   return bibExakt(bot, bot ? '' : p.art) || null;
 }
-function zustandsAuswahl(p){
-  const b = bibVon(p);
-  const codes = Object.keys(ZUSTAENDE);
-  if(b) b.spez.forEach(c=>{ if(SPEZIAL[c]) codes.push(c); });
-  return codes;
+
+/* ══════════════════════════════════════════════════════════════
+   4.0-beta.27 (Plan G2a+c, Etappe A): Tag-System
+   Ein Tag ist eine Markierung, die der Nutzer selbst setzt: mit Datum,
+   kurzer Notiz und wahlweise Wirkungen. Er ersetzt die 40 Zustände.
+   Doktor und KI setzen nie einen Tag (Entscheidung 07.11. 22:11).
+   Daten (alles in S und damit in der Sicherung):
+     S.tags       Liste der Tag-Vorlagen {id, name, art, giess, pz,
+                  duengSperre, duenger, schaedling, dauer, erinnern,
+                  gruppe, abstand, nichtMit, hinweis, fest, vorgabe}
+     S.tagGruppen eigene Gruppen {id, name, farbe}
+     S.tagEin     je Pflanze die Einträge {e, t, von, bis, ende,
+                  notiz, pz, er, hinweis, giessNotiz}
+     S.lernen     das Gelernte je Pflanze (vorher in S.zustand)
+   ══════════════════════════════════════════════════════════════ */
+/* Wirkungen mit fester Farbe. Jede bildet ihre eigene Gruppe (F262).
+   Höchstens eine Gießwirkung je Tag (F270). */
+var TAG_GIESS = {
+  pause:   {name:'Gießpause',              farbe:'#b8452f'},
+  kuerzer: {name:'Gießabstand verkürzen',  farbe:'#2e6e8e'},
+  laenger: {name:'Gießabstand verlängern', farbe:'#56708f'}
+};
+var TAG_SCHALTER = {
+  duengSperre: {name:'Düngen sperren',       farbe:'#a3652b'},
+  duenger:     {name:'Dünger',               farbe:'#4d7a39'},
+  schaedling:  {name:'Schädlingsbekämpfung', farbe:'#86599a'}
+};
+var TAG_OHNE = {name:'Ohne Wirkung', farbe:'#77776f'};
+/* Farben für eigene Gruppen, Knopfliste statt Farbwähler des Systems */
+var TAG_FARBEN = ['#3f7d5a','#b8452f','#2e6e8e','#a3652b','#86599a','#8a7a2e','#c05f86','#4c5a6b'];
+var TAG_NOTIZ_MAX = 200;
+/* Ein Zeitraum ohne Dauer läuft bis „Beenden“. stoppRest meldet dann
+   diese Zahl, damit `stoppRest(p) > 0` überall weiter gilt. */
+var TAG_OFFEN = 9999;
+/* Die Vorgaben (F247, F249, F256, F263, F271). Nur Winterruhe ist fest. */
+var TAG_VORGABEN = [
+  {vorgabe:'pause',       name:'Gießpause',              art:'zeitraum', giess:'pause',   dauer:14, erinnern:true},
+  {vorgabe:'kuerzer',     name:'Gießabstand verkürzen',  art:'zeitraum', giess:'kuerzer', pz:25, dauer:0},
+  {vorgabe:'laenger',     name:'Gießabstand verlängern', art:'zeitraum', giess:'laenger', pz:25, dauer:0},
+  {vorgabe:'duenger',     name:'Dünger',                 art:'einmalig', duenger:true},
+  {vorgabe:'blatt',       name:'Neues Blatt',            art:'einmalig'},
+  {vorgabe:'blatt_weg',   name:'Blatt verloren',         art:'einmalig'},
+  {vorgabe:'quarantaene', name:'Quarantäne',             art:'zeitraum', dauer:21, erinnern:true},
+  {vorgabe:'winterruhe',  name:'Winterruhe',             art:'zeitraum', giess:'laenger', pz:50, dauer:120, fest:true}
+];
+
+function tagNeuId(vor){ return (vor || 't') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function tagSauber(t){
+  const art = t.art === 'einmalig' ? 'einmalig' : 'zeitraum';
+  const giess = TAG_GIESS[t.giess] ? t.giess : null;
+  const zahl = (v, lo, hi) => { const n = Math.round(Number(v) || 0); return Math.max(lo, Math.min(hi, n)); };
+  return {
+    id: t.id || tagNeuId('t'),
+    name: String(t.name || '').trim().slice(0, 40) || 'Tag',
+    art,
+    giess,
+    pz: giess === 'kuerzer' ? zahl(t.pz || 25, 5, 90) : giess === 'laenger' ? zahl(t.pz || 25, 5, 300) : 0,
+    duengSperre: !!t.duengSperre, duenger: !!t.duenger, schaedling: !!t.schaedling,
+    dauer: art === 'zeitraum' ? zahl(t.dauer, 0, 730) : 0,
+    erinnern: art === 'zeitraum' && !!t.erinnern,
+    gruppe: t.gruppe || null,
+    abstand: zahl(t.abstand, 0, 730),
+    nichtMit: Array.isArray(t.nichtMit) ? t.nichtMit.filter(Boolean) : [],
+    hinweis: String(t.hinweis || '').slice(0, TAG_NOTIZ_MAX),
+    fest: !!t.fest,
+    vorgabe: t.vorgabe || null
+  };
+}
+function tagListe(){ return Array.isArray(S.tags) ? S.tags : []; }
+function tagDef(id){ return tagListe().find(t => t.id === id) || null; }
+function tagGruppen(){ return Array.isArray(S.tagGruppen) ? S.tagGruppen : []; }
+function tagGruppe(id){ return tagGruppen().find(g => g.id === id) || null; }
+
+/* Legt fehlende Vorgaben an. `alle` holt auch gelöschte zurück
+   („Vorgaben wiederherstellen“), ohne vorhandene zu ändern. Winterruhe
+   kommt immer zurück, weil sie fest ist. */
+function tagVorgabenSichern(alle){
+  if(!Array.isArray(S.tags)) S.tags = [];
+  if(!Array.isArray(S.tagGruppen)) S.tagGruppen = [];
+  if(!S.tagEin || typeof S.tagEin !== 'object') S.tagEin = {};
+  if(!S.tagVorgabenAus) S.tagVorgabenAus = [];
+  let n = 0;
+  TAG_VORGABEN.forEach(v => {
+    if(S.tags.some(t => t.vorgabe === v.vorgabe)) return;
+    if(!alle && !v.fest && S.tagVorgabenAus.indexOf(v.vorgabe) !== -1) return;
+    S.tags.push(tagSauber(Object.assign({id:'tv-' + v.vorgabe}, v)));
+    n++;
+  });
+  if(alle) S.tagVorgabenAus = [];
+  return n;
 }
 
-function zustandVon(p){
-  let z = S.zustand[p.id];
-  /* 4.0-beta.13 (A): Ein Eintrag nur mit Gelerntem (lernSchritt legt ihn
-     ohne Code an) oder mit unbekanntem Code ist kein Zustand. Vorher kam
-     er hier ohne Code mit dem Namen „Gesund“ heraus, und der Gießmodus
-     fragte „Ist der Zustand vorbei?“. */
-  if(z && (!z.code || !zustandDef(z.code))) z = null;
-  /* Altbestand: alte Umstellungsfelder als Zustand deuten */
-  if(!z && p.uebergang && p.uebergangBis && HEUTE < new Date(p.uebergangBis+'T23:59:59')){
-    z = {code:'aquakultur', seit:null, bis:p.uebergangBis};
-  }
-  if(!z) return {code:'gesund', def:ZUSTAENDE.gesund, seit:null, bis:null, faellig:false};
-  const def = zustandDef(z.code) || ZUSTAENDE.gesund;
-  const faellig = !!(z.bis && HEUTE >= new Date(z.bis+'T00:00:00'));
-  return {code:z.code, def, seit:z.seit||null, bis:z.bis||null, faellig};
+/* Heimatgruppe: eigene Gruppe, sonst die Gruppe der ersten Wirkung,
+   sonst „Ohne Wirkung“. Sie gibt Farbe, Ordnung und Filterlogik. */
+function tagHeimat(t){
+  const g = t && t.gruppe ? tagGruppe(t.gruppe) : null;
+  if(g) return {key:'g:' + g.id, name:g.name, farbe:g.farbe || TAG_FARBEN[0]};
+  if(t && t.giess) return {key:'w:' + t.giess, name:TAG_GIESS[t.giess].name, farbe:TAG_GIESS[t.giess].farbe};
+  for(const k of Object.keys(TAG_SCHALTER))
+    if(t && t[k]) return {key:'w:' + k, name:TAG_SCHALTER[k].name, farbe:TAG_SCHALTER[k].farbe};
+  return {key:'w:ohne', name:TAG_OHNE.name, farbe:TAG_OHNE.farbe};
+}
+/* Alle Wirkungen eines Tags als Schlüssel (für den Filter „Wirkung“). */
+function tagWirkungen(t){
+  const w = [];
+  if(!t) return w;
+  if(t.giess) w.push(t.giess);
+  Object.keys(TAG_SCHALTER).forEach(k => { if(t[k]) w.push(k); });
+  return w;
+}
+function tagWirkName(k){ return (TAG_GIESS[k] || TAG_SCHALTER[k] || TAG_OHNE).name; }
+
+function tagHeuteIso(){ return iso(HEUTE); }
+function tagPlusTage(s, n){
+  const d = new Date(s + 'T12:00:00');
+  return iso(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n, 12));
+}
+function tagDatumKurz(s){
+  return s ? new Date(s + 'T12:00:00').toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'}) : '';
 }
 
-function zustandSetzen(id, code, tage, medium){
-  /* 4.0-beta.13 (A2): Im selben Eintrag liegt, was die App aus „War
-     staubtrocken“ und „Noch feucht“ gelernt hat. Ein Zustandswechsel
-     ersetzt nur Zustand, Beginn, Ende und Medium; das Gelernte bleibt.
-     Der Einfluss des Zustands auf den Abstand endet mit ihm, weil
-     intervallVon ihn nur anwendet, solange er gilt. */
-  const alt = S.zustand[id];
-  if(!code || code==='gesund'){
-    if(alt){
-      delete alt.code; delete alt.seit; delete alt.bis; delete alt.medium;
-      if(!Object.keys(alt).length) delete S.zustand[id];
-    }
-    sichern(); return;
-  }
-  const def = zustandDef(code); if(!def) return;
-  const t = tage!=null ? tage : (def.tage||0);
-  const bis = t>0 ? iso(new Date(HEUTE.getTime() + t*86400000)) : null;
-  const neu = Object.assign({}, alt || {});
-  neu.code = code; neu.seit = iso(HEUTE); neu.bis = bis;
-  neu.medium = medium || (alt && alt.code === code ? alt.medium : null) || null;
-  S.zustand[id] = neu;
-  sichern();
+function tagEintraege(pid){ return (S.tagEin && S.tagEin[pid]) || []; }
+/* Läuft der Eintrag heute? Nur Zeiträume laufen; ein erreichtes Ende
+   gilt auch dann, wenn tagAblauf es noch nicht eingetragen hat. */
+function tagLaeuft(e){
+  const t = tagDef(e.t);
+  if(!t || t.art !== 'zeitraum' || e.ende) return false;
+  const h = tagHeuteIso();
+  if(e.von > h) return false;
+  return !e.bis || h < e.bis;
 }
-/* Wasserglas, Substrat oder Moos — die Pflege weicht deutlich ab,
-   der Gießrhythmus nicht. */
-function mediumSetzen(id, medium){
-  const z = S.zustand[id]; if(!z) return;
-  z.medium = medium || null; sichern();
+function tagLaufend(p){
+  const id = p && p.id != null ? p.id : p;
+  return tagEintraege(id).filter(tagLaeuft).map(e => ({e, t:tagDef(e.t)}));
 }
-function mediumVon(p){
-  const z = S.zustand[p.id];
-  const def = z ? zustandDef(z.code) : null;
-  if(!def || !def.medien) return null;
-  const key = z.medium && def.medien[z.medium] ? z.medium : null;
-  return key ? Object.assign({key}, def.medien[key]) : null;
+function tagGiessEintrag(p){ return tagLaufend(p).find(x => x.t.giess) || null; }
+function tagProzent(x){
+  const v = x.e.pz != null ? Number(x.e.pz) : Number(x.t.pz);
+  return isFinite(v) ? v : 0;
 }
-function zustandVerlaengern(id, tage){
-  const z = S.zustand[id]; if(!z) return;
-  const basis = z.bis ? new Date(z.bis+'T12:00:00') : HEUTE;
-  const ab = basis > HEUTE ? basis : HEUTE;
-  z.bis = iso(new Date(ab.getTime() + tage*86400000));
-  sichern();
+/* Faktor auf den Gießabstand aus dem laufenden Gießtag */
+function tagFaktor(p){
+  const x = tagGiessEintrag(p);
+  if(!x) return 1;
+  if(x.t.giess === 'kuerzer') return Math.max(0.1, 1 - tagProzent(x) / 100);
+  if(x.t.giess === 'laenger') return 1 + tagProzent(x) / 100;
+  return 1;
 }
-/* Tage, in denen wegen Wurzelfäule o. ä. gar nicht gegossen wird */
+/* Tage, in denen wegen einer Gießpause gar nicht gegossen wird */
 function stoppRest(p){
-  const z = zustandVon(p);
-  if(!z.def.stopp || !z.seit) return 0;
-  const vergangen = tageSeit(z.seit);
-  return Math.max(0, z.def.stopp - vergangen);
+  const x = tagGiessEintrag(p);
+  if(!x || x.t.giess !== 'pause') return 0;
+  if(!x.e.bis) return TAG_OFFEN;
+  return Math.max(0, -tageSeit(x.e.bis));
+}
+function stoppText(p){
+  const n = stoppRest(p);
+  if(n <= 0) return '';
+  if(n >= TAG_OFFEN) return 'bis du die Gießpause beendest';
+  return 'noch ' + n + (n === 1 ? ' Tag' : ' Tage');
+}
+/* „14 → 7 Tage (−50 %)“ für Karte und Fenster */
+function tagWirkText(iv, giess, pz){
+  if(!giess || giess === 'pause' || !iv) return '';
+  const f = giess === 'kuerzer' ? Math.max(0.1, 1 - pz / 100) : 1 + pz / 100;
+  const neu = Math.max(1, Math.round(iv * f));
+  return iv + ' → ' + neu + ' Tage (' + (giess === 'kuerzer' ? '−' : '+') + pz + ' %)';
+}
+function tagWinterruheLaeuft(p){ return tagLaufend(p).some(x => x.t.vorgabe === 'winterruhe'); }
+
+function tagVerlauf(pid, text, datum){
+  if(typeof ereignisDazu === 'function') ereignisDazu(pid, 'tag', text, null, datum);
+}
+function tagEndeText(e){
+  return e.bis ? 'bis ' + tagDatumKurz(e.bis) : 'ohne Ende';
 }
 
-function zustandBadge(p){
-  const z = zustandVon(p);
-  if(z.code==='gesund') return '';
-  const ton = z.def.ton==='warn' ? ' warn' : (z.def.ton==='ok' ? ' good' : '');
-  return `<span class="zbadge${ton}" title="${esc(z.def.kurz||'')}">${SVG.zustand}${esc(z.def.name)}</span>`;
+/* Was gegen das Setzen spricht. Nie eine Sperre (F234), nur Hinweise;
+   „ersetzen“ ist die Gießregel (F270, 22:04). */
+function tagHinweise(pid, tid, von){
+  const t = tagDef(tid); if(!t) return [];
+  von = von || tagHeuteIso();
+  const liste = [];
+  const lauf = tagLaufend(pid);
+  if(t.giess && t.art === 'zeitraum'){
+    const g = lauf.find(x => x.t.giess);
+    if(g) liste.push({art:'ersetzen', e:g.e, t:g.t,
+      text:'„' + g.t.name + '“ läuft schon. Pro Pflanze gilt nur ein Gießtag.'});
+  }
+  if(t.abstand > 0){
+    const frueher = tagEintraege(pid).filter(e => e.t === tid && e.von <= von)
+      .sort((a, b) => b.von.localeCompare(a.von))[0];
+    if(frueher){
+      const tage = Math.round((new Date(von + 'T12:00:00') - new Date(frueher.von + 'T12:00:00')) / 86400000);
+      if(tage < t.abstand) liste.push({art:'abstand',
+        text:'„' + t.name + '“ zuletzt vor ' + tage + (tage === 1 ? ' Tag' : ' Tagen')
+          + '. Frühestens wieder nach ' + t.abstand + ' Tagen.'});
+    }
+  }
+  const nicht = (t.nichtMit || []).slice();
+  /* „nicht zusammen mit“ gilt in beide Richtungen */
+  tagListe().forEach(o => { if(o.id !== tid && (o.nichtMit || []).indexOf(tid) !== -1) nicht.push(o.id); });
+  Array.from(new Set(nicht)).forEach(oid => {
+    const o = tagDef(oid); if(!o) return;
+    const lauft = lauf.some(x => x.t.id === oid);
+    const gleicherTag = tagEintraege(pid).some(e => e.t === oid && e.von === von);
+    if(lauft || gleicherTag) liste.push({art:'nichtMit', text:'„' + t.name + '“ soll nicht zusammen mit „' + o.name + '“ gesetzt werden.'});
+  });
+  if(t.duenger){
+    const sp = lauf.find(x => x.t.duengSperre);
+    if(sp) liste.push({art:'duengSperre', text:'„' + sp.t.name + '“ sperrt gerade das Düngen.'});
+  }
+  return liste;
 }
 
-function zustandBlockHTML(p){
-  const z = zustandVon(p);
-  const codes = zustandsAuswahl(p);
-  const opts = codes.map(c=>{
-    const d = zustandDef(c);
-    const spz = SPEZIAL[c] ? ' ·' : '';
-    return `<option value="${c}"${c===z.code?' selected':''}>${esc(d.name)}${spz}</option>`;
-  }).join('');
-  const stopp = stoppRest(p);
-  const stoppTxt = stopp>0
-    ? `<p class="zstopp"><b>Jetzt nicht gießen.</b> Noch ${stopp} ${stopp===1?'Tag':'Tage'} komplett trocken stehen lassen.</p>` : '';
-  const bis = z.bis
-    ? `<p class="zbis">Nächste Nachfrage am ${new Date(z.bis+'T12:00:00').toLocaleDateString('de-DE')}.
-       <button class="linkbtn" data-do="ics" data-p="${p.id}">In den Kalender legen</button></p>` : '';
-  const text = z.code==='gesund' ? '' : `<p class="ztext">${esc(z.def.text)}</p>`;
-  /* Bei Zuständen mit Medien steht die Feinwahl direkt darunter —
-     ein Steckling im Wasserglas wird anders behandelt als einer im Moos. */
-  const med = mediumVon(p);
-  const medWahl = (z.def.medien && z.code !== 'gesund')
-    ? `<div class="zmed">
-        <span class="lab">Worin steckt er?</span>
-        <div class="sym-liste">${Object.keys(z.def.medien).map(k=>
-          `<button class="sym${med && med.key===k?' on':''}" data-zmed="${p.id}" data-m="${k}">${esc(z.def.medien[k].name)}</button>`).join('')}</div>
-        ${med ? `<p class="ztext">${esc(med.text)}</p>`
-              : '<p class="fhint">Noch nicht gewählt — die Pflege weicht je nach Medium deutlich ab.</p>'}
-      </div>` : '';
-  const tasks = ((z.def.tasks && z.def.tasks.length) || mediumVon(p)) && z.code!=='gesund'
-    ? `<p class="zvor">Passend dazu: <button class="linkbtn" data-do="ztasks" data-p="${p.id}">Vorschläge als Aufgaben übernehmen</button></p>` : '';
-  return `<div class="zustand">
-    <label class="zsel"><span class="lab">Zustand</span>
-      <select data-zsel="${p.id}">${opts}</select></label>
-    ${stoppTxt}${text}${medWahl}${tasks}${bis}
-  </div>`;
+/* Setzt einen Tag. opt: {von, notiz, dauer, pz, er}. `ersetzen` beendet
+   den laufenden Gießtag mit Verlaufseintrag (Gießregel). */
+function tagSetzen(pid, tid, opt, ersetzen){
+  const t = tagDef(tid); if(!t) return null;
+  opt = opt || {};
+  const von = opt.von || tagHeuteIso();
+  if(!S.tagEin) S.tagEin = {};
+  const liste = S.tagEin[pid] = S.tagEin[pid] || [];
+  if(t.giess && t.art === 'zeitraum'){
+    tagLaufend(pid).filter(x => x.t.giess).forEach(x => {
+      if(!ersetzen) return;
+      x.e.ende = von < x.e.von ? x.e.von : von;
+      tagVerlauf(pid, x.t.name + ' ersetzt durch ' + t.name, x.e.ende);
+    });
+  }
+  const e = {e:tagNeuId('e'), t:tid, von, notiz:String(opt.notiz || '').slice(0, TAG_NOTIZ_MAX)};
+  if(t.art === 'zeitraum'){
+    const dauer = opt.dauer != null ? Math.max(0, Math.round(Number(opt.dauer) || 0)) : t.dauer;
+    e.bis = dauer > 0 ? tagPlusTage(von, dauer) : null;
+    e.ende = null;
+    e.er = opt.er != null ? !!opt.er : !!t.erinnern;
+    if(t.giess === 'kuerzer' || t.giess === 'laenger')
+      e.pz = opt.pz != null ? Math.max(5, Math.min(t.giess === 'kuerzer' ? 90 : 300, Math.round(Number(opt.pz) || 0))) : t.pz;
+  }
+  liste.push(e);
+  tagVerlauf(pid, t.name + (t.art === 'zeitraum' ? ' gesetzt (' + tagEndeText(e) + ')' : '')
+    + (e.notiz ? ' · ' + e.notiz : ''), von);
+  if(typeof sichern === 'function') sichern();
+  return e;
+}
+function tagEintragVon(pid, eid){ return tagEintraege(pid).find(e => e.e === eid) || null; }
+function tagBeenden(pid, eid){
+  const e = tagEintragVon(pid, eid); if(!e) return false;
+  const t = tagDef(e.t);
+  if(!t || t.art !== 'zeitraum' || e.ende) return false;
+  const h = tagHeuteIso();
+  e.ende = h < e.von ? e.von : h;
+  tagVerlauf(pid, t.name + ' beendet');
+  sichern();
+  return true;
+}
+function tagEntfernen(pid, eid){
+  const e = tagEintragVon(pid, eid); if(!e) return false;
+  const t = tagDef(e.t);
+  S.tagEin[pid] = tagEintraege(pid).filter(x => x.e !== eid);
+  if(!S.tagEin[pid].length) delete S.tagEin[pid];
+  tagVerlauf(pid, (t ? t.name : 'Tag') + ' entfernt');
+  sichern();
+  return true;
+}
+function tagEintragAendern(pid, eid, von, notiz){
+  const e = tagEintragVon(pid, eid); if(!e) return false;
+  const t = tagDef(e.t);
+  let geaendert = false;
+  if(von && von !== e.von){
+    if(e.bis){
+      const dauer = Math.round((new Date(e.bis + 'T12:00:00') - new Date(e.von + 'T12:00:00')) / 86400000);
+      e.bis = tagPlusTage(von, dauer);
+    }
+    e.von = von;
+    tagVerlauf(pid, (t ? t.name : 'Tag') + ': Datum auf ' + tagDatumKurz(von) + ' geändert');
+    geaendert = true;
+  }
+  if(notiz != null){
+    const n = String(notiz).slice(0, TAG_NOTIZ_MAX);
+    if(n !== (e.notiz || '')){
+      e.notiz = n;
+      if(n) tagVerlauf(pid, (t ? t.name : 'Tag') + ' · Notiz: ' + n);
+      geaendert = true;
+    }
+  }
+  if(geaendert) sichern();
+  return geaendert;
+}
+function tagGesehen(pid, eid){
+  const e = tagEintragVon(pid, eid); if(!e) return;
+  e.hinweis = false; sichern();
+}
+/* Beim Gießen verschwindet die Notiz „… vorbei“ (F253 A, 22:17). */
+function tagGiessNotizWeg(pid){
+  let n = 0;
+  tagEintraege(pid).forEach(e => { if(e.giessNotiz){ e.giessNotiz = false; n++; } });
+  return n;
+}
+function tagGiessNotizen(p){
+  const id = p && p.id != null ? p.id : p;
+  return tagEintraege(id).filter(e => e.giessNotiz).map(e => {
+    const t = tagDef(e.t);
+    return (t ? t.name : 'Tag') + ' vorbei';
+  });
+}
+/* Trägt erreichte Enden nach: Verlaufseintrag „beendet“ und bei
+   aktiver Erinnerung Hinweiszeile und Gießnotiz (F248, F253 A). */
+function tagAblauf(){
+  if(!S.tagEin) return 0;
+  const h = tagHeuteIso();
+  let n = 0;
+  Object.keys(S.tagEin).forEach(pid => {
+    (S.tagEin[pid] || []).forEach(e => {
+      const t = tagDef(e.t);
+      if(!t || t.art !== 'zeitraum' || e.ende || !e.bis || h < e.bis) return;
+      e.ende = e.bis;
+      if(e.er){ e.hinweis = true; e.giessNotiz = true; }
+      tagVerlauf(pid, t.name + ' beendet', e.bis);
+      n++;
+    });
+  });
+  if(n && typeof sichern === 'function') sichern();
+  return n;
+}
+/* Wie viele Pflanzen einen Tag tragen (laufend oder im Verlauf) */
+function tagNutzung(tid){
+  return Object.keys(S.tagEin || {}).filter(pid => tagEintraege(pid).some(e => e.t === tid)).length;
+}
+function tagLoeschen(tid){
+  const t = tagDef(tid);
+  if(!t || t.fest) return false;
+  S.tags = tagListe().filter(x => x.id !== tid);
+  Object.keys(S.tagEin || {}).forEach(pid => {
+    S.tagEin[pid] = tagEintraege(pid).filter(e => e.t !== tid);
+    if(!S.tagEin[pid].length) delete S.tagEin[pid];
+  });
+  S.tags.forEach(x => { x.nichtMit = (x.nichtMit || []).filter(i => i !== tid); });
+  if(t.vorgabe){
+    if(!S.tagVorgabenAus) S.tagVorgabenAus = [];
+    if(S.tagVorgabenAus.indexOf(t.vorgabe) === -1) S.tagVorgabenAus.push(t.vorgabe);
+  }
+  sichern();
+  return true;
+}
+/* Speichert eine Vorlage. Winterruhe behält Name, Art und Wirkung. */
+function tagSpeichern(daten){
+  const alt = daten.id ? tagDef(daten.id) : null;
+  /* Winterruhe behält Name, Art und Wirkung; Dauer, Prozent und die
+     übrigen Felder bleiben änderbar (F256). */
+  if(alt && alt.fest)
+    daten = Object.assign({}, daten, {name:alt.name, art:alt.art, giess:alt.giess, fest:true, vorgabe:alt.vorgabe});
+  const neu = tagSauber(Object.assign({}, alt || {}, daten));
+  if(!alt && tagListe().some(t => t.name.toLowerCase() === neu.name.toLowerCase()))
+    return {fehler:'Einen Tag mit diesem Namen gibt es schon.'};
+  if(alt && tagListe().some(t => t.id !== alt.id && t.name.toLowerCase() === neu.name.toLowerCase()))
+    return {fehler:'Einen Tag mit diesem Namen gibt es schon.'};
+  if(!Array.isArray(S.tags)) S.tags = [];
+  if(alt) S.tags[S.tags.indexOf(alt)] = neu; else S.tags.push(neu);
+  sichern();
+  return {tag:neu};
+}
+function tagGruppeSpeichern(id, name, farbe){
+  name = String(name || '').trim().slice(0, 30);
+  if(!name) return {fehler:'Bitte einen Namen eingeben.'};
+  if(!Array.isArray(S.tagGruppen)) S.tagGruppen = [];
+  if(tagGruppen().some(g => g.id !== id && g.name.toLowerCase() === name.toLowerCase()))
+    return {fehler:'Eine Gruppe mit diesem Namen gibt es schon.'};
+  let g = id ? tagGruppe(id) : null;
+  if(g){ g.name = name; g.farbe = farbe || g.farbe; }
+  else { g = {id:tagNeuId('g'), name, farbe:farbe || TAG_FARBEN[tagGruppen().length % TAG_FARBEN.length]}; S.tagGruppen.push(g); }
+  sichern();
+  return {gruppe:g};
+}
+function tagGruppeLoeschen(id){
+  S.tagGruppen = tagGruppen().filter(g => g.id !== id);
+  tagListe().forEach(t => { if(t.gruppe === id) t.gruppe = null; });
+  sichern();
 }
 
-/* Fällige Stichtage oben in der App */
-function stichtageHTML(){
-  const liste = allePflanzen().map(p=>({p, z:zustandVon(p)})).filter(x=>x.z.faellig);
-  if(!liste.length) return '';
-  return `<div class="stich">
-    <h3>Nachfrage fällig</h3>
-    ${liste.map(({p,z})=>`<div class="stich-row">
-      <p class="stich-q"><b>${esc(nice(p))}</b> — ${esc(z.def.name)}<br><span>${esc(z.def.frage||'Ist der Zustand vorbei?')}</span></p>
-      <div class="stich-btns">
-        <button data-do="zfertig" data-p="${p.id}">${z.def.danach && ZUSTAENDE[z.def.danach]
-          ? 'Ja — weiter als „' + esc(ZUSTAENDE[z.def.danach].name) + '“' : 'Ja, wieder normal'}</button>
-        <button data-do="zplus" data-p="${p.id}">Noch zwei Wochen</button>
-      </div></div>`).join('')}
-  </div>`;
+/* Umbau der Zustände (F252, F266), einmal mit Merker, ohne Sicherung
+   (Regel 6.12): Zustände verworfen, das Gelernte nach S.lernen,
+   Einträge der entfernten Ereignisknöpfe gelöscht. */
+var TAG_UMBAU_EREIGNISSE = ['blatt','blatt_weg','geblueht','umgetopft','geschnitten','geduengt','schaedling'];
+var TAG_ZUSTANDSFELDER = ['code','seit','bis','medium'];
+function tagUmbau(){
+  if(!S || S.tagUmbau) return 0;
+  let n = 0;
+  if(!S.lernen || typeof S.lernen !== 'object') S.lernen = {};
+  const alt = S.zustand && typeof S.zustand === 'object' ? S.zustand : {};
+  Object.keys(alt).forEach(id => {
+    const e = alt[id] || {};
+    const rest = {};
+    Object.keys(e).forEach(k => { if(TAG_ZUSTANDSFELDER.indexOf(k) === -1) rest[k] = e[k]; });
+    if(Object.keys(rest).length) S.lernen[id] = Object.assign({}, S.lernen[id] || {}, rest);
+    n++;
+  });
+  delete S.zustand;
+  (S.eigene || []).forEach(p => {
+    if(p && ('uebergang' in p || 'uebergangBis' in p)){ delete p.uebergang; delete p.uebergangBis; n++; }
+  });
+  Object.keys(S.ereignisse || {}).forEach(id => {
+    const vor = S.ereignisse[id].length;
+    S.ereignisse[id] = S.ereignisse[id].filter(e => TAG_UMBAU_EREIGNISSE.indexOf(e.typ) === -1);
+    n += vor - S.ereignisse[id].length;
+    if(!S.ereignisse[id].length) delete S.ereignisse[id];
+  });
+  if(S.rundgang && S.rundgang.knoepfe) delete S.rundgang.knoepfe;
+  if(S.giess && 'winterpause' in S.giess){ delete S.giess.winterpause; n++; }
+  S.tagUmbau = 1;
+  return n;
+}
+/* Beim Start und nach jedem Einlesen: Umbau, Vorgaben, Abläufe. */
+function tagsBereit(){
+  if(typeof S !== 'object' || !S) return;
+  tagUmbau();
+  tagVorgabenSichern(false);
+  /* Beim allerersten Laden stehen HEUTE und iso noch nicht bereit; dann
+     trägt render() die Enden nach. */
+  try{ tagAblauf(); }catch(e){}
 }
 
-/* ══════════════════ Kalendereintrag ══════════════════ */
-function icsBauen(p){
-  const z = zustandVon(p);
-  if(!z.bis) return null;
-  const d = z.bis.replace(/-/g,'');
-  const endD = iso(new Date(new Date(z.bis+'T12:00:00').getTime()+86400000)).replace(/-/g,'');
-  const stempel = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-  const titel = 'Pflanze prüfen: ' + nice(p);
-  const text = (z.def.frage||'Zustand prüfen') + ' (' + z.def.name + ')';
-  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Pflanzenglossar//DE','BEGIN:VEVENT',
-    'UID:'+p.id+'-'+d+'@pflanzenglossar','DTSTAMP:'+stempel,'DTSTART;VALUE=DATE:'+d,
-    'DTEND;VALUE=DATE:'+endD,'SUMMARY:'+titel,'DESCRIPTION:'+text.replace(/\n/g,'\\n'),
-    'BEGIN:VALARM','TRIGGER:-PT9H','ACTION:DISPLAY','DESCRIPTION:'+titel,'END:VALARM',
-    'END:VEVENT','END:VCALENDAR'].join('\r\n');
-}
-function icsLaden(p){
-  const t = icsBauen(p); if(!t){ alert('Für diesen Zustand gibt es keinen Stichtag.'); return; }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([t], {type:'text/calendar'}));
-  a.download = 'pflanze-' + p.id + '.ics';
-  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-}
+
 
 /* ══════════════════ Gemini ══════════════════ */
 const ANLEGEN_KOPF = 'Du hilfst mir, eine Zimmer- oder Balkonpflanze zu bestimmen. Ich hänge gleich ein Foto an.';
@@ -7474,20 +7567,6 @@ function geminiLesen(txt){
   return raus;
 }
 
-const ZUSTAND_WORTE = [
-  [/wurzelf|staun/i,'wurzelfaeule'], [/frisch\s*umget|umgetop/i,'frisch'],
-  [/ausgetrock|vertrock|trockenstress/i,'trocken'], [/ausgehung|n(a|ä)hrstoffm/i,'hunger'],
-  [/sch(a|ä)dl|milbe|laus|l(a|ä)use|trauermuck/i,'schaedlinge'], [/sonnenbrand|verbrannt/i,'sonnenbrand'],
-  [/k(a|ä)lte|frostschad/i,'kaelteschaden'], [/erholung|regener/i,'regeneration'],
-  [/wasserkultur|aquakultur|umstellung/i,'aquakultur'], [/steckling|bewurzel/i,'steckling'],
-  [/winterruhe|ruhephase/i,'winterruhe'], [/bl(u|ü)te|frucht/i,'bluete'],
-  [/frisch\s*gekauft|neu\s*gekauft/i,'neu'], [/gesund|unauff/i,'gesund']
-];
-function zustandRaten(text){
-  if(!text) return null;
-  for(const [re, code] of ZUSTAND_WORTE) if(re.test(text)) return code;
-  return null;
-}
 
 /* ══════════════════ Nicht gefundene Arten sammeln ══════════════════ */
 function neueArtMerken(eintrag){
@@ -8583,149 +8662,125 @@ const DOKTOR_FRAGEN = [
 
 /* Diagnosen. gewicht: Symptom → Punkte. minus: spricht dagegen. */
 const DIAGNOSEN = [
-  {id:'staunaesse', name:'Staunässe und Wurzelfäule', zustand:'wurzelfaeule',
-   gewicht:{'welk-feucht':5,'erde-nass':5,'wurzeln-braun':6,'geruch':6,'gelb-unten':2,'gelb-alle':3,
+  {id:'staunaesse', name:'Staunässe und Wurzelfäule', gewicht:{'welk-feucht':5,'erde-nass':5,'wurzeln-braun':6,'geruch':6,'gelb-unten':2,'gelb-alle':3,
             'flecken-weich':3,'weich-matschig':5,'umgeknickt':4,'schimmel-erde':2,'blattfall':2},
    minus:{'erde-staubig':4,'welk-trocken':3},
    erklaerung:'Faule Wurzeln nehmen kein Wasser mehr auf. Die Pflanze lässt die Blätter hängen und wirkt durstig — genau deshalb wird oft nachgegossen und alles wird schlimmer. Ursache ist fast immer ein fehlendes Abzugsloch, ein zu großer Topf oder ein voller Untersetzer.',
    sofort:['Gießen sofort einstellen','Austopfen und Wurzeln ansehen: braune, weiche, riechende Teile wegschneiden','Abzugsloch prüfen, notfalls bohren','In luftiges Substrat mit grobem Anteil setzen','Untersetzer nach jedem Gießen leeren'],
    gegen:'Wenn die Erde staubtrocken ist, ist es eher das Gegenteil.'},
 
-  {id:'trockenstress', name:'Trockenstress', zustand:'trocken',
-   gewicht:{'welk-trocken':5,'erde-staubig':5,'raender-braun':3,'eingerollt':4,'blattfall':2,
+  {id:'trockenstress', name:'Trockenstress', gewicht:{'welk-trocken':5,'erde-staubig':5,'raender-braun':3,'eingerollt':4,'blattfall':2,
             'spitzen-braun':2,'flecken-trocken':2},
    minus:{'erde-nass':5,'welk-feucht':4,'wurzeln-braun':3},
    erklaerung:'Stark ausgetrocknete Erde nimmt oben kaum noch Wasser an, es läuft am Ballen vorbei ins Untersetzerchen. Die Pflanze bleibt durstig, obwohl gegossen wurde.',
    sofort:['Einmal gründlich tauchen, bis keine Blasen mehr aufsteigen','Danach gut abtropfen lassen','Vertrocknete Blätter erst entfernen, wenn neue kommen','Gießabstand kürzen, bis sie sich gefangen hat']},
 
-  {id:'lichtmangel', name:'Lichtmangel', zustand:null,
-   gewicht:{'lang-duenn':6,'klein-blass':5,'panasch-weg':6,'kein-wuchs':3,'blattfall':2,'keine-bluete':3},
+  {id:'lichtmangel', name:'Lichtmangel', gewicht:{'lang-duenn':6,'klein-blass':5,'panasch-weg':6,'kein-wuchs':3,'blattfall':2,'keine-bluete':3},
    minus:{'flecken-trocken':2},
    erklaerung:'Die Pflanze streckt sich zum Licht: lange dünne Triebe, große Abstände zwischen den Blättern, blasse Farbe. Gestreckte Teile bleiben gestreckt, das wächst sich nicht aus.',
    sofort:['Schrittweise heller stellen, nicht sofort in die pralle Sonne','Gestreckte Triebe einkürzen, sie treiben buschiger nach','Weniger gießen, solange wenig Licht da ist']},
 
-  {id:'sonnenbrand', name:'Sonnenbrand', zustand:'sonnenbrand',
-   gewicht:{'flecken-trocken':6,'raender-braun':2,'eingerollt':2},
+  {id:'sonnenbrand', name:'Sonnenbrand', gewicht:{'flecken-trocken':6,'raender-braun':2,'eingerollt':2},
    minus:{'lang-duenn':3,'klein-blass':2},
    erklaerung:'Helle, papierne Flecken auf den sonnenzugewandten Blättern, oft nach einem Umzug nach draußen oder ans Südfenster. Verbrannte Stellen wachsen nicht nach.',
    sofort:['Schattieren und über zwei Wochen langsam angewöhnen','Verbrannte Blätter erst entfernen, wenn neue da sind','Mittags nicht auf nasse Blätter gießen']},
 
-  {id:'naehrstoff', name:'Nährstoffmangel', zustand:'hunger',
-   gewicht:{'klein-blass':5,'gelb-unten':4,'kein-wuchs':4,'gelb-alle':2,'keine-bluete':2,'wurzeln-raus':3},
+  {id:'naehrstoff', name:'Nährstoffmangel', gewicht:{'klein-blass':5,'gelb-unten':4,'kein-wuchs':4,'gelb-alle':2,'keine-bluete':2,'wurzeln-raus':3},
    minus:{'kruste-weiss':4,'erde-nass':2},
    erklaerung:'Typisch nach langer Zeit im selben Substrat oder in reinem Wasser: kleine, blasse Blätter, dünne Triebe, kein Zuwachs. Die alten Blätter werden zuerst geopfert, weil die Pflanze deren Nährstoffe umverteilt.',
    sofort:['In frisches Substrat setzen oder schwach dosiert düngen','Bei Wasserkultur: dringend topfen, Wasser enthält keine Nährstoffe','Erst düngen, wenn die Wurzeln gesund sind']},
 
-  {id:'ueberduengung', name:'Überdüngung oder Salzschaden', zustand:null,
-   gewicht:{'kruste-weiss':6,'spitzen-braun':4,'raender-braun':3,'welk-feucht':2,'flecken-trocken':2},
+  {id:'ueberduengung', name:'Überdüngung oder Salzschaden', gewicht:{'kruste-weiss':6,'spitzen-braun':4,'raender-braun':3,'welk-feucht':2,'flecken-trocken':2},
    minus:{'klein-blass':3},
    erklaerung:'Zu viel Dünger oder hartes Wasser hinterlässt Salze im Substrat. Die Wurzeln können dann kein Wasser mehr ziehen, obwohl genug da ist — die Blattränder verbrennen von außen nach innen.',
    sofort:['Substrat gründlich durchspülen: langsam viel Wasser durchlaufen lassen','Vier bis sechs Wochen nicht düngen','Danach halb so stark dosieren wie angegeben','Weißen Belag von der Oberfläche abtragen']},
 
-  {id:'kalk', name:'Kalk oder hartes Wasser', zustand:null,
-   gewicht:{'spitzen-braun':4,'raender-braun':4,'kruste-weiss':3,'gelb-adern':3},
+  {id:'kalk', name:'Kalk oder hartes Wasser', gewicht:{'spitzen-braun':4,'raender-braun':4,'kruste-weiss':3,'gelb-adern':3},
    minus:{},
    erklaerung:'Kalkhaltiges Leitungswasser macht sich zuerst an den Blatträndern bemerkbar. Empfindlich sind vor allem Pfeilwurzgewächse, Farne, Karnivoren und Zitrus.',
    sofort:['Auf Regenwasser oder abgestandenes Wasser umstellen','Substrat einmal gründlich durchspülen','Braune Ränder knapp im Braunen abschneiden, nicht ins Grüne']},
 
-  {id:'chlorose', name:'Eisenmangel durch zu kalkhaltigen Boden', zustand:null,
-   gewicht:{'gelb-adern':7,'klein-blass':2},
+  {id:'chlorose', name:'Eisenmangel durch zu kalkhaltigen Boden', gewicht:{'gelb-adern':7,'klein-blass':2},
    minus:{},
    erklaerung:'Das Muster ist verräterisch: Blattfläche gelb, Adern bleiben grün. Meist fehlt nicht Eisen, sondern der Boden ist zu kalkhaltig, sodass die Pflanze es nicht aufnehmen kann.',
    sofort:['Auf Regenwasser umstellen','Speziellen Dünger für die Art geben, bei akutem Mangel Eisenchelat','Wurzelbereich nicht kalt und nass stehen lassen']},
 
-  {id:'luft-trocken', name:'Zu trockene Luft', zustand:null,
-   gewicht:{'spitzen-braun':5,'raender-braun':4,'eingerollt':3,'knospen-fallen':3,'sprenkel-fein':1},
+  {id:'luft-trocken', name:'Zu trockene Luft', gewicht:{'spitzen-braun':5,'raender-braun':4,'eingerollt':3,'knospen-fallen':3,'sprenkel-fein':1},
    minus:{'erde-nass':2},
    erklaerung:'Heizungsluft fällt im Winter unter dreißig Prozent Luftfeuchte. Farne, Pfeilwurzgewächse und Kannenpflanzen quittieren das mit knusprigen Rändern — und Spinnmilben lieben genau diese Bedingungen.',
    sofort:['Abstand zur Heizung vergrößern','Schale mit Wasser und Blähton daneben stellen','Pflanzen zusammenstellen, das hebt die Luftfeuchte im Umfeld','Auf Spinnmilben kontrollieren, sie folgen der trockenen Luft']},
 
-  {id:'spinnmilben', name:'Spinnmilben', zustand:'schaedlinge',
-   gewicht:{'gespinst':7,'sprenkel-fein':6,'blattfall':2,'raender-braun':1},
+  {id:'spinnmilben', name:'Spinnmilben', gewicht:{'gespinst':7,'sprenkel-fein':6,'blattfall':2,'raender-braun':1},
    minus:{'erde-nass':1},
    erklaerung:'Winzige Tiere auf der Blattunterseite, erkennbar an feinen Gespinsten in den Blattachseln und an einer hellen Sprenkelung der Blattfläche. Sie explodieren bei warmer, trockener Luft.',
    sofort:['Pflanze von den anderen trennen','Gründlich abduschen, besonders die Blattunterseiten','Luftfeuchte deutlich erhöhen','Behandlung nach 7 Tagen wiederholen, dann noch einmal','Nachbarpflanzen ebenfalls prüfen']},
 
-  {id:'trauermuecken', name:'Trauermücken', zustand:'schaedlinge',
-   gewicht:{'muecken':7,'erde-nass':3,'schimmel-erde':2,'klein-blass':1},
+  {id:'trauermuecken', name:'Trauermücken', gewicht:{'muecken':7,'erde-nass':3,'schimmel-erde':2,'klein-blass':1},
    minus:{'erde-staubig':2},
    erklaerung:'Die Mücken selbst sind harmlos, ihre Larven fressen aber feine Wurzeln. Sie brauchen dauerfeuchte Oberfläche zum Eierlegen — das Problem ist also fast immer die Gießweise.',
    sofort:['Obere Schicht abtrocknen lassen, von unten gießen','Zwei Zentimeter Sand oder feinen Kies aufstreuen, das blockiert die Eiablage','Gelbtafeln gegen die fliegenden Tiere','Nematoden gießen, wenn es hartnäckig ist']},
 
-  {id:'wolllaeuse', name:'Woll- oder Schmierläuse', zustand:'schaedlinge',
-   gewicht:{'watte':7,'klebrig':4,'klein-blass':2,'kein-wuchs':1},
+  {id:'wolllaeuse', name:'Woll- oder Schmierläuse', gewicht:{'watte':7,'klebrig':4,'klein-blass':2,'kein-wuchs':1},
    minus:{},
    erklaerung:'Weiße Wattebäusche in den Blattachseln und an Triebspitzen. Sie saugen Saft und scheiden Honigtau aus, auf dem später Rußtau wächst.',
    sofort:['Pflanze isolieren','Einzelne Nester mit einem in Alkohol getauchten Wattestäbchen abtupfen','Bei starkem Befall die ganze Pflanze behandeln','Nach 7 Tagen wiederholen, die Eier schlüpfen versetzt','Auch die Erdoberfläche und den Topfrand prüfen']},
 
-  {id:'schildlaeuse', name:'Schildläuse', zustand:'schaedlinge',
-   gewicht:{'hoecker':7,'klebrig':4,'gelb-alle':1},
+  {id:'schildlaeuse', name:'Schildläuse', gewicht:{'hoecker':7,'klebrig':4,'gelb-alle':1},
    minus:{},
    erklaerung:'Braune, feste Höcker auf Stiel und Blattadern, die sich abkratzen lassen. Unter dem Schild sitzt das Tier, deshalb wirken Spritzmittel schlecht.',
    sofort:['Schilde mechanisch abstreifen, mit Fingernagel oder weicher Bürste','Danach mit Öl- oder Seifenlösung nachbehandeln','Wöchentlich kontrollieren, mindestens vier Wochen lang','Klebrige Blätter abwischen, sonst kommt Rußtau']},
 
-  {id:'blattlaeuse', name:'Blattläuse', zustand:'schaedlinge',
-   gewicht:{'laeuse':7,'klebrig':4,'eingerollt':3,'knospen-fallen':2},
+  {id:'blattlaeuse', name:'Blattläuse', gewicht:{'laeuse':7,'klebrig':4,'eingerollt':3,'knospen-fallen':2},
    minus:{},
    erklaerung:'Sitzen dicht an jungen Trieben und Knospen. Vermehren sich rasend, sind aber vergleichsweise leicht loszuwerden.',
    sofort:['Mit kräftigem Wasserstrahl abspülen','Danach Schmierseifenlösung sprühen','Nach 5 bis 7 Tagen wiederholen','Draußen: Marienkäfer und Florfliegen machen den Rest']},
 
-  {id:'weisse-fliege', name:'Weiße Fliege', zustand:'schaedlinge',
-   gewicht:{'weisse-fliegen':7,'klebrig':3,'gelb-alle':2},
+  {id:'weisse-fliege', name:'Weiße Fliege', gewicht:{'weisse-fliegen':7,'klebrig':3,'gelb-alle':2},
    minus:{},
    erklaerung:'Kleine weiße Tiere auf der Blattunterseite, die beim Anstoßen auffliegen. Häufig an Tomaten, Fuchsien und Hibiskus.',
    sofort:['Gelbtafeln aufhängen, sie fangen die fliegenden Tiere','Blattunterseiten behandeln, dort sitzen Eier und Larven','Alle 5 Tage wiederholen, über drei Wochen','Neuzugänge zwei Wochen getrennt halten']},
 
-  {id:'mehltau', name:'Mehltau', zustand:'schaedlinge',
-   gewicht:{'belag-weiss':7,'gelb-alle':1,'blattfall':1},
+  {id:'mehltau', name:'Mehltau', gewicht:{'belag-weiss':7,'gelb-alle':1,'blattfall':1},
    minus:{},
    erklaerung:'Weißer, mehliger Belag, der sich abwischen lässt. Echter Mehltau mag warm und trocken, falscher Mehltau feucht — beide breiten sich bei stehender Luft aus.',
    sofort:['Befallene Blätter entfernen und im Restmüll entsorgen','Für Luftbewegung sorgen, Pflanzen auseinanderstellen','Milch-Wasser-Gemisch oder Backpulverlösung sprühen','Nicht über die Blätter gießen']},
 
-  {id:'grauschimmel', name:'Grauschimmel', zustand:'schaedlinge',
-   gewicht:{'flecken-weich':5,'schimmel-erde':3,'knospen-fallen':3,'weich-matschig':3},
+  {id:'grauschimmel', name:'Grauschimmel', gewicht:{'flecken-weich':5,'schimmel-erde':3,'knospen-fallen':3,'weich-matschig':3},
    minus:{'erde-staubig':3},
    erklaerung:'Weiche, faulende Stellen mit grauem Pelz, oft nach zu dichtem Stand und feuchter Luft ohne Bewegung.',
    sofort:['Befallene Teile großzügig wegschneiden, Werkzeug danach reinigen','Luft bewegen, Pflanzen auseinanderstellen','Nicht über Blätter und Blüten gießen','Abgefallenes Material sofort entfernen']},
 
-  {id:'kaelte', name:'Kälteschaden oder Zugluft', zustand:'kaelteschaden',
-   gewicht:{'flecken-weich':4,'blattfall':4,'welk-feucht':2,'gelb-alle':2},
+  {id:'kaelte', name:'Kälteschaden oder Zugluft', gewicht:{'flecken-weich':4,'blattfall':4,'welk-feucht':2,'gelb-alle':2},
    minus:{'erde-staubig':2,'lang-duenn':2},
    erklaerung:'Glasige, dann braun-schwarz werdende Blätter nach kalter Zugluft, kaltem Fensterbrett oder einer Nacht zu weit draußen. Kalte Wurzeln nehmen kaum Wasser auf.',
    sofort:['Zugluftquelle abstellen, Abstand zur Fensterscheibe','Untersetzer oder Korkscheibe gegen kalte Füße','Deutlich sparsamer gießen, bis neuer Trieb kommt','Nicht düngen']},
 
-  {id:'topf-zu-klein', name:'Topf zu klein, Ballen durchwurzelt', zustand:null,
-   gewicht:{'wurzeln-raus':6,'erde-staubig':3,'welk-trocken':3,'klein-blass':3,'kein-wuchs':3},
+  {id:'topf-zu-klein', name:'Topf zu klein, Ballen durchwurzelt', gewicht:{'wurzeln-raus':6,'erde-staubig':3,'welk-trocken':3,'klein-blass':3,'kein-wuchs':3},
    minus:{'erde-nass':3,'wurzeln-braun':2},
    erklaerung:'Wenn der Ballen komplett durchwurzelt ist, passt kaum noch Substrat und damit kaum Wasser hinein. Die Pflanze trocknet innerhalb von ein bis zwei Tagen aus und hungert gleichzeitig.',
    sofort:['In einen Topf umsetzen, der zwei bis vier Zentimeter mehr Durchmesser hat','Nicht viel größer, sonst droht Staunässe','Wurzelfilz an der Außenseite vorsichtig lösen','Erst vier Wochen nach dem Umtopfen wieder düngen']},
 
-  {id:'umzugsschock', name:'Umzugs- oder Kaufschock', zustand:'neu',
-   gewicht:{'blattfall':5,'gelb-alle':2,'knospen-fallen':3,'welk-feucht':1},
+  {id:'umzugsschock', name:'Umzugs- oder Kaufschock', gewicht:{'blattfall':5,'gelb-alle':2,'knospen-fallen':3,'welk-feucht':1},
    minus:{'wurzeln-braun':2,'muecken':2},
    erklaerung:'Standortwechsel, andere Lichtmenge oder der Weg aus dem Gewächshaus in die Wohnung: viele Pflanzen werfen daraufhin Blätter ab, oft erst ein bis zwei Wochen später. Feigen sind dafür berüchtigt.',
    sofort:['Standort jetzt nicht noch einmal wechseln','Drei Wochen nicht düngen und nicht umtopfen','Sparsamer gießen, solange wenig Blattmasse da ist','Auf Schädlinge kontrollieren, besonders bei Neuzugängen']},
 
-  {id:'alterung', name:'Normale Alterung', zustand:null,
-   gewicht:{'gelb-unten':5,'blattfall':1},
+  {id:'alterung', name:'Normale Alterung', gewicht:{'gelb-unten':5,'blattfall':1},
    minus:{'gelb-alle':3,'welk-feucht':3,'klein-blass':2,'wurzeln-braun':3},
    erklaerung:'Wenn einzelne alte Blätter ganz unten langsam vergilben, während oben normal weitergewachsen wird, ist das kein Problem, sondern Stoffwechsel. Die Pflanze holt sich die Nährstoffe aus alten Blättern zurück.',
    sofort:['Nichts unternehmen','Vergilbte Blätter erst abnehmen, wenn sie ganz trocken sind','Weiter beobachten: kommt neuer Zuwachs, ist alles in Ordnung']},
 
-  {id:'verholzt', name:'Verkahlt durch fehlenden Schnitt', zustand:null,
-   gewicht:{'verholzt-kahl':7,'kein-wuchs':2,'lang-duenn':2},
+  {id:'verholzt', name:'Verkahlt durch fehlenden Schnitt', gewicht:{'verholzt-kahl':7,'kein-wuchs':2,'lang-duenn':2},
    minus:{},
    erklaerung:'Rosmarin, Lavendel, Thymian und Salbei verkahlen von innen, wenn man sie nicht regelmäßig schneidet. Aus altem Holz treibt kaum etwas nach.',
    sofort:['Nur den grünen, beblätterten Teil um etwa ein Drittel kürzen','Nie ins alte Holz schneiden','Nach der Blüte schneiden, im Frühjahr noch einmal leicht','Völlig verholzte Pflanzen eher ersetzen als retten']},
 
-  {id:'bluetenendfaeule', name:'Blütenendfäule', zustand:null,
-   gewicht:{'frucht-schwarz':8},
+  {id:'bluetenendfaeule', name:'Blütenendfäule', gewicht:{'frucht-schwarz':8},
    minus:{},
    erklaerung:'Schwarze, eingesunkene Stellen am Fruchtende sind kein Pilz, sondern Kalziummangel durch schwankende Wasserversorgung. Betrifft vor allem Tomaten und Paprika im Topf.',
    sofort:['Gleichmäßig gießen, lieber öfter wenig als selten viel','Morgens an die Wurzel gießen, nicht über die Blätter','Betroffene Früchte abnehmen, sie erholen sich nicht','Mulchen, damit der Boden nicht so schnell austrocknet']},
 
-  {id:'karnivore-wasser', name:'Falsches Wasser bei einer Karnivore', zustand:null,
-   nurTyp:'Karnivore',
+  {id:'karnivore-wasser', name:'Falsches Wasser bei einer Karnivore', nurTyp:'Karnivore',
    gewicht:{'spitzen-braun':4,'raender-braun':4,'gelb-alle':3,'kein-wuchs':3,'flecken-trocken':2},
    minus:{},
    erklaerung:'Karnivoren vertragen nur Regen- oder Osmosewasser und ausschließlich ungedüngtes Torf-Sand-Substrat. Leitungswasser und normale Blumenerde bringen sie innerhalb weniger Wochen um.',
@@ -10089,16 +10144,14 @@ function vSaison(methode, monat){
 const EREIGNIS_ARTEN = {
   blatt:       {name:'Neues Blatt',      kurz:'+1 Blatt',      ton:'gut'},
   blatt_weg:   {name:'Blatt verloren',   kurz:'−1 Blatt',      ton:'warn'},
-  geblueht:    {name:'Blüte',            kurz:'blüht',         ton:'gut'},
-  umgetopft:   {name:'Umgetopft',        kurz:'umgetopft',     ton:'info', zustand:'frisch'},
-  geschnitten: {name:'Geschnitten',      kurz:'geschnitten',   ton:'info'},
-  geduengt:    {name:'Gedüngt',          kurz:'gedüngt',       ton:'info'},
-  schaedling:  {name:'Schädling gesehen',kurz:'Schädling',     ton:'warn', zustand:'schaedlinge'},
+  umgetopft:   {name:'Umgetopft',        kurz:'umgetopft',     ton:'info'},
+  /* 4.0-beta.27 (G2a+c): Setzen, Ersetzen, Beenden und Entfernen eines Tags */
+  tag:         {name:'Tag',              kurz:'Tag',           ton:'info'},
   foto:        {name:'Foto gemacht',     kurz:'Foto',          ton:'info'},
   gesehen:     {name:'Angesehen',        kurz:'angesehen',     ton:'still'},
   notiz:       {name:'Notiz',            kurz:'Notiz',         ton:'info'},
   /* Die beiden Seiten einer Vermehrung. Sie stehen bewusst nicht in
-     STANDARD_KNOEPFE: sie entstehen beim Anlegen eines Ablegers von
+     den Knöpfen des Verlaufs: sie entstehen beim Anlegen eines Ablegers von
      selbst und waeren als Knopf im Rundgang nur eine Fehlerquelle. */
   vermehrt:    {name:'Steckling abgenommen', kurz:'vermehrt',   ton:'gut'},
   entstanden:  {name:'Als Ableger entstanden', kurz:'entstanden', ton:'gut'}
@@ -10109,21 +10162,14 @@ function ereignisse(id){ return ((S.ereignisse||{})[id] || []).slice().sort((a,b
 /* `bezug` haelt die andere Pflanze fest, wenn ein Ereignis zwei
    betrifft — bei einer Vermehrung die Mutter beziehungsweise den
    Ableger. Der Verlauf macht daraus einen Sprung in deren Karte. */
-function ereignisDazu(id, typ, text, bezug){
+function ereignisDazu(id, typ, text, bezug, datum){
   if(!S.ereignisse) S.ereignisse = {};
   const liste = S.ereignisse[id] = S.ereignisse[id] || [];
   liste.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-              datum:iso(HEUTE), typ, text: text || '',
+              datum:datum || iso(HEUTE), typ, text: text || '',
               bezug: bezug || null});
   if(typ === 'blatt' && typeof blattDazu === 'function') blattDazu(id);
   if(typ === 'blatt_weg' && typeof blattZurueck === 'function') blattZurueck(id);
-  /* Manche Ereignisse aendern den Zustand — „umgetopft" setzt „frisch
-     umgetopft" und damit die vierwoechige Duengesperre. Das stand
-     vorher bei den Aufrufern, im Rundgang und am Ereignisknopf. Jeder
-     dritte Weg haette es erneut nachbauen muessen. */
-  const art = EREIGNIS_ARTEN[typ];
-  if(art && art.zustand && typeof zustandSetzen === 'function')
-    zustandSetzen(id, art.zustand);
   gesehenSetzen(id);
   sichern();
 }
@@ -10333,7 +10379,6 @@ const REGEL_STICHWORTE = [
 ];
 
 function statusHTML(p){
-  const knoepfe = (S.rundgang && S.rundgang.knoepfe) || STANDARD_KNOEPFE;
   const alle = ereignisse(p.id);
   const liste = alle.slice(0, 5);
   const aelter = alle.slice(5);
@@ -10359,15 +10404,12 @@ function statusHTML(p){
     <details class="stat-auf">
       <summary>Etwas eintragen</summary>
       <div class="stat-chips">
-        ${knoepfe.map(k=>EREIGNIS_ARTEN[k] ? `<button class="stat-chip ${EREIGNIS_ARTEN[k].ton}"
-          data-do="ereignis" data-p="${p.id}" data-typ="${k}">${esc(EREIGNIS_ARTEN[k].name)}</button>` : '').join('')}
         <button class="stat-chip still" data-do="ereignis" data-p="${p.id}" data-typ="gesehen">Nur angesehen</button>
       </div>
     </details>
   </div>`;
 }
 
-const STANDARD_KNOEPFE = ['blatt','blatt_weg','geblueht','umgetopft','geschnitten','geduengt','schaedling'];
 
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-do]'); if(!b) return;
@@ -10408,7 +10450,7 @@ document.addEventListener('click', e=>{
   if(b.dataset.do === 'ereignis'){
     e.stopPropagation();
     const typ = b.dataset.typ;
-    ereignisDazu(b.dataset.p, typ);   /* setzt den Zustand selbst */
+    ereignisDazu(b.dataset.p, typ);
     render();
     return;
   }
@@ -10875,7 +10917,6 @@ function pflanzeEntfernen(id){
         </button>
       </div>
     </div>
-    <div id="stichtage"></div>
   </section>
 
   <div data-ans="sammlung">
@@ -10890,6 +10931,8 @@ function pflanzeEntfernen(id){
     <div class="ctrl-klapp" id="ctrl-klapp" hidden>
     </div>
     <div class="filter-marken" id="filter-marken"></div>
+    <!-- 4.0-beta.27 (G2a+c): Tags, die gerade eine Pflanze trägt -->
+    <div class="tag-leiste" id="tag-leiste" role="group" aria-label="Nach Tag filtern" hidden></div>
   </section>
   <div data-ans="sammlung" id="ctrl-platz" aria-hidden="true"></div>
   <!-- 4.0-beta.24 (G1a-2, F218): Ansicht über ein eigenes Aufklappmenü, keine Systemliste -->
@@ -10919,6 +10962,20 @@ function pflanzeEntfernen(id){
 
 
 
+
+  <!-- 4.0-beta.27 (G2a+c): Tags und eigene Gruppen -->
+  <section data-ans="mehr" class="plan mh" id="tags-sec" data-mh="tags">
+    <h2 class="wz-h2">Tags</h2>
+    <div class="wz-kopfzeile">
+      <button class="wz-kopf" data-mh-go="tags" aria-expanded="false" aria-controls="mh-in-tags">
+        <span class="wz-t">Tags</span><span class="wz-p" aria-hidden="true">›</span></button>
+      <button class="wz-i" data-mh-info="tags" aria-expanded="false" aria-label="Wozu sind Tags da?">i</button>
+    </div>
+    <div class="wz-in" id="mh-in-tags" hidden>
+      <p class="wz-hilfe" hidden>Ein Tag markiert eine Pflanze mit Datum, zum Beispiel „Gießpause“ oder „Dünger“. Hier legst du Tags und eigene Gruppen an, änderst und löschst sie. Gesetzt wird ein Tag in der Pflanzenkarte.</p>
+      <div id="tv-inhalt"></div>
+    </div>
+  </section>
 
   <!-- 4.0-beta.23 (G1a, F212): Räume und Stellplätze statt Grundriss -->
   <section data-ans="mehr" class="plan mh" id="raeume-sec" data-mh="raeume">
@@ -11926,12 +11983,6 @@ function pflanzeEntfernen(id){
       <p class="fhint" id="kanne-text"></p>
       <button type="button" class="knopf-leise" id="schwelle-zurueck">Vorschlag wieder verwenden</button>
 
-      <p class="ein-abschnitt">Winterpause</p>
-      <div class="ein-karte">
-      <label class="fspan check">
-        <input type="checkbox" role="switch" id="ck-winterpause"> <span class="lab" style="display:inline">Von Oktober bis Februar nicht düngen</span></label>
-      <p class="fhint" id="winterpause-text"></p>
-      </div>
     </div>
   </section>
 
@@ -12112,7 +12163,6 @@ function pflanzeEntfernen(id){
       <label id="rg-wer-feld"><span class="lab">Wer kommt dran</span><select id="rg-wer">
         <option value="faellig">Nur die länger nicht angesehenen</option>
         <option value="alle">Alle Pflanzen</option>
-        <option value="zustand">Nur die mit einem Zustand</option>
       </select></label>
       <label><span class="lab">Reihenfolge</span><select id="rg-sortieren">
         <option value="raum">Nach Raum und Standort — einmal durchlaufen</option>
@@ -12123,8 +12173,6 @@ function pflanzeEntfernen(id){
       <label class="fspan check"><input type="checkbox" role="switch" id="rg-saison">
         <span class="lab" style="display:inline">Im Winter größere Abstände</span></label>
     </div>
-    <h3>Welche Knöpfe erscheinen</h3>
-    <div class="sym-liste" id="rg-knoepfe-wahl"></div>
     </div>
   </section>
 
@@ -12166,8 +12214,6 @@ function pflanzeEntfernen(id){
         <input type="checkbox" role="switch" id="sch-gliste"> <span class="lab" style="display:inline">Gießen als Liste</span></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-gmwie"> <span class="lab" style="display:inline">Hinweiskärtchen beim Gießen</span></label>
-      <label class="fspan check">
-        <input type="checkbox" role="switch" id="sch-gmzustand"> <span class="lab" style="display:inline">Zustandsfrage beim Gießen</span></label>
     </div>
     <!-- 4.0-beta.19 (Plan M1b): Die Kartendichte gehört zum Modus -->
     <p class="ein-abschnitt">Kartendichte</p>
@@ -12453,6 +12499,15 @@ function pflanzeEntfernen(id){
   </div>
 </div>
 
+<!-- 4.0-beta.27 (G2a+c): Tag setzen und Eintrag bearbeiten -->
+<div id="tag-fenster" class="modal" role="dialog" aria-modal="true" aria-labelledby="tag-titel" hidden>
+  <div class="modal-box tag-box">
+    <button type="button" id="tag-zu" aria-label="Schließen">×</button>
+    <h3 id="tag-titel">Tag setzen</h3>
+    <div class="tag-inhalt" id="tag-inhalt"></div>
+  </div>
+</div>
+
 <div id="rundgang" role="dialog" aria-modal="true" aria-label="Rundgang" hidden>
   <div class="gm-leiste">
     <div class="gm-fort-bahn"><span id="rg-fort"></span></div>
@@ -12519,8 +12574,15 @@ function pflanzeEntfernen(id){
     <p class="ein-abschnitt">Ort</p>
     <div id="lage-filter"></div>
 
-    <p class="ein-abschnitt">Zustand</p>
+    <p class="ein-abschnitt">Gießen</p>
     <div class="as-knoepfe" id="filter-zustand"></div>
+
+    <!-- 4.0-beta.27 (G2a+c): Tags nach Gruppen und Wirkung -->
+    <p class="ein-abschnitt">Tags</p>
+    <div id="filter-tags"></div>
+
+    <p class="ein-abschnitt">Wirkung</p>
+    <div class="as-knoepfe" id="filter-wirk"></div>
 
     <p class="ein-abschnitt">Sicherheit</p>
     <div class="as-knoepfe" id="filter-gift"></div>
@@ -12662,18 +12724,6 @@ function pflanzeEntfernen(id){
           <span class="fhint" id="f-sorte-hint" hidden></span>
         </div>
         <p class="pastemeld aw-status" id="al-artfrage" hidden></p>
-        <div class="al-feld">
-          <span class="lab">Zustand</span>
-          <select id="f-zustand" hidden></select>
-          <div class="al-knoepfe" id="f-zustand-knoepfe"></div>
-          <span class="fhint" id="f-zustand-hint"></span>
-        </div>
-        <div class="quar-anbieten" id="f-quar">
-          <p>Neuzugang? Drei Wochen getrennt aufstellen ist die wirksamste Einzelmaßnahme gegen
-            eingeschleppte Schädlinge. Die Pflanze läuft dann nicht im Rundgang mit und bekommt
-            eigene Kontrolltermine.</p>
-          <div class="tools"><button type="button" id="btn-f-quar">Mit Quarantäne anlegen</button></div>
-        </div>
       </div>
 
       <!-- Stufe 4: Platz und Pflege -->
@@ -13064,7 +13114,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.26';
+const FASSUNG = '4.0-beta.27';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13272,7 +13322,9 @@ const WUNSCH_START = [
 ];
 const LEERSTAND = () => ({
   tasks:{}, added:{}, deleted:{}, wish:null, water:{}, fotos:{}, fotosWeg:{}, profil:{},
-  eigene:[], zustand:{}, neueArten:[], blatt:{}, vorrat:[],
+  eigene:[], lernen:{}, neueArten:[], blatt:{}, vorrat:[],
+  /* 4.0-beta.27 (G2a+c): Tags statt Zustände */
+  tags:null, tagGruppen:[], tagEin:{}, tagVorgabenAus:[],
   ereignisse:{}, gesehen:{}, orte:{}, acc:{giessen:1, aufgaben:1},
   balkon:null, raeume:null, raumAktiv:null, rundgang:null, meldeMail:'', sammlungOffen:null,
   design:'botanisch', wetter:null,
@@ -13310,7 +13362,7 @@ const LEERSTAND = () => ({
   /* Gießcenter: was fuer alle Pflanzen gilt. `art` ist das Wasser aus
      dem Hahn oder der Tonne, `haerte` bleibt leer, solange es niemand
      nachgeschlagen hat — raten waere hier schlechter als schweigen. */
-  giess:{art:'leitung', haerte:'', dgArt:'fluessig', winterpause:true,
+  giess:{art:'leitung', haerte:'', dgArt:'fluessig',
          saison:true, saisonStaerke:'normal'},
   /* 3.31.0: Felder, die die App schon benutzte, aber hier fehlten.
      `null` heißt überall „nicht gesetzt“ — so lesen die Stellen im
@@ -13498,11 +13550,13 @@ function grundwerteErgaenzen(){
   ['wzOffen', 'mehrOffen', 'ansichtAlles'].forEach(k=>{ delete S[k]; });
   /* Ebenso alle Sammlungen, die als Liste erwartet werden. */
   ['eigene','neueArten','vorrat'].forEach(k=>{ if(!Array.isArray(S[k])) S[k] = []; });
-  ['tasks','added','deleted','water','fotos','fotosWeg','profil','zustand','blatt',
-   'ereignisse','gesehen','orte'].forEach(k=>{
+  ['tasks','added','deleted','water','fotos','fotosWeg','profil','lernen','blatt',
+   'ereignisse','gesehen','orte','tagEin'].forEach(k=>{
     if(!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {};
   });
   datenVereinheitlichen();
+  /* 4.0-beta.27 (G2a+c): Umbau der Zustände, Vorgaben, erreichte Enden */
+  if(typeof tagsBereit === 'function') tagsBereit();
   bereinigungAnstossen();
 }
 
@@ -14122,8 +14176,7 @@ function jahresMischung(sommerWert, winterWert, lage){
    nachgesehen. Der Abstand lernt aus dem Untersetzer: „Noch Wasser
    drin“ einen Tag länger, „War schon leer“ einen kürzer, Grenzen 1 bis
    14 Tage. Start 3 Tage oder die Antwort beim Anlegen. Steht in
-   S.anstau, nicht in S.zustand — ein Zustandswechsel löscht dort den
-   Eintrag der Pflanze. */
+   S.anstau. */
 const ANSTAU_START = 3, ANSTAU_MIN = 1, ANSTAU_MAX = 14;
 function anstauTage(p){
   const v = p && S.anstau ? S.anstau[p.id] : null;
@@ -14139,10 +14192,13 @@ function anstauSchritt(p, d){
 function anstauLage(p){
   if(!p || p.klasse !== 'S' || p.intervallEigen === true) return null;
   if(wechselIntervall(p)) return null;
-  const z = typeof zustandVon === 'function' ? zustandVon(p) : null;
-  return (z && z.code === 'karnivore-ruhe') ? 'ruhe' : 'anstau';
+  /* 4.0-beta.27: Die Ruhe kommt aus dem Tag „Winterruhe“ (vorher Zustand
+     „Winterruhe der Karnivore“). */
+  return (typeof tagWinterruheLaeuft === 'function' && tagWinterruheLaeuft(p)) ? 'ruhe' : 'anstau';
 }
-function intervallVon(p){
+/* 4.0-beta.27: `ohneTag` liefert den Abstand ohne den laufenden Gießtag
+   (für die Anzeige „14 → 7 Tage“). */
+function intervallVon(p, ohneTag){
   const lage = jahresLage();
   const w = wechselIntervall(p);
   if(w) return Math.max(1, Math.round(jahresMischung(w[0], w[1], lage)));
@@ -14153,7 +14209,7 @@ function intervallVon(p){
        bereits der Ruherhythmus, nicht der Sommerwert mit Zuschlag. */
     const iv = intervallBasis(p);
     const basis = anstau === 'ruhe' ? Math.max(1, Math.round(iv[1])) : anstauTage(p);
-    const schub = (S.zustand[p.id] && S.zustand[p.id].giessSchub) || 0;
+    const schub = schubVon(p.id);
     return basis + Math.min(4, Math.max(0, schub));
   }
   const iv = intervallBasis(p);
@@ -14166,9 +14222,8 @@ function intervallVon(p){
     const f = saisonFaktor();
     if(f !== 1) basis = basis * f;
   }
-  /* Gelerntes aus den Rueckmeldungen. Es sitzt vor dem Zustand: ein
-     kranker oder frisch umgetopfter Stand ist voruebergehend, der
-     gelernte Rhythmus gilt darunter weiter. */
+  /* Gelerntes aus den Rueckmeldungen. Es sitzt vor dem Gießtag: der
+     Tag ist voruebergehend, der gelernte Rhythmus gilt darunter weiter. */
   /* Ein eigener Rhythmus ist genau das, was eingetragen wurde. Ein
      vorher gelernter Faktor darf ihn nicht still verschieben — sonst
      stünde nach „alle 7 Tage“ auf der Karte „alle 9 Tage“. */
@@ -14180,11 +14235,14 @@ function intervallVon(p){
   if(!ivEigen(p) && typeof lernFaktorVon === 'function' && (typeof gruppeLernt !== 'function' || gruppeLernt(p)))
     basis = basis * lernFaktorVon(p.id);
   basis = Math.max(1, Math.round(basis));
-  const z = typeof zustandVon === 'function' ? zustandVon(p) : null;
-  if(z && z.def && z.def.f && z.def.f !== 1) basis = Math.max(1, Math.round(basis * z.def.f));
-  else if(p.uebergang && p.uebergangBis && HEUTE < new Date(p.uebergangBis+'T23:59:59')) basis = p.uebergang;
+  /* 4.0-beta.27: Der laufende Gießtag wirkt in Prozent (vorher der
+     Faktor des Zustands). Er endet mit dem Tag. */
+  if(!ohneTag && typeof tagFaktor === 'function'){
+    const tf = tagFaktor(p);
+    if(tf !== 1) basis = Math.max(1, Math.round(basis * tf));
+  }
   /* Von Hand bestätigte Verschiebung, höchstens vier Tage. */
-  const schub = (S.zustand[p.id] && S.zustand[p.id].giessSchub) || 0;
+  const schub = schubVon(p.id);
   return basis + Math.min(4, Math.max(0, schub));
 }
 /* „alle 1 Tage" sagt niemand. Bei einem Tag heißt der Rhythmus
@@ -14193,7 +14251,7 @@ function intervallVon(p){
 function ivWort(iv){ return iv === 1 ? 'täglich' : 'alle ' + iv + ' Tage'; }
 /* Für die Rückfrage: der Wert ohne Verschiebung. */
 function giessIntervall(p){
-  const schub = (S.zustand[p.id] && S.zustand[p.id].giessSchub) || 0;
+  const schub = schubVon(p.id);
   return intervallVon(p) - Math.min(4, Math.max(0, schub));
 }
 /* In S.water[id] gehört eine Liste von Gießterminen. Steht dort aus
@@ -14263,30 +14321,8 @@ function duengSperre(p){
   if((p.duenger || 'normal') === 'nie')
     return {code:'nie', text:'Diese Art wird nie gedüngt — Dünger schadet ihr.'};
 
-  const g = (typeof giessEinst === 'function') ? giessEinst() : {};
-  /* Die Pause hängt an derselben Jahreskurve wie das Gießen. Die
-     Schwelle 0,35 liegt dort, wo vorher der 1. Oktober und der
-     1. März standen — etwa Mitte Oktober bis Anfang März. Eine
-     Ja/Nein-Frage braucht eine Grenze; sie soll aber dieselbe Kurve
-     benutzen wie alles andere, nicht eine eigene Monatsliste. */
-  if(g.winterpause !== false && jahresLage() < DUENG_PAUSE_AB)
-    return {code:'winter', text:'Winterpause bis März. Wer jetzt düngt, reichert Salz im Topf an — die Pflanze wächst nicht und nimmt nichts auf.'};
-
-  const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-  if(z && z.code === 'frisch'){
-    /* Vier Wochen gelten fuers Giessen — so lange wachsen die Wurzeln
-       an. Der Duenger braucht laenger: in vorgedueengter Erde reicht
-       der Vorrat sechs bis acht Wochen, und geduengt wird deshalb
-       erst nach sechs. Die Zahl steht hier und nicht am Zustand,
-       damit sie die Giessdauer nicht mitverschiebt. */
-    const seit = z.seit ? tageSeit(z.seit) : null;
-    const rest = (seit == null) ? null : Math.max(0, DUENG_FRISCH_TAGE - seit);
-    return {code:'frisch', text:'Frisch umgetopft. Im neuen Substrat steckt genug — '
-      + (rest ? 'noch ' + rest + ' ' + (rest === 1 ? 'Tag' : 'Tage') : 'noch einige Tage') + ' warten.'};
-  }
-  if(z && z.code !== 'gesund' && z.def && z.def.ton === 'alarm')
-    return {code:'zustand', text:'Erst gesund werden lassen. „' + z.def.name
-      + '“ und Dünger vertragen sich nicht — geschwächte Wurzeln nehmen ihn nicht auf.'};
+  /* 4.0-beta.27 (F265): Der Winterschalter und die Zustandssperren
+     sind weg. Die Sperre setzt jetzt ein Tag mit „Düngen sperren“. */
 
   /* Langzeitdünger beim Umtopfen: eine feste Sperre statt einer
      Rechnung. Der Assistent trägt das Datum ein. */
@@ -14584,8 +14620,7 @@ function duengGrenze(p){
   if(zahl >= d.proSaison && (!jedes || DUENG_SAISON_BLEIBT.indexOf((typeof gruppeVon === 'function' ? gruppeVon(p) : {}).id) !== -1))
     return {code:'saison', text:'In dieser Saison schon ' + zahl + '× gedüngt — mehr verträgt sie nicht.'};
   if(d.nurImTrieb){
-    const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-    if(z && z.code === 'winterruhe')
+    if(typeof tagWinterruheLaeuft === 'function' && tagWinterruheLaeuft(p))
       return {code:'ruhe', text:'Sie ist eingezogen. Gedüngt wird erst wieder, wenn sie treibt.'};
   }
   if(d.nurRuhezeitUmgekehrt && typeof jahresLage === 'function' && jahresLage() > 0.8)
@@ -14761,6 +14796,7 @@ function giessen(id){
     S.water[id] = l.filter(d => d !== heute);
   } else {
     l.push(heute); l.sort();
+    if(typeof tagGiessNotizWeg === 'function') tagGiessNotizWeg(id);
   }
   sichern();
   return true;
@@ -15260,6 +15296,10 @@ let gruppierung = 'raum', filterKlasse = null, filterKatze = null;
    Zustaende heissen „eines von beiden“ — sonst waere die Auswahl bei
    jedem zweiten Klick leer. */
 const filterZustand = new Set();
+/* 4.0-beta.27 (G2a+c): gewählte Tags (ODER in einer Gruppe, UND zwischen
+   Gruppen) und Wirkungen */
+const filterTags = new Set();
+const filterWirk = new Set();
 let sortierung = 'faellig';
 function ansichtEinstellungenLaden(){
   if(typeof S !== 'object' || !S) return;
@@ -15286,18 +15326,8 @@ const ZUSTAND_FILTER = {
   faellig:    {name:'Heute fällig',    pruef:p=>{ const st = giessStatus(p);
                  return st.stand === 'soon' && st.rest <= 0; }},
   ueber:      {name:'Überfällig',      pruef:p=>giessStatus(p).stand === 'over'},
-  /* 4.0-beta.26 (G1b): laufende Gießpause eines Zustands */
+  /* 4.0-beta.27: laufende Gießpause aus einem Tag */
   pause:      {name:'Gießpause',       pruef:p=>stoppRest(p) > 0},
-  trocken:    {name:'Ausgetrocknet',   pruef:p=>{ const z = zustandVon(p);
-                 return !!z && /trocken|durst/i.test((z.def && z.def.name) || z.code || ''); }},
-  quarantaene:{name:'In Quarantäne',   pruef:p=>{ const z = zustandVon(p);
-                 return !!z && z.code === 'quarantaene'; }},
-  steckling:  {name:'Ableger',         pruef:p=>{ const z = zustandVon(p);
-                 return !!p.eltern || (!!z && z.code === 'steckling'); }},
-  befund:     {name:'Befund offen',    pruef:p=>{ const z = zustandVon(p);
-                 return !!z && z.code !== 'gesund'; }},
-  gesund:     {name:'Alles in Ordnung',pruef:p=>{ const z = zustandVon(p);
-                 return !z || z.code === 'gesund'; }},
   wasser:     {name:'Wasserkultur',    pruef:p=>giessartVon(p) === 'wasser'},
   hydro:      {name:'Hydrokultur',     pruef:p=>giessartVon(p) === 'hydro'}
 };
@@ -15337,7 +15367,6 @@ const GRUPPIERUNGEN = {
   familie:    'Familie',
   typ:        'Typ',
   klasse:     'Gießklasse',
-  zustand:    'Zustand',
   faelligkeit:'Fälligkeit',
   abstammung: 'Abstammung',
   licht:      'Lichtbedarf'
@@ -15359,10 +15388,6 @@ function gruppenSchluessel(p){
     case 'licht':      return SONNE[p.sonne] ? SONNE[p.sonne].text : 'Licht offen';
     case 'gattung':    return gattungVonName(p);
     case 'familie':    return String(p.familie || '').trim() || 'Ohne Familie';
-    case 'zustand': {
-      const z = zustandVon(p);
-      return (z && z.def && z.def.name) || 'Gesund';
-    }
     case 'faelligkeit': {
       const st = giessStatus(p);
       if(st.stand === 'over') return 'Überfällig';
@@ -15446,6 +15471,7 @@ function filterKnoepfeZeichnen(){
   const gr = document.getElementById('filter-gruppen');
   if(gr) gr.innerHTML = Object.keys(GRUPPIERUNGEN).map(k =>
     knopf('data-fgruppe', k, GRUPPIERUNGEN[k], gruppierung === k)).join('');
+  if(typeof tagFilterKnoepfeZeichnen === 'function') tagFilterKnoepfeZeichnen();
 }
 
 /* Was gerade greift, in einer Zeile über der Sammlung. Ohne das
@@ -15464,6 +15490,8 @@ function filterMarkenZeichnen(){
     : (raumNameVon(filterRaum) || 'Raum')]);
   if(filterPlatz) marken.push(['platz', filterPlatz === '__ohne' ? 'Ohne Stellplatz' : filterPlatz]);
   if(typeof filterDueng !== 'undefined' && filterDueng) marken.push(['dueng', 'Düngen fällig']);
+  filterTags.forEach(id => { const t = tagDef(id); if(t) marken.push(['tag:' + id, t.name]); });
+  filterWirk.forEach(k => marken.push(['wirk:' + k, tagWirkName(k)]));
   box.innerHTML = marken.map(m =>
     '<button type="button" class="filter-marke" data-fweg="' + esc(m[0]) + '">'
     + esc(m[1]) + '</button>').join('');
@@ -15476,10 +15504,13 @@ function filterWeg(was){
   else if(was === 'platz') filterPlatz = null;
   else if(was === 'dueng'){ if(typeof filterDueng !== 'undefined') filterDueng = false; }
   else if(was.indexOf('zustand:') === 0) filterZustand.delete(was.slice(8));
+  else if(was.indexOf('tag:') === 0) filterTags.delete(was.slice(4));
+  else if(was.indexOf('wirk:') === 0) filterWirk.delete(was.slice(5));
 }
 function filterZuruecksetzen(){
   filterKlasse = null; filterKatze = null; filterRaum = null; filterPlatz = null;
   filterZustand.clear();
+  filterTags.clear(); filterWirk.clear();
   if(typeof filterDueng !== 'undefined') filterDueng = false;
   sortierung = 'faellig';
 }
@@ -15538,9 +15569,410 @@ document.addEventListener('click', e => {
    Beide standen dauerhaft unter der Suche und haben zwei Zeilen belegt,
    auch wenn nichts gefiltert war. Jetzt öffnet sie ein Knopf, der die
    Zahl der gesetzten Filter mitführt — sichtbar bleibt nur die Suche. */
+/* ══════════════════════════════════════════════════════════════
+   4.0-beta.27 (Plan G2a+c): Tags in Karte, Fenster, Einstellungen
+   und Filter
+   ══════════════════════════════════════════════════════════════ */
+function tagPunktHTML(farbe){ return '<span class="tag-punkt" aria-hidden="true" style="background:' + esc(farbe) + '"></span>'; }
+function tagArtText(t){
+  const w = tagWirkungen(t).map(k => k === 'kuerzer' || k === 'laenger'
+    ? tagWirkName(k) + ' ' + t.pz + ' %' : tagWirkName(k));
+  const teile = [t.art === 'einmalig' ? 'einmalig' : (t.dauer ? 'Zeitraum, ' + t.dauer + ' Tage' : 'Zeitraum')];
+  return teile.concat(w.length ? w : ['ohne Wirkung']).join(' · ') + (t.fest ? ' · fest' : '');
+}
+/* Die Tags nach Heimatgruppe, eigene Gruppen zuerst, dann die Wirkungen */
+function tagNachGruppe(liste){
+  const reihe = tagGruppen().map(g => 'g:' + g.id)
+    .concat(Object.keys(TAG_GIESS).map(k => 'w:' + k), Object.keys(TAG_SCHALTER).map(k => 'w:' + k), ['w:ohne']);
+  const map = {};
+  liste.forEach(t => { const h = tagHeimat(t); (map[h.key] = map[h.key] || {h, tags:[]}).tags.push(t); });
+  return reihe.filter(k => map[k]).map(k => map[k]);
+}
+
+/* ── Karte ─────────────────────────────────────────────────── */
+function tagKarteHTML(p){
+  if(!p || !p.id) return '';
+  const hin = tagEintraege(p.id).filter(e => e.hinweis).map(e => {
+    const t = tagDef(e.t);
+    return `<p class="tag-hinweis"><span><b>${esc((t ? t.name : 'Tag') + ' vorbei')}</b> · seit ${esc(tagDatumKurz(e.ende || e.bis))}</span>`
+      + `<button type="button" data-tag-gesehen="${esc(e.e)}" data-p="${esc(p.id)}">Gesehen</button></p>`;
+  }).join('');
+  const lauf = tagLaufend(p);
+  const chips = lauf.map(x => {
+    const h = tagHeimat(x.t);
+    const zeit = x.e.bis ? 'bis ' + tagDatumKurz(x.e.bis) : 'seit ' + tagDatumKurz(x.e.von);
+    return `<button type="button" class="tag-chip" data-tag-e="${esc(x.e.e)}" data-p="${esc(p.id)}" style="--tagf:${esc(h.farbe)}">`
+      + `${tagPunktHTML(h.farbe)}<span>${esc(x.t.name)}</span><small>${esc(zeit)}</small></button>`;
+  }).join('');
+  const g = tagGiessEintrag(p);
+  let wirk = '';
+  if(g && g.t.giess === 'pause') wirk = 'Gießpause: ' + stoppText(p) + '.';
+  else if(g) wirk = g.t.name + ': ' + tagWirkText(intervallVon(p, true), g.t.giess, tagProzent(g));
+  return `<div class="tagk" data-tagk="${esc(p.id)}">${hin}
+    <div class="tagk-kopf"><span class="lab">Tags</span>
+      <button type="button" class="tag-plus" data-tag-auf="${esc(p.id)}">+ Tag</button></div>
+    ${chips ? `<div class="tag-chips">${chips}</div>` : '<p class="fhint tag-leer">Keine laufenden Tags.</p>'}
+    ${wirk ? `<p class="tag-wirk">${esc(wirk)}</p>` : ''}
+  </div>`;
+}
+
+/* ── Fenster „Tag setzen“ und Eintrag ─────────────────────── */
+var TAGF = null;
+function tagFensterAuf(pid, eid, ausloeser){
+  const p = allePflanzen().find(x => x.id === pid); if(!p) return false;
+  TAGF = {pid, eid:eid || null, tid:null, von:tagHeuteIso(), notiz:'', dauer:null, pz:null, er:null,
+          warn:[], bestaetigt:false, entfernenFrage:false};
+  if(eid){
+    const e = tagEintragVon(pid, eid); if(!e) return false;
+    TAGF.tid = e.t; TAGF.von = e.von; TAGF.notiz = e.notiz || '';
+  }
+  tagFensterZeichnen();
+  return modalAuf('tag-fenster', ausloeser);
+}
+function tagFensterLesen(){
+  if(!TAGF) return;
+  const v = id => document.getElementById(id);
+  if(v('tagf-datum') && v('tagf-datum').value) TAGF.von = v('tagf-datum').value;
+  if(v('tagf-notiz')) TAGF.notiz = v('tagf-notiz').value.slice(0, TAG_NOTIZ_MAX);
+  if(v('tagf-dauer')) TAGF.dauer = Math.max(0, Math.round(Number(v('tagf-dauer').value) || 0));
+  if(v('tagf-pz')) TAGF.pz = Math.round(Number(v('tagf-pz').value) || 0);
+  if(v('tagf-er')) TAGF.er = !!v('tagf-er').checked;
+}
+function tagFensterZeichnen(){
+  const box = document.getElementById('tag-inhalt');
+  const titel = document.getElementById('tag-titel');
+  if(!box || !TAGF) return;
+  const p = allePflanzen().find(x => x.id === TAGF.pid);
+  if(!p){ box.innerHTML = ''; return; }
+  const h = tagHeuteIso(), g = tagPlusTage(h, -1);
+  const datumHTML = `<span class="lab">Datum</span>
+    <div class="segment tag-datum" role="group" aria-label="Datum">
+      <button type="button" data-tagf-von="${h}" aria-pressed="${TAGF.von === h}">Heute</button>
+      <button type="button" data-tagf-von="${g}" aria-pressed="${TAGF.von === g}">Gestern</button></div>
+    <input type="date" id="tagf-datum" class="tag-datumfeld" value="${esc(TAGF.von)}" max="${h}" aria-label="Anderes Datum">`;
+  const notizHTML = `<label class="fspan tag-notizfeld"><span class="lab">Notiz</span>
+      <textarea id="tagf-notiz" rows="2" maxlength="${TAG_NOTIZ_MAX}" placeholder="Grund, Mittel, Menge …">${esc(TAGF.notiz)}</textarea></label>
+    <p class="fhint tag-zahl" id="tagf-zahl">${TAGF.notiz.length} / ${TAG_NOTIZ_MAX}</p>`;
+
+  if(TAGF.eid){
+    const e = tagEintragVon(TAGF.pid, TAGF.eid);
+    const t = e ? tagDef(e.t) : null;
+    if(!e || !t){ box.innerHTML = ''; return; }
+    if(titel) titel.textContent = t.name;
+    const hm = tagHeimat(t);
+    const lauf = tagLaeuft(e);
+    box.innerHTML = `<p class="tag-gewaehlt">${tagPunktHTML(hm.farbe)}<span><b>${esc(nice(p))}</b><i>${esc(t.art === 'zeitraum'
+        ? (lauf ? (e.bis ? 'läuft bis ' + tagDatumKurz(e.bis) : 'läuft ohne Ende') : 'beendet am ' + tagDatumKurz(e.ende || e.bis))
+        : 'einmalig')}</i></span></p>
+      ${datumHTML}${notizHTML}
+      <div class="gm-zfrage-btns tag-fuss"><button type="button" class="haupt" data-tagf="speichern">Speichern</button></div>
+      ${lauf ? '<div class="gm-zfrage-btns tag-fuss"><button type="button" data-tagf="beenden">Beenden</button></div>' : ''}
+      <div class="tools tag-weg"><button type="button" class="loeschen" data-tagf="entfernen">${TAGF.entfernenFrage
+        ? 'Wirklich entfernen?' : 'Entfernen'}</button></div>`;
+    return;
+  }
+
+  if(titel) titel.textContent = 'Tag setzen';
+  if(!TAGF.tid){
+    const gruppen = tagNachGruppe(tagListe());
+    box.innerHTML = `<p class="tag-unter">Für <b>${esc(nice(p))}</b></p>`
+      + (gruppen.length ? gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
+        <div class="wahl-liste tag-wahl" role="group" aria-label="${esc(gr.h.name)}">${gr.tags.map(t =>
+          `<button type="button" data-tagw="${esc(t.id)}">${tagPunktHTML(gr.h.farbe)}<span class="wl-txt"><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span></button>`).join('')}</div>`).join('')
+        : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>');
+    return;
+  }
+  const t = tagDef(TAGF.tid);
+  if(!t){ TAGF.tid = null; tagFensterZeichnen(); return; }
+  const hm = tagHeimat(t);
+  const dauer = TAGF.dauer != null ? TAGF.dauer : t.dauer;
+  const pz = TAGF.pz != null ? TAGF.pz : t.pz;
+  const er = TAGF.er != null ? TAGF.er : t.erinnern;
+  const prozentFeld = (t.giess === 'kuerzer' || t.giess === 'laenger')
+    ? `<label class="fspan zeile"><span class="lab">Prozent</span>
+        <input type="number" id="tagf-pz" min="5" max="${t.giess === 'kuerzer' ? 90 : 300}" step="5" inputmode="numeric" value="${pz}"></label>
+       <p class="tag-vorschau" id="tagf-vorschau">${esc(tagWirkText(intervallVon(p, true), t.giess, pz))}</p>` : '';
+  const zeitFelder = t.art === 'zeitraum'
+    ? `<label class="fspan zeile"><span class="lab">Dauer in Tagen</span>
+        <input type="number" id="tagf-dauer" min="0" max="730" inputmode="numeric" value="${dauer}"></label>
+       <p class="fhint">0 heißt: läuft, bis du „Beenden“ tippst.</p>
+       <label class="check"><input type="checkbox" role="switch" id="tagf-er"${er ? ' checked' : ''}> <span class="lab">Erinnerung bei Ende</span></label>` : '';
+  const warn = TAGF.warn.length ? `<div class="tag-warn" id="tagf-warn" role="status">${TAGF.warn.map(w =>
+    `<p>${esc(w.text)}</p>`).join('')}</div>` : '';
+  const ersetzt = TAGF.warn.some(w => w.art === 'ersetzen');
+  const knopf = !TAGF.bestaetigt ? 'Setzen' : (ersetzt ? 'Ersetzen' : 'Trotzdem setzen');
+  box.innerHTML = `<button type="button" class="mehr-dazu tag-zurueck" data-tagf="zurueck">‹ Anderer Tag</button>
+    <p class="tag-gewaehlt">${tagPunktHTML(hm.farbe)}<span><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span></p>
+    ${t.hinweis ? `<p class="fhint tag-vhinweis">${esc(t.hinweis)}</p>` : ''}
+    ${datumHTML}${zeitFelder}${prozentFeld}${notizHTML}${warn}
+    <div class="gm-zfrage-btns tag-fuss"><button type="button" data-tagf="abbrechen">Abbrechen</button>
+      <button type="button" class="haupt" data-tagf="setzen">${knopf}</button></div>`;
+}
+function tagFensterSetzen(){
+  tagFensterLesen();
+  const t = tagDef(TAGF.tid); if(!t) return;
+  if(!TAGF.bestaetigt){
+    TAGF.warn = tagHinweise(TAGF.pid, TAGF.tid, TAGF.von);
+    if(TAGF.warn.length){ TAGF.bestaetigt = true; tagFensterZeichnen(); return; }
+  }
+  const opt = {von:TAGF.von, notiz:TAGF.notiz};
+  if(t.art === 'zeitraum'){ opt.dauer = TAGF.dauer != null ? TAGF.dauer : t.dauer; opt.er = TAGF.er != null ? TAGF.er : t.erinnern; }
+  if(t.giess === 'kuerzer' || t.giess === 'laenger') opt.pz = TAGF.pz != null ? TAGF.pz : t.pz;
+  tagSetzen(TAGF.pid, TAGF.tid, opt, true);
+  modalZu('tag-fenster');
+  tagNachAenderung();
+}
+function tagNachAenderung(){
+  render();
+  if(typeof karteRumpfFuellen === 'function'){ try{ karteRumpfFuellen(); }catch(e){} }
+}
+document.addEventListener('input', e => {
+  if(!TAGF) return;
+  if(e.target.id === 'tagf-notiz'){
+    const z = document.getElementById('tagf-zahl');
+    if(z) z.textContent = e.target.value.length + ' / ' + TAG_NOTIZ_MAX;
+  }
+  if(e.target.id === 'tagf-pz'){
+    const t = tagDef(TAGF.tid), v = document.getElementById('tagf-vorschau');
+    const p = allePflanzen().find(x => x.id === TAGF.pid);
+    if(t && v && p) v.textContent = tagWirkText(intervallVon(p, true), t.giess, Math.round(Number(e.target.value) || 0));
+  }
+  if(e.target.id === 'tagf-datum' && e.target.value){
+    TAGF.von = e.target.value;
+    document.querySelectorAll('[data-tagf-von]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tagfVon === TAGF.von)));
+  }
+});
+document.addEventListener('click', e => {
+  const auf = e.target.closest('[data-tag-auf]');
+  if(auf){ e.stopPropagation(); tagFensterAuf(auf.dataset.tagAuf, null, auf); return; }
+  const chip = e.target.closest('[data-tag-e]');
+  if(chip){ e.stopPropagation(); tagFensterAuf(chip.dataset.p, chip.dataset.tagE, chip); return; }
+  const ges = e.target.closest('[data-tag-gesehen]');
+  if(ges){ e.stopPropagation(); tagGesehen(ges.dataset.p, ges.dataset.tagGesehen); tagNachAenderung(); return; }
+  if(e.target.closest('#tag-zu')){ modalZu('tag-fenster'); return; }
+  if(!TAGF || !e.target.closest('#tag-fenster')) return;
+  const w = e.target.closest('[data-tagw]');
+  if(w){ TAGF.tid = w.dataset.tagw; TAGF.warn = []; TAGF.bestaetigt = false; TAGF.dauer = null; TAGF.pz = null; TAGF.er = null; tagFensterZeichnen(); return; }
+  const von = e.target.closest('[data-tagf-von]');
+  if(von){ tagFensterLesen(); TAGF.von = von.dataset.tagfVon; TAGF.warn = []; TAGF.bestaetigt = false; tagFensterZeichnen(); return; }
+  const b = e.target.closest('[data-tagf]'); if(!b) return;
+  const a = b.dataset.tagf;
+  if(a === 'zurueck'){ tagFensterLesen(); TAGF.tid = null; TAGF.warn = []; TAGF.bestaetigt = false; tagFensterZeichnen(); return; }
+  if(a === 'abbrechen'){ modalZu('tag-fenster'); return; }
+  if(a === 'setzen'){ tagFensterSetzen(); return; }
+  if(a === 'speichern'){ tagFensterLesen(); tagEintragAendern(TAGF.pid, TAGF.eid, TAGF.von, TAGF.notiz); modalZu('tag-fenster'); tagNachAenderung(); return; }
+  if(a === 'beenden'){ tagBeenden(TAGF.pid, TAGF.eid); modalZu('tag-fenster'); tagNachAenderung(); return; }
+  if(a === 'entfernen'){
+    if(!TAGF.entfernenFrage){ TAGF.entfernenFrage = true; tagFensterZeichnen(); return; }
+    tagEntfernen(TAGF.pid, TAGF.eid); modalZu('tag-fenster'); tagNachAenderung(); return;
+  }
+});
+/* Ein Tipp auf den Schleier schließt wie das × */
+document.addEventListener('click', e => {
+  if(e.target && e.target.id === 'tag-fenster') modalZu('tag-fenster');
+});
+
+/* ── Einstellungen → Tags ─────────────────────────────────── */
+var TV = {edit:null, gedit:null, f:null, fehler:'', loeschFrage:false};
+function tvLeer(){ return {name:'', art:'zeitraum', giess:null, pz:25, duengSperre:false, duenger:false, schaedling:false,
+  dauer:0, erinnern:false, gruppe:null, abstand:0, nichtMit:[], hinweis:'', fest:false}; }
+function tvFormLesen(){
+  const v = id => document.getElementById(id);
+  if(v('tv-gname')) TV.gname = v('tv-gname').value;
+  const f = TV.f; if(!f) return;
+  if(v('tv-name') && !f.fest) f.name = v('tv-name').value;
+  if(v('tv-pz')) f.pz = Math.round(Number(v('tv-pz').value) || 0);
+  if(v('tv-dauer')) f.dauer = Math.round(Number(v('tv-dauer').value) || 0);
+  if(v('tv-abstand')) f.abstand = Math.round(Number(v('tv-abstand').value) || 0);
+  if(v('tv-hinweis')) f.hinweis = v('tv-hinweis').value;
+  ['duengSperre','duenger','schaedling','erinnern'].forEach(k => { if(v('tv-' + k)) f[k] = !!v('tv-' + k).checked; });
+}
+function tvKnopf(attr, wert, name, an, aus){
+  return `<button type="button" class="as-knopf" ${attr}="${esc(wert)}" aria-pressed="${an ? 'true' : 'false'}"${aus ? ' disabled' : ''}><b>${esc(name)}</b></button>`;
+}
+function tvZeichnen(){
+  const box = document.getElementById('tv-inhalt'); if(!box) return;
+  const fehler = TV.fehler ? `<p class="tv-fehler" role="alert">${esc(TV.fehler)}</p>` : '';
+  if(TV.gedit){
+    const g = TV.gedit === 'neu' ? null : tagGruppe(TV.gedit);
+    const name = TV.gname != null ? TV.gname : (g ? g.name : '');
+    const farbe = TV.gfarbe || (g ? g.farbe : TAG_FARBEN[tagGruppen().length % TAG_FARBEN.length]);
+    box.innerHTML = `<button type="button" class="mehr-dazu" data-tv="zurueck">‹ Alle Tags</button>
+      <p class="ein-abschnitt">${g ? 'Gruppe bearbeiten' : 'Neue Gruppe'}</p>
+      <label class="fspan"><span class="lab">Name</span><input type="text" id="tv-gname" maxlength="30" value="${esc(name)}" placeholder="z. B. Schädlinge"></label>
+      <span class="lab">Farbe</span>
+      <div class="tv-farben" role="group" aria-label="Farbe">${TAG_FARBEN.map((c, i) =>
+        `<button type="button" class="tv-farbe" data-tv-farbe="${c}" aria-pressed="${c === farbe}" aria-label="Farbe ${i + 1}" style="background:${c}"></button>`).join('')}</div>
+      ${fehler}
+      <div class="gm-zfrage-btns"><button type="button" data-tv="zurueck">Abbrechen</button><button type="button" class="haupt" data-tv="gspeichern">Speichern</button></div>
+      ${g ? `<div class="tools"><button type="button" class="loeschen" data-tv="gloeschen">${TV.loeschFrage ? 'Wirklich löschen? Die Tags bleiben.' : 'Gruppe löschen'}</button></div>` : ''}`;
+    return;
+  }
+  if(TV.edit){
+    const f = TV.f;
+    const fest = !!f.fest;
+    const andere = tagListe().filter(t => t.id !== TV.edit);
+    const zr = f.art === 'zeitraum';
+    box.innerHTML = `<button type="button" class="mehr-dazu" data-tv="zurueck">‹ Alle Tags</button>
+      <p class="ein-abschnitt">${TV.edit === 'neu' ? 'Neuer Tag' : 'Tag bearbeiten'}</p>
+      ${fest ? '<p class="fhint">Winterruhe ist fest: Name und Wirkung bleiben. Dauer und Prozent stellst du hier vor oder je Pflanze beim Setzen ein.</p>' : ''}
+      <label class="fspan"><span class="lab">Name</span><input type="text" id="tv-name" maxlength="40" value="${esc(f.name)}"${fest ? ' disabled' : ''}></label>
+      <span class="lab">Art</span>
+      <div class="as-knoepfe" role="group" aria-label="Art">${tvKnopf('data-tv-art', 'einmalig', 'Einmalig', !zr, fest)}${tvKnopf('data-tv-art', 'zeitraum', 'Zeitraum', zr, fest)}</div>
+      <p class="fhint">Einmalig: an einem Tag passiert. Zeitraum: gilt eine Weile.</p>
+      ${zr ? `<span class="lab">Gießen</span>
+      <div class="as-knoepfe" role="group" aria-label="Gießen">${tvKnopf('data-tv-giess', '', 'Keine', !f.giess, fest)}${Object.keys(TAG_GIESS).map(k =>
+        tvKnopf('data-tv-giess', k, TAG_GIESS[k].name, f.giess === k, fest)).join('')}</div>
+      ${f.giess === 'kuerzer' || f.giess === 'laenger' ? `<label class="fspan zeile"><span class="lab">Prozent</span><input type="number" id="tv-pz" min="5" max="${f.giess === 'kuerzer' ? 90 : 300}" step="5" inputmode="numeric" value="${f.pz}"></label>` : ''}
+      <label class="check"><input type="checkbox" role="switch" id="tv-duengSperre"${f.duengSperre ? ' checked' : ''}> <span class="lab">Düngen sperren</span></label>` : ''}
+      <label class="check"><input type="checkbox" role="switch" id="tv-duenger"${f.duenger ? ' checked' : ''}> <span class="lab">Dünger</span></label>
+      <label class="check"><input type="checkbox" role="switch" id="tv-schaedling"${f.schaedling ? ' checked' : ''}> <span class="lab">Schädlingsbekämpfung</span></label>
+      ${zr ? `<label class="fspan zeile"><span class="lab">Dauer in Tagen</span><input type="number" id="tv-dauer" min="0" max="730" inputmode="numeric" value="${f.dauer}"></label>
+      <p class="fhint">0 heißt: läuft, bis du „Beenden“ tippst.</p>
+      <label class="check"><input type="checkbox" role="switch" id="tv-erinnern"${f.erinnern ? ' checked' : ''}> <span class="lab">Erinnerung bei Ende</span></label>` : ''}
+      <span class="lab">Gruppe</span>
+      <div class="as-knoepfe" role="group" aria-label="Gruppe">${tvKnopf('data-tv-gruppe', '', 'Keine', !f.gruppe)}${tagGruppen().map(g =>
+        tvKnopf('data-tv-gruppe', g.id, g.name, f.gruppe === g.id)).join('')}</div>
+      <label class="fspan zeile"><span class="lab">Frühestens wieder nach … Tagen</span><input type="number" id="tv-abstand" min="0" max="730" inputmode="numeric" value="${f.abstand}"></label>
+      ${andere.length ? `<span class="lab">Nicht zusammen mit</span>
+      <div class="as-knoepfe" role="group" aria-label="Nicht zusammen mit">${andere.map(t =>
+        tvKnopf('data-tv-nicht', t.id, t.name, f.nichtMit.indexOf(t.id) !== -1)).join('')}</div>` : ''}
+      <label class="fspan"><span class="lab">Hinweis beim Setzen</span><textarea id="tv-hinweis" rows="2" maxlength="${TAG_NOTIZ_MAX}">${esc(f.hinweis)}</textarea></label>
+      ${fehler}
+      <div class="gm-zfrage-btns"><button type="button" data-tv="zurueck">Abbrechen</button><button type="button" class="haupt" data-tv="speichern">Speichern</button></div>
+      ${TV.edit !== 'neu' && !fest ? `<div class="tools"><button type="button" class="loeschen" data-tv="loeschen">${TV.loeschFrage
+        ? (tagNutzung(TV.edit) ? 'Wirklich löschen? ' + tagNutzung(TV.edit) + ' Pflanzen verlieren ihn.' : 'Wirklich löschen?') : 'Tag löschen'}</button></div>` : ''}`;
+    return;
+  }
+  const gruppen = tagNachGruppe(tagListe());
+  box.innerHTML = `${gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
+    <div class="ein-karte tv-liste">${gr.tags.map(t => `<button type="button" class="tv-zeile" data-tv-edit="${esc(t.id)}">${tagPunktHTML(gr.h.farbe)}
+      <span class="wl-txt"><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span><span class="wz-p" aria-hidden="true">›</span></button>`).join('')}</div>`).join('')}
+    <div class="gm-zfrage-btns"><button type="button" class="haupt" data-tv="neu">+ Neuer Tag</button></div>
+    <p class="ein-abschnitt">Eigene Gruppen</p>
+    ${tagGruppen().length ? `<div class="ein-karte tv-liste">${tagGruppen().map(g => `<button type="button" class="tv-zeile" data-tv-gedit="${esc(g.id)}">${tagPunktHTML(g.farbe)}
+      <span class="wl-txt"><b>${esc(g.name)}</b><i>${tagListe().filter(t => t.gruppe === g.id).length} Tags</i></span><span class="wz-p" aria-hidden="true">›</span></button>`).join('')}</div>`
+      : '<p class="fhint">Noch keine. Eine Gruppe ordnet Tags, zum Beispiel „Schädlinge“ oder „Pflege“.</p>'}
+    <div class="gm-zfrage-btns"><button type="button" data-tv="gneu">+ Neue Gruppe</button></div>
+    <div class="gm-zfrage-btns"><button type="button" data-tv="vorgaben">Vorgaben wiederherstellen</button></div>
+    ${fehler}`;
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest || !e.target.closest('#tv-inhalt')) return;
+  const ed = e.target.closest('[data-tv-edit]');
+  if(ed){ const t = tagDef(ed.dataset.tvEdit); if(!t) return;
+    TV.edit = t.id; TV.f = JSON.parse(JSON.stringify(t)); TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  const ge = e.target.closest('[data-tv-gedit]');
+  if(ge){ TV.gedit = ge.dataset.tvGedit; TV.gname = null; TV.gfarbe = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  const art = e.target.closest('[data-tv-art]');
+  if(art && !art.disabled){ tvFormLesen(); TV.f.art = art.dataset.tvArt; if(TV.f.art === 'einmalig'){ TV.f.giess = null; TV.f.duengSperre = false; } tvZeichnen(); return; }
+  const gi = e.target.closest('[data-tv-giess]');
+  if(gi && !gi.disabled){ tvFormLesen(); TV.f.giess = gi.dataset.tvGiess || null; if(TV.f.giess && !TV.f.pz) TV.f.pz = 25; tvZeichnen(); return; }
+  const gr = e.target.closest('[data-tv-gruppe]');
+  if(gr){ tvFormLesen(); TV.f.gruppe = gr.dataset.tvGruppe || null; tvZeichnen(); return; }
+  const ni = e.target.closest('[data-tv-nicht]');
+  if(ni){ tvFormLesen(); const id = ni.dataset.tvNicht, l = TV.f.nichtMit;
+    if(l.indexOf(id) === -1) l.push(id); else l.splice(l.indexOf(id), 1); tvZeichnen(); return; }
+  const fa = e.target.closest('[data-tv-farbe]');
+  if(fa){ tvFormLesen(); TV.gfarbe = fa.dataset.tvFarbe; tvZeichnen(); return; }
+  const b = e.target.closest('[data-tv]'); if(!b) return;
+  const a = b.dataset.tv;
+  if(a === 'zurueck'){ TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  if(a === 'neu'){ TV.edit = 'neu'; TV.f = tvLeer(); TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  if(a === 'gneu'){ TV.gedit = 'neu'; TV.gname = null; TV.gfarbe = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  if(a === 'speichern'){
+    tvFormLesen();
+    if(!String(TV.f.name || '').trim()){ TV.fehler = 'Bitte einen Namen eingeben.'; tvZeichnen(); return; }
+    const daten = Object.assign({}, TV.f); if(TV.edit === 'neu') delete daten.id;
+    const r = tagSpeichern(daten);
+    if(r.fehler){ TV.fehler = r.fehler; tvZeichnen(); return; }
+    TV.edit = null; TV.f = null; TV.fehler = ''; tvZeichnen(); tagNachAenderung(); return;
+  }
+  if(a === 'loeschen'){
+    if(!TV.loeschFrage){ TV.loeschFrage = true; tvZeichnen(); return; }
+    tagLoeschen(TV.edit); TV.edit = null; TV.f = null; TV.loeschFrage = false; tvZeichnen(); tagNachAenderung(); return;
+  }
+  if(a === 'gspeichern'){
+    tvFormLesen();
+    const g = TV.gedit === 'neu' ? null : tagGruppe(TV.gedit);
+    const r = tagGruppeSpeichern(g ? g.id : null, TV.gname != null ? TV.gname : (g ? g.name : ''),
+      TV.gfarbe || (g ? g.farbe : null));
+    if(r.fehler){ TV.fehler = r.fehler; tvZeichnen(); return; }
+    TV.gedit = null; TV.fehler = ''; tvZeichnen(); tagNachAenderung(); return;
+  }
+  if(a === 'gloeschen'){
+    if(!TV.loeschFrage){ TV.loeschFrage = true; tvZeichnen(); return; }
+    tagGruppeLoeschen(TV.gedit); TV.gedit = null; TV.loeschFrage = false; tvZeichnen(); tagNachAenderung(); return;
+  }
+  if(a === 'vorgaben'){
+    const n = tagVorgabenSichern(true);
+    TV.fehler = n ? '' : 'Alle Vorgaben sind schon da.';
+    tvZeichnen(); return;
+  }
+});
+
+/* ── Filter: Chipleiste, Abschnitte „Tags“ und „Wirkung“ ───── */
+/* filterTags und filterWirk stehen neben filterZustand. */
+/* Die Tags, die gerade mindestens eine Pflanze trägt */
+function tagGetragen(){
+  const ids = new Set();
+  allePflanzen().forEach(p => tagLaufend(p).forEach(x => ids.add(x.t.id)));
+  return tagListe().filter(t => ids.has(t.id));
+}
+/* ODER innerhalb einer Gruppe, UND zwischen Gruppen (F240) */
+function tagFilterPasst(p){
+  const lauf = tagLaufend(p);
+  if(filterTags.size){
+    const gruppen = {};
+    filterTags.forEach(id => { const t = tagDef(id); if(!t) return; (gruppen[tagHeimat(t).key] = gruppen[tagHeimat(t).key] || []).push(id); });
+    for(const k of Object.keys(gruppen))
+      if(!lauf.some(x => gruppen[k].indexOf(x.t.id) !== -1)) return false;
+  }
+  if(filterWirk.size){
+    if(!lauf.some(x => tagWirkungen(x.t).some(w => filterWirk.has(w)))) return false;
+  }
+  return true;
+}
+function tagSuchText(p){
+  return tagEintraege(p.id).map(e => { const t = tagDef(e.t); return (t ? t.name : '') + ' ' + (e.notiz || ''); }).join(' ');
+}
+function tagLeisteZeichnen(){
+  const box = document.getElementById('tag-leiste'); if(!box) return;
+  const liste = tagGetragen();
+  /* Gesetzte Filter bleiben sichtbar, auch wenn keine Pflanze den Tag mehr trägt */
+  filterTags.forEach(id => { const t = tagDef(id); if(t && liste.indexOf(t) === -1) liste.push(t); });
+  const gruppen = tagNachGruppe(liste);
+  box.hidden = !gruppen.length;
+  box.innerHTML = gruppen.map(gr => gr.tags.map(t =>
+    `<button type="button" class="tag-chip tag-fchip" data-ftag="${esc(t.id)}" aria-pressed="${filterTags.has(t.id)}" style="--tagf:${esc(gr.h.farbe)}">${tagPunktHTML(gr.h.farbe)}<span>${esc(t.name)}</span></button>`).join('')).join('');
+}
+function tagFilterKnoepfeZeichnen(){
+  const knopf = (attr, wert, name, an) => '<button type="button" class="as-knopf" ' + attr + '="' + esc(wert) + '"'
+    + ' aria-pressed="' + (an ? 'true' : 'false') + '"><b>' + esc(name) + '</b></button>';
+  const tb = document.getElementById('filter-tags');
+  if(tb){
+    const liste = tagGetragen();
+    filterTags.forEach(id => { const t = tagDef(id); if(t && liste.indexOf(t) === -1) liste.push(t); });
+    tb.innerHTML = liste.length ? tagNachGruppe(liste).map(gr => '<p class="tag-fgruppe">' + esc(gr.h.name) + '</p>'
+      + '<div class="as-knoepfe">' + gr.tags.map(t => knopf('data-ftag', t.id, t.name, filterTags.has(t.id))).join('') + '</div>').join('')
+      : '<p class="fhint">Gerade trägt keine Pflanze einen laufenden Tag.</p>';
+  }
+  const wb = document.getElementById('filter-wirk');
+  if(wb) wb.innerHTML = Object.keys(TAG_GIESS).concat(Object.keys(TAG_SCHALTER)).map(k =>
+    knopf('data-fwirk', k, tagWirkName(k), filterWirk.has(k))).join('');
+}
+document.addEventListener('click', e => {
+  const ft = e.target.closest('[data-ftag]');
+  const fw = e.target.closest('[data-fwirk]');
+  if(!ft && !fw) return;
+  if(ft){ const id = ft.dataset.ftag; if(filterTags.has(id)) filterTags.delete(id); else filterTags.add(id); }
+  if(fw){ const k = fw.dataset.fwirk; if(filterWirk.has(k)) filterWirk.delete(k); else filterWirk.add(k); }
+  filterKnoepfeZeichnen(); filterMarkenZeichnen(); ctrlKnopfZeichnen(); render();
+});
+
 function filterZahl(){
   return [filterKlasse, filterKatze, filterRaum, filterPlatz].filter(Boolean).length
-    + filterZustand.size
+    + filterZustand.size + filterTags.size + filterWirk.size
     + ((typeof filterDueng !== 'undefined' && filterDueng) ? 1 : 0);
 }
 function ctrlKnopfZeichnen(){
@@ -15656,7 +16088,6 @@ function acc(key, titel, inhalt, zusatz){
 function kartenKopfHTML(p){
   const st = giessStatus(p);
   const heute = giessLog(p.id)[0] === iso(HEUTE);
-  const z = zustandVon(p);
   const stand = karteStand(p);
   const pf = profilFoto(p.id);
 
@@ -15695,7 +16126,7 @@ function kartenKopfHTML(p){
       </div>` : '';
 
   const rest = `${anstoss}<p class="km-stand" data-ton="${stand.ton}">
-      <i class="km-punkt" aria-hidden="true"></i>${esc(lage)}${z.code!=='gesund'?` · ${esc(z.def.name)}`:''}
+      <i class="km-punkt" aria-hidden="true"></i>${esc(lage)}
     </p>
     <div class="km-zeichen">${kartenZeichen(p)}</div>
     <div class="km-taten">
@@ -15797,16 +16228,16 @@ function giessAbschnitt(p){
   const tag = n => n === 1 ? 'Tag' : 'Tage';
   const tagen = n => n === 1 ? 'Tag' : 'Tagen';
   const lage = st.stand === 'stopp'
-      ? `<p class="kb-lage warn">Gießpause — noch ${stoppRest(p)} ${tagen(stoppRest(p))} trocken stehen lassen.</p>`
+      ? `<p class="kb-lage warn">Gießpause: ${esc(stoppText(p))}. Trocken stehen lassen.</p>`
     : st.stand === 'unbekannt' ? '<p class="kb-leer">Noch nie gegossen eingetragen.</p>'
     : st.rest < 0 ? `<p class="kb-lage warn">${-st.rest} ${tag(-st.rest)} überfällig</p>`
     : st.rest === 0 ? '<p class="kb-lage">Heute dran</p>'
     : `<p class="kb-lage">Wieder in ${st.rest} ${tagen(st.rest)}</p>`;
   const zuletzt = st.letzte
     ? `<p class="kb-klein">Zuletzt am ${new Date(st.letzte+'T12:00:00').toLocaleDateString('de-DE',{day:'numeric', month:'long'})}</p>` : '';
-  const zz = zustandVon(p);
-  const ab = zz.code !== 'gesund'
-    ? `<p class="kb-klein">Wegen „${esc(zz.def.name)}“ weicht der Rhythmus gerade vom Normalwert ab.</p>` : '';
+  const tg = (typeof tagGiessEintrag === 'function') ? tagGiessEintrag(p) : null;
+  const ab = tg && tg.t.giess !== 'pause'
+    ? `<p class="kb-klein tag-wirk">${esc(tg.t.name)}: ${esc(tagWirkText(intervallVon(p, true), tg.t.giess, tagProzent(tg)))}</p>` : '';
   const q = rhythmusQuelle(p);
   const zeilen = `<dl class="spec kb-werte">
       <dt>Rhythmus</dt><dd>${anstauLage(p) === 'anstau' ? 'Untersetzer: ' + ivWort(st.iv) + ' nachsehen' : ivWort(st.iv)} <span class="kb-marke${q.ton?' '+q.ton:''}">${esc(q.wort)}</span></dd>
@@ -15875,7 +16306,7 @@ function vorschlagRechnen(p, richtung){
 function ivVorschlagVon(p){
   if(!p) return null;
   const eigen = ivEigen(p); if(!eigen) return null;
-  const v = (S.zustand && S.zustand[p.id] && S.zustand[p.id].ivVorschlag) || null;
+  const v = (S.lernen && S.lernen[p.id] && S.lernen[p.id].ivVorschlag) || null;
   if(!v || !v.wert) return null;
   const saison = (typeof sommer === 'function' && sommer()) ? 's' : 'w';
   if(v.saison !== saison) return null;
@@ -15883,7 +16314,7 @@ function ivVorschlagVon(p){
   return v;
 }
 function ivVorschlagWeg(id){
-  const e = S.zustand && S.zustand[id]; if(!e) return;
+  const e = S.lernen && S.lernen[id]; if(!e) return;
   delete e.ivVorschlag; delete e.vorZahl; delete e.vorRichtung;
   sichern();
 }
@@ -16105,9 +16536,6 @@ function warnungenHTML(p){
   if(betroffen.length)
     w.push('<b>Giftig für ' + esc(betroffen.join(', ')) + '.</b> Nicht in Reichweite stellen.');
 
-  const z = zustandVon(p);
-  if(z.code === 'schaedlinge')
-    w.push('<b>Quarantäne aktiv.</b> Getrennt von den anderen Pflanzen halten, bis zwei Kontrollen im Wochenabstand sauber bleiben.');
 
   /* Bei einer Karnivore standen hier zwei Zeilen untereinander: die
      automatische Regel „kein Leitungswasser, niemals düngen“ und das
@@ -16166,14 +16594,6 @@ function pflegeHinweiseHTML(p){
                                    : 'Mehr Sonne, als die Art gewohnt ist',
       text: ab.text});
 
-  /* Artspezifische Abweichung schlägt den allgemeinen Katalog. */
-  const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-  if(z && z.code === 'schaedlinge'){
-    const eigen = (typeof schaedlingHinweisVon === 'function') ? schaedlingHinweisVon(p) : '';
-    if(eigen && !hinweisWeg(p.id, 'schaedling-art'))
-      teile.push({key:'schaedling-art',
-        titel:'Bei dieser Art gilt etwas anderes', text:eigen});
-  }
 
   if(!teile.length) return '';
   return '<div class="pflegehinweis">' + teile.map(t=>
@@ -16458,10 +16878,10 @@ function kartenDetailHTML(p){
       ${warnungenHTML(p)}
       ${pflegeHinweiseHTML(p)}
       ${aufgabenZeileHTML(p)}
+      ${tagKarteHTML(p)}
       ${kartenReiter(p.id, [
         {key:'pflege', titel:'Pflege', inhalt:
-          zustandBlockHTML(p)
-          + kblock('giessen', 'Gießen', giessAbschnitt(p))
+          kblock('giessen', 'Gießen', giessAbschnitt(p))
           + kblock('duengen', 'Düngen', duengAbschnittHTML(p))
           + kblock('topf', 'Topf und Substrat', topfSubstratHTML(p))
           + kblock('pflege', 'Pflegeschritte', kListe(p.pflege))
@@ -16495,27 +16915,12 @@ function kartenDetailHTML(p){
    Eine Zeile, wie in der Vorschau: farbiger Punkt und ein Wort.
    Der Punkt schmueckt, das Wort traegt — wer Farben schlecht
    unterscheidet, liest trotzdem, was los ist. */
-/* Ein Punkt in zwei Farben sagte kaum etwas. Jetzt hat jeder
-   Zustand seinen Ton: Rot heisst „jetzt etwas tun", Blauviolett
-   „jetzt nichts tun", Bernstein „nachsehen", Blau „gießen".
-   Das Wort daneben bleibt trotzdem die eigentliche Information. */
-const STAND_TON = {
-  quarantaene:'alarm', schaedlinge:'alarm', wurzelfaeule:'alarm',
-  trocken:'warn', hunger:'warn', sonnenbrand:'warn', kaelteschaden:'warn',
-  neu:'ruhe', frisch:'ruhe', aquakultur:'ruhe', steckling:'ruhe',
-  regeneration:'ruhe', winterruhe:'ruhe', bluete:'bluete'
-};
-
 function karteStand(p){
   const st = giessStatus(p);
-  const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-  const zTon = z && z.code !== 'gesund'
-    ? (STAND_TON[z.code] || (z.def.ton === 'warn' ? 'warn' : 'ruhe')) : null;
   /* Ein laufender Gießstopp ist immer der wichtigere Befund — er
      widerspricht dem, was der Rhythmus sagen wuerde. */
   /* 4.0-beta.24 (G1a-2, F220): `kurz` steht ab drei Spalten auf der Kachel. */
   if(st.stand === 'stopp')     return {ton:'alarm', text:'Jetzt nicht gießen', kurz:'nicht gießen'};
-  if(zTon === 'alarm')         return {ton:'alarm', text:z.def.name, kurz:z.def.name};
   if(st.stand === 'over' && st.feuchtHeute){
     const rest = feuchtRest(p.id);
     return {ton:'still', text:'Als feucht gemeldet'
@@ -16525,7 +16930,6 @@ function karteStand(p){
   if(st.stand === 'unbekannt') return {ton:'still', text:'Noch nicht erfasst', kurz:'offen'};
   if(st.rest <= 0)             return {ton:'wasser', text:'Gießen: heute', kurz:'heute'};
   if(st.rest === 1)            return {ton:'wasser', text:'Gießen: morgen', kurz:'morgen'};
-  if(zTon)                     return {ton:zTon, text:z.def.name, kurz:z.def.name};
   if(st.rest === 2)            return {ton:'wasser', text:'Gießen: übermorgen', kurz:'übermorgen'};
   return {ton:'sicher', text:'Alles in Ordnung', kurz: Number.isFinite(st.rest) ? 'in ' + st.rest + ' T.' : 'in Ordnung'};
 }
@@ -16537,10 +16941,9 @@ function karteStand(p){
    ueber das ganze Gitter hinweg mit einem Blick, welcher Pflanze
    es nicht gut geht. */
 function karteZustandTon(p){
+  /* 4.0-beta.27: Ohne Zustände meldet der Rand nur noch die Gießpause. */
   if(typeof stoppRest === 'function' && stoppRest(p) > 0) return 'alarm';
-  const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-  if(!z || z.code === 'gesund') return 'gesund';
-  return STAND_TON[z.code] || (z.def.ton === 'warn' ? 'warn' : 'ruhe');
+  return 'gesund';
 }
 
 function karteStandHTML(p, s){
@@ -16584,7 +16987,7 @@ function cardHTML(p){
         <span class="card-bot">${unter}</span>
         ${lageVon(p)?`<span class="card-lage">${esc(lageVon(p))}</span>`:''}
         ${karteStandHTML(p, ks)}
-        ${iconRow(p)}${zustandBadge(p)}
+        ${iconRow(p)}
         <span class="bar"><span style="width:${K.feuchte}%"></span></span>
       </span>
     </button></article>`;
@@ -16791,12 +17194,6 @@ function kennzahlen(){
   const alle = allePflanzen();
   const gesamt = alle.length;
 
-  /* Gesund: alles ausser Alarmzustaenden. Winterruhe und
-     Eingewöhnung zählen als gesund — sie sind kein Schaden. */
-  const gesund = alle.filter(p=>{
-    const z = zustandVon(p);
-    return !z || z.code === 'gesund' || (z.def && z.def.ton !== 'alarm');
-  }).length;
 
   /* Gießtreue: der Anteil der Pflanzen, die gerade nicht überfällig
      sind. Eine Pflanze in Gießpause zählt nicht mit — sie kann
@@ -16823,7 +17220,7 @@ function kennzahlen(){
     return d === marke;
   }).length;
 
-  return {gesamt, gesund, treue, neu};
+  return {gesamt, treue, neu};
 }
 
 function kennzahlenHTML(){
@@ -16834,7 +17231,6 @@ function kennzahlenHTML(){
     `<div class="kz-feld"><em>${esc(name)}</em><b>${esc(String(wert))}</b>`
     + (zusatz ? `<i>${esc(zusatz)}</i>` : '') + '</div>';
   return '<div class="kennzahlen">'
-    + feld('Gesund', k.gesund + '/' + k.gesamt, '')
     + feld('Gießtreue', k.treue == null ? '—' : k.treue + '%', '')
     + feld('Neu im Monat', (k.neu > 0 ? '+' : '') + k.neu, '')
     + '</div>';
@@ -17783,6 +18179,7 @@ function samGegossen(ids){
     l.push(heute); l.sort();
     S.water[id] = l;
     if(S.feuchtRueck && S.feuchtRueck[id]) delete S.feuchtRueck[id];
+    if(typeof tagGiessNotizWeg === 'function') tagGiessNotizWeg(id);
     neu++;
   });
   if(neu) sichern();
@@ -18089,10 +18486,12 @@ document.addEventListener('click', e=>{
 });
 
 function render(){
+  if(typeof tagAblauf === 'function') tagAblauf();
   zaehler();
   const alle = allePflanzen();
   const q = $('#q').value.trim().toLowerCase();
   lageFilterZeichnen();
+  if(typeof tagLeisteZeichnen === 'function') tagLeisteZeichnen();
   if(typeof formLageZeichnen === 'function') formLageZeichnen();
   const list = alle.filter(p=>{
     /* Von der Düngezeile auf Heute aus gesetzt. Ein Suchwort hätte
@@ -18109,10 +18508,13 @@ function render(){
     if(filterRaum === '__ohne' ? !!p.raum : (filterRaum && p.raum !== filterRaum)) return false;
     if(filterPlatz === '__ohne' ? !!p.stellplatz : (filterPlatz && p.stellplatz !== filterPlatz)) return false;
     if(filterZustand.size && !zustandFilterPasst(p)) return false;
+    if((filterTags.size || filterWirk.size) && !tagFilterPasst(p)) return false;
     if(!q) return true;
     const felder = ['id','name','art','botanisch','sorte','sortenmerkmale','familie','typ','merkmale','herkunft','folge','katzentext','notiz'];
     let hay = felder.map(f=>p[f]||'').join(' ') + ' ' + lageVon(p);
     ['bedingungen','pflege','probleme','beob','todo'].forEach(f=>{ if(p[f]) hay += ' '+JSON.stringify(p[f]); });
+    /* 4.0-beta.27: Tag-Namen und Notizen der Einträge */
+    hay += ' ' + tagSuchText(p);
     return hay.toLowerCase().includes(q);
   });
 
@@ -18187,7 +18589,6 @@ function render(){
      Blockgrenzen hinweg gibt es kein Hoisting. */
   $('#heute-status').innerHTML = wetterZeileHTML() + kennzahlenHTML()
     + (typeof duengZeileHTML === 'function' ? duengZeileHTML() : '');
-  $('#stichtage').innerHTML = stichtageHTML();
   meldeRender();
   if(typeof rundeAngebotZeichnen === 'function') rundeAngebotZeichnen();
   /* Der Stammbaum baut sich beim Öffnen auf, nicht bei jedem Rendern —
@@ -18414,8 +18815,6 @@ function formularLeeren(){
   $('#bib-gewaehlt').hidden = true; $('#bib-liste').hidden = true;
   $('#paste-box').hidden = true; $('#paste-meld').hidden = true;
   const uns = $('#neu-unsicher'); if(uns) uns.innerHTML = '';
-  zustandListe(null);
-  if(typeof zustandHinweis === 'function') zustandHinweis();
   neuWegSetzen(null);
   if(typeof alKnoepfeAlle === 'function') alKnoepfeAlle();
 }
@@ -19172,6 +19571,9 @@ document.addEventListener('click', e => {
 /* 4.0-beta.10: Hinweiskärtchen zum Gießweg, über dem Gießmodus. */
 modalAnmelden('gm-wie', {groesse:'blatt', schleier:true});
 modalAnmelden('mix-add', {groesse:'blatt', schleier:true});
+/* 4.0-beta.27 (G2a+c) */
+modalAnmelden('tag-fenster', {groesse:'blatt', schleier:true, fokusOhneScroll:true,
+  nachZu(){ TAGF = null; }});
 
 modalAnmelden('rundgang', {
   groesse:'voll', schleier:false,
@@ -19393,7 +19795,7 @@ document.addEventListener('input', e => {
 });
 function alKnoepfeAlle(){
   alListenFuellen();
-  ['f-zustand', 'f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
+  ['f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
    'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum'].forEach(alKnopfGruppe);
   alAnstauFeld();
 }
@@ -19651,7 +20053,6 @@ function alZsfZeichnen(){
     + alZeile('Art', art || 'Unbestimmt')
     + alZeile('Kultur', kulturText)
     + alZeile('Botanisch', wert('f-bot') || (a ? a.bot : ''))
-    + alZeile('Zustand', text('f-zustand'))
     + alZeile('Standort', ort)
     + alZeile('Topf', topfText)
     + alZeile('Substrat', (typeof alMixWert === 'function' && alMixWert()) ? mixKurzText(alMixWert()) : kopf('f-substrat'))
@@ -22120,7 +22521,6 @@ function botKontext(p){
   const art = [p.art && !/^unbestimmt$/i.test(p.art) ? p.art : '', p.botanisch ? '(' + p.botanisch + ')' : ''].filter(Boolean).join(' ');
   if(art) z.push('Art: ' + art);
   if(p.sorte) z.push('Sorte: ' + p.sorte);
-  try{ const zu = zustandVon(p); if(zu && zu.def) z.push('Zustand: ' + zu.def.name); }catch(e){}
   const topf = [p.topf ? p.topf + ' cm' : '', p.topfform || '', p.substrat ? 'Substrat ' + p.substrat : '', p.ablauf === 'ja' ? 'mit Abzugsloch' : p.ablauf === 'nein' ? 'ohne Abzugsloch' : ''].filter(Boolean).join(', ');
   if(topf) z.push('Topf: ' + topf);
   const ort = [raumNameVon(p.raum), p.stellplatz || ''].filter(Boolean).join(', ');
@@ -22483,17 +22883,14 @@ function artWaehlen(bot){
   const verw = verwechslungFuer(a.bot);
   const eigen = merkmalVon(a.bot);
   const frost = a.frost==null ? 'winterhart' : (a.frost<=0 ? 'hält bis '+a.frost+' °C' : 'nicht unter '+a.frost+' °C');
-  const spez = a.spez.filter(c=>SPEZIAL[c]).map(c=>SPEZIAL[c].name);
   $('#bib-gewaehlt').innerHTML = `
     <h4>${esc(a.de)} <span style="font-weight:400;font-size:.85rem">· ${esc(a.bot)}</span></h4>
     <p>${esc(a.fam)} · Gießklasse ${a.klasse} · ${esc(SONNE[a.licht].text)} · ${esc(DUENGER[a.duenger].text)} · ${esc(frost)}</p>
     ${eigen?`<p><b>Erkennst du an:</b> ${esc(eigen)}</p>`:''}
-    ${spez.length?`<p><b>Typisch für diese Art:</b> ${esc(spez.join(' · '))} — steht später in der Zustandsliste.</p>`:''}
     ${verw.length?`<div class="verw"><p><b>Verwechslungsgefahr.</b> Falls es doch eine davon ist, hier wechseln:</p>
       ${verw.map(v=>`<button class="linkbtn" type="button" data-bib="${esc(v.bot)}">${esc(v.art?v.art.de:v.bot)} — ${esc(v.merkmal)}</button>`).join('')}</div>`:''}`;
   $('#bib-gewaehlt').hidden = false;
 
-  zustandListe(a);
   { const ga = giftAusArt(a.bot);
     if(ga && giftRang(ga.tiere.katze) > 0) giftWarnen(a.de, ga); }
 }
@@ -22501,36 +22898,8 @@ function artWaehlen(bot){
 function artFreitext(){
   gewaehlteArt = null;
   $('#bib-gewaehlt').hidden = true;
-  zustandListe(null);
 }
 
-function zustandListe(a){
-  const sel = $('#f-zustand'); if(!sel) return;
-  /* Ein Code, den es sowohl als Grundzustand als auch artspezifisch
-     gibt, darf nur einmal in der Auswahl stehen. */
-  const codes = Array.from(new Set(
-    Object.keys(ZUSTAENDE).concat(a ? a.spez.filter(c=>SPEZIAL[c]) : [])));
-  sel.innerHTML = codes.map(c=>{
-    const d = zustandDef(c);
-    return `<option value="${c}">${esc(d.name)}${SPEZIAL[c]?' ·':''}</option>`;
-  }).join('');
-  zustandHinweis();
-}
-function zustandHinweis(){
-  const d = zustandDef($('#f-zustand').value);
-  $('#f-zustand-hint').textContent = d && d.text ? d.text : '';
-  /* Angeboten, nicht vorausgewählt: was vorausgewählt ist, wird
-     weggetippt, ohne gelesen zu werden. */
-  const box = document.getElementById('f-quar');
-  if(box) box.hidden = $('#f-zustand').value === 'quarantaene';
-}
-{
-  const k = document.getElementById('btn-f-quar');
-  if(k) k.onclick = ()=>{
-    const sel = document.getElementById('f-zustand');
-    if(sel){ sel.value = 'quarantaene'; zustandHinweis(); }
-  };
-}
 
 /* ── Giftwarnung ─────────────────────────────────────────── */
 function giftWarnen(name, ga){
@@ -22732,7 +23101,6 @@ document.addEventListener('click', e=>{
     return;
   }
 });
-$('#f-zustand').addEventListener('change', zustandHinweis);
 
 /* ── Gemini ──────────────────────────────────────────────── */
 $('#ki-text').value = anlegenPromptBauen();
@@ -23280,8 +23648,6 @@ async function alSpeichern(){
   /* 4.0-beta.9: Antwort auf „Wie lange hält das Wasser im Untersetzer?“ */
   const anst = Number(($('#f-anstau') || {}).value || 0);
   if(kl === 'S' && anst > 0){ if(!S.anstau) S.anstau = {}; S.anstau[id] = anst; }
-  const zc = $('#f-zustand').value;
-  if(zc && zc !== 'gesund') zustandSetzen(id, zc);
   if(!a) neueArtMerken({art: art, bot: $('#f-bot').value.trim(), notiz: lageVon(p)});
   const files = (typeof AL_FOTOS !== 'undefined' && AL_FOTOS.length)
     ? AL_FOTOS.map(f=>f.datei) : $('#f-fotos').files;
@@ -23338,20 +23704,6 @@ function alKarteNachAnlegen(id){
   setTimeout(los, 800);
 }
 
-/* ── Zustandsbedienung auf den Karten ────────────────────── */
-document.addEventListener('change', e=>{
-  const sel = e.target.closest('[data-zsel]');
-  if(!sel) return;
-  const id = sel.dataset.zsel;
-  zustandSetzen(id, sel.value);
-  const p = allePflanzen().find(x=>x.id===id);
-  if(p && istGiftig(p, 'katze') === true && sel.value==='gesund'){ /* keine Warnung nötig */ }
-  render();
-});
-document.addEventListener('click', e=>{
-  const m = e.target.closest('[data-zmed]');
-  if(m){ mediumSetzen(m.dataset.zmed, m.dataset.m); render(); return; }
-});
 /* beta.2: einen Bibliothekswert in die Karte übernehmen (nur per Tipp). */
 document.addEventListener('click', e=>{
   const btn = e.target.closest('[data-do="bib-nimm"]'); if(!btn) return;
@@ -23364,30 +23716,7 @@ document.addEventListener('click', e=>{
   aenderungSetzen(p.id, {[f]: wert}, 'bib', true);
   render();
 });
-document.addEventListener('click', e=>{
-  const btn = e.target.closest('[data-do]'); if(!btn) return;
-  const a = btn.dataset.do, id = btn.dataset.p;
-  const p = allePflanzen().find(x=>x.id===id);
-  /* Ist der Steckling angewachsen, geht es nicht zurück auf „gesund",
-     sondern auf den Zustand danach — frisch getopfte Wurzeln sind
-     etwas anderes als eine eingewachsene Pflanze. */
-  if(a==='zfertig'){
-    const z = p ? zustandVon(p) : null;
-    zustandSetzen(id, (z && z.def && z.def.danach) ? z.def.danach : 'gesund');
-    render();
-  }
-  else if(a==='zplus'){ zustandVerlaengern(id, 14); render(); }
-  else if(a==='ics' && p){ icsLaden(p); }
-  else if(a==='ztasks' && p){
-    const z = zustandVon(p);
-    const med = (typeof mediumVon === 'function') ? mediumVon(p) : null;
-    (z.def.tasks||[]).concat(med && med.tasks ? med.tasks : []).forEach(t=>{
-      const liste = S.added[id] = S.added[id] || [];
-      if(!liste.some(x=>x.text===t)) liste.push({id:'z'+Date.now()+Math.random().toString(36).slice(2,6), text:t});
-    });
-    sichern(); render();
-  }
-});
+
 
 /* ── Melden ──────────────────────────────────────────────── */
 $('#btn-melden').onclick = ()=>{
@@ -23424,7 +23753,6 @@ $('#btn-melden-weg').onclick = ()=>{
   S.neueArten = []; sichern(); $('#melde-box').hidden = true; meldeRender();
 };
 
-zustandListe(null);
 meldeRender();
 
 
@@ -24421,7 +24749,6 @@ function planKarteHTML(p){
   const r = raum(), o = pflanzenOrt(p.id);
   const u = o ? platzUrteil(r, o.x, o.y, pMonat) : null;
   const st = giessStatus(p);
-  const z = zustandVon(p);
   const wo = u && u.moebel ? 'auf ' + u.moebel.name : 'auf dem Boden';
   const licht = u ? `${u.stunden.toFixed(1).replace('.',',')} Std Sonne · ${HELL_NAME[u.stufe]}` : '';
   const wasser = st.stand==='stopp' ? 'Gießpause'
@@ -24433,7 +24760,7 @@ function planKarteHTML(p){
       <button class="pk-zu" data-do="karte-zu">×</button>
       <h4>${esc(nice(p))}</h4>
       <p class="pk-zeile">${esc(wo)}${u ? ' · ' + esc(licht) : ''}</p>
-      <p class="pk-zeile">${esc(wasser)}${z.code!=='gesund'?' · '+esc(z.def.name):''}${istGiftig(p,'katze')===true?' · giftig für Katzen':''}</p>
+      <p class="pk-zeile">${esc(wasser)}${istGiftig(p,'katze')===true?' · giftig für Katzen':''}</p>
       <div class="tools"><button class="haupt" data-do="giessen" data-p="${p.id}">${giessTat(p)}</button></div>
     </div>`;
   }
@@ -24442,7 +24769,7 @@ function planKarteHTML(p){
     <h4>${esc(nice(p))}</h4>
     <p class="pk-art">${esc(mitSorte(p.art, p))}${p.botanisch?` · <i>${esc(p.botanisch)}</i>`:''}</p>
     <p class="pk-zeile">${esc(wo)} in ${esc(u&&u.hoehe?u.hoehe+' cm Höhe':'Bodenhöhe')} · ${esc(licht)}</p>
-    <p class="pk-zeile">${esc(SONNE[p.sonne]?SONNE[p.sonne].text:'Licht offen')} · ${esc(wasser)}${z.code!=='gesund'?' · '+esc(z.def.name):''}</p>
+    <p class="pk-zeile">${esc(SONNE[p.sonne]?SONNE[p.sonne].text:'Licht offen')} · ${esc(wasser)}</p>
     ${istGiftig(p,'katze')===true?`<p class="pk-warn">Giftig für Katzen${u&&u.katze?' — und hier erreichbar':''}</p>`:''}
     <div class="tools">
       <button data-do="giessen" data-p="${p.id}">Heute gegossen</button>
@@ -25706,7 +26033,7 @@ let gmTeil = null;
 /* Was ein Tipp an einer Pflanze schreiben kann. Ein Fach mehr im
    Gießmodus heißt: hier eintragen, sonst bleibt nach Rückgängig ein
    Rest stehen. */
-const GM_SNAP_FAECHER = ['water', 'zustand', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen'];
+const GM_SNAP_FAECHER = ['water', 'lernen', 'tagEin', 'feuchtRueck', 'dueng', 'gesehen', 'anstau', 'spuelen'];
 function gmSnapPflanze(id){
   const o = {id, f:{}};
   GM_SNAP_FAECHER.forEach(k => {
@@ -25761,12 +26088,6 @@ function gmRaumVon(p){
   const o = typeof pflanzenOrt === 'function' ? pflanzenOrt(p.id) : null;
   return p.raum || (o && o.raum) || '';
 }
-function gmKrankRang(p){
-  const z = zustandVon(p);
-  if(!z || z.code === 'gesund' || !z.def) return 0;
-  if(z.def.trennen) return 2;
-  return (z.def.ton === 'warn' || z.def.ton === 'alarm') ? 1 : 0;
-}
 function gmLaufweg(liste){
   const rPos = {};
   raumListe().forEach((r, i) => { rPos[r.id] = i; });
@@ -25787,7 +26108,7 @@ function gmLaufweg(liste){
       if(sa !== sb) return sa - sb;
       const ta = String(a.p.stellplatz || ''), tb = String(b.p.stellplatz || '');
       if(ta !== tb) return ta.localeCompare(tb, 'de');
-      return gmKrankRang(a.p) - gmKrankRang(b.p) || a.i - b.i;
+      return a.i - b.i;
     })
     .map(x => x.p);
 }
@@ -25856,7 +26177,7 @@ function gmStarten(){
     return;
   }
   gmZwHinweisMerken();
-  gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = []; gmZugefragt = {};
+  gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = [];
   gmVerlauf = []; gmSnaps = {}; gmNeuMelden = null; gmDgWahl = null; gmDgAuto = null;
   gmListeAktiv = false; gmHaken = {}; gmStill = false; gmTeil = null;
   gmDuengEntscheiden();
@@ -25942,7 +26263,6 @@ function gmDuengKandidaten(liste){
 let gmBefunde = [];
 /* Wer im Rundgang schon geantwortet hat, wird nicht noch einmal
    gefragt — die Antwort gilt fuer diesen Durchgang. */
-let gmZugefragt = {};
 function gmBeenden(){ modalZu('giessmodus'); }
 function gmWeiter(){
   if(gmTeil){
@@ -26018,7 +26338,7 @@ function gmLeiste(){
 function gmEintragZuruecknehmen(e){
   if(e.snap) gmSnapZurueck(e.snap);
   if(e.befund) gmBefunde = (gmBefunde || []).filter(b => b !== e.befund);
-  if(e.typ === 'p'){ delete gmZugefragt[e.id]; delete gmSnaps[e.index]; }
+  if(e.typ === 'p'){ delete gmSnaps[e.index]; }
 }
 function gmRueckgaengig(){
   if(gmNeuMelden){ gmNeuAbbrechen(); return; }
@@ -26080,7 +26400,6 @@ function gmNeuAbbrechen(){
   } else if(n && n.e){
     if(n.e.nach) gmSnapZurueck(n.e.nach);
     if(n.e.befund && gmBefunde.indexOf(n.e.befund) < 0) gmBefunde.push(n.e.befund);
-    if(n.e.typ === 'p') gmZugefragt[n.e.id] = true;
     gmVerlauf.splice(n.vi, 0, n.e);
   }
   gmZeichnenEnde();
@@ -26452,7 +26771,6 @@ function gmZeichnen(){
   if(!p){ gmZeichnenEnde(); return; }
   if(!gmSnaps[gmIndex]) gmSnaps[gmIndex] = gmSnapPflanze(p.id);
   const st = giessStatus(p);
-  const z = zustandVon(p);
   const kl = KLASSEN[p.klasse] || {};
   const pfoto = profilFoto(p.id);
   const foto = pfoto ? pfoto.src : null;
@@ -26468,10 +26786,8 @@ function gmZeichnen(){
      ein, an der das Besondere haette stehen muessen. Er sitzt jetzt
      im Streifen unter dem Namen und laesst sich antippen. */
   const kasten = [];
-  if(stopp > 0) kasten.push({warn:true, text:'Nicht gießen. Wegen „' + z.def.name + '“ noch ' + stopp + (stopp===1?' Tag':' Tage') + ' trocken lassen.'});
+  if(stopp > 0) kasten.push({warn:true, text:'Nicht gießen. Gießpause ' + stoppText(p) + '.'});
   else {
-    if(z.code !== 'gesund' && gmZugefragt[p.id])
-      kasten.push({warn:false, text: z.def.name + (z.def.kurz ? ' — ' + z.def.kurz : '')});
     /* 4.0-beta.13 (F149): kein Hinweis „Aus deinen Rückmeldungen“ mehr.
        Das Lernen selbst läuft unverändert weiter. */
     const v = umtopfVerdacht(p);
@@ -26480,21 +26796,11 @@ function gmZeichnen(){
       kasten.push({warn:false, text:'Voller Sonne — trocknet an heißen Tagen schneller als der Rhythmus.'});
   }
 
-  /* Die Frage nach dem Zustand gehoert hierher: hier steht man vor der
-     Pflanze und sieht sie an. Die Stichtagsliste auf der Startseite
-     fragt erst, wenn die volle Frist des Zustands abgelaufen ist —
-     bei „Ausgehungert" nach sechs Wochen, und bis dahin rechnet die
-     App mit einem Zustand, den es vielleicht nicht mehr gibt. */
-  /* 4.0-beta.21 (Plan M2b): abschaltbar mit „Zustandsfrage beim Gießen“. */
-  const zFrage = (stopp <= 0 && z.code !== 'gesund' && !gmZugefragt[p.id] && schalterAn('gmzustand'))
-    ? `<div class="gm-zfrage">
-         <p><b>${esc(z.def.name)}</b> — ${esc(z.def.frage || 'Ist der Zustand vorbei?')}</p>
-         <div class="gm-zfrage-btns">
-           <button type="button" data-gm-z="vorbei">${z.def.danach && ZUSTAENDE[z.def.danach]
-             ? 'Vorbei — weiter als „' + esc(ZUSTAENDE[z.def.danach].name) + '“' : 'Vorbei'}</button>
-           <button type="button" data-gm-z="bleibt">Bleibt</button>
-         </div>
-       </div>` : '';
+  /* 4.0-beta.27 (F253 A): Ein beendeter Tag mit Erinnerung meldet sich
+     beim nächsten Gießen einmal, ohne Frage. */
+  const tagNotiz = tagGiessNotizen(p);
+  const zFrage = tagNotiz.length
+    ? tagNotiz.map(t => `<p class="gm-hinweis gm-tagnotiz">${esc(t)}</p>`).join('') : '';
 
   /* 4.0-beta.14 (Plan Schritt 3, F155): Topfgröße nachtragen, hier
      steht man vor dem Topf. */
@@ -26715,14 +27021,11 @@ function gmZeichnenAnzucht(e){
    Klasse, dann die Art der Wassergabe, dann der Standort. */
 function giessHinweisFuer(p, ohneArt){
   const kl = (typeof KLASSEN !== 'undefined' && KLASSEN[p.klasse]) || {};
-  const z  = (typeof zustandVon === 'function') ? zustandVon(p) : null;
   const winter = (typeof sommer === 'function') ? !sommer() : false;
   const teile = [];
 
   if(typeof stoppRest === 'function' && stoppRest(p) > 0){
-    const t = stoppRest(p);
-    return { warn:true, text:'Jetzt gar nicht gießen. Noch ' + t + (t===1?' Tag':' Tage')
-      + ' komplett trocken stehen lassen' + (z && z.code!=='gesund' ? ' — ' + z.def.name.toLowerCase() : '') + '.' };
+    return { warn:true, text:'Jetzt gar nicht gießen. Gießpause ' + stoppText(p) + '.' };
   }
 
   /* Wasserkultur hat keine Erde, also auch keine Probe. */
@@ -26730,8 +27033,6 @@ function giessHinweisFuer(p, ohneArt){
   if(art && GIESSARTEN[art] && GIESSARTEN[art].wechsel)
     return { warn:false, text: GIESSARTEN[art].kurz };
 
-  const med = (typeof mediumVon === 'function') ? mediumVon(p) : null;
-  if(med) return { warn:false, text: med.text };
 
   /* Der Satz kommt aus der Gruppe, nicht aus der Klasse: eine
      Karnivore im Anstau hat keine Fingerprobe, eine Bromelie wird im
@@ -26751,10 +27052,11 @@ function giessHinweisFuer(p, ohneArt){
      && p.klasse !== 'S' && art !== 'anstau')
     teile.push(GIESSARTEN[art].kurz);
 
-  if(z && z.code !== 'gesund' && z.def && z.def.f && z.def.f !== 1)
-    teile.push(z.def.f > 1
-      ? 'Wegen „' + z.def.name + '“ braucht sie gerade weniger Wasser als sonst.'
-      : 'Wegen „' + z.def.name + '“ braucht sie gerade mehr Wasser als sonst.');
+  /* 4.0-beta.27: Wirkung des laufenden Gießtags */
+  const tg = (typeof tagGiessEintrag === 'function') ? tagGiessEintrag(p) : null;
+  if(tg && tg.t.giess !== 'pause')
+    teile.push('Wegen „' + tg.t.name + '“ ' + (tg.t.giess === 'laenger'
+      ? 'seltener gießen als sonst.' : 'öfter gießen als sonst.'));
 
   if(p.sonne === 'voll' && !winter && p.klasse !== 'S')
     teile.push('Voller Sonne ausgesetzt — an heißen Tagen trocknet sie schneller aus, als der Rhythmus vorgibt.');
@@ -27075,7 +27377,8 @@ function gmZeichnenListe(){
       }
       const name = z.az ? z.az.name : nice(z.p);
       const klein = z.az ? z.az.tat : (z.p.art || '');
-      zeilen += `<label class="gm-lg-zeile">${gmLgBild(z, name)}<span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}</span>`
+      const tn = z.p ? tagGiessNotizen(z.p) : [];
+      zeilen += `<label class="gm-lg-zeile">${gmLgBild(z, name)}<span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}${tn.length ? `<i class="gm-tagnotiz">${esc(tn.join(' · '))}</i>` : ''}</span>`
         + `<input type="checkbox" data-gm-hk="${esc(z.id)}" data-gm-lgk="${esc(g.key)}"${gmHakenAn(z) ? ' checked' : ''}></label>`;
     });
     const n = g.eintraege.filter(gmHakenAn).length;
@@ -27246,20 +27549,6 @@ function gmZeichnenEnde(){
 }
 
 document.addEventListener('click', e=>{
-  const zb = e.target.closest('[data-gm-z]');
-  if(zb){
-    const p = gmListe[gmIndex]; if(!p) return;
-    const z = zustandVon(p);
-    if(zb.dataset.gmZ === 'vorbei'){
-      const danach = z.def && z.def.danach && ZUSTAENDE[z.def.danach] ? z.def.danach : null;
-      zustandSetzen(p.id, danach || 'gesund');
-    } else if(typeof zustandVerlaengern === 'function'){
-      zustandVerlaengern(p.id, 14);
-    }
-    gmZugefragt[p.id] = true;
-    gmZeichnen();
-    return;
-  }
   const tb = e.target.closest('[data-gm-topf]');
   if(tb){ gmTopfAntwort(tb.dataset.gmTopf === 'ja'); return; }
   /* 4.0-beta.10: Icon oder Balken öffnet das Hinweiskärtchen. */
@@ -27433,7 +27722,7 @@ gmKnopfAktualisieren();
    Gelernt wird höchstens einmal je Gießzyklus. Zehnmal „noch feucht"
    in derselben Wartezeit ist eine Beobachtung, nicht zehn. */
 function lernFaktorVon(id){
-  const e = S.zustand && S.zustand[id];
+  const e = S.lernen && S.lernen[id];
   const f = e && e.lernFaktor;
   return (typeof f === 'number' && f > 0) ? f : 1;
 }
@@ -27447,7 +27736,8 @@ const VORSCHLAG_AB = 2;
 function lernSchritt(p, richtung){
   if(!p || !gruppeLernt(p)) return false;
   const g = gruppeVon(p);
-  const e = S.zustand[p.id] || (S.zustand[p.id] = {});
+  const lz = (S.lernen || (S.lernen = {}));
+  const e = lz[p.id] || (lz[p.id] = {});
   /* Ein Zyklus ist die Zeit bis zum nächsten Gießen. Solange kein
      neuer Termin dazugekommen ist, zählt dieselbe Beobachtung weiter
      als eine. */
@@ -27478,7 +27768,7 @@ function lernSchritt(p, richtung){
 /* Neue Erde ist eine neue Pflanze: was über den alten Ballen gelernt
    wurde, gilt für den neuen nicht. */
 function lernZuruecksetzen(id){
-  const e = S.zustand[id];
+  const e = S.lernen && S.lernen[id];
   if(!e) return;
   delete e.lernFaktor; delete e.lernMarke; delete e.trockenZahl;
   delete e.ivVorschlag; delete e.vorZahl; delete e.vorRichtung;
@@ -27489,7 +27779,7 @@ function lernZuruecksetzen(id){
 function umtopfVerdacht(p){
   const g = gruppeVon(p);
   const st = lernStand(p);
-  const e = (S.zustand && S.zustand[p.id]) || {};
+  const e = (S.lernen && S.lernen[p.id]) || {};
   if(st.unten && (e.trockenZahl || 0) >= 2){
     if(g.verdacht === 'wurzelbund')
       return {art:'wurzelbund', text:'Trocknet schneller aus, als der Topf hergibt. Meist Wurzelbund oder Erde, die kein Wasser mehr annimmt.'};
@@ -27504,9 +27794,10 @@ function umtopfVerdacht(p){
 const FEUCHT_SCHWELLE = 2;
 const SCHUB_DECKEL = 4;
 
-function schubVon(id){ return (S.zustand[id] && S.zustand[id].giessSchub) || 0; }
+function schubVon(id){ return (S.lernen && S.lernen[id] && S.lernen[id].giessSchub) || 0; }
 function schubSetzen(id, tage){
-  S.zustand[id] = Object.assign({}, S.zustand[id], {giessSchub: tage});
+  const lz = (S.lernen || (S.lernen = {}));
+  lz[id] = Object.assign({}, lz[id], {giessSchub: tage});
   sichern();
 }
 
@@ -27912,6 +28203,10 @@ function sektionOeffnen(key, ausloeser){
 
   sekZurueckKnopf();
   modalAuf('sek-modal', ausloeser);
+  if(key === 'tags' && typeof tvZeichnen === 'function'){
+    TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false;
+    tvZeichnen();
+  }
   if(key === 'raeume' && typeof rvZeichnen === 'function'){
     RV.raum = null; RV.menue = null; RV.tun = null; RV.fehler = '';
     rvZeichnen();
@@ -28079,6 +28374,7 @@ const WZ_KACHEL = {
    Werkzeugkacheln, nur kleiner. */
 const MH_IKON = {
   raeume:    '<path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>',
+  tags:      '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-6.2 6.2a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.6"/>',
   sicherung: '<path d="M12 3l7.5 3v5.6c0 4.3-3.1 8-7.5 9.4-4.4-1.4-7.5-5.1-7.5-9.4V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/>',
   urlaub:    '<path d="M4 4h16v16H4zM4 9h16M9 4v16"/>',
   wetter:    '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
@@ -28116,6 +28412,8 @@ const MH_IKON = {
 const MH_UNTER = {
   /* 4.0-beta.23 (G1a) */
   raeume:    ()=>{ const n = raumListe().length; return n === 1 ? 'Ein Raum' : n + ' Räume'; },
+  /* 4.0-beta.27 (G2a+c) */
+  tags:      ()=>{ const n = tagListe().length; return n === 1 ? 'Ein Tag' : n + ' Tags'; },
   aufgaben:  ()=>{
     const n = allePflanzen().flatMap(aufgabenVon).filter(t=>!t.done).length;
     return n ? (n === 1 ? 'Eine offene Aufgabe' : n + ' offene Aufgaben') : 'Nichts offen';
@@ -28176,7 +28474,7 @@ const MH_STILL = ['ansicht','tiere','rundgang','kidienst','wasser','duenger','rh
                   'bib-arten','bib-rezepte','bib-wissen'];
 
 const MH_GRUPPEN = [
-  {titel:'Sammlung', punkte:['raeume','aufgaben','wunsch']},
+  {titel:'Sammlung', punkte:['raeume','tags','aufgaben','wunsch']},
   {titel:'Pflege',   punkte:['giess','wetter','kartei','bibliothek']},
   {titel:'App',      punkte:['sicherung','einstell','tour','install']},
   {titel:'Hilfe',    punkte:['patch','rueck','melde','sprot']}
@@ -28234,7 +28532,7 @@ const SAISON_TEXT = {
 
 function giessEinst(){
   if(!S.giess) S.giess = {art:'leitung', haerte:'', dgArt:'fluessig',
-                          winterpause:true, saison:true, saisonStaerke:'normal'};
+                          saison:true, saisonStaerke:'normal'};
   return S.giess;
 }
 
@@ -28342,10 +28640,6 @@ function giessCenterZeichnen(){
           + ' Fällt der Rundgang aus, wird er nachgeholt.')
     + ' Wartet eine Pflanze mehr als doppelt so lange wie vorgesehen, gibt es höchstens alle '
     + NOTBREMSE_FRIST + ' Tage trotzdem einen — sonst wäre die Notbremse die Regel.');
-  ek('winterpause-text', g.winterpause
-    ? 'Zwischen Oktober und Februar schlägt die App kein Düngen vor.'
-    : 'Es wird das ganze Jahr über gedüngt. Nur sinnvoll, wenn deine Pflanzen unter Lampen durchwachsen.',
-    g.winterpause ? 'Im Winter kein Düngevorschlag.' : 'Ganzjährig düngen.');
   ek('saison-text', g.saison
     ? 'Die Gießabstände werden von November bis Februar länger.'
     : 'Die Abstände bleiben das ganze Jahr gleich.',
@@ -28353,8 +28647,6 @@ function giessCenterZeichnen(){
   ek('saison-staerke-text', SAISON_TEXT[g.saisonStaerke],
     {sanft:'Ein Fünftel längere Abstände.', normal:'Ein Drittel längere Abstände.', stark:'Doppelt so lange Abstände.'}[g.saisonStaerke]);
 
-  const w = document.getElementById('ck-winterpause');
-  if(w) w.checked = g.winterpause !== false;
   const sa = document.getElementById('ck-saison');
   if(sa) sa.checked = g.saison !== false;
   /* 4.0-beta.11 (F135): Sammelkarten, Standard an */
@@ -28370,8 +28662,7 @@ function giessCenterZeichnen(){
   u('gc-u-wasser', (WASSER_ART[g.art] || {}).name
     + (g.haerte ? ' · ' + {weich:'weich', mittel:'mittel', hart:'hart'}[g.haerte] : ''));
   u('gc-u-duenger', {fluessig:'Flüssig', stab:'Stäbchen', langzeit:'Langzeit', selbst:'Selbst angesetzt'}[g.dgArt]
-    + (duengJedes() ? ' · bei jedem Gießen' : duengWunschtag() === null ? '' : ' · ' + WOCHENTAG_NAME[duengWunschtag()].replace(/en$/, 's'))
-    + (g.winterpause ? ' · Winterpause' : ''));
+    + (duengJedes() ? ' · bei jedem Gießen' : duengWunschtag() === null ? '' : ' · ' + WOCHENTAG_NAME[duengWunschtag()].replace(/en$/, 's')));
   u('gc-u-rhythmus', (giesstageAktiv() ? 'Gießtage: ' + giesstage().slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(x => GT_KURZ[x]).join(', ') + ' · ' : '') + (g.saison
     ? 'Saison-Anpassung: ' + {sanft:'sanft', normal:'normal', stark:'stark'}[g.saisonStaerke]
     : 'Ohne Saison-Anpassung'));
@@ -28495,9 +28786,6 @@ document.addEventListener('click', e=>{
   }
 });
 document.addEventListener('change', e=>{
-  if(e.target.id === 'ck-winterpause'){
-    giessEinst().winterpause = e.target.checked; sichern(); giessCenterZeichnen(); mehrNebenzeilen();
-  }
   if(e.target.id === 'ck-saison'){
     giessEinst().saison = e.target.checked; sichern(); giessCenterZeichnen(); mehrNebenzeilen(); render();
   }
@@ -28941,7 +29229,7 @@ function ubBlattHTML(plan, o){
         <span class="ub-box gestrichelt" aria-hidden="true"></span>
         <span class="ub-nr">${e.raum ? e.nr : '–'}</span>
         <span><b>${esc(nice(e.p))}</b> — ${esc(ubStandort(e.p))}${
-          e.rest ? ` · noch ${e.rest} ${e.rest === 1 ? 'Tag' : 'Tage'}` : ''}</span></div>`).join('')}`;
+          e.rest >= TAG_OFFEN ? ' · bis auf Weiteres' : e.rest ? ` · noch ${e.rest} ${e.rest === 1 ? 'Tag' : 'Tage'}` : ''}</span></div>`).join('')}`;
   }
 
   /* Steckbriefe */
@@ -29263,8 +29551,7 @@ var SCHALTER = [
   {k:'giessart',   id:'sch-giessart',   vor:{sammler:false, entdecker:true}},
   /* 4.0-beta.21 (Plan M2a/M2b): Gießen als Liste, Kärtchen und Zustandsfrage im Gießmodus */
   {k:'gliste',     id:'sch-gliste',     vor:{sammler:true,  entdecker:false}},
-  {k:'gmwie',      id:'sch-gmwie',      vor:{sammler:false, entdecker:true}},
-  {k:'gmzustand',  id:'sch-gmzustand',  vor:{sammler:false, entdecker:true}}
+  {k:'gmwie',      id:'sch-gmwie',      vor:{sammler:false, entdecker:true}}
 ];
 function modusVon(){
   return MODI[S.modus] ? S.modus : (S.einfach ? 'sammler' : 'entdecker');
@@ -30030,10 +30317,20 @@ function dokAufbau(){
     }</div></div>`).join('');
 }
 
+/* 4.0-beta.27 (F250): Befund des Doktors als Kurznotiz im Verlauf,
+   höchstens TAG_NOTIZ_MAX Zeichen. Gibt false zurück, wenn derselbe
+   Befund heute schon dasteht. */
+function dokBefundVerlauf(pid, text){
+  const max = (typeof TAG_NOTIZ_MAX === 'number') ? TAG_NOTIZ_MAX : 200;
+  let kurz = 'Befund: ' + String(text || '').replace(/\s+/g, ' ').trim();
+  if(kurz.length > max) kurz = kurz.slice(0, max - 1).trimEnd() + '…';
+  const heute = iso(HEUTE);
+  if(ereignisse(pid).some(e => e.typ === 'notiz' && e.datum === heute && e.text === kurz)) return false;
+  ereignisDazu(pid, 'notiz', kurz);
+  return true;
+}
 function dokKiErgebnisHTML(d){
   const p = dokPflanze ? allePflanzen().find(x=>x.id===dokPflanze) : null;
-  const z = d.zustand ? zustandRaten(d.zustand) : null;
-  const zd = z ? zustandDef(z) : null;
   const schritte = d.schritte
     ? d.schritte.split('\n').map(z2=>z2.split('|')[1] || z2.split('|')[0] || z2)
         .map(x=>x.trim()).filter(Boolean) : [];
@@ -30042,7 +30339,7 @@ function dokKiErgebnisHTML(d){
       <span class="dg-rang">Einschätzung der KI</span>
       <span class="dg-wert">${esc(d.sicher ? 'Sicherheit ' + d.sicher : 'ohne Angabe')}</span>
     </div>
-    <h4>${esc((zd && zd.name) || d.zustand || 'Kein Zustand genannt')}</h4>
+    <h4>${esc(d.zustand || 'Kein Zustand genannt')}</h4>
     ${d.antwort && !/^keine frage gestellt$/i.test(String(d.antwort).trim())
       ? `<div class="dok-antwort"><b>Auf deine Frage</b><p>${esc(d.antwort)}</p></div>` : ''}
     ${d.stelle && !/^nichts auff/i.test(String(d.stelle).trim())
@@ -30053,7 +30350,6 @@ function dokKiErgebnisHTML(d){
     ${schritte.length ? `<p class="dg-schritt-kopf">Was jetzt zu tun ist</p>
       <ol class="dg-schritte">${schritte.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>` : ''}
     ${p ? `<div class="tools">
-      ${z && z !== 'gesund' ? `<button data-do="dok-zustand-ki" data-z="${esc(z)}">Zustand „${esc((zd||{}).name||'')}“ setzen</button>` : ''}
       <button data-do="dok-neu">Noch einmal von vorn</button>
     </div>` : '<p class="dg-hinweis">Ohne gewählte Pflanze bleibt die Einschätzung nur hier stehen.</p>'}
   </div>`;
@@ -30103,7 +30399,6 @@ function dokErgebnis(){
         <ol class="dg-schritte">${d.sofort.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
         ${dokPflanze && dokPflanze.indexOf('bib:') !== 0 ? `<div class="tools">
           <button class="haupt" data-do="dok-tasks" data-d="${d.id}">Schritte als Aufgaben übernehmen</button>
-          ${d.zustand?`<button data-do="dok-zustand" data-d="${d.id}">Zustand „${esc((zustandDef(d.zustand)||{}).name||'')}“ setzen</button>`:''}
         </div>` : '<p class="dg-hinweis">Wähle oben eine Pflanze aus, dann kannst du die Schritte direkt übernehmen.</p>'}
       </div>`;
     }).join('');
@@ -30226,9 +30521,6 @@ function dokPromptBauen(){
      Antwort ausschert. */
   let format = mitDoktorZeilen(ANTWORT_FORMAT);
   if(p && vermehrungKiVon(p)) format = ohneVermehrung(format);
-  /* Wer gerade umgetopft hat, braucht keine Umtopfempfehlung. */
-  const zst = (typeof zustandVon === 'function' && p) ? zustandVon(p) : null;
-  if(zst && zst.code === 'frisch') format = ohneTopf(format);
   format = mitIstWerten(format, p);
   zeilen.push(format);
   return zeilen.join('\n');
@@ -30360,18 +30652,12 @@ document.addEventListener('click', e=>{
     if(!roh || !dokPflanze) return;
     const p = allePflanzen().find(x=>x.id===dokPflanze);
     if(!p) return;
-    const alt = (p.notiz || '').trim();
-    /* Derselbe Dublettenschutz wie beim Uebernehmen. Er fehlte hier,
-       und wer eine Antwort zweimal einfuegte — weil die erste
-       abgeschnitten war —, hatte den Befund zweimal in den Notizen. */
-    const neu = 'Befund vom ' + new Date().toLocaleDateString('de-DE') + ': ' + roh;
-    const schon = alt.indexOf(roh) >= 0;
-    if(!schon) aenderungSetzen(dokPflanze, {notiz: (alt ? alt + '\n\n' : '') + neu});
+    const schon = !dokBefundVerlauf(dokPflanze, roh);
     const box = document.getElementById('dok-abgleich-hinweis');
     if(box) box.innerHTML = '';
     dokKiHinweis(schon
-      ? 'Der Text stand schon in den Notizen — nichts doppelt eingetragen.'
-      : 'Der Text steht jetzt als Befund in den Notizen.', 'ok');
+      ? 'Der Befund stand schon im Verlauf — nichts doppelt eingetragen.'
+      : 'Der Befund steht jetzt kurz im Verlauf.', 'ok');
     render(); dokWeiterZurEinschaetzung(); return;
   }
   /* Die Kästen „Abgleich“, „andere Art“, „Sortenmerkmale“ und die
@@ -30391,40 +30677,6 @@ document.addEventListener('click', e=>{
     dokKiHinweis(neu + ' ' + (neu===1?'Schritt':'Schritte') + ' als Aufgaben übernommen. Zu finden bei „Heute“ und in der Karte der Pflanze.', 'ok');
     return;
   }
-  if(btn.dataset.do === 'dok-zustand'){
-    const d = DIAGNOSEN.find(x=>x.id===btn.dataset.d);
-    if(!d || !d.zustand || !dokPflanze) return;
-    zustandSetzen(dokPflanze, d.zustand);
-    render();
-    /* Bei Schädlingen ist das Trennen die wirksamste Einzelmaßnahme —
-       und der Moment, sie vorzuschlagen, ist genau jetzt. */
-    if(d.zustand === 'schaedlinge'){
-      dokKiHinweis('Zustand gesetzt.', 'ok');
-      const box = document.getElementById('dok-abgleich-hinweis');
-      if(box) box.innerHTML = `<div class="dok-unsicher"><b>Schädlingsbefall — trennen?</b>
-        Drei Wochen getrennt aufstellen hält den Befall von der übrigen Sammlung fern.
-        Der Zustand „Quarantäne“ nimmt die Pflanze aus dem Rundgang und legt häufigere Kontrollen an.
-        <div class="tools"><button class="haupt" data-do="quar-an" data-p="${dokPflanze}">Quarantäne setzen</button>
-        <button data-do="uns-weg">Nicht nötig</button></div></div>`;
-      return;
-    }
-    dokKiHinweis('Zustand gesetzt. Die Gießempfehlung ist damit angepasst.', 'ok');
-    return;
-  }
-  if(btn.dataset.do === 'dok-zustand-ki'){
-    if(!dokPflanze) return;
-    zustandSetzen(dokPflanze, btn.dataset.z);
-    render(); dokErgebnis();
-    dokKiHinweis('Zustand gesetzt. Die Gießempfehlung ist damit angepasst.', 'ok');
-    if(btn.dataset.z === 'schaedlinge'){
-      const box = document.getElementById('dok-abgleich-hinweis');
-      if(box) box.innerHTML = `<div class="dok-unsicher"><b>Schädlingsbefall — trennen?</b>
-        Drei Wochen getrennt aufstellen hält den Befall von der übrigen Sammlung fern.
-        <div class="tools"><button class="haupt" data-do="quar-an" data-p="${dokPflanze}">Quarantäne setzen</button>
-        <button data-do="uns-weg">Nicht nötig</button></div></div>`;
-    }
-    return;
-  }
   if(btn.dataset.do === 'dok-neu'){
     dokSchritt = 2; dokWeg = null; dokKiFertig = false; dokKiDaten = null;
     dokSymptome.clear(); dokAntworten = {};
@@ -30434,12 +30686,6 @@ document.addEventListener('click', e=>{
     });
     dokKiHinweis(''); dokAufbau(); dokZeigen(); dokErgebnis();
     return;
-  }
-  if(btn.dataset.do === 'quar-an'){
-    zustandSetzen(btn.dataset.p, 'quarantaene');
-    const box = document.getElementById('dok-abgleich-hinweis'); if(box) box.innerHTML = '';
-    dokKiHinweis('Quarantäne läuft — drei Wochen, dann fragt die App nach.', 'ok');
-    render(); return;
   }
   /* Von der Pflanzenkarte in den Grundriss: den Raum öffnen, in dem die
      Pflanze steht, und ihre Karte gleich aufschlagen. Steht sie nirgends,
@@ -30767,8 +31013,6 @@ $('#btn-dok-paste').onclick = ()=>{
   }
   const teile = [];
   if(dokPflanze){
-    const code = zustandRaten(d.zustand);
-    if(code){ zustandSetzen(dokPflanze, code); teile.push('Zustand „' + (zustandDef(code)||{}).name + '“ gesetzt'); }
     const notiz = [];
     /* Die Antwort auf die eigene Frage ist der eigentliche Befund —
        sie steht vor der allgemeinen Beschreibung, nicht dahinter. */
@@ -30794,19 +31038,11 @@ $('#btn-dok-paste').onclick = ()=>{
       umtopfVormerken(dokPflanze, topf.empfehlung || topf.groesse);
       teile.push('Fürs Umtopfen vorgemerkt');
     }
-    if(notiz.length){
-      const p = allePflanzen().find(x=>x.id===dokPflanze);
-      const alt = (p.notiz||'').trim();
-      /* Wer dieselbe Antwort noch einmal einfügt — weil die erste
-         abgeschnitten war, weil er die Ansicht gewechselt hat —, soll
-         den Befund nicht zweimal in den Notizen stehen haben. */
-      const block = notiz.join('\n');
-      if(alt.indexOf(block) >= 0){
-        teile.push('Befund stand schon in den Notizen');
-      } else {
-        aenderungSetzen(dokPflanze, {notiz: (alt ? alt + '\n\n' : '') + block});
-        teile.push('Befund in die Notizen');
-      }
+    /* 4.0-beta.27 (F250): Der Befund steht kurz im Verlauf, nicht als
+       langer Text in den Notizen. */
+    if(befundText){
+      teile.push(dokBefundVerlauf(dokPflanze, befundText)
+        ? 'Befund im Verlauf' : 'Befund stand schon im Verlauf');
     }
     /* Die Maßnahmen wandern nicht mehr von selbst auf die Liste,
        sondern stehen unten mit einem Haken zur Auswahl. */
@@ -31230,10 +31466,8 @@ function utZeichnen(){
   /* Stufe 1: was an dieser Pflanze gerade dran ist */
   const lage = document.getElementById('ut-pflanze-lage');
   if(lage && p){
-    const z = zustandVon(p);
     const teile = [];
     if(p.topf) teile.push('Bisher ' + p.topf + ' cm');
-    if(z && z.code !== 'gesund') teile.push(z.def.name);
     const letzt = ereignisse(p.id).find(e=>e.typ === 'umgetopft');
     if(letzt) teile.push('Zuletzt umgetopft am '
       + new Date(letzt.datum + 'T12:00:00').toLocaleDateString('de-DE'));
@@ -31297,7 +31531,6 @@ function utZusammenfassung(p){
   if(UT.gruende.length)
     zeilen.push(['Grund', UT.gruende.map(k=>UT_GRUENDE[k].name).join(', ')]);
   zeilen.push(['Verlauf', 'Eintrag „Umgetopft“ am heutigen Tag']);
-  zeilen.push(['Zustand', 'Frisch umgetopft — vier Wochen nicht düngen']);
   if(UT.langzeit)
     zeilen.push(['Dünger', 'Langzeitdünger — ein halbes Jahr keine weitere Gabe']);
   if(UT.stecklinge && UT.zahl > 0)
@@ -31316,9 +31549,7 @@ function utEintragen(){
   /* 1. Neue Topfgroesse an die Pflanze */
   aenderungSetzen(p.id, {topf:String(UT.topf), topfform:UT.form});
 
-  /* 2. Verlauf. EREIGNIS_ARTEN.umgetopft traegt zustand:'frisch' —
-        damit greift zugleich die Duengesperre ueber ZUSTAENDE.frisch
-        mit ihren 28 Tagen. Ein zweiter Eintrag ist nicht noetig. */
+  /* 2. Verlauf (4.0-beta.27: ohne Zustandsfolge) */
   const grund = UT.gruende.map(k=>UT_GRUENDE[k].name).join(', ');
   ereignisDazu(p.id, 'umgetopft',
     UT.topf + ' cm' + (grund ? ' · ' + grund : ''));
@@ -32485,8 +32716,6 @@ function ablegerAnlegen(mutterId, methodeId){
   Object.assign(p, ablegerErbe(mutter, b));
   S.eigene = S.eigene || [];
   S.eigene.push(p);
-  /* Zustand „Steckling“ mit Stichtag, damit die App nachfragt */
-  if(typeof zustandSetzen === 'function') zustandSetzen(id, 'steckling', m.dauer);
   /* Die zwei wichtigsten Schritte gleich als Aufgaben */
   const liste = S.added[id] = S.added[id] || [];
   m.schritte.slice(0, 2).forEach(t=>liste.push(
@@ -33843,7 +34072,7 @@ const STUFEN = {
 
 const RUNDGANG_STANDARD = {
   stufe:'rundgang', rhythmus:14, max:10, sortieren:'raum', wer:'faellig',
-  fotoJedes:4, zaehler:0, knoepfe:STANDARD_KNOEPFE.slice(), saison:true, rest:[]
+  fotoJedes:4, zaehler:0, saison:true, rest:[]
 };
 function rgEinst(){
   if(!S.rundgang) S.rundgang = Object.assign({}, RUNDGANG_STANDARD);
@@ -33858,17 +34087,6 @@ function rhythmusJetzt(){
 }
 
 /* Wer ist dran? */
-/* Steht eine Pflanze getrennt, gehört sie nicht in den Durchgang durch
-   die Sammlung — man geht ja gerade nicht von ihr zur nächsten. Sie
-   bekommt ihre eigene, häufigere Kontrolle über die Aufgabenliste. */
-function inTrennung(p){
-  const z = (typeof zustandVon === 'function') ? zustandVon(p) : null;
-  return !!(z && z.def && z.def.trennen);
-}
-/* Was hier gezählt wird, hängt von der Art ab. Bei Karnivoren ist die
-   neue Falle die Einheit, bei Orchideen und Bromelien der Trieb.
-   Schnellwachsende Kräuter und Einjährige zählt niemand sinnvoll —
-   dort verschwindet der Zähler. */
 function zuwachsArt(p){
   const b = (typeof bibVon === 'function') ? bibVon(p) : null;
   const typ = String((b ? b.typ : (p && p.typ)) || (typeof typVon === 'function' ? typVon(p) : '') || '');
@@ -33895,11 +34113,9 @@ function zuwachsArt(p){
 function rundgangListe(){
   const e = rgEinst();
   const takt = rhythmusJetzt();
-  let liste = allePflanzen().filter(p=>!inTrennung(p));
+  let liste = allePflanzen();
   if(e.wer === 'faellig')
     liste = liste.filter(p=>{ const t = tageSeitGesehen(p.id); return t == null || t >= takt; });
-  else if(e.wer === 'zustand')
-    liste = liste.filter(p=>zustandVon(p).code !== 'gesund');
   /* Nach Raum und Lage sortieren, damit man einmal physisch durchgeht */
   if(e.sortieren === 'raum' && typeof pflanzenOrt === 'function'){
     const rang = {};
@@ -33947,7 +34163,6 @@ function rgZeichnen(){
   const pfoto = profilFoto(p.id);
   const foto = pfoto ? pfoto.src : null;
   const heute = ereignisse(p.id).filter(x=>x.datum === iso(HEUTE));
-  const z = zustandVon(p);
   const wo = typeof gmStandort === 'function' ? gmStandort(p) : lageVon(p);
 
   $('#rg-inhalt').innerHTML = `
@@ -33955,7 +34170,7 @@ function rgZeichnen(){
     <div class="gm-bild">${foto?`<img src="${foto}" alt="">`:'<span class="gm-kein">kein Foto</span>'}</div>
     <h3>${esc(nice(p))}</h3>
     <p class="gm-art">${esc(p.art)}</p>
-    <p class="gm-lage">${seit == null ? 'Noch nie vermerkt' : (seit === 0 ? 'Heute schon angesehen' : `Zuletzt vor ${seit} ${seit===1?'Tag':'Tagen'}`)}${z.code!=='gesund'?' · '+esc(z.def.name):''}</p>
+    <p class="gm-lage">${seit == null ? 'Noch nie vermerkt' : (seit === 0 ? 'Heute schon angesehen' : `Zuletzt vor ${seit} ${seit===1?'Tag':'Tagen'}`)}</p>
     <p class="gm-wo">${esc(wo)}</p>
 
     ${e.stufe !== 'blick' ? `
@@ -33964,10 +34179,7 @@ function rgZeichnen(){
       <span class="rg-wert"><b>${blattLog(p.id).length}</b><i>${esc(zuwachsArt(p).kurz)} gezählt</i></span>
       <button class="rg-pm" data-rg="blatt-plus">+</button>
     </div>` : ''}
-    <div class="rg-chips">
-      ${(e.knoepfe||[]).filter(k=>!['blatt','blatt_weg'].includes(k)).map(k=>EREIGNIS_ARTEN[k]
-        ? `<button class="stat-chip ${EREIGNIS_ARTEN[k].ton}" data-rg="ev:${k}">${esc(EREIGNIS_ARTEN[k].name)}</button>` : '').join('')}
-    </div>` : ''}
+    ` : ''}
 
     ${rgFotoFaellig() ? `
     <label class="rg-foto">
@@ -34038,11 +34250,6 @@ document.addEventListener('click', e=>{
     return;
   }
   if(a === 'blatt-weg'){ ereignisDazu(p.id, 'blatt_weg'); rgErfasst++; rgZeichnen(); return; }
-  if(a.indexOf('ev:') === 0){
-    const typ = a.slice(3);
-    ereignisDazu(p.id, typ); rgErfasst++;   /* setzt den Zustand selbst */
-    rgZeichnen();
-  }
 });
 $('#rg-abbruch').onclick = rgBeenden;
 $('#btn-rundgang').onclick = rgStarten;
@@ -34065,10 +34272,6 @@ function rgEinstellungenAufbau(){
   setz('rg-max', e.max); setz('rg-wer', e.wer);
   setz('rg-sortieren', e.sortieren); setz('rg-fotojedes', e.fotoJedes);
   const s = document.getElementById('rg-saison'); if(s) s.checked = !!e.saison;
-  const box = document.getElementById('rg-knoepfe-wahl');
-  if(box) box.innerHTML = Object.keys(EREIGNIS_ARTEN)
-    .filter(k=>!['gesehen','foto','notiz'].includes(k))
-    .map(k=>`<button class="sym${(e.knoepfe||[]).includes(k)?' on':''}" data-rgk="${k}">${esc(EREIGNIS_ARTEN[k].name)}</button>`).join('');
   /* Steht die Obergrenze auf null, kommt niemand dran — dann ist die
      Frage, wer drankäme, gegenstandslos. */
   const werFeld = document.getElementById('rg-wer-feld');
@@ -34081,14 +34284,6 @@ function rgEinstellungenAufbau(){
     : '';
 }
 
-document.addEventListener('click', e=>{
-  const k = e.target.closest('[data-rgk]'); if(!k) return;
-  const ein = rgEinst();
-  const id = k.dataset.rgk;
-  const i = ein.knoepfe.indexOf(id);
-  if(i >= 0) ein.knoepfe.splice(i,1); else ein.knoepfe.push(id);
-  sichern(); rgEinstellungenAufbau(); render();
-});
 ['rg-stufe','rg-rhythmus','rg-max','rg-wer','rg-sortieren','rg-fotojedes'].forEach(id=>{
   const el = document.getElementById(id); if(!el) return;
   el.onchange = ()=>{
