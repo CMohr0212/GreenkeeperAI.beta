@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.30', w.__T('FASSUNG') === '4.0-beta.30', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.31', w.__T('FASSUNG') === '4.0-beta.31', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -7381,18 +7381,8 @@ setTimeout(async () => {
     pruef('E3: „wie Karte“ erkannt', pl('Wie Karte.').typ === 'wie' && pl('unverändert').typ === 'wie');
     pruef('E3: „keine“ erkannt', pl('keine').typ === 'keine' && pl('Keine besonderen.').typ === 'keine');
 
-    /* Karte zeigt den eigenen Text (4.0-beta.30, B3: die Texte setzt der Test, vorher die Kartei) */
-    T(`aenderungSetzen('PF1', {pflege:['Triebe kappen', 'Luftwurzeln stehen lassen'], winterruheText:'Kühl bei 10 °C'}, 'ki')`);
-    const karte = id => T(`kartenDetailHTML(allePflanzen().find(function(x){return x.id==='${id}';}))`);
-    pruef('E3: Die Karte zeigt den eigenen Winterruhe-Text', /Kühl bei 10 °C/.test(karte('PF1')) && !/Ist Pflicht/.test(karte('PF1')));
-    pruef('E3: Ohne Text bleibt der alte Text', /Ist Pflicht/.test(karte('PF3')));
-    pruef('E3: Pflegeschritte stehen auf der Karte', /Luftwurzeln stehen lassen/.test(karte('PF1')));
-
-    /* Ableger */
-    const erbe = JSON.parse(T(`JSON.stringify(ablegerErbe({pflege:[], winterruheText:'', quellen:{pflege:'ki'}}))`));
-    pruef('E3: Ein geprüftes „keine“ erbt mit', Array.isArray(erbe.pflege) && erbe.winterruheText === '', JSON.stringify(erbe));
-    pruef('E3: winterruheText steht in ABLEGER_ERBE', T(`ABLEGER_ERBE.indexOf('winterruheText') > -1`) === true);
-
+    /* 4.0-beta.31 (B4a): Karte und Ableger zeigen und erben das Pflegeheft
+       statt der alten Felder; geprüft im Block beta.31 B4a. */
     /* Anlegen speichert */
     T(`(function(){ alStart(); neuWegSetzen('ki');
       document.getElementById('f-paste').value = 'ART: Testranke\\nBOTANISCH: Fictus rankens\\nPFLEGE: Triebe kappen | Stützstab geben\\nWINTERRUHE: keine';
@@ -7403,24 +7393,19 @@ setTimeout(async () => {
     d.getElementById('f-name').value = 'PflegeAnlegen';
     await T('alSpeichern()');
     const np = c => T(`(function(){ var p = allePflanzen().find(function(x){ return x.name === 'PflegeAnlegen'; }); return p ? ${c} : 'fehlt'; })()`);
-    pruef('E3: Anlegen speichert Pflegeschritte mit Stempel ki',
-      np('JSON.stringify(p.pflege)') === '["Triebe kappen","Stützstab geben"]' && np('p.quellen.pflege') === 'ki', np('JSON.stringify([p.pflege, p.quellen])'));
-    pruef('E3: „keine“ Winterruhe als geprüft', np('p.winterruheText') === '');
+    /* 4.0-beta.31 (B4a): Pflegeschritte als Abschnitt in „Allgemein“, Quelle KI; „keine“ Winterruhe legt nichts an */
+    pruef('E3 (beta.31): Anlegen legt die Pflegeschritte als KI-Abschnitt ins Pflegeheft',
+      np(`JSON.stringify(heftVon(p).map(function(a){ return [a.kat, a.quelle, a.text]; }))`) === '[["allgemein","ki","Triebe kappen\\nStützstab geben"]]'
+      && np('p.pflege === undefined && !(p.quellen && p.quellen.pflege)') === true, np('JSON.stringify([p.heft, p.pflege, p.quellen])'));
 
-    /* Bearbeiten */
+    /* Bearbeiten: keine Felder für Pflegeschritte und Winterruhe mehr (4.0-beta.31, B4a) */
     const bid = np('p.id');
     T(`(function(){ var box = document.getElementById('b-${bid}');
       if(!box){ box = document.createElement('div'); box.id = 'b-${bid}'; document.body.appendChild(box); }
       box.innerHTML = bearbeitenInnenHTML(allePflanzen().find(function(x){return x.id==='${bid}';}));
       delete box.dataset.spaet; return 1; })()`);
-    const npi = c => T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === '${bid}'; }); return p ? ${c} : 'fehlt'; })()`);
-    const tb = d.getElementById('b-' + bid).querySelector('[data-e="pflege"]');
-    pruef('E3: Bearbeiten zeigt Pflegeschritte je Zeile', !!tb && tb.value === 'Triebe kappen\nStützstab geben');
-    if(tb) tb.value = 'Triebe kappen\nStützstab geben\nNie drehen';
-    const sb = d.getElementById('b-' + bid).querySelector('[data-do="bearb-save"]'); if(sb) sb.click();
-    pruef('E3: Geänderte Schritte bekommen den Stempel hand',
-      npi('p.pflege.length') === 3 && npi(`herkunftVon(p, 'pflege')`) === 'hand' && npi(`herkunftVon(p, 'winterruheText')`) === 'ki',
-      npi('JSON.stringify([p.pflege, p.quellen])'));
+    pruef('E3 (beta.31): Bearbeiten hat keine Felder für Pflegeschritte und Winterruhe',
+      !d.getElementById('b-' + bid).querySelector('[data-e="pflege"],[data-e="winterruheText"]') && !!d.getElementById('b-' + bid).querySelector('[data-e="notiz"]'));
     T(`(function(){ var b = document.getElementById('b-${bid}'); if(b) b.remove();
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'PF' && p.id !== '${bid}'; });
       sichern(); render(); return 1; })()`);
@@ -7548,7 +7533,8 @@ setTimeout(async () => {
 
     /* Herkunft auf der Karte */
     const hz = T(`herkunftZeileHTML({quellen:{sorte:'ki', pflege:'ki', klasse:'hand'}})`);
-    pruef('3.27.0: Die Karte zeigt KI- und eigene Angaben', /KI<\/b> Sorte, Pflegeschritte/.test(hz) && /Von dir<\/b> Gießklasse/.test(hz), hz);
+    /* 4.0-beta.31 (B4a): Pflegeschritte haben keinen Stempel mehr */
+    pruef('3.27.0: Die Karte zeigt KI- und eigene Angaben', /KI<\/b> Sorte</.test(hz) && /Von dir<\/b> Gießklasse/.test(hz) && !/Pflegeschritte/.test(hz), hz);
 
     /* Denkstufe und 503 */
     w.__leiber = []; w.__plan = [];
@@ -8690,7 +8676,7 @@ setTimeout(async () => {
       && /Blattsteckling/.test(gel.vermehrung || ''), JSON.stringify(gel));
     const neu1 = JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === 'Testgattung neuart'; }).pop() || null)`));
     pruef('beta.2: Die Karte trägt das Artwissen mit Herkunft KI',
-      !!neu1 && neu1.klasse === 'C' && neu1.sonne === 'voll' && neu1.quellen.klasse === 'ki' && !!neu1.vermehrungKi && Array.isArray(neu1.pflege),
+      !!neu1 && neu1.klasse === 'C' && neu1.sonne === 'voll' && neu1.quellen.klasse === 'ki' && !!neu1.vermehrungKi && neu1.pflege === undefined,
       JSON.stringify(neu1 && {k:neu1.klasse, s:neu1.sonne, q:neu1.quellen, v:!!neu1.vermehrungKi, p:neu1.pflege}));
 
     /* Bekannte (gelernte) Art: eine Anfrage */
@@ -10251,8 +10237,10 @@ setTimeout(async () => {
       const n1 = notizNach('ART: Probeart\nBOTANISCH: Testgattung notizart\nVERWECHSLUNG: keine\nFROST: unbekannt');
       pruef('beta.12: Einfügen mit „VERWECHSLUNG: keine“ und „FROST: unbekannt“ schreibt nichts in die Notiz', !/verwechselt|Frostgrenze/.test(n1), n1);
       const n2 = notizNach('ART: Probeart\nBOTANISCH: Testgattung notizart\nVERWECHSLUNG: Testgattung andere\nFROST: 12 °C');
-      pruef('beta.12: Eine echte Verwechslung und Frostgrenze kommen weiter in die Notiz',
-        /Könnte verwechselt sein mit: Testgattung andere/.test(n2) && /Frostgrenze laut Bestimmung: 12 °C/.test(n2), n2);
+      /* 4.0-beta.31 (B4a, F293, F326): nichts mehr in die Notiz; die Verwechslung steht nur in der Meldung */
+      const m2 = String((d.getElementById('paste-meld') || {}).textContent || '');
+      pruef('beta.12 (beta.31): Verwechslung und Frostgrenze kommen nicht in die Notiz, die Verwechslung steht in der Meldung',
+        !/verwechselt|Frostgrenze/.test(n2) && /Könnte verwechselt sein mit: Testgattung andere/.test(m2), n2 + ' | ' + m2);
       T(`formularLeeren(); modalZu("anleg-modal"); 1`);
       await warte(80);
 
@@ -11027,7 +11015,7 @@ setTimeout(async () => {
       /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
       /* beta.23: „licht“ ist weg, neun Schalter */
       /* beta.27: „Zustandsfrage beim Gießen“ ist weg, acht Schalter */
-      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an)', alle() === '00000010', alle());
+      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an; beta.31: Pflegeheft an)', alle() === '01000010', alle());
       T(`modusSetzen('entdecker'); 1`);
       pruef('beta.18: Entdecker schaltet alle sechs Schalter an (beta.21: Liste aus, Kärtchen an)', alle() === '11111101', alle());
       pruef('beta.18: Katalog hat acht Schalter (seit beta.27) mit eigenem Schalter in der Ansicht',
@@ -11059,7 +11047,7 @@ setTimeout(async () => {
         box.remove();
         return aus === 'none' && an !== 'none' && !d.body.classList.contains('s-aus-' + k);
       };
-      [['pflege','<section class="kblock" data-kblock="pflege"></section>'],
+      [['pflege','<div class="ktab-pane" data-kpane="pflegeheft"></div>'],
        ['symbole','<div class="km-zeichen" data-schalter="symbole"></div>'],
        ['befunde','<section class="kblock" data-kblock="befunde"></section>'],
        ['abstammung','<section class="kblock" data-kblock="abstammung"></section>'],
@@ -11328,9 +11316,9 @@ setTimeout(async () => {
       pruef('beta.20: Der aktuelle Modus ist vorgewählt', mk('entdecker').getAttribute('aria-pressed') === 'true' && mk('sammler').getAttribute('aria-pressed') === 'false');
       mk('sammler').click();
       pruef('beta.20: Tipp auf Sammler stellt den Modus um', T(`modusVon()`) === 'sammler' && T(`S.modus`) === 'sammler'
-        && mk('sammler').getAttribute('aria-pressed') === 'true' && mk('entdecker').getAttribute('aria-pressed') === 'false' && T(`schalterAn('pflege')`) === false, T(`S.modus`));
+        && mk('sammler').getAttribute('aria-pressed') === 'true' && mk('entdecker').getAttribute('aria-pressed') === 'false' && T(`schalterAn('befunde')`) === false, T(`S.modus`));
       mk('entdecker').click();
-      pruef('beta.20: Tipp auf Entdecker stellt zurück', T(`modusVon()`) === 'entdecker' && T(`schalterAn('pflege')`) === true);
+      pruef('beta.20: Tipp auf Entdecker stellt zurück', T(`modusVon()`) === 'entdecker' && T(`schalterAn('befunde')`) === true);
 
       /* Design-Frage */
       d.querySelector('[data-wk="2"] [data-wkgo="3"]').click();
@@ -13583,15 +13571,13 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.30 B2 (12): keine Tiere-Zeile in der Karte, Daten der Tiere bleiben',
         !q('#karte-rumpf .lage-tier') && !q('#karte-rumpf [data-kblock="tiere"]') && TS(`meineTiere().join(',')`) === 'katze');
 
-      /* (13) Pflegetexte im Reiter „Pflegeheft“ */
+      /* (13) 4.0-beta.31 (B4a): Das Pflegeheft ist ein Register; die alten Texte zeigt es nicht mehr */
       const heft = q('#karte-rumpf [data-kpane="pflegeheft"]');
       const ht = heft ? heft.textContent : '';
-      pruef('beta.30 B2 (13): Pflegeschritte, „Wenn etwas nicht stimmt“, Beobachtungen im Pflegeheft',
-        /B2 Schritt eins/.test(ht) && /Wenn etwas nicht stimmt/.test(ht) && /B2 Beobachtung/.test(ht), ht.slice(0, 120));
+      pruef('beta.30 B2 (13, beta.31): Pflegeheft zeigt das Register, keine alten Pflegetexte',
+        !!heft && heft.querySelectorAll('.heft-kat').length === 7 && !/B2 Schritt eins|B2 Beobachtung/.test(ht), ht.slice(0, 120));
       pruef('beta.30 B2 (13): Steckbrief ohne Pflegetexte, mit Giftigkeit',
         !!q('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="gift"]') && !/B2 Schritt eins/.test((q('#karte-rumpf [data-kpane="steckbrief"]') || {}).textContent || ''));
-      await zu(); TS(`karteOeffnen('B2B')`); await warte(60);
-      pruef('beta.30 B2 (13): leeres Pflegeheft sagt es', /Noch keine Pflegetexte/.test((q('#karte-rumpf [data-kpane="pflegeheft"]') || {}).textContent || ''));
       await zu();
 
       /* Start mit gefülltem Speicher (T9b) und offener Karte */
@@ -13734,6 +13720,191 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         history.replaceState(null, ''); delete S.kartei;
         S.eigene = a.eigene; ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt30b)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.31: Etappe B4a — Pflegeheft als Register (F304, F255, F293, F326 bis F328).
+     Sieben feste Kategorien, eigene Abschnitte anlegen, bearbeiten, löschen;
+     alte Pflegetexte und alte KI-Zeilen in Notizen beim Laden und Einlesen
+     gelöscht; Anlegen legt Pflegetexte als KI-Abschnitte ab; Ableger erben
+     das Heft; Schalter blendet den Reiter aus. Legt alles selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const TS = c => { try { return w.__T(c); } catch(e){ return 'FEHLER: ' + (e && e.message); } };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt31 = T(`JSON.stringify({eigene:S.eigene, modus:S.modus, schalter:S.schalter, kartenTab:S.kartenTab, acc:S.acc, ansicht:S.ansicht})`);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const ruhe = async () => { await warte(300); T(`history.replaceState(null, ''); 1`); };
+    const q = s => d.querySelector(s);
+    const qa = s => [].slice.call(d.querySelectorAll(s));
+    const heftJ = id => TS(`JSON.stringify(heftVon(allePflanzen().find(function(x){ return x.id === '${id}'; })).map(function(a){ return [a.kat, a.quelle, a.text]; }))`);
+    const klick = sel => { const b = q(sel); if(b) b.click(); return !!b; };
+    const heftAuf = async id => { await zu(); TS(`karteOeffnen('${id}')`); await warte(60); klick('#karte-rumpf [data-ktab="pflegeheft"]'); await warte(20); };
+    let w31 = null;
+    try {
+      await zu();
+      T(`(function(){
+        S.eigene = (S.eigene || []).filter(function(p){ return ['H4A','H4B'].indexOf(p.id) < 0; });
+        S.eigene.push({id:'H4A', name:'H4 · Alpha', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', log:[], notiz:'',
+          heft:[{id:'hk1', kat:'winter', datum:'2026-11-01', quelle:'ki', text:'H4 kühl stellen'},
+                {id:'hk2', kat:'winter', datum:'2026-11-05', quelle:'eigener', text:'H4 neuer Wintertext'}]});
+        S.eigene.push({id:'H4B', name:'H4 · Beta', art:'Zamioculcas', botanisch:'Zamioculcas zamiifolia', klasse:'C', log:[], notiz:''});
+        S.modus = 'entdecker'; S.schalter = {}; S.acc = Object.assign({}, S.acc, {'heft-winter':1}); schalterAnwenden();
+        sichern(); render(); return 1; })()`);
+
+      /* (1) sieben Kategorien, Zahl je Kategorie, leere mit „Noch nichts notiert“ */
+      await heftAuf('H4A');
+      const titel = qa('#karte-rumpf [data-kpane="pflegeheft"] .heft-kat .acc-t').map(x => x.textContent);
+      pruef('beta.31 B4a (1): sieben Kategorien in fester Reihenfolge', titel.join('|')
+        === 'Allgemein|Licht und Standort|Gießen|Substrat und Dünger|Winter|Vermehrung|Probleme und Schädlinge', titel.join('|'));
+      const zahl = k => ((q(`#karte-rumpf [data-heft-kat="${k}"] .acc-z`) || {}).textContent || '');
+      pruef('beta.31 B4a (1): Zahl der Abschnitte je Kategorie', zahl('winter') === '2' && zahl('allgemein') === '0', zahl('winter') + '/' + zahl('allgemein'));
+      pruef('beta.31 B4a (1): leere Kategorie sagt „Noch nichts notiert“',
+        /Noch nichts notiert/.test((q('#karte-rumpf [data-heft-kat="licht"]') || {}).textContent || '')
+        && !/Noch nichts notiert/.test((q('#karte-rumpf [data-heft-kat="winter"]') || {}).textContent || ''));
+      const wi = qa('#karte-rumpf [data-heft-kat="winter"] .heft-text').map(x => x.textContent);
+      pruef('beta.31 B4a (1): neueste zuerst, Quelle sichtbar', wi.join('|') === 'H4 neuer Wintertext|H4 kühl stellen'
+        && /KI/.test((q('#karte-rumpf [data-heft-id="hk1"] .heft-quelle') || {}).textContent || ''), wi.join('|'));
+      pruef('beta.31 B4a (1): Kategorien unabhängig offen oder zu', !!(q('#karte-rumpf [data-heft-kat="winter"]') || {}).open
+        && !(q('#karte-rumpf [data-heft-kat="licht"]') || {}).open);
+
+      /* (2) anlegen: leerer Text speichert nichts, Kategorie per Knopfliste */
+      klick('#karte-rumpf [data-do="heft-neu"]'); await warte(40);
+      pruef('beta.31 B4a (2): „+ Eintrag“ öffnet das Fenster', !!q('#heft-huelle') && !q('#heft-huelle').hidden && /Neuer Eintrag/.test((q('#heft-titel') || {}).textContent || ''));
+      pruef('beta.31 B4a (10): keine Systemliste im Fenster, Kategorie als Knopfliste',
+        !q('#heft-modal select') && qa('#heft-modal [data-heft-kat-wahl]').length === 7
+        && (q('#heft-modal [data-heft-kat-wahl="allgemein"]') || {getAttribute:()=>''}).getAttribute('aria-pressed') === 'true');
+      klick('#heft-modal [data-heft-tun="speichern"]'); await warte(20);
+      pruef('beta.31 B4a (2): leerer Text speichert nichts und sagt es', heftJ('H4B') === '[]' && !q('#heft-fehler').hidden && !q('#heft-huelle').hidden);
+      const feld = q('#heft-feld'); feld.value = 'H4 morgens gießen'; feld.dispatchEvent(new w.Event('input', {bubbles:true}));
+      klick('#heft-modal [data-heft-kat-wahl="giessen"]');
+      klick('#heft-modal [data-heft-tun="speichern"]'); await ruhe();
+      pruef('beta.31 B4a (2): Eintrag mit gewählter Kategorie als eigener gespeichert', heftJ('H4A').indexOf('["giessen","eigener","H4 morgens gießen"]') !== -1, heftJ('H4A'));
+      pruef('beta.31 B4a (2): Karte zeigt den neuen Eintrag', zahl('giessen') === '1', zahl('giessen'));
+      /* Suche findet Text im Pflegeheft (die alten Felder sind aus der Suche entfernt) */
+      const gr31 = TS(`gruppierung`);
+      TS(`filterZuruecksetzen(); gruppierung = 'keine'; $('#q').value = 'h4 morgens'; render(); 1`);
+      const tr31 = TS(`[].map.call(document.querySelectorAll('#out .card'), function(c){ return c.dataset.karte; }).join(',')`);
+      TS(`$('#q').value = ''; gruppierung = ${JSON.stringify(gr31)}; render(); 1`);
+      pruef('beta.31 B4a (2): Suche findet Text im Pflegeheft', tr31 === 'H4A', tr31);
+
+      /* bearbeiten: ⋯ → Bearbeiten; ein geänderter KI-Abschnitt gilt danach als eigener */
+      klick('#karte-rumpf [data-heft-id="hk1"] [data-do="heft-menue"]'); await warte(40);
+      pruef('beta.31 B4a (2): ⋯ öffnet Bearbeiten und Löschen', !!q('#heft-modal [data-heft-tun="bearb"]') && !!q('#heft-modal [data-heft-tun="frage"]'));
+      klick('#heft-modal [data-heft-tun="bearb"]'); await warte(20);
+      pruef('beta.31 B4a (2): Bearbeiten zeigt Text und Kategorie', (q('#heft-feld') || {}).value === 'H4 kühl stellen'
+        && (q('#heft-modal [data-heft-kat-wahl="winter"]') || {getAttribute:()=>''}).getAttribute('aria-pressed') === 'true');
+      q('#heft-feld').value = 'H4 kühl bei 12 °C';
+      klick('#heft-modal [data-heft-tun="speichern"]'); await ruhe();
+      pruef('beta.31 B4a (2): Bearbeiten ändert den Text, Quelle wird eigener', heftJ('H4A').indexOf('["winter","eigener","H4 kühl bei 12 °C"]') !== -1
+        && heftJ('H4A').indexOf('H4 kühl stellen') === -1, heftJ('H4A'));
+
+      /* löschen mit Nachfrage */
+      klick('#karte-rumpf [data-heft-id="hk2"] [data-do="heft-menue"]'); await warte(40);
+      klick('#heft-modal [data-heft-tun="frage"]'); await warte(20);
+      pruef('beta.31 B4a (2): Löschen fragt erst nach, nichts gelöscht', /wirklich löschen/.test((q('#heft-inhalt') || {}).textContent || '')
+        && heftJ('H4A').indexOf('H4 neuer Wintertext') !== -1);
+      klick('#heft-modal [data-heft-tun="loeschen"]'); await ruhe();
+      pruef('beta.31 B4a (2): nach „Löschen“ ist der Abschnitt weg', heftJ('H4A').indexOf('H4 neuer Wintertext') === -1 && JSON.parse(heftJ('H4A')).length === 2, heftJ('H4A'));
+      await zu();
+
+      /* (3) Kürzung */
+      const lang = (n, qu) => JSON.parse(TS(`JSON.stringify(heftAbschnitt('allgemein', new Array(${n} + 1).join('a'), '${qu}').text)`));
+      const e700 = lang(700, 'eigener'), k400 = lang(400, 'ki'), e600 = lang(600, 'eigener');
+      pruef('beta.31 B4a (3): eigener Abschnitt auf 600, KI auf 300 gekürzt',
+        e700.length === 600 && /…$/.test(e700) && k400.length === 300 && /…$/.test(k400) && e600.length === 600 && !/…$/.test(e600),
+        [e700.length, k400.length, e600.length].join('/'));
+
+      /* (4, 8, T9b) Start und Einlesen mit alten Pflegetexten und alten KI-Zeilen */
+      const roh31 = T(`(function(){ var s = JSON.parse(localStorage.getItem(KEY));
+        s.eigene = (s.eigene || []).filter(function(p){ return p.id !== 'H4C'; }).concat([{id:'H4C', name:'H4 · Alt', art:'Efeutute', klasse:'B', log:[],
+          pflege:['Alt eins'], probleme:[['a','b','c']], folge:'Alt Folge', beob:['Alt Beob'], winterruheText:'Alt Winter', winterruhe:true,
+          wichtig:'H4 wichtig', quellen:{pflege:'ki', winterruheText:'hand', klasse:'ki'},
+          notiz:'Eigene Zeile eins\\nGießen laut Bestimmung: alle 7 Tage\\nSchritte: umtopfen\\nFrostgrenze laut Bestimmung: 10 °C\\nKönnte verwechselt sein mit: X\\nBefund: alt\\nEigene Zeile zwei\\n\\nBefund vom 1.11.2026: Blätter gesund.\\nSchritte: Doktor sagt düngen'}]);
+        return JSON.stringify(s); })()`);
+      const f31 = [];
+      const dom31 = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.localStorage.setItem('gk-beta', roh31);
+        w2.addEventListener('error', e => f31.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(700);
+      w31 = dom31.window;
+      let k31 = '';
+      try { w31.__T(`karteOeffnen('H4C')`); k31 = (w31.document.querySelector('#karte-rumpf [data-kpane="pflegeheft"]') || {}).innerHTML || ''; } catch(e){ f31.push(String(e && e.message)); }
+      pruef('beta.31 B4a: Start mit alten Pflegetexten und offener Karte ohne Laufzeitfehler', f31.length === 0 && /heft-kat/.test(k31), (f31.join(' | ') || k31).slice(0, 300));
+      const st31 = (() => { try { return w31.__T(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'H4C'; });
+        return JSON.stringify([['pflege','probleme','folge','beob','winterruheText'].filter(function(f){ return f in p; }), p.quellen, p.wichtig, p.winterruhe, p.notiz]); })()`); } catch(e){ return 'FEHLER ' + e.message; } })();
+      const st31o = (() => { try { return JSON.parse(st31); } catch(e){ return null; } })();
+      pruef('beta.31 B4a (4): fünf alte Felder und ihre Stempel gelöscht, Steckbrief bleibt',
+        !!st31o && st31o[0].length === 0 && JSON.stringify(st31o[1]) === '{"klasse":"ki"}' && st31o[2] === 'H4 wichtig' && st31o[3] === true, st31);
+      const nz = st31o ? st31o[4] : '';
+      pruef('beta.31 B4a (8): alte KI-Zeilen in der Notiz gelöscht, eigene Zeilen bleiben',
+        /^Eigene Zeile eins\nEigene Zeile zwei/.test(nz) && !/Gießen laut|Frostgrenze|verwechselt|Befund: alt|Schritte: umtopfen/.test(nz), nz);
+      pruef('beta.31 B4a (8): „Befund vom …“ des Doktors bleibt ganz, samt eigener Zeilen darin',
+        /Befund vom 1\.11\.2026: Blätter gesund\.\nSchritte: Doktor sagt düngen$/.test(nz), nz);
+      try { w31.__T(`grundwerteErgaenzen(); sichern()`); } catch(e){}
+      pruef('beta.31 B4a (4): zweiter Lauf ändert nichts (wiederholbar)',
+        (() => { try { return w31.__T(`JSON.stringify(S.eigene.find(function(x){ return x.id === 'H4C'; }).notiz)`); } catch(e){ return ''; } })() === JSON.stringify(nz));
+      pruef('beta.31 B4a (4): Speicher danach ohne alte Pflegefelder', !/"(winterruheText|beob|folge|probleme)"/.test(w31.localStorage.getItem('gk-beta') || ''));
+      try { w31.close(); } catch(e){} w31 = null;
+      const sich31 = JSON.stringify(Object.assign({__app:'greenkeeperai', __fassung:'4.0-beta.30'}, JSON.parse(roh31)));
+      const inp31 = d.getElementById('import-file');
+      Object.defineProperty(inp31, 'files', {value:[new w.File([sich31], 'pflanzen-sicherung.json', {type:'application/json'})], configurable:true});
+      inp31.onchange(); await warte(400);
+      pruef('beta.31 B4a (4): eingelesene Sicherung ohne alte Pflegefelder, Pflanze da',
+        TS(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'H4C'; }); return !!p && !('pflege' in p) && !('winterruheText' in p) && !('beob' in p); })()`) === true);
+      await zu();
+      pruef('beta.31 B4a (4): Artwissen und Herkunftszeile ohne Pflegeschritte und Winterruhe',
+        TS(`AW_KARTE_FELDER.map(function(x){ return x[0]; }).join(',')`).indexOf('pflege') === -1
+        && TS(`AW_KARTE_FELDER.map(function(x){ return x[0]; }).join(',')`).indexOf('winterruheText') === -1
+        && TS(`HERKUNFT_NAMEN.pflege === undefined && HERKUNFT_NAMEN.winterruheText === undefined`) === true);
+
+      /* (5) Anlegen „voll“: Winterruhe in „Winter“, erst nach „Anlegen“ */
+      T(`(function(){ alStart(); neuWegSetzen('ki');
+        document.getElementById('f-paste').value = 'ART: Testranke\\nBOTANISCH: Fictus rankens\\nPFLEGE: H4 Triebe kappen\\nWINTERRUHE: H4 kühl bei 10 °C';
+        document.getElementById('btn-paste-los').click(); return 1; })()`);
+      pruef('beta.31 B4a (5): vor „Anlegen“ steht nichts in der Sammlung', TS(`allePflanzen().some(function(p){ return p.name === 'H4 Anlegen'; })`) === false);
+      d.getElementById('f-name').value = 'H4 Anlegen';
+      TS(`(function(){ formLageZeichnen(raumAnlegen('H4 Raum'), ''); var t = document.getElementById('f-topf'); if(t){ t.value = 14; t.dataset.gesetzt = '1'; } return 1; })()`);
+      await T('alSpeichern()'); await warte(120);
+      const an = TS(`(function(){ var p = allePflanzen().find(function(x){ return x.name === 'H4 Anlegen'; }); return p ? JSON.stringify(heftVon(p).map(function(a){ return [a.kat, a.quelle, a.text]; })) + '|' + JSON.stringify(p.notiz || '') : 'fehlt'; })()`);
+      pruef('beta.31 B4a (5): Anlegen legt Pflegeschritte in „Allgemein“ und Winterruhe in „Winter“ ab, Quelle KI, Notiz leer',
+        an === '[["allgemein","ki","H4 Triebe kappen"],["winter","ki","H4 kühl bei 10 °C"]]|""', an);
+      await zu();
+
+      /* (7) Notiz beim Anlegen: keine Frostzeile mehr über das Artwissen */
+      pruef('beta.31 B4a (7): kein Weg schreibt „Frostgrenze laut Bestimmung“ oder „Könnte verwechselt sein mit“ in die Notiz',
+        html.indexOf("'Frostgrenze laut Bestimmung: '") === -1 && html.indexOf("notiz.push('Könnte verwechselt") === -1);
+
+      /* (6) Ableger erben das Heft als Kopie */
+      pruef('beta.31 B4a (6): ABLEGER_ERBE nennt das Heft, nicht die alten Felder',
+        TS(`ABLEGER_ERBE.indexOf('heft') > -1 && ABLEGER_ERBE.indexOf('pflege') === -1 && ABLEGER_ERBE.indexOf('winterruheText') === -1`) === true);
+      const erbe31 = TS(`(function(){ var m = {art:'A', heft:[{id:'e1', kat:'giessen', datum:'2026-11-01', quelle:'ki', text:'H4 Erbtext'}]};
+        var e = ablegerErbe(m); m.heft[0].text = 'geändert'; return JSON.stringify(e.heft); })()`);
+      pruef('beta.31 B4a (6): Ableger erbt das Pflegeheft als eigene Kopie', /H4 Erbtext/.test(erbe31) && !/geändert/.test(erbe31), erbe31);
+
+      /* (9) Schalter blendet den Reiter aus, Vorgabe in beiden Modi an */
+      T(`modusSetzen('sammler'); 1`);
+      const samm = TS(`schalterAn('pflege')`);
+      T(`modusSetzen('entdecker'); schalterSetzen('pflege', false); 1`);
+      await heftAuf('H4A');
+      pruef('beta.31 B4a (9): Schalter aus nimmt den Reiter heraus, Vorgabe in beiden Modi an',
+        samm === true && !q('#karte-rumpf [data-ktab="pflegeheft"]') && !q('#karte-rumpf [data-kpane="pflegeheft"]')
+        && /Pflegeheft in der Karte/.test(((q('#sch-pflege') || {}).parentNode || {}).textContent || ''));
+      T(`schalterSetzen('pflege', true); 1`);
+      await heftAuf('H4A');
+      pruef('beta.31 B4a (9): Schalter an zeigt den Reiter wieder', !!q('#karte-rumpf [data-ktab="pflegeheft"]'));
+      await zu();
+    } catch(e){
+      pruef('beta.31 B4a: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if(w31) w31.close(); } catch(e){}
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        S.eigene = a.eigene; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab; S.acc = a.acc;
+        if(typeof schalterAnwenden === 'function') schalterAnwenden();
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt31)})`);
     }
   }
 
