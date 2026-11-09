@@ -4605,6 +4605,22 @@ html[data-design] #filter-tags .tag-fgruppe{margin:8px 0 4px;font-size:var(--t-x
 /* ══ Plan B1 (4.0-beta.29): Ohne Aufgabenzeile stieß die Tag-Zeile in
    Botanisch an die Knöpfe; der Abstand der alten Zeile (12 px) bleibt. ══ */
 html[data-design="botanisch"] #karte-rumpf .detail > .tagk{margin-top:12px}
+/* 4.0-beta.32 (B4b): Pflegeheft – KI-Frage und Spickzettel */
+html[data-design] #heft-modal #heft-frage-feld{width:100%;box-sizing:border-box;min-height:84px;font:inherit;font-size:var(--t-m);resize:vertical}
+html[data-design] #heft-modal .heft-vorschlaege{margin:8px 0 12px}
+html[data-design] #heft-modal .heft-mit{margin:4px 0 10px;color:var(--schrift-3)}
+html[data-design] #heft-modal .heft-lauf{margin:4px 0 10px;font-size:var(--t-m)}
+html[data-design] #heft-modal .heft-verw{margin:0 0 12px;color:var(--schrift-3)}
+html[data-design] #heft-modal .heft-spick{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+html[data-design] #heft-modal .heft-spick:first-child{border-top:0}
+html[data-design] #heft-modal .heft-spick > input[type="checkbox"]{flex:0 0 auto;margin:3px 2px 0 0;width:20px;height:20px}
+html[data-design] #heft-modal .heft-spick-ab{flex-direction:column;cursor:default}
+html[data-design] #heft-modal .heft-spick-in{display:block;min-width:0}
+html[data-design] #heft-modal .heft-spick-t{display:block;font-size:var(--t-s);margin:0 0 2px}
+html[data-design] #heft-modal .heft-spick-x{display:block;font-size:var(--t-m);overflow-wrap:anywhere}
+html[data-design] #heft-modal .heft-spick-hinw{display:block;margin-top:4px;color:var(--gift, #b3261e)}
+html[data-design] #heft-modal .heft-spick-ok{color:var(--schrift-3)}
+html[data-design] .heft-kat .heft-ki-kat{display:inline-block;margin-top:6px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -12907,7 +12923,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.31';
+const FASSUNG = '4.0-beta.32';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -16181,13 +16197,19 @@ function heftHTML(p){
         <div class="heft-meta"><span class="heft-quelle">${a.quelle === 'ki' ? 'KI' : 'Eigener Eintrag'}</span>`
         + `<span class="heft-datum">${esc(heftDatum(a.datum))}</span>`
         + `<button type="button" class="heft-mehr" data-do="heft-menue" data-p="${esc(p.id)}" data-h="${esc(a.id)}" aria-label="Eintrag bearbeiten oder löschen">⋯</button></div></div>`).join('')
-      : '<p class="kb-leer heft-leer">Noch nichts notiert</p>';
+      : '<p class="kb-leer heft-leer">Noch nichts notiert</p>'
+        + `<button type="button" class="linkbtn heft-ki-kat" data-do="heft-ki" data-p="${esc(p.id)}" data-k="${c.k}">KI zu ${esc(c.t)} fragen</button>`;
     const auf = !!(S.acc || {})['heft-' + c.k];
     return `<details class="acc heft-kat" data-acc="heft-${c.k}" data-heft-kat="${c.k}"${auf ? ' open' : ''}>`
       + `<summary><span class="acc-t">${esc(c.t)}</span><span class="acc-z">${liste.length}</span></summary>`
       + `<div class="acc-in">${inhalt}</div></details>`;
   }).join('');
-  return `<div class="kb-aktionen heft-kopf"><button type="button" class="kb-zweit" data-do="heft-neu" data-p="${esc(p.id)}">+ Eintrag</button></div>${kats}`;
+  /* 4.0-beta.32 (B4b): „KI fragen“ immer, „Spickzettel erstellen“ nur bei leerem Heft */
+  const leer = !heftVon(p).length;
+  return `<div class="kb-aktionen heft-kopf"><button type="button" class="kb-zweit" data-do="heft-neu" data-p="${esc(p.id)}">+ Eintrag</button>`
+    + `<button type="button" class="kb-zweit" data-do="heft-ki" data-p="${esc(p.id)}">KI fragen</button>`
+    + (leer ? `<button type="button" class="kb-zweit" data-do="heft-spick" data-p="${esc(p.id)}">Spickzettel erstellen</button>` : '')
+    + `</div>${kats}`;
 }
 
 /* Fenster „Pflegeheft“: Neuer Eintrag, ⋯ (Bearbeiten, Löschen),
@@ -16220,6 +16242,8 @@ function heftFensterZeichnen(){
       <div class="as-knoepfe" role="group" aria-label="Kategorie">${kats}</div>`;
     fuss.innerHTML = '<button type="button" data-heft-tun="abbrechen">Abbrechen</button>'
       + '<button type="button" class="haupt" data-heft-tun="speichern">Speichern</button>';
+  } else if(HFT.art === 'ki' || HFT.art === 'spick'){
+    heftKiZeichnen(box, fuss, titel);
   } else if(HFT.art === 'menue'){
     titel.textContent = 'Eintrag';
     box.innerHTML = zitat(HFT.text) + `<div class="heft-taten">
@@ -16240,6 +16264,7 @@ function heftKarteNeu(){
 function heftFensterTun(tun){
   if(!HFT) return false;
   if(tun === 'abbrechen'){ modalZu('heft-modal'); return true; }
+  if(/^(ki-|spick-)/.test(tun)) return heftKiTun(tun);
   if(tun === 'bearb'){ HFT.art = 'bearb'; heftFensterZeichnen(); return true; }
   if(tun === 'frage'){ HFT.art = 'loeschen'; heftFensterZeichnen(); return true; }
   if(tun === 'loeschen'){
@@ -16258,6 +16283,19 @@ function heftFensterTun(tun){
   return false;
 }
 document.addEventListener('click', e => {
+  const kb = e.target.closest('[data-do="heft-ki"],[data-do="heft-spick"]');
+  if(kb){
+    e.stopPropagation();
+    heftKiAuf(kb.dataset.p, kb.dataset.do === 'heft-spick' ? 'spick' : 'ki', kb.dataset.k || '', kb);
+    return;
+  }
+  const vs = e.target.closest('#heft-modal [data-heft-vorschlag]');
+  if(vs && HFT && HFT.art === 'ki'){
+    HFT.frage = vs.dataset.heftVorschlag; HFT.fehler = '';
+    const f = document.getElementById('heft-frage-feld'); if(f) f.value = HFT.frage;
+    const e2 = document.getElementById('heft-fehler'); if(e2) e2.hidden = true;
+    return;
+  }
   const b = e.target.closest('[data-do="heft-neu"],[data-do="heft-menue"]');
   if(b){
     e.stopPropagation();
@@ -16266,6 +16304,8 @@ document.addEventListener('click', e => {
   }
   const t = e.target.closest('#heft-modal [data-heft-tun]');
   if(t){ heftFensterTun(t.dataset.heftTun); return; }
+  const ein = e.target.closest('#heft-modal [data-heft-einzeln]');
+  if(ein && HFT){ heftSpickEinzeln(ein.dataset.heftEinzeln); return; }
   const k = e.target.closest('#heft-modal [data-heft-kat-wahl]');
   if(k && HFT){
     HFT.kat = heftKat(k.dataset.heftKatWahl);
@@ -16274,11 +16314,339 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('input', e => {
+  if(HFT && e.target && e.target.id === 'heft-frage-feld'){
+    HFT.frage = e.target.value;
+    if(HFT.fehler && HFT.frage.trim()){ HFT.fehler = ''; const f = document.getElementById('heft-fehler'); if(f) f.hidden = true; }
+    return;
+  }
   if(!HFT || !e.target || e.target.id !== 'heft-feld') return;
   HFT.text = e.target.value;
   const z = document.getElementById('heft-zahl'); if(z) z.textContent = heftZahlText();
   if(HFT.fehler && HFT.text.trim()){ HFT.fehler = false; const f = document.getElementById('heft-fehler'); if(f) f.hidden = true; }
 });
+document.addEventListener('change', e => {
+  const h = e.target && e.target.closest ? e.target.closest('#heft-modal [data-heft-haken]') : null;
+  if(!h || !HFT || !HFT.spick) return;
+  HFT.spick.wahl[h.dataset.heftHaken] = !!h.checked;
+  const n = document.querySelector('#heft-modal [data-heft-tun="spick-nimm"]');
+  if(n) n.disabled = !heftSpickGewaehlt().length;
+});
+
+/* ── Pflegeheft: KI-Frage und Spickzettel (4.0-beta.32, B4b) ──────
+   Beide öffnen das Fenster „Pflegeheft“. Mitgeschickt werden nur Art,
+   botanischer Name und Sorte (Regel 7.3). Ein Tipp, eine Anfrage
+   (Regel 7.1). Gespeichert wird erst nach „Ins Pflegeheft“ oder
+   „Ausgewählte ins Pflegeheft“ (Regel 7.2), immer als neuer Abschnitt.
+   Beim Spickzettel legt der Code fest, was von der Artenbibliothek
+   abweicht: Licht und Gießklasse der Antwort gegen den Eintrag. Ein
+   abweichender Abschnitt geht nur einzeln ins Heft (Regel 7.4). */
+const HEFT_VORSCHLAEGE = ['Wie oft düngen?', 'Winterruhe nötig?', 'Welches Substrat?'];
+const HEFT_FRAGE_MAX = 300;
+/* Schlüsselwörter des Formats „Pflegetexte je Kategorie“, gemeinsam für
+   Spickzettel und Anlegen. Sie enthalten kein Schlüsselwort des alten
+   Lesers (geminiLesen), damit keine Zeile in einem fremden Feld landet. */
+const HEFT_KI_FELDER = {allgemein:'HEFT_ALLGEMEIN', licht:'HEFT_STELLE', giessen:'HEFT_GUSS',
+  substrat:'HEFT_BODEN', winter:'HEFT_WINTER', vermehrung:'HEFT_NACHWUCHS', probleme:'HEFT_PROBLEME'};
+const HEFT_KI_TEXT = {
+  allgemein:'Was an dieser Art sonst besonders ist',
+  licht:'Licht und Standort',
+  giessen:'Gießen und Luftfeuchte',
+  substrat:'Substrat, Umtopfen und Dünger',
+  winter:'Winter und Winterruhe',
+  vermehrung:'Vermehrung',
+  probleme:'Typische Probleme und Schädlinge'
+};
+function heftKiFeldZeilen(){
+  return HEFT_KATS.map(c => HEFT_KI_FELDER[c.k] + ': ' + HEFT_KI_TEXT[c.k]
+    + ', nur was für diese Art gilt, in ein bis zwei Sätzen, höchstens 250 Zeichen. '
+    + 'Keine Regeln, die für jede Zimmerpflanze gelten. Gibt es nichts Besonderes, schreib genau: keine');
+}
+function heftKiFeldNamen(){ return HEFT_KATS.map(c => HEFT_KI_FELDER[c.k]); }
+/* Liest die Pflegetexte je Kategorie aus JSON oder aus Zeilen. „keine“,
+   „unbekannt“ und Leeres fallen weg. Ergebnis: {kat: text}. */
+function heftKiLesen(txt){
+  let t = String(txt || '').trim();
+  const cb = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if(cb) t = cb[1];
+  let o = null;
+  const a = t.indexOf('{'), z = t.lastIndexOf('}');
+  if(a > -1 && z > a){ try{ o = JSON.parse(t.slice(a, z + 1)); }catch(e){ o = null; } }
+  const roh = {};
+  if(o && typeof o === 'object' && !Array.isArray(o)){
+    Object.keys(o).forEach(k => { roh[String(k).toUpperCase().trim()] = o[k]; });
+  } else {
+    t.split(/\r?\n/).forEach(z2 => {
+      const m = z2.replace(/^[\s>*\-•]+/, '').replace(/\*\*/g, '').match(/^(HEFT_[A-ZÄÖÜ]+)\s*[:：]\s*(.*)$/i);
+      if(m) roh[m[1].toUpperCase()] = m[2];
+    });
+  }
+  const raus = {};
+  HEFT_KATS.forEach(c => {
+    let v = roh[HEFT_KI_FELDER[c.k]];
+    if(Array.isArray(v)) v = v.join(' ');
+    if(v == null || typeof v === 'object') return;
+    v = String(v).replace(/\s*\n\s*/g, ' ').trim();
+    if(!v || keineAngabe(v) || awRohLeer(v)) return;
+    raus[c.k] = v;
+  });
+  return raus;
+}
+/* Entfernt die Pflegeheft-Zeilen, bevor der Rest durch geminiLesen geht. */
+function heftKiZeilenWeg(txt){
+  return String(txt || '').split(/\r?\n/).filter(z => !/^[\s>*\-•]*(\*\*)?HEFT_[A-ZÄÖÜ]+(\*\*)?\s*[:：]/i.test(z)).join('\n');
+}
+function heftArtVon(p){
+  return {art:String((p && p.art) || '').trim(), bot:String((p && p.botanisch) || '').trim(), sorte:String((p && p.sorte) || '').trim()};
+}
+function heftArtName(f){
+  const name = [f.art, f.bot && norm(f.bot) !== norm(f.art) ? '(' + f.bot + ')' : ''].filter(Boolean).join(' ') || f.bot;
+  return name + (f.sorte ? ', Sorte ' + f.sorte : '');
+}
+function heftMitZeile(f){
+  const teile = [f.art, f.bot && norm(f.bot) !== norm(f.art) ? f.bot : '', f.sorte ? 'Sorte ' + f.sorte : ''].filter(Boolean);
+  return '<p class="kb-klein heft-mit">Mitgeschickt wird nur: ' + esc(teile.join(' · ') || 'keine Art eingetragen') + '</p>';
+}
+function heftFrageSchema(){
+  return {type:'OBJECT', properties:{KATEGORIE:{type:'STRING', enum:HEFT_KATS.map(c => c.k)}, ANTWORT:{type:'STRING'}},
+    required:['KATEGORIE','ANTWORT'], propertyOrdering:['KATEGORIE','ANTWORT']};
+}
+function heftFragePrompt(f, frage, kat){
+  const k = HEFT_KATS.find(c => c.k === kat);
+  return ['Du beantwortest eine Frage zur Pflege einer Zimmer- oder Balkonpflanzenart: ' + heftArtName(f) + '. '
+    + 'Es geht um die Art' + (f.sorte ? ' und Sorte' : '') + ', nicht um ein bestimmtes Exemplar.',
+    'Antworte sachlich auf Deutsch in höchstens 300 Zeichen, ohne Einleitung und ohne Schlussfloskel. '
+    + 'Schreib nichts, was für jede Zimmerpflanze gilt. Weißt du es nicht sicher, sag das in der Antwort.',
+    k ? 'Die Frage wurde im Abschnitt „' + k.t + '“ gestellt.' : '',
+    '', 'Frage: ' + String(frage || '').trim().slice(0, HEFT_FRAGE_MAX),
+    '', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER',
+    'KATEGORIE: Zu welchem Abschnitt des Pflegehefts die Antwort gehört. Nur genau eines dieser Wörter: ' + HEFT_KATS.map(c => c.k).join(', '),
+    'ANTWORT: Die Antwort, höchstens 300 Zeichen.'].filter(x => x !== null).join('\n');
+}
+function heftFrageLesen(txt){
+  let t = String(txt || '').trim();
+  const cb = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if(cb) t = cb[1];
+  let kat = '', text = '';
+  const a = t.indexOf('{'), z = t.lastIndexOf('}');
+  let o = null;
+  if(a > -1 && z > a){ try{ o = JSON.parse(t.slice(a, z + 1)); }catch(e){ o = null; } }
+  if(o && typeof o === 'object' && !Array.isArray(o)){
+    Object.keys(o).forEach(k => {
+      const n = String(k).toUpperCase().trim();
+      if(n === 'KATEGORIE') kat = String(o[k] || '');
+      if(n === 'ANTWORT') text = String(o[k] == null ? '' : o[k]);
+    });
+  } else {
+    let inAntwort = false;
+    const rest = [];
+    t.split(/\r?\n/).forEach(z2 => {
+      const m = z2.replace(/\*\*/g, '').match(/^\s*(KATEGORIE|ANTWORT)\s*[:：]\s*(.*)$/i);
+      if(m){ if(m[1].toUpperCase() === 'KATEGORIE'){ kat = m[2]; inAntwort = false; } else { rest.push(m[2]); inAntwort = true; } return; }
+      if(inAntwort) rest.push(z2);
+    });
+    text = rest.join('\n');
+  }
+  const kn = norm(kat).trim();
+  const treffer = HEFT_KATS.find(c => c.k === kn || norm(c.t) === kn);
+  return {kat:treffer ? treffer.k : '', text:String(text).replace(/\r/g, '').trim()};
+}
+function heftSpickPrompt(f){
+  return ['Du schreibst einen kurzen Spickzettel zur Pflege einer Zimmer- oder Balkonpflanzenart: ' + heftArtName(f) + '. '
+    + 'Es geht um die Art' + (f.sorte ? ' und Sorte' : '') + ', nicht um ein bestimmtes Exemplar. '
+    + 'Je Abschnitt ein bis zwei sachliche Sätze auf Deutsch, höchstens 250 Zeichen.',
+    '', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER',
+    AW_ART_TEXT.LICHT, AW_ART_TEXT.GIESSKLASSE].concat(heftKiFeldZeilen()).join('\n');
+}
+function heftSpickSchema(){
+  const felder = ['LICHT','GIESSKLASSE'].concat(heftKiFeldNamen());
+  return awSchema(felder);
+}
+/* Was weicht von der Artenbibliothek ab? Der Code entscheidet, nicht die KI. */
+function heftSpickAbweichung(p, txt){
+  const b = bibExakt(p.botanisch, p.art);
+  if(!b) return {};
+  let licht = '', klasse = '';
+  const d = jsonLesen(txt) || geminiLesen(heftKiZeilenWeg(txt)) || {};
+  if(d.licht) licht = lichtRaten(d.licht) || '';
+  if(d.klasse) klasse = klasseRaten(d.klasse) || '';
+  const raus = {};
+  if(licht && b.licht && licht !== b.licht) raus.licht = 'Licht laut Bibliothek: ' + ((SONNE[b.licht] || {}).text || b.licht);
+  if(klasse && b.klasse && klasse !== b.klasse) raus.giessen = 'Gießklasse laut Bibliothek: ' + b.klasse + ((KLASSEN[b.klasse] || {}).name ? ' ' + KLASSEN[b.klasse].name : '');
+  return raus;
+}
+function heftKiAuf(pid, art, kat, ausloeser){
+  const p = allePflanzen().find(x => x.id === pid); if(!p) return false;
+  HFT = {pid:pid, aid:null, art:art, kat:heftKat(kat), vonKat:kat ? heftKat(kat) : '', text:'', frage:'', fehler:'',
+    laeuft:false, tok:0, antwort:null, spick:null, kiFehler:'', kiModell:''};
+  heftFensterZeichnen();
+  const auf = modalAuf('heft-modal', ausloeser);
+  if(art === 'spick' && kiBereit()) heftSpickLos();
+  return auf;
+}
+function heftKiZeichnen(box, fuss, titel){
+  const p = allePflanzen().find(x => x.id === HFT.pid);
+  const f = heftArtVon(p);
+  const ohneArt = !f.art && !f.bot;
+  const fehltSchl = !kiBereit();
+  const hinweis = ohneArt ? '<p class="heft-fehler">Für die KI fehlt die Art. Trag sie über „Bearbeiten“ in der Karte ein.</p>'
+    : fehltSchl ? '<p class="heft-fehler">Für die KI fehlt der Schlüssel. Du hinterlegst ihn in den Einstellungen unter „KI“.</p>' : '';
+  const lauf = HFT.laeuft ? '<p class="heft-lauf" role="status">Die KI antwortet' + (HFT.kiModell ? ' (' + esc(HFT.kiModell) + ')' : '') + ' …</p>' : '';
+  const fehler = HFT.kiFehler ? '<p class="heft-fehler" role="alert">' + esc(HFT.kiFehler) + '</p>' : '';
+  const katKnoepfe = () => '<p class="ein-abschnitt">Kategorie</p><div class="as-knoepfe" role="group" aria-label="Kategorie">'
+    + HEFT_KATS.map(c => `<button type="button" class="as-knopf" data-heft-kat-wahl="${c.k}" aria-pressed="${HFT.kat === c.k}"><b>${esc(c.t)}</b></button>`).join('')
+    + '</div>';
+  const sperre = ohneArt || fehltSchl;
+  if(HFT.art === 'ki'){
+    if(HFT.antwort){
+      titel.textContent = 'Antwort der KI';
+      box.innerHTML = `<p class="heft-zitat heft-antwort">${esc(HFT.antwort.text).replace(/\n/g, '<br>')}</p>`
+        + `<p class="kb-klein heft-verw">Die Antwort gilt für ${esc(heftArtName(f))}. Ist die Art falsch bestimmt, passt sie nicht — dann verwerfen.</p>`
+        + katKnoepfe();
+      fuss.innerHTML = '<button type="button" data-heft-tun="ki-weg">Verwerfen</button>'
+        + '<button type="button" class="haupt" data-heft-tun="ki-nimm">Ins Pflegeheft</button>';
+      return;
+    }
+    const zu = HFT.vonKat ? (HEFT_KATS.find(c => c.k === HFT.vonKat) || {}).t : '';
+    titel.textContent = zu ? 'KI zu ' + zu + ' fragen' : 'KI fragen';
+    box.innerHTML = hinweis
+      + `<label class="heft-feld-lab" for="heft-frage-feld"><span class="lab">Deine Frage</span></label>`
+      + `<textarea id="heft-frage-feld" rows="3" maxlength="${HEFT_FRAGE_MAX}"${HFT.laeuft || sperre ? ' disabled' : ''}>${esc(HFT.frage)}</textarea>`
+      + `<p class="heft-fehler" id="heft-fehler"${HFT.fehler ? '' : ' hidden'}>${esc(HFT.fehler || '')}</p>`
+      + '<div class="as-knoepfe heft-vorschlaege" role="group" aria-label="Vorschläge">'
+      + HEFT_VORSCHLAEGE.map(v => `<button type="button" class="as-knopf" data-heft-vorschlag="${esc(v)}"${HFT.laeuft || sperre ? ' disabled' : ''}><b>${esc(v)}</b></button>`).join('')
+      + '</div>' + heftMitZeile(f) + lauf + fehler;
+    fuss.innerHTML = HFT.laeuft
+      ? '<button type="button" data-heft-tun="ki-stopp">Abbrechen</button>'
+      : '<button type="button" data-heft-tun="abbrechen">Abbrechen</button>'
+        + `<button type="button" class="haupt" data-heft-tun="ki-los"${sperre ? ' disabled' : ''}>${HFT.kiFehler ? 'Noch einmal fragen' : 'Fragen'}</button>`;
+    return;
+  }
+  /* Spickzettel */
+  titel.textContent = 'Spickzettel';
+  if(HFT.spick){
+    const sp = HFT.spick;
+    const zeilen = HEFT_KATS.filter(c => sp.texte[c.k]).map(c => {
+      const ab = sp.abweich[c.k];
+      const fertig = sp.einzeln[c.k];
+      const kopf = `<b class="heft-spick-t">${esc(c.t)}</b><span class="heft-spick-x">${esc(sp.texte[c.k])}</span>`;
+      if(ab) return `<div class="heft-spick heft-spick-ab" data-heft-spick="${c.k}"><div class="heft-spick-in">${kopf}`
+        + `<span class="kb-klein heft-spick-hinw">Weicht von der Artenbibliothek ab. ${esc(ab)}</span></div>`
+        + (fertig ? '<span class="kb-klein heft-spick-ok">Im Pflegeheft</span>'
+          : `<button type="button" class="kb-zweit" data-heft-einzeln="${c.k}">Einzeln übernehmen</button>`) + '</div>';
+      return `<label class="heft-spick" data-heft-spick="${c.k}"><input type="checkbox" data-heft-haken="${c.k}"${sp.wahl[c.k] ? ' checked' : ''}>`
+        + `<span class="heft-spick-in">${kopf}</span></label>`;
+    }).join('');
+    box.innerHTML = (zeilen || '<p class="heft-frage">Die KI hat zu dieser Art nichts Besonderes genannt.</p>')
+      + `<p class="kb-klein heft-verw">Der Spickzettel gilt für ${esc(heftArtName(f))}. Ist die Art falsch bestimmt, passt er nicht — dann verwerfen.</p>`;
+    const n = heftSpickGewaehlt().length;
+    const offen = HEFT_KATS.some(c => sp.texte[c.k] && !sp.abweich[c.k]);
+    fuss.innerHTML = '<button type="button" data-heft-tun="abbrechen">Verwerfen</button>'
+      + (offen ? `<button type="button" class="haupt" data-heft-tun="spick-nimm"${n ? '' : ' disabled'}>Ausgewählte ins Pflegeheft</button>` : '');
+    return;
+  }
+  box.innerHTML = hinweis + '<p class="heft-frage">Die KI schreibt zu jeder Kategorie einen kurzen Abschnitt. Du wählst danach, was ins Pflegeheft kommt.</p>'
+    + heftMitZeile(f) + lauf + fehler;
+  fuss.innerHTML = HFT.laeuft
+    ? '<button type="button" data-heft-tun="spick-stopp">Abbrechen</button>'
+    : '<button type="button" data-heft-tun="abbrechen">Schließen</button>'
+      + `<button type="button" class="haupt" data-heft-tun="spick-los"${sperre ? ' disabled' : ''}>${HFT.kiFehler ? 'Noch einmal' : 'Spickzettel erstellen'}</button>`;
+}
+function heftSpickGewaehlt(){
+  if(!HFT || !HFT.spick) return [];
+  const sp = HFT.spick;
+  return HEFT_KATS.map(c => c.k).filter(k => sp.texte[k] && !sp.abweich[k] && sp.wahl[k]);
+}
+async function heftFrageLos(){
+  if(!HFT || HFT.laeuft) return false;
+  const fe = document.getElementById('heft-frage-feld');
+  if(fe) HFT.frage = fe.value;
+  if(!HFT.frage.trim()){
+    HFT.fehler = 'Bitte zuerst eine Frage schreiben oder einen Vorschlag antippen.';
+    heftFensterZeichnen(); return false;
+  }
+  const p = allePflanzen().find(x => x.id === HFT.pid); if(!p) return false;
+  const f = heftArtVon(p);
+  if((!f.art && !f.bot) || !kiBereit()) return false;
+  const tok = ++HFT.tok;
+  HFT.laeuft = true; HFT.kiFehler = ''; HFT.kiModell = (kiModellAktiv() || {}).anzeige || '';
+  heftFensterZeichnen();
+  let erg = null, fehler = null;
+  try{
+    erg = await kiFragenEinmal(heftFragePrompt(f, HFT.frage, HFT.vonKat), [], null,
+      {denken:'niedrig', zweck:'Pflegeheft · Frage', schema:heftFrageSchema()});
+  }catch(e){ fehler = e; }
+  if(!HFT || HFT.tok !== tok) return false;
+  HFT.laeuft = false;
+  if(fehler){
+    HFT.kiFehler = fehler.name === 'AbortError' ? 'Abgebrochen.' : (fehler.message || String(fehler));
+    heftFensterZeichnen(); return false;
+  }
+  const a = heftFrageLesen(erg.text);
+  if(!a.text){ HFT.kiFehler = 'Die Antwort war leer oder nicht lesbar. Noch einmal fragen?'; heftFensterZeichnen(); return false; }
+  HFT.antwort = {text:heftKuerzen(a.text, 'ki')};
+  HFT.kat = a.kat || HFT.vonKat || 'allgemein';
+  heftFensterZeichnen();
+  return true;
+}
+async function heftSpickLos(){
+  if(!HFT || HFT.laeuft) return false;
+  const p = allePflanzen().find(x => x.id === HFT.pid); if(!p) return false;
+  const f = heftArtVon(p);
+  if((!f.art && !f.bot) || !kiBereit()) return false;
+  const tok = ++HFT.tok;
+  HFT.laeuft = true; HFT.kiFehler = ''; HFT.kiModell = (kiModellAktiv() || {}).anzeige || '';
+  heftFensterZeichnen();
+  let erg = null, fehler = null;
+  try{
+    erg = await kiFragenEinmal(heftSpickPrompt(f), [], null,
+      {denken:'niedrig', zweck:'Pflegeheft · Spickzettel', schema:heftSpickSchema()});
+  }catch(e){ fehler = e; }
+  if(!HFT || HFT.tok !== tok) return false;
+  HFT.laeuft = false;
+  if(fehler){
+    HFT.kiFehler = fehler.name === 'AbortError' ? 'Abgebrochen.' : (fehler.message || String(fehler));
+    heftFensterZeichnen(); return false;
+  }
+  const texte = heftKiLesen(erg.text);
+  const abweich = heftSpickAbweichung(p, erg.text);
+  const wahl = {};
+  Object.keys(texte).forEach(k => { if(!abweich[k]) wahl[k] = true; });
+  HFT.spick = {texte:texte, abweich:abweich, wahl:wahl, einzeln:{}};
+  heftFensterZeichnen();
+  return true;
+}
+function heftSpickEinzeln(k){
+  if(!HFT || !HFT.spick || !HFT.spick.texte[k] || HFT.spick.einzeln[k]) return false;
+  const a = heftAnhaengen(HFT.pid, k, HFT.spick.texte[k], 'ki');
+  if(!a) return false;
+  HFT.spick.einzeln[k] = true;
+  heftFensterZeichnen(); heftKarteNeu();
+  return true;
+}
+function heftKiTun(tun){
+  if(!HFT) return false;
+  if(tun === 'ki-los'){ heftFrageLos(); return true; }
+  if(tun === 'spick-los'){ heftSpickLos(); return true; }
+  if(tun === 'ki-stopp' || tun === 'spick-stopp'){ HFT.tok++; HFT.laeuft = false; HFT.kiFehler = 'Abgebrochen.'; kiAbbrechen(); heftFensterZeichnen(); return true; }
+  if(tun === 'ki-weg'){ modalZu('heft-modal'); return true; }
+  if(tun === 'ki-nimm'){
+    if(!HFT.antwort) return false;
+    const ok = !!heftAnhaengen(HFT.pid, HFT.kat, HFT.antwort.text, 'ki');
+    modalZu('heft-modal'); heftKarteNeu();
+    return ok;
+  }
+  if(tun === 'spick-nimm'){
+    const ks = heftSpickGewaehlt();
+    if(!ks.length) return false;
+    const p = allePflanzen().find(x => x.id === HFT.pid); if(!p) return false;
+    const neu = ks.map(k => heftAbschnitt(k, HFT.spick.texte[k], 'ki')).filter(a => a.text);
+    aenderungSetzen(HFT.pid, {heft:heftVon(p).concat(neu)});
+    modalZu('heft-modal'); heftKarteNeu();
+    return true;
+  }
+  return false;
+}
+
 /* Giftigkeit für jedes eingetragene Tier. Ohne Tiere kein Abschnitt —
    dann interessiert die Frage nicht (Chris, 11.09.). */
 function kGiftHTML(p){
@@ -19038,7 +19406,7 @@ modalAnmelden('iv-modal', {el:'iv-huelle', groesse:'blatt', schleier:true, fokus
   nachZu: ()=>{ IVF = null; }});
 /* 4.0-beta.31 (B4a): Fenster „Pflegeheft“ */
 modalAnmelden('heft-modal', {el:'heft-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
-  nachZu: ()=>{ HFT = null; }});
+  nachZu: ()=>{ if(HFT && HFT.laeuft && typeof kiAbbrechen === 'function') kiAbbrechen(); HFT = null; }});
 
 modalAnmelden('lightbox', {
   groesse:'voll',
@@ -21049,9 +21417,11 @@ const AW_JSON_SATZ = 'Antworte nur mit einem JSON-Objekt, dessen Schlüssel gena
   + 'Weißt du etwas nicht, schreib genau: unbekannt. Kannst du kein JSON ausgeben, schreib eine Zeile je Schlüsselwort: SCHLÜSSELWORT: Wert.';
 
 /* 4.0-beta.19 (F176): „Nur Steckbrief“ fragt keine Pflegetexte */
-const AW_PFLEGETEXTE = ['WICHTIG','PFLEGE','WINTERRUHE'];
+/* 4.0-beta.32 (B4b): „voll“ fragt die Pflegetexte je Kategorie des
+   Pflegehefts (HEFT_KI_FELDER) statt PFLEGE und WINTERRUHE. */
+const AW_PFLEGETEXTE = ['WICHTIG'].concat(heftKiFeldNamen());
 function awArtFelder(){
-  let f = ['LICHT','GIESSKLASSE','GIESSART','TYP','SPEICHER','FROST','WICHTIG','PFLEGE','WINTERRUHE'];
+  let f = ['LICHT','GIESSKLASSE','GIESSART','TYP','SPEICHER','FROST','WICHTIG'].concat(heftKiFeldNamen());
   if(typeof kiStufeVon === 'function' && kiStufeVon() === 'kurz') f = f.filter(n => AW_PFLEGETEXTE.indexOf(n) === -1);
   if(tierZeileFuer(meineTiere())) f.push('KATZEN');
   f.push('VERMEHRUNG');
@@ -21101,6 +21471,7 @@ function anlegenArtPromptBauen(f, nurFelder){
   z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER');
   (nurFelder || awArtFelder()).forEach(n => {
     let t = AW_ART_TEXT[n] || (n === 'KATZEN' ? tierZeileFuer(meineTiere()) : (FELD_ZUSATZ[n] ? FELD_ZUSATZ[n].text : ''));
+    if(!t && /^HEFT_/.test(n)){ const k = Object.keys(HEFT_KI_FELDER).find(x => HEFT_KI_FELDER[x] === n); if(k) t = heftKiFeldZeilen()[HEFT_KATS.findIndex(c => c.k === k)]; }
     if(n === 'LICHT' && f.sorte) t += ' ' + KI_LICHT_PANASCHIERT;
     if(t) z.push(t);
   });
@@ -21379,12 +21750,21 @@ async function awHolen(modellId){
     return;
   }
   if(tok !== AW_TOKEN) return;
-  const d = geminiLesen(awJsonText(erg.text, awArtFelder()));
+  /* 4.0-beta.32 (B4b): Die Pflegeheft-Zeilen liest heftKiLesen, der Rest geht ohne sie durch geminiLesen. */
+  const felder = awArtFelder();
+  const heftKi = heftKiLesen(erg.text);
+  const d = geminiLesen(heftKiZeilenWeg(awJsonText(erg.text, felder.filter(n => !/^HEFT_/.test(n)))));
   AW = {quelle:'ki', werte:awWerteAusAntwort(d), fuer:f, schluessel:awSchluessel(f.bot || f.art, f.sorte),
-    fehlt:awFehlt(d, awArtFelder()), hand:{}};
+    fehlt:awFehlt(d, felder), hand:{}, heftKi:heftKi};
   const msg = awAnwenden({frostNotiz:true});
+  /* Was hier von der Bibliothek abweicht, geht nur mit, wenn du den KI-Wert wählst (Regel 7.4). */
+  AW.heftAbweich = Object.keys(AW.offen || {});
+  const nh = Object.keys(heftKi).length;
+  const abw = AW.heftAbweich.filter(x => (x === 'sonne' && heftKi.licht) || (x === 'klasse' && heftKi.giessen));
   awStatus('Artwissen für ' + esc(awArtName(f)) + ' ist da. Es steht auf der Stufe „Platz und Pflege“ zum Bestätigen und kommt erst mit „Anlegen“ in die Karte.'
-    + (msg.length ? ' ' + esc(msg.join(' · ')) + '.' : ''));
+    + (msg.length ? ' ' + esc(msg.join(' · ')) + '.' : '')
+    + (nh ? ' Dazu ' + (nh === 1 ? 'ein Abschnitt' : nh + ' Abschnitte') + ' fürs Pflegeheft.' : '')
+    + (abw.length ? ' Den Pflegeheft-Text zu ' + abw.map(x => x === 'sonne' ? 'Licht' : 'Gießen').join(' und ') + ' gibt es nur, wenn du dort den KI-Wert wählst.' : ''));
 }
 document.addEventListener('click', e => {
   const k = e.target.closest('[data-aw]');
@@ -22958,7 +23338,18 @@ async function alSpeichern(){
   /* 4.0-beta.31 (B4a): Pflegetexte der Antwort kommen erst mit „Anlegen“
      als Abschnitte mit Quelle KI ins Pflegeheft (Regel 10.8): Pflegeschritte
      nach „Allgemein“, Winterruhe nach „Winter“. „keine“ legt nichts an. */
-  if(letzteKiAntwort){
+  /* 4.0-beta.32 (B4b): Stufe „voll“ bringt die Pflegetexte je Kategorie mit.
+     Weicht Licht oder Gießklasse von der Bibliothek ab, kommt der passende
+     Abschnitt nur mit, wenn du den KI-Wert gewählt hast (Regel 7.4). */
+  const heftKi = (AW && AW.quelle === 'ki' && AW.heftKi && Object.keys(AW.heftKi).length) ? AW.heftKi : null;
+  if(heftKi){
+    const abw = AW.heftAbweich || [];
+    const gilt = (feld) => abw.indexOf(feld) === -1 || (AW.gesetzt && AW.gesetzt[feld] === 'ki');
+    const neu = HEFT_KATS.map(c => c.k).filter(k => heftKi[k])
+      .filter(k => !(k === 'licht' && !gilt('sonne')) && !(k === 'giessen' && !gilt('klasse')))
+      .map(k => heftAbschnitt(k, heftKi[k], 'ki')).filter(a => a.text);
+    if(neu.length){ p.heft = heftVon(p).concat(neu); sichern(); }
+  } else if(letzteKiAntwort){
     const neu = [];
     const pl = pflegeLesen(letzteKiAntwort.pflege);
     if(pl && pl.typ === 'liste' && pl.liste.length) neu.push(heftAbschnitt('allgemein', pl.liste.join('\n'), 'ki'));

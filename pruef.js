@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.31', w.__T('FASSUNG') === '4.0-beta.31', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.32', w.__T('FASSUNG') === '4.0-beta.32', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -11170,7 +11170,7 @@ setTimeout(async () => {
       pruef('beta.19 (F176): Der Auftrag „Nur Steckbrief“ nennt keine Pflegetexte',
         !/^(PFLEGE|WICHTIG|WINTERRUHE):/m.test(T(`anlegenArtPromptBauen({art:'Probe', bot:'Probea test', sorte:''})`)));
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.19 (F176): Entdecker fragt mit Pflegetexten', T(`kiStufeVon()`) === 'voll' && /PFLEGE/.test(felder()) && /WICHTIG/.test(felder()), felder());
+      pruef('beta.19 (F176, beta.32): Entdecker fragt mit Pflegetexten', T(`kiStufeVon()`) === 'voll' && /HEFT_/.test(felder()) && /WICHTIG/.test(felder()), felder());
       T(`alKiStufeZeichnen(); 1`);
       d.querySelector('#al-kistufe [data-kistufe="kurz"]').click();
       pruef('beta.19 (F176): Tipp auf „Nur Steckbrief“ stellt um', T(`S.kiStufe`) === 'kurz' && T(`kiStufeVon()`) === 'kurz'
@@ -13905,6 +13905,205 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = a.eigene; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab; S.acc = a.acc;
         if(typeof schalterAnwenden === 'function') schalterAnwenden();
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt31)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.32: Etappe B4b — Pflegeheft: KI-Frage, Spickzettel, Anlegen je Kategorie.
+     KI-Frage und Spickzettel schicken genau eine Anfrage ohne Kartennamen;
+     gespeichert wird erst nach dem Übernahme-Knopf; ein Spickzettel-Abschnitt,
+     der von der Artenbibliothek abweicht, geht nur einzeln; Anlegen „voll“
+     legt die Texte je Kategorie ab. Legt alles selbst an. ══ */
+  {
+    const T = c => w.__T(c);
+    const TS = c => { try { return w.__T(c); } catch(e){ return 'FEHLER: ' + (e && e.message); } };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt32 = T(`JSON.stringify({eigene:S.eigene, modus:S.modus, schalter:S.schalter, kartenTab:S.kartenTab, acc:S.acc, ansicht:S.ansicht,
+      kiModelle:S.kiModelle, kiModell:S.kiModell, kiStufe:S.kiStufe, gelernteArten:S.gelernteArten})`);
+    const fetch32 = w.fetch;
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const ruhe = async () => { await warte(300); T(`history.replaceState(null, ''); 1`); };
+    const q = s => d.querySelector(s);
+    const qa = s => [].slice.call(d.querySelectorAll(s));
+    const klick = sel => { const b = q(sel); if(b) b.click(); return !!b; };
+    const heftJ = id => TS(`JSON.stringify(heftVon(allePflanzen().find(function(x){ return x.id === '${id}'; })).map(function(a){ return [a.kat, a.quelle, a.text]; }))`);
+    const heftAuf = async id => { await zu(); TS(`karteOeffnen('${id}')`); await warte(60); klick('#karte-rumpf [data-ktab="pflegeheft"]'); await warte(20); };
+    /* Attrappe für Google: Antwort nach Auftrag */
+    w.__aufrufe32 = [];
+    w.__antwort32 = {};
+    w.fetch = (u, o) => {
+      let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+      w.__aufrufe32.push({u:String(u), leib:leib});
+      const pr = leib && leib.contents ? leib.contents[0].parts[0].text : '';
+      const art = /Spickzettel/.test(pr) ? 'spick' : /beantwortest eine Frage/.test(pr) ? 'frage' : 'anlegen';
+      const text = JSON.stringify(w.__antwort32[art] || {});
+      return new Promise(res => setTimeout(() => res({ok:true, status:200, json:()=>Promise.resolve({candidates:[{finishReason:'STOP', content:{parts:[{text:text}]}}]})}), 10));
+    };
+    const posts = () => w.__aufrufe32.filter(a => a.u.indexOf(':generateContent') > -1);
+    const promptVon = a => a.leib.contents[0].parts[0].text;
+    const mitBild = a => a.leib.contents[0].parts.some(p => p.inline_data);
+    try {
+      await zu();
+      T(`kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}]; S.kiModell = 'models/gemini-3.6-flash';
+        Object.keys(KI_SCHEMA_AUS).forEach(function(k){ delete KI_SCHEMA_AUS[k]; }); 1`);
+      /* Eine Art aus der Bibliothek mit Licht und Gießklasse; dazu ein Lichtwort, das abweicht, und ein Gießwort, das passt */
+      const bib = JSON.parse(T(`(function(){
+        var k = Object.keys(BIB_NACH_BOT).find(function(x){ var b = bibExakt(x, ''); return /^[A-Z][a-z]+ [a-z]+$/.test(x) && b && b.licht && b.klasse && b.klasse !== 'S'; });
+        var b = bibExakt(k, '');
+        var la = ['voll','hell','indirekt'].find(function(x){ return lichtRaten(x) && lichtRaten(x) !== b.licht; });
+        var kg = ['normal','durstig','kakteenmodus'].find(function(x){ return klasseRaten(x) === b.klasse; });
+        var lg = ['voll','hell','indirekt'].find(function(x){ return lichtRaten(x) === b.licht; });
+        return JSON.stringify({bot:k, de:b.de, licht:b.licht, klasse:b.klasse, lichtAnders:la, lichtGleich:lg, klasseGleich:kg}); })()`));
+      T(`(function(){
+        S.eigene = (S.eigene || []).filter(function(p){ return ['H5A','H5B'].indexOf(p.id) < 0 && !/^H5 Anlegen/.test(p.name || ''); });
+        S.eigene.push({id:'H5A', name:'H5 Geheimname', art:'Probeblatt', botanisch:'Fictus testus', sorte:'Weißrand', klasse:'B', log:[], notiz:'',
+          heft:[{id:'hv1', kat:'licht', datum:'2026-11-01', quelle:'eigener', text:'H5 steht am Ostfenster'}]});
+        S.eigene.push({id:'H5B', name:'H5 Leer', art:${JSON.stringify(bib.de)}, botanisch:${JSON.stringify(bib.bot)}, klasse:${JSON.stringify(bib.klasse)}, log:[], notiz:''});
+        S.modus = 'entdecker'; S.schalter = {}; schalterAnwenden(); sichern(); return 1; })()`);
+
+      /* (1) Kopf und leere Kategorien */
+      await heftAuf('H5A');
+      pruef('beta.32 B4b (1): Heft mit Eintrag zeigt „KI fragen“, keinen Spickzettel',
+        !!q('#karte-rumpf .heft-kopf [data-do="heft-ki"]') && !q('#karte-rumpf [data-do="heft-spick"]'));
+      pruef('beta.32 B4b (1): leere Kategorie hat „KI zu … fragen“, gefüllte nicht',
+        /KI zu Gießen fragen/.test((q('#karte-rumpf [data-heft-kat="giessen"] [data-do="heft-ki"]') || {}).textContent || '')
+        && !q('#karte-rumpf [data-heft-kat="licht"] [data-do="heft-ki"]'));
+      await heftAuf('H5B');
+      pruef('beta.32 B4b (1): leeres Heft zeigt „Spickzettel erstellen“', !!q('#karte-rumpf .heft-kopf [data-do="heft-spick"]'));
+
+      /* (2) KI-Frage: Fenster, Vorschläge, Mitgeschickt-Zeile */
+      await heftAuf('H5A');
+      w.__aufrufe32 = [];
+      w.__antwort32.frage = {KATEGORIE:'substrat', ANTWORT:'H5 Im Frühjahr alle vier Wochen schwach düngen.'};
+      klick('#karte-rumpf [data-heft-kat="giessen"] [data-do="heft-ki"]'); await warte(40);
+      pruef('beta.32 B4b (2): „KI zu Gießen fragen“ öffnet das Fenster mit Textfeld und drei Vorschlägen',
+        !q('#heft-huelle').hidden && /KI zu Gießen fragen/.test(q('#heft-titel').textContent) && !!q('#heft-frage-feld')
+        && qa('#heft-modal [data-heft-vorschlag]').map(x => x.dataset.heftVorschlag).join('|') === 'Wie oft düngen?|Winterruhe nötig?|Welches Substrat?',
+        q('#heft-titel').textContent);
+      pruef('beta.32 B4b (2): Mitgeschickt-Zeile nennt Art, botanischen Namen und Sorte, nicht den Kartennamen',
+        /Mitgeschickt wird nur: Probeblatt · Fictus testus · Sorte Weißrand/.test((q('#heft-modal .heft-mit') || {}).textContent || '')
+        && !/Geheimname/.test(q('#heft-modal').textContent), (q('#heft-modal .heft-mit') || {}).textContent);
+      klick('#heft-modal [data-heft-tun="ki-los"]'); await warte(60);
+      pruef('beta.32 B4b (2): leere Frage schickt nichts und sagt es', posts().length === 0 && !q('#heft-fehler').hidden);
+      klick('#heft-modal [data-heft-vorschlag="Wie oft düngen?"]');
+      pruef('beta.32 B4b (2): Vorschlag füllt das Textfeld, schickt aber nichts', q('#heft-frage-feld').value === 'Wie oft düngen?' && posts().length === 0);
+      klick('#heft-modal [data-heft-tun="ki-los"]'); await warte(150);
+      const p2 = posts();
+      pruef('beta.32 B4b (2): genau eine Anfrage, ohne Bild, ohne Kartennamen, mit Art und Frage',
+        p2.length === 1 && !mitBild(p2[0]) && !/Geheimname/.test(promptVon(p2[0])) && /Fictus testus/.test(promptVon(p2[0]))
+        && /Wie oft düngen\?/.test(promptVon(p2[0])) && /höchstens 300 Zeichen/.test(promptVon(p2[0])), String(p2.length));
+      pruef('beta.32 B4b (2): Antwort steht im Fenster, noch nichts gespeichert',
+        /H5 Im Frühjahr/.test((q('#heft-modal .heft-antwort') || {}).textContent || '') && heftJ('H5A').indexOf('H5 Im Frühjahr') === -1, heftJ('H5A'));
+      pruef('beta.32 B4b (2): Kategorie der KI ist als Knopfliste vorgewählt, ohne Systemliste',
+        !q('#heft-modal select') && (q('#heft-modal [data-heft-kat-wahl="substrat"]') || {getAttribute:()=>''}).getAttribute('aria-pressed') === 'true');
+      pruef('beta.32 B4b (2): „Ins Pflegeheft“ und „Verwerfen“ stehen da',
+        !!q('#heft-modal [data-heft-tun="ki-nimm"]') && /Ins Pflegeheft/.test(q('#heft-modal [data-heft-tun="ki-nimm"]').textContent)
+        && /Verwerfen/.test((q('#heft-modal [data-heft-tun="ki-weg"]') || {}).textContent || ''));
+      klick('#heft-modal [data-heft-kat-wahl="allgemein"]');
+      klick('#heft-modal [data-heft-tun="ki-nimm"]'); await ruhe();
+      pruef('beta.32 B4b (2): „Ins Pflegeheft“ legt einen neuen KI-Abschnitt in der gewählten Kategorie an, der alte bleibt',
+        heftJ('H5A') === '[["licht","eigener","H5 steht am Ostfenster"],["allgemein","ki","H5 Im Frühjahr alle vier Wochen schwach düngen."]]', heftJ('H5A'));
+      /* Verwerfen speichert nichts; zu lange Antwort wird auf 300 gekürzt */
+      await heftAuf('H5A');
+      w.__antwort32.frage = {KATEGORIE:'winter', ANTWORT:new Array(400).join('w')};
+      klick('#karte-rumpf .heft-kopf [data-do="heft-ki"]'); await warte(40);
+      const fe = q('#heft-frage-feld'); fe.value = 'H5 Winter?'; fe.dispatchEvent(new w.Event('input', {bubbles:true}));
+      klick('#heft-modal [data-heft-tun="ki-los"]'); await warte(150);
+      pruef('beta.32 B4b (2): zu lange Antwort wird auf 300 Zeichen gekürzt', ((q('#heft-modal .heft-antwort') || {}).textContent || '').length === 300,
+        String(((q('#heft-modal .heft-antwort') || {}).textContent || '').length));
+      const vorher2 = heftJ('H5A');
+      klick('#heft-modal [data-heft-tun="ki-weg"]'); await ruhe();
+      pruef('beta.32 B4b (2): „Verwerfen“ speichert nichts und schließt', heftJ('H5A') === vorher2 && q('#heft-huelle').hidden);
+
+      /* (3) Spickzettel: eine Anfrage, Haken, Abweichung nur einzeln */
+      await heftAuf('H5B');
+      w.__aufrufe32 = [];
+      w.__antwort32.spick = {LICHT:bib.lichtAnders, GIESSKLASSE:bib.klasseGleich, HEFT_ALLGEMEIN:'H5 Wächst langsam', HEFT_STELLE:'H5 Volle Sonne verträgt sie',
+        HEFT_GUSS:'H5 Weiches Wasser', HEFT_BODEN:'keine', HEFT_WINTER:'H5 Kühl überwintern', HEFT_NACHWUCHS:'unbekannt', HEFT_PROBLEME:'H5 Wollläuse in den Achseln'};
+      klick('#karte-rumpf [data-do="heft-spick"]'); await warte(200);
+      const p3 = posts();
+      pruef('beta.32 B4b (3): Spickzettel schickt genau eine Anfrage ohne Foto und ohne Kartennamen',
+        p3.length === 1 && !mitBild(p3[0]) && !/H5 Leer/.test(promptVon(p3[0])) && /HEFT_GUSS/.test(promptVon(p3[0])), String(p3.length));
+      const zeilen3 = qa('#heft-modal [data-heft-spick]').map(x => x.dataset.heftSpick).join(',');
+      pruef('beta.32 B4b (3): je Kategorie mit Text eine Zeile, „keine“ und „unbekannt“ fallen weg', zeilen3 === 'allgemein,licht,giessen,winter,probleme', zeilen3);
+      pruef('beta.32 B4b (3): Abschnitte mit Haken, alle vorgewählt', qa('#heft-modal [data-heft-haken]').length === 4
+        && qa('#heft-modal [data-heft-haken]').every(x => x.checked));
+      pruef('beta.32 B4b (3): Licht weicht von der Bibliothek ab: kein Haken, Knopf „Einzeln übernehmen“, Hinweis',
+        !q('#heft-modal [data-heft-haken="licht"]') && !!q('#heft-modal [data-heft-einzeln="licht"]')
+        && /Weicht von der Artenbibliothek ab/.test((q('#heft-modal [data-heft-spick="licht"]') || {}).textContent || ''));
+      pruef('beta.32 B4b (3): vor dem Tipp steht nichts im Heft', heftJ('H5B') === '[]', heftJ('H5B'));
+      const hw = q('#heft-modal [data-heft-haken="winter"]'); hw.checked = false; hw.dispatchEvent(new w.Event('change', {bubbles:true}));
+      klick('#heft-modal [data-heft-tun="spick-nimm"]'); await ruhe();
+      pruef('beta.32 B4b (3): „Ausgewählte ins Pflegeheft“ nimmt nur die angehakten, nie den abweichenden',
+        heftJ('H5B') === '[["allgemein","ki","H5 Wächst langsam"],["giessen","ki","H5 Weiches Wasser"],["probleme","ki","H5 Wollläuse in den Achseln"]]', heftJ('H5B'));
+      /* Einzeln übernehmen */
+      T(`aenderungSetzen('H5B', {heft:[]}); 1`);
+      await heftAuf('H5B');
+      klick('#karte-rumpf [data-do="heft-spick"]'); await warte(200);
+      klick('#heft-modal [data-heft-einzeln="licht"]'); await warte(40);
+      pruef('beta.32 B4b (3): „Einzeln übernehmen“ legt nur diesen Abschnitt an und bleibt im Fenster',
+        heftJ('H5B') === '[["licht","ki","H5 Volle Sonne verträgt sie"]]' && !q('#heft-huelle').hidden
+        && /Im Pflegeheft/.test((q('#heft-modal [data-heft-spick="licht"]') || {}).textContent || ''), heftJ('H5B'));
+      klick('#heft-modal [data-heft-tun="abbrechen"]'); await ruhe();
+      pruef('beta.32 B4b (3): Verwerfen danach lässt den einzeln übernommenen Abschnitt stehen', heftJ('H5B') === '[["licht","ki","H5 Volle Sonne verträgt sie"]]', heftJ('H5B'));
+      pruef('beta.32 B4b (3): Heft nicht mehr leer: kein Spickzettel-Knopf', (await heftAuf('H5B'), !q('#karte-rumpf [data-do="heft-spick"]')));
+      await zu();
+
+      /* (4) Anlegen: Stufe „voll“ fragt die Pflegetexte je Kategorie, „kurz“ nicht */
+      T(`modusSetzen('entdecker'); 1`);
+      const felder = () => T(`awArtFelder().join(',')`);
+      pruef('beta.32 B4b (4): „voll“ fragt die sieben Kategorien statt PFLEGE und WINTERRUHE',
+        T(`heftKiFeldNamen().every(function(n){ return awArtFelder().indexOf(n) > -1; })`) === true && !/(^|,)(PFLEGE|WINTERRUHE)(,|$)/.test(felder()), felder());
+      T(`S.kiStufe = 'kurz'; 1`);
+      pruef('beta.32 B4b (4): „kurz“ fragt keine Pflegetexte', !/HEFT_|WICHTIG/.test(felder()), felder());
+      T(`S.kiStufe = 'voll'; 1`);
+      const anlegen = async (name, art, bot, antwort, vorSpeichern) => {
+        w.__antwort32.anlegen = antwort;
+        w.__aufrufe32 = [];
+        T(`(function(){ alStart(); neuWegSetzen('ki'); document.getElementById('f-art').value = ${JSON.stringify(art)};
+          document.getElementById('f-bot').value = ${JSON.stringify(bot)}; return 1; })()`);
+        await T(`awHolen(null)`); await warte(60);
+        if(vorSpeichern) vorSpeichern();
+        d.getElementById('f-name').value = name;
+        TS(`(function(){ formLageZeichnen(raumAnlegen('H5 Raum'), ''); var t = document.getElementById('f-topf'); if(t){ t.value = 14; t.dataset.gesetzt = '1'; } return 1; })()`);
+        await T('alSpeichern()'); await warte(150);
+        return TS(`(function(){ var p = allePflanzen().find(function(x){ return x.name === ${JSON.stringify(name)}; }); return p ? JSON.stringify(heftVon(p).map(function(a){ return [a.kat, a.quelle, a.text]; })) : 'fehlt'; })()`);
+      };
+      const basis = {GIESSART:'durchdringend', TYP:'Staude', SPEICHER:'kein Speicher', FROST:'10', WICHTIG:'keine', VERMEHRUNG:[]};
+      const an1 = await anlegen('H5 Anlegen eins', 'Probeblatt', 'Fictus anlegus', Object.assign({LICHT:'hell', GIESSKLASSE:'normal',
+        HEFT_ALLGEMEIN:'H5A Wächst schnell', HEFT_STELLE:'H5A Ostfenster', HEFT_GUSS:'keine', HEFT_BODEN:'H5A Torffrei',
+        HEFT_WINTER:'H5A Bei 15 °C', HEFT_NACHWUCHS:'H5A Kopfstecklinge', HEFT_PROBLEME:'unbekannt'}, basis));
+      pruef('beta.32 B4b (4): Anlegen legt je Kategorie einen KI-Abschnitt ab, „keine“ und „unbekannt“ fallen weg',
+        an1 === '[["allgemein","ki","H5A Wächst schnell"],["licht","ki","H5A Ostfenster"],["substrat","ki","H5A Torffrei"],["winter","ki","H5A Bei 15 °C"],["vermehrung","ki","H5A Kopfstecklinge"]]', an1);
+      pruef('beta.32 B4b (4): Die Anlegen-Anfrage nennt die Kategorien und bleibt eine Anfrage',
+        posts().length === 1 && /HEFT_NACHWUCHS/.test(promptVon(posts()[0])) && !/^PFLEGE:/m.test(promptVon(posts()[0])), String(posts().length));
+      await zu();
+      /* Abweichung von der Bibliothek: Licht-Abschnitt nur, wenn der KI-Wert gewählt ist */
+      const abw = Object.assign({LICHT:bib.lichtAnders, GIESSKLASSE:bib.klasseGleich, HEFT_ALLGEMEIN:'H5B Allgemein', HEFT_STELLE:'H5B Licht anders',
+        HEFT_GUSS:'H5B Gießen', HEFT_BODEN:'keine', HEFT_WINTER:'keine', HEFT_NACHWUCHS:'keine', HEFT_PROBLEME:'keine'}, basis);
+      const an2 = await anlegen('H5 Anlegen zwei', bib.de, bib.bot, abw, null);
+      pruef('beta.32 B4b (4): weicht Licht von der Bibliothek ab und ist nicht gewählt, kommt der Licht-Abschnitt nicht mit',
+        an2 === '[["allgemein","ki","H5B Allgemein"],["giessen","ki","H5B Gießen"]]', an2);
+      await zu();
+      const an3 = await anlegen('H5 Anlegen drei', bib.de, bib.bot, abw, () => T(`awWahl('sonne', 'ki'); 1`));
+      pruef('beta.32 B4b (4): wählst du den KI-Wert, kommt der Licht-Abschnitt mit',
+        an3 === '[["allgemein","ki","H5B Allgemein"],["licht","ki","H5B Licht anders"],["giessen","ki","H5B Gießen"]]', an3);
+      await zu();
+      /* Die Pflegeheft-Zeilen landen nicht in fremden Feldern (Zeilenform ohne JSON) */
+      const lz = TS(`JSON.stringify(geminiLesen(heftKiZeilenWeg('LICHT: hell\\nHEFT_STELLE: Ostfenster\\nHEFT_GUSS: weich\\nHEFT_BODEN: torffrei')))`);
+      pruef('beta.32 B4b (4): Zeilenform: Pflegeheft-Zeilen gehen nicht ins Licht oder Substrat', /"licht":"hell"/.test(lz) && !/Ostfenster|torffrei|weich/.test(lz), lz);
+      pruef('beta.32 B4b (4): Zeilenform: heftKiLesen liest die Kategorien', TS(`JSON.stringify(heftKiLesen('LICHT: hell\\nHEFT_STELLE: Ostfenster\\n**HEFT_GUSS**: weich'))`)
+        === '{"licht":"Ostfenster","giessen":"weich"}', TS(`JSON.stringify(heftKiLesen('LICHT: hell\\nHEFT_STELLE: Ostfenster\\n**HEFT_GUSS**: weich'))`));
+    } catch(e){
+      pruef('beta.32 B4b: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      w.fetch = fetch32;
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        S.eigene = a.eigene; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab; S.acc = a.acc;
+        S.kiModelle = a.kiModelle; S.kiModell = a.kiModell; S.gelernteArten = a.gelernteArten;
+        if(a.kiStufe === undefined) delete S.kiStufe; else S.kiStufe = a.kiStufe;
+        if(typeof schalterAnwenden === 'function') schalterAnwenden();
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt32)})`);
     }
   }
 
