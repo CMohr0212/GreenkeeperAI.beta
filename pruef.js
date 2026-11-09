@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.29', w.__T('FASSUNG') === '4.0-beta.29', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.30', w.__T('FASSUNG') === '4.0-beta.30', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -700,32 +700,33 @@ setTimeout(async () => {
   {
     const tabs = [...d.querySelectorAll('#karte-rumpf .ktab')].map(x=>x.dataset.ktab);
     pruef('Genau vier Reiter', tabs.length === 4, tabs.join(','));
-    pruef('Reiter heißen pflege, standort, verlauf, wissen',
-      tabs.join(',') === 'pflege,standort,verlauf,wissen', tabs.join(','));
+    /* 4.0-beta.30 (B2, F309): Verlauf, Platz, Pflegeheft, Steckbrief */
+    pruef('Reiter heißen verlauf, platz, pflegeheft, steckbrief',
+      tabs.join(',') === 'verlauf,platz,pflegeheft,steckbrief', tabs.join(','));
     pruef('Kein Reiter „Allgemein" mehr', tabs.indexOf('allgemein') === -1);
     /* Seit 3.12.0 bleibt „Wissen" auch bei einer Pflanze ohne hinterlegte
        Artangaben stehen — dann mit dem Hinweis, was zu tun waere. */
-    pruef('Wissen bleibt auch ohne Artangaben stehen',
-      !!d.querySelector('#karte-rumpf [data-kpane="wissen"]'));
+    pruef('Steckbrief bleibt auch ohne Artangaben stehen',
+      !!d.querySelector('#karte-rumpf [data-kpane="steckbrief"]'));
     pruef('Fotos sind kein Akkordeon mehr',
       !d.querySelector('#karte-rumpf [data-acc="fotos"]'));
     /* 4.0-beta.29 (B1, F279): keine Aufgabenzeile mehr in der Karte */
     pruef('Keine Aufgabenzeile vor den Reitern',
       !d.querySelector('#karte-rumpf [data-acc="aufgaben-zeile"]'));
-    pruef('Steckbrief liegt im Wissen-Reiter',
-      !!d.querySelector('#karte-rumpf [data-kpane="wissen"] [data-kblock="steckbrief"]')
+    pruef('Steckbrief liegt im Reiter Steckbrief',
+      !!d.querySelector('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="steckbrief"]')
       || !d.querySelector('#karte-rumpf [data-kblock="steckbrief"]'));
-    pruef('Notizen liegen im Verlauf-Reiter',
-      !!d.querySelector('#karte-rumpf [data-kpane="verlauf"] [data-kblock="notiz"]')
-      || !d.querySelector('#karte-rumpf [data-kblock="notiz"]'));
+    /* 4.0-beta.30 (B2): die Notiz steht oben als eigenes Feld, nicht im Verlauf */
+    pruef('Notiz steht als Feld über den Reitern',
+      !!d.querySelector('#karte-rumpf .detail > .knotiz') && !d.querySelector('#karte-rumpf [data-kblock="notiz"]'));
     /* Seit 3.12.0 nur mit eingetragenen Tieren — ohne Tier interessiert
        die Frage nicht, und der Abschnitt fällt ganz weg. */
     pruef('Giftigkeit liegt im Wissen-Reiter, sobald Tiere eingetragen sind',
       w.__T('meineTiere().length')
-        ? !!d.querySelector('#karte-rumpf [data-kpane="wissen"] [data-kblock="gift"]')
+        ? !!d.querySelector('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="gift"]')
         : !d.querySelector('#karte-rumpf [data-kblock="gift"]'));
-    pruef('Standort trägt die Lagebox',
-      !!d.querySelector('#karte-rumpf [data-kpane="standort"] .lagebox'));
+    pruef('Platz trägt die Knopflisten',
+      !!d.querySelector('#karte-rumpf [data-kpane="platz"] .platzbox'));
   }
   pruef('„Zuklappen" ist raus',
     !d.querySelector('#karte-modal [data-do="karte-zu-oben"]'));
@@ -1281,7 +1282,7 @@ setTimeout(async () => {
     w.__T(`karteOeffnen('${kid}')`); await tick();
     pruef('Kartenfenster \u00f6ffnet', w.__T("modalOffen('karte-modal')"));
     const tot = [];
-    for(const t of ['pflege','standort','verlauf','wissen']){
+    for(const t of ['verlauf','platz','pflegeheft','steckbrief']){
       const b = d.querySelector(`#karte-rumpf .ktab[data-ktab="${t}"]`);
       if(!b){ tot.push(t + ' (Knopf fehlt)'); continue; }
       b.click(); await tick();
@@ -3097,15 +3098,8 @@ setTimeout(async () => {
       const haengt = pr => Promise.race([pr, new Promise((_, nein)=>setTimeout(()=>nein(new Error('hängt')), 3000))]);
       try{ await haengt(w.__T("kiFragen('x', [])")); }catch(e){ stockt = String(e.message || e); voll = !!e.voll; }
       pruef('3.24.0: Ein stockender Antwortrumpf läuft in die Frist', /nicht rechtzeitig/.test(stockt), stockt);
-      pruef('3.24.0: und zählt als voll, damit die Kartei es noch einmal versucht', voll === true);
-      w.__T(`(function(){ window.__kf0 = karteiFoto; window.__kk0 = karteiKleiner;
-        karteiFoto = function(){ return {src:'data:image/jpeg;base64,QUJD'}; };
-        karteiKleiner = function(){ return new Promise(function(){}); }; return 1; })()`);
-      let foto = '';
-      try{ await haengt(w.__T("karteiBilder({id:'x'})")); foto = 'kam zurück'; }catch(e){ foto = String(e.message || e); }
-      pruef('3.24.0: Ein Foto, das nicht lädt, hält den Lauf nicht an', /Foto nicht geladen/.test(foto), foto);
-      w.__T(`(function(){ karteiFoto = window.__kf0; karteiKleiner = window.__kk0;
-        window.setTimeout = window.__st0; return 1; })()`);
+      /* 4.0-beta.30 (B3): Kartei-Teil entfernt */
+      w.__T(`(function(){ window.setTimeout = window.__st0; return 1; })()`);
     }
 
     /* --- Anzeige: beide Wege stehen untereinander ---
@@ -3557,10 +3551,11 @@ setTimeout(async () => {
     pruef('Ohne Befund bleibt alles eigene Notiz',
       nur.eigen === 'Nur eine eigene Notiz.' && nur.befunde.length === 0);
     const html = w.__T("befundeHTML({id:'fa', notiz:'Meins.\\n\\nBefund vom 1.1.2026: A.\\n\\nBefund vom 2.1.2026: B.\\n\\nBefund vom 3.1.2026: C.\\n\\nBefund vom 4.1.2026: D.'})");
-    const nurNotiz = w.__T("notizenHTML({id:'fa', notiz:'Meins.\\n\\nBefund vom 1.1.2026: A.'})");
+    /* 4.0-beta.30 (B2): notizKarteHTML statt notizenHTML */
+    const nurNotiz = w.__T("notizKarteHTML({id:'fa', notiz:'Meins.\\n\\nBefund vom 1.1.2026: A.'})");
     pruef('Notizen zeigen nur das Eigene', /Meins/.test(nurNotiz) && !/befund-weg|1\.1\.2026/.test(nurNotiz), nurNotiz);
     pruef('Befunde zeigen nichts Eigenes', !/Meins/.test(html));
-    pruef('Nur Befunde: kein Notizenblock', w.__T("notizenHTML({id:'fa', notiz:'Befund vom 1.1.2026: A.'})") === '');
+    pruef('Nur Befunde: Notizfeld ohne Text', /Noch keine Notiz/.test(w.__T("notizKarteHTML({id:'fa', notiz:'Befund vom 1.1.2026: A.'})")));
     pruef('Drei Befunde stehen offen, der Rest hinter einem Aufklapper',
       /bef-mehr/.test(html) && /1 ältere anzeigen/.test(html), html.slice(-90));
     pruef('Der neueste Befund steht oben',
@@ -3601,24 +3596,22 @@ setTimeout(async () => {
       kb.innerHTML = w.__T(`kartenDetailHTML(Object.assign({}, allePflanzen().find(x=>x.id==='A1B'), {eigen:false}))`);
       const lv = bloecke(kv).join(','), lb = bloecke(kb).join(',');
       pruef('Eigene und mitgelieferte Pflanze: dieselben Abschnitte', lv === lb, lv + ' | ' + lb);
-      pruef('Eigene Pflanze hat Steckbrief im Wissen', lv.indexOf('wissen:steckbrief') > -1, lv);
-      pruef('Eigene Pflanze hat Giftigkeit im Wissen', lv.indexOf('wissen:gift') > -1, lv);
+      /* 4.0-beta.30 (B2, F309): Reiter Verlauf, Platz, Pflegeheft, Steckbrief */
+      pruef('Eigene Pflanze hat Steckbrief im Reiter Steckbrief', lv.indexOf('steckbrief:steckbrief') > -1, lv);
+      pruef('Eigene Pflanze hat Giftigkeit im Reiter Steckbrief', lv.indexOf('steckbrief:gift') > -1, lv);
       pruef('Vier Reiterflächen in jeder Karte',
-        [...kv.querySelectorAll('[data-kpane]')].map(x=>x.dataset.kpane).join(',') === 'pflege,standort,verlauf,wissen');
-      /* Pflege: keine Aufklapper mehr */
-      pruef('Im Reiter Pflege kein Aufklapper', !kv.querySelector('[data-kpane="pflege"] details.acc'));
-      pruef('Im Reiter Standort kein Aufklapper', !kv.querySelector('[data-kpane="standort"] details.acc'));
-      /* Zustand */
-      const pfl = kv.querySelector('[data-kpane="pflege"]');
-      pruef('beta.27: Reiter Pflege beginnt mit dem Gießen, die Tags stehen über den Reitern',
-        !!pfl && !!pfl.firstElementChild && pfl.firstElementChild.dataset.kblock === 'giessen'
+        [...kv.querySelectorAll('[data-kpane]')].map(x=>x.dataset.kpane).join(',') === 'verlauf,platz,pflegeheft,steckbrief');
+      pruef('Im Reiter Platz kein Aufklapper', !kv.querySelector('[data-kpane="platz"] details.acc'));
+      const pfl = kv.querySelector('[data-kpane="platz"]');
+      pruef('beta.30: Reiter Platz beginnt mit dem Platz, die Tags stehen über den Reitern',
+        !!pfl && !!pfl.firstElementChild && pfl.firstElementChild.dataset.kblock === 'platz'
         && !!kv.querySelector('.tagk') && !kv.querySelector('[data-kpane] .tagk') && !kv.querySelector('.zustand'));
-      pruef('Topf und Substrat steht im Reiter Pflege',
-        !!kv.querySelector('[data-kpane="pflege"] [data-kblock="topf"]'));
+      pruef('Topf und Substrat steht im Reiter Platz',
+        !!kv.querySelector('[data-kpane="platz"] [data-kblock="topf"]'));
       pruef('beta.27: keine Zustandsauswahl in der Karte',
         !kv.querySelector('[data-zsel]'));
-      pruef('Gießabstände stehen im Verlauf, nicht in Pflege',
-        !kv.querySelector('[data-kpane="pflege"] .verlauf, [data-kpane="pflege"] .wachstum'));
+      pruef('Gießabstände stehen im Verlauf, nicht im Platz',
+        !kv.querySelector('[data-kpane="platz"] .verlauf'));
       /* Namen */
       const txt = kv.textContent;
       pruef('Kein „Gießen und Verlauf“ mehr', txt.indexOf('Gießen und Verlauf') < 0);
@@ -3628,8 +3621,8 @@ setTimeout(async () => {
       /* Befunde */
       const bef = kv.querySelector('[data-kpane="verlauf"] [data-kblock="befunde"]');
       pruef('Befunde haben eigenen Abschnitt im Verlauf', !!bef);
-      pruef('Befunde stehen nicht unter Notizen',
-        !kv.querySelector('[data-kblock="notiz"] .bef-liste') && !!kv.querySelector('[data-kblock="notiz"]'));
+      pruef('Befunde stehen nicht in der Notiz',
+        !kv.querySelector('.knotiz .bef-liste') && !!kv.querySelector('.knotiz'));
       pruef('Befund zeigt ersten Satz offen',
         !!bef && /Erster Satz ist kurz\./.test((bef.querySelector('.bef-k')||{}).textContent || ''));
       pruef('Rest des Befunds liegt hinter Tippen',
@@ -3643,15 +3636,7 @@ setTimeout(async () => {
       pruef('Leere Abschnitte fallen weg',
         !!kn && !kn.querySelector('[data-kblock="steckbrief"],[data-kblock="beob"],[data-acc="probleme"],[data-kblock="notiz"]'));
 
-      /* Wachstum: zwei Blätter in zwei Tagen ergeben keine Monatsrate */
-      const wz = w.__T(`(function(){
-        const alt = S.blatt; S.blatt = {A1V:[iso(new Date(HEUTE-2*86400000)), iso(HEUTE)]};
-        const h = wachstumHTML({id:'A1V'}); S.blatt = alt; return h; })()`);
-      pruef('2 Blätter in 2 Tagen: keine Monatsrate', !/im Monat/.test(wz) && /2<\/span> Blätter seit/.test(wz), wz.slice(0, 200));
-      const wl = w.__T(`(function(){
-        const alt = S.blatt; S.blatt = {A1V:[iso(new Date(HEUTE-40*86400000)), iso(new Date(HEUTE-20*86400000)), iso(HEUTE)]};
-        const h = wachstumHTML({id:'A1V'}); S.blatt = alt; return h; })()`);
-      pruef('Ab 30 Tagen steht die Rate', /im Monat/.test(wl), wl.slice(0, 200));
+      /* 4.0-beta.30 (B2, F273): Der Block „Wachstum“ ist entfallen; geprüft im Block beta.30. */
 
       /* Gießtipp: was die Warnbox sagt, fällt weg; Rest bleibt */
       const tippKarni = w.__T(`giesstippRest({id:'A1K', art:'Venusfliegenfalle', botanisch:'Dionaea muscipula', klasse:'S',
@@ -3702,8 +3687,9 @@ setTimeout(async () => {
       pruef('Ohne eigenen Rhythmus steht die Marke „Gießklasse“',
         w.__T(`rhythmusQuelle(allePflanzen().find(x=>x.id==='A2P')).wort`) === 'Gießklasse',
         w.__T(`rhythmusQuelle(allePflanzen().find(x=>x.id==='A2P')).wort`));
-      pruef('Der Regler steht offen im Gießen-Block',
-        !!karteAus('A2P').querySelector('[data-kblock="giessen"] .iv-edit [data-do="iv-schritt"]'));
+      /* 4.0-beta.30 (B2): Der Regler lebt im Fenster „Gießabstand“, die Karte hat „Ändern“ */
+      pruef('Die Gießzeile hat „Ändern“',
+        !!karteAus('A2P').querySelector('.km-giess [data-do="iv-fenster"]'));
       w.__T(`aenderungSetzen('A2P', {intervall:[5,5], intervallEigen:true})`);
       const ivEigen = w.__T(`intervallVon(allePflanzen().find(x=>x.id==='A2P'))`);
       pruef('Ein von Hand gesetzter Rhythmus wird übernommen',
@@ -3910,7 +3896,9 @@ setTimeout(async () => {
       ivStart + ' → ' + iv() + ' / Faktor ' + w.__T(`lernFaktorVon('A3P')`));
 
     /* ── Die Karte fragt ── */
-    const gb = karte3('A3P').querySelector('[data-kblock="giessen"]');
+    /* 4.0-beta.30 (B2): Die Frage steht im Fenster „Gießabstand“ */
+    w.__T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); ivFensterAuf('A3P'); return 1; })()`);
+    const gb = d.getElementById('iv-inhalt');
     pruef('Die Karte stellt die Frage',
       !!gb && !!gb.querySelector('[data-do="iv-vor-ja"]')
       && /Zweimal/.test(((gb && gb.querySelector('.iv-vor-t')) || {}).textContent || ''),
@@ -3951,17 +3939,20 @@ setTimeout(async () => {
       S.lernen.A3P = {lernFaktor:1.6}; sichern(); })()`);
     pruef('Vorbedingung: ein gelernter Faktor liegt vor',
       w.__T(`lernFaktorVon('A3P')`) === 1.6);
+    w.__T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
     w.__T(`karteOeffnen('A3P')`);
-    const box3 = d.querySelector('#karte-rumpf [data-kblock="giessen"] .iv-edit');
-    if(box3){ box3.dataset.s = '5'; box3.dataset.w = '5'; }
-    const ok3 = d.querySelector('#karte-rumpf [data-kblock="giessen"] [data-do="iv-ok"]');
+    const ab3 = d.querySelector('#karte-rumpf .km-giess [data-do="iv-fenster"]');
+    if(ab3) ab3.click();
+    /* 7 → 5 Tage: je zweimal „kürzer“ für Sommer und Winter */
+    for(const k of ['s','s','w','w']){ const b = d.querySelector('#iv-modal [data-ivf-schritt="' + k + '"][data-d="-1"]'); if(b) b.click(); }
+    const ok3 = d.getElementById('iv-speichern');
     if(ok3) ok3.click();
     pruef('Ein von Hand gesetzter Rhythmus kommt an',
       JSON.stringify(w.__T(`ivEigen(${P3('A3P')})`)) === '[5,5]',
       JSON.stringify(w.__T(`ivEigen(${P3('A3P')})`)));
     pruef('Eine Aenderung von Hand setzt den gelernten Faktor auf 1',
       w.__T(`lernFaktorVon('A3P')`) === 1, String(w.__T(`lernFaktorVon('A3P')`)));
-    w.__T(`modalZu('karte-modal')`);
+    w.__T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
 
     /* ── Historie: Balken und Zeitstrahl ── */
     w.__T(`S.histAnsicht = 'balken'; sichern();`);
@@ -4081,10 +4072,10 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Fünfzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg)', alle.length === 15, String(alle.length));
-    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1), 24 Abschnitte */
+    pruef('Vierzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg; beta.30: „Kartei auffrischen“ weg)', alle.length === 14, String(alle.length));
+    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1); 4.0-beta.30: „Kartei auffrischen“ (B3), 23 Abschnitte */
     pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 24,
+      d.querySelectorAll('section[data-mh]').length === 23,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
@@ -6535,42 +6526,8 @@ setTimeout(async () => {
 
     pruef('ANTWORT_FORMAT bleibt zeichengleich', w.__T('ANTWORT_FORMAT') === fmt0);
 
-    /* Die Art prueft seit 3.21.0 die Kartei. Eine Zeile gibt es nur bei
-       anderer Art UND ausdruecklicher Sicherheit, und sie aendert nichts
-       ohne Antippen. */
+    /* 4.0-beta.30 (B3): Die Art prüfte bis beta.29 die Kartei; entfernt. */
     pruef('Der Doktor hat keinen Artkasten mehr', !d.getElementById('dok-art'));
-    const artVon = () => w.__T("allePflanzen().find(function(x){return x.id==='BT1';}).art");
-    const artZeilen = (a, bot, sicher) => w.__T(`karteiAbweichungen(
-      allePflanzen().find(function(x){return x.id==='BT1';}),
-      {stand:'ok', felder:{art:'${a}', bot:'${bot}', sicher:'${sicher}'}})
-      .zeilen.filter(function(z){return z.key==='art';}).length`);
-    pruef('Gleiche Art ergibt keine Artzeile', artZeilen('Efeutute', 'Epipremnum aureum', 'hoch') === 0);
-    pruef('Ein anderer Name fuer denselben botanischen Namen ist keine andere Art',
-      artZeilen('Goldene Efeutute', 'Epipremnum aureum', 'hoch') === 0);
-    pruef('Ohne hohe Sicherheit keine Artzeile',
-      artZeilen('Herzblattphilodendron', 'Philodendron hederaceum', 'mittel') === 0);
-    pruef('Bei anderer Art und hoher Sicherheit steht die Zeile',
-      artZeilen('Herzblattphilodendron', 'Philodendron hederaceum', 'hoch') === 1);
-    pruef('Die Zeile allein aendert nichts an der Pflanze', artVon() === 'Efeutute', artVon());
-
-    w.__T("artUebernehmen('BT1', 'Herzblattphilodendron', 'Philodendron hederaceum')");
-    pruef('„Art übernehmen“ setzt Art und botanischen Namen',
-      artVon() === 'Herzblattphilodendron'
-      && w.__T("allePflanzen().find(function(x){return x.id==='BT1';}).botanisch")
-         === 'Philodendron hederaceum',
-      artVon());
-
-    /* Eine eigene Giftangabe ist kein KI-Ergebnis — sie ueberlebt. */
-    w.__T("aenderungSetzen('BT1', {giftig:true});");
-    w.__T("artUebernehmen('BT1', 'Efeutute', 'Epipremnum aureum')");
-    /* Auf den Status allein ist kein Verlass: eine Art aus der
-       gepruefften Tabelle liefert ebenfalls „fest“. Die eigene Angabe
-       erkennt man an der Quelle. */
-    pruef('Eine eigene Giftangabe überlebt den Artwechsel',
-      w.__T("giftVon(allePflanzen().find(function(x){return x.id==='BT1';})).status") === 'fest'
-      && w.__T("giftVon(allePflanzen().find(function(x){return x.id==='BT1';})).quelle") === 'nutzer',
-      String(w.__T("giftVon(allePflanzen().find(function(x){return x.id==='BT1';})).quelle")));
-
     /* Aufraeumen: die Testpflanzen gehoeren nicht in die Sammlung. */
     w.__T(`(function(){
       dokPflanze = null;
@@ -6918,26 +6875,6 @@ setTimeout(async () => {
         return !!(p && p.quellen && p.quellen.typ === 'ki' && p.quellen.botanisch === 'ki');
       })()`) === true);
 
-    /* ── Der Abgleich in der Kartei (3.21.0) ── */
-    w.__T(`(function(){
-      aenderungSetzen('HQ1', {klasse:'B'});           /* hand */
-      aenderungSetzen('HQ1', {sonne:'hell'}, 'bib');  /* bib  */
-      return 1;
-    })()`);
-    {
-      const zl = JSON.parse(w.__T(`JSON.stringify(karteiAbweichungen(
-        allePflanzen().find(function(x){return x.id==='HQ1';}),
-        {stand:'ok', felder:{klasse:'C — durchtrocknen', licht:'volle Sonne'}})
-        .zeilen.map(function(z){ return {k:z.key, h:!!z.hand}; }))`));
-      pruef('Eine eigene Angabe steht als Widerspruch im Abgleich',
-        zl.some(z=>z.k === 'klasse' && z.h), JSON.stringify(zl));
-      pruef('Ein Bibliothekswert steht ohne Vermerk da',
-        zl.some(z=>z.k === 'sonne' && !z.h), JSON.stringify(zl));
-      pruef('Der Widerspruch steht oben', zl.length === 2 && zl[0].k === 'klasse', JSON.stringify(zl));
-      pruef('Das blosse Lesen aendert nichts',
-        hq(`p.klasse`) === 'B' && hq(`p.sonne`) === 'hell');
-    }
-
     /* ── Der Doktor schreibt keine Steckbriefdaten mehr (3.21.0) ── */
     {
       const bild = `JSON.stringify({k:p.klasse, s:p.sonne, a:p.art, b:p.botanisch,
@@ -7125,27 +7062,7 @@ setTimeout(async () => {
         === 'gelb panaschiert, Blatt gewellt',
       String(w.__T(`JSON.stringify(geminiLesen('ART: Fensterblatt\\nMERKMALE: gelb panaschiert, Blatt gewellt'))`)));
 
-    /* ── Merkmale im Kartei-Abgleich (3.21.0) ── */
     pruef('Der Doktor ruft keinen Merkmalskasten mehr auf', !/dokMerkmaleZeigen/.test(html));
-    const soAb = `karteiAbweichungen(allePflanzen().find(function(x){return x.id==='SO1';}),
-      {stand:'ok', felder:{sortenmerkmale:'weiss marmoriert, Blattstiel hell'}})`;
-    pruef('Der Abgleich zeigt die Merkmale',
-      w.__T(`${soAb}.zeilen.some(function(z){ return z.key === 'sortenmerkmale'; })`) === true);
-    pruef('Er schreibt sie nicht von selbst in die Karte',
-      so(`p.sortenmerkmale`) === '', String(so(`p.sortenmerkmale`)));
-    pruef('Die Bibliotheks-Merkmale bleiben dabei stehen',
-      so(`p.merkmale`) === 'Aus der Bibliothek', String(so(`p.merkmale`)));
-    w.__T(`${soAb}.zeilen.find(function(z){ return z.key === 'sortenmerkmale'; }).nimm()`);
-    pruef('Nach dem Übernehmen stehen die Merkmale in der Karte',
-      so(`p.sortenmerkmale`) === 'weiss marmoriert, Blattstiel hell',
-      String(so(`p.sortenmerkmale`)));
-    pruef('Die Sorte bleibt dabei unangetastet',
-      so(`p.sorte`) === 'Thai Constellation', String(so(`p.sorte`)));
-    pruef('Die Bibliotheks-Merkmale bleiben auch danach stehen',
-      so(`p.merkmale`) === 'Aus der Bibliothek', String(so(`p.merkmale`)));
-    pruef('Gleiche Merkmale ergeben keine Zeile',
-      w.__T(`${soAb}.zeilen.length`) === 0, String(w.__T(`${soAb}.zeilen.length`)));
-
     /* Aufraeumen */
     w.__T(`(function(){
       dokPflanze = null;
@@ -7155,9 +7072,8 @@ setTimeout(async () => {
     })()`);
   }
 
-  /* ══ Kartei auffrischen (Etappe E1) ══════════════════════
-     Die Pflanzen legt der Test selbst an, samt Foto. Die KI-Antwort
-     kommt aus der Attrappe oben, nichts geht ins Netz. */
+  /* ══ Kartei auffrischen (Etappe E1): mit 4.0-beta.30 (B3, F307) entfernt; die Leser-Prüfungen stehen im Block beta.30 B3. ══ */
+  /* Die Attrappe des Blocks bleibt: spätere Blöcke (Anzucht 3.29.0, 3.32.0) fragen über sie. */
   {
     /* Fruehere Bloecke haben window.fetch mehrfach ersetzt — hier
        kommt eine eigene Attrappe hin, die mitzaehlt, wie viele
@@ -7191,894 +7107,6 @@ setTimeout(async () => {
           content:{parts:[{text:w.__buendelAntwort(o, k.antwort)}]}}]})});
       }, k.verzug));
     };
-    const BT3 = String.fromCharCode(96,96,96);
-    const ANTWORT = BT3 + '\nART: Efeutute\nBOTANISCH: Epipremnum aureum\n'
-      + 'ZUSTAND: gesund\nLICHT: indirekt\nFROST: 10\n' + BT3;
-    w.__ki.antwort = ANTWORT;
-
-    w.__T(`(function(){
-      S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KA'; });
-      S.fotos = S.fotos || {};
-      var bild = 'data:image/jpeg;base64,' + new Array(41).join('A');
-      S.eigene.push({id:'KA1', eigen:true, name:'Kartei Voll', art:'Efeutute',
-        botanisch:'Epipremnum aureum', typ:'Kletterpflanze', klasse:'IV',
-        sonne:'indirekt', wichtig:'keine', frostMin:10, duenger:'normal', pflege:[], winterruheText:''});
-      S.eigene.push({id:'KA2', eigen:true, name:'Kartei Luecke', art:'Unbekannt', klasse:'IV'});
-      S.eigene.push({id:'KA3', eigen:true, name:'Kartei ohne Foto', art:'Bogenhanf',
-        botanisch:'Dracaena trifasciata', typ:'Sukkulente', klasse:'IV',
-        sonne:'hell', wichtig:'keine', frostMin:10, duenger:'sparsam', pflege:[], winterruheText:''});
-      /* Zwei weitere ohne Foto: erst mit mehr Pflanzen als Spuren in
-         der Schlange faellt auf, ob ein Fehlschlag den Rest mitreisst. */
-      S.eigene.push({id:'KA4', eigen:true, name:'Kartei vier', art:'Bogenhanf',
-        botanisch:'Dracaena trifasciata', typ:'Sukkulente', klasse:'IV',
-        sonne:'hell', wichtig:'keine', frostMin:10, duenger:'sparsam', pflege:[], winterruheText:''});
-      S.eigene.push({id:'KA5', eigen:true, name:'Kartei fuenf', art:'Bogenhanf',
-        botanisch:'Dracaena trifasciata', typ:'Sukkulente', klasse:'IV',
-        sonne:'hell', wichtig:'keine', frostMin:10, duenger:'sparsam', pflege:[], winterruheText:''});
-      S.fotos['KA1'] = [{key:'k1', src:bild, datum:'2026-09-01'}];
-      S.fotos['KA2'] = [{key:'k2', src:bild, datum:'2026-09-01'}];
-      S.kiModelle = [{id:'models/gemini-3-flash', anzeige:'3 flash', empfohlen:true}];
-      S.kiModell = 'models/gemini-3-flash';
-      sichern();
-      kiSchluesselSetzen('${ATTRAPPE_ECHT}');
-      return 1;
-    })()`);
-    const kp = c => w.__T(`(function(){ var p = allePflanzen().find(function(x){return x.id==='${c}';}); return p; })()`);
-    const art = c => w.__T(`karteiArt(allePflanzen().find(function(x){return x.id==='${c}';}))`);
-
-    pruef('Vollstaendige Pflanze mit Foto bekommt den Fotoauftrag', art('KA1') === 'foto', art('KA1'));
-    pruef('Pflanze mit Luecken und Foto ebenso',                 art('KA2') === 'foto', art('KA2'));
-    pruef('Pflanze ohne Foto bekommt den Textauftrag',           art('KA3') === 'text', art('KA3'));
-    pruef('Luecken werden erkannt',
-      w.__T(`karteiLuecken(allePflanzen().find(function(x){return x.id==='KA2';})).length`) > 0);
-    pruef('Bei voller Karte fehlt nichts',
-      w.__T(`karteiLuecken(allePflanzen().find(function(x){return x.id==='KA1';})).length`) === 0);
-
-    const auftrag = c => w.__T(`karteiAuftrag(allePflanzen().find(function(x){return x.id==='${c}';})).text`);
-    const aText = auftrag('KA3'), aVoll = auftrag('KA2'), aTeil = auftrag('KA1');
-    /* Seit 3.21.0 fragt die Kartei nur Artdaten (Chris, 16.09.2026). */
-    {
-      const ARTDATEN = ['ART','BOTANISCH','SICHERHEIT','FAMILIE','TYP','SPEICHER','LICHT',
-        'GIESSKLASSE','GIESSART','DUENGER','FROST','WICHTIG','VERMEHRUNG'];
-      const DOKTOR = ['ZUSTAND','BEFUND','TOPF','TOPFART','SUBSTRAT','ABLAUF','MASSNAHME',
-        'FEHLT','VERWECHSLUNG','GIESSEN'];
-      const hat = (t, n) => new RegExp('^' + n + ':', 'm').test(t);
-      [['ohne Foto', aText], ['mit Lücken', aVoll], ['ohne Lücken', aTeil]].forEach(([n, t])=>{
-        pruef('Der Auftrag ' + n + ' fragt alle Artdaten',
-          ARTDATEN.every(x=>hat(t, x)), ARTDATEN.filter(x=>!hat(t, x)).join(','));
-        pruef('Der Auftrag ' + n + ' fragt nichts, was dem Doktor gehört',
-          DOKTOR.every(x=>!hat(t, x)), DOKTOR.filter(x=>hat(t, x)).join(','));
-        pruef('Der Auftrag ' + n + ' kündigt keine MASSNAHME-Zeilen an',
-          t.indexOf('MASSNAHME') === -1);
-      });
-    }
-    pruef('Ohne Foto keine MERKMALE-Zeile', !/^MERKMALE:/m.test(aText));
-    pruef('Mit Foto eine MERKMALE-Zeile', /^MERKMALE:/m.test(aTeil));
-    pruef('Ohne Foto steht der Hinweis auf das fehlende Bild drin',
-      aText.indexOf('Es liegt kein Foto vor') > -1);
-    pruef('Der Auftrag mit Lücken nennt die fehlenden Angaben',
-      aVoll.indexOf('Diese Angaben fehlen mir') > -1);
-    pruef('Auch eine Pflanze ohne Lücken wird voll abgefragt',
-      /^BOTANISCH:/m.test(aTeil) && /^FROST:/m.test(aTeil) && /^GIESSKLASSE:/m.test(aTeil));
-    pruef('Der Auftrag nennt die eingetragene Art',
-      aTeil.indexOf('Epipremnum aureum') > -1);
-    pruef('Die Werte der Karte stehen nicht im Auftrag',
-      aTeil.indexOf('laut meiner Karte:') === aTeil.indexOf('Sorte laut meiner Karte:')
-      && aTeil.indexOf('Das ist zu dieser Pflanze eingetragen') === -1);
-    pruef('Der Leser kennt FAMILIE',
-      w.__T(`geminiLesen('ART: Efeutute\\nFAMILIE: Aronstabgewächse').familie`) === 'Aronstabgewächse');
-    pruef('Der Leser kennt DUENGER',
-      w.__T(`geminiLesen('ART: Efeutute\\nDUENGER: sparsam').duenger`) === 'sparsam');
-    pruef('DUENGER nimmt nur die drei Wörter',
-      w.__T(`duengerLesen('Normal')`) === 'normal' && w.__T(`duengerLesen('reichlich')`) === null
-      && w.__T(`duengerLesen('Starkzehrer')`) === null);
-    pruef('giessartLesen liest wie bisher das Anlegen',
-      w.__T(`['Hydrokultur','Wasserglas','Anstau','tauchen','von unten','Schluck','durchdringend','irgendwie']
-        .map(giessartLesen).join(',')`) === 'hydro,wasser,anstau,tauchen,unten,schluck,durch,',
-      String(w.__T(`['Hydrokultur','Wasserglas','Anstau','tauchen','von unten','Schluck','durchdringend','irgendwie']
-        .map(giessartLesen).join(',')`)));
-    {
-      /* Die Zahl im Auftrag zaehlt sich selbst nach — sie darf nicht
-         von der Zahl der Feldzeilen abweichen. */
-      const zahl = n => {
-        const m = n.match(/Alle (\S+) Schlüsselwörter/);
-        return m ? m[1] : '?';
-      };
-      /* Gezaehlt wird nur die Feldliste zwischen der Ueberschrift und
-         der Beispielantwort — sonst zaehlt das Beispiel doppelt. */
-      const felder = n => {
-        const a = n.indexOf('DIE ZEILEN');
-        const b = n.indexOf('SO SIEHT EINE RICHTIGE ANTWORT AUS');
-        const set = new Set();
-        n.slice(a, b > a ? b : undefined).split('\n').forEach(z=>{
-          const m = z.match(/^([A-ZÄÖÜ][A-ZÄÖÜ_]{2,}):/);   /* 3.30.0: mit Unterstrich */
-          if(m && m[1] !== 'VERMEHRUNG' && m[1] !== 'MASSNAHME') set.add(m[1]);
-        });
-        return set.size;
-      };
-      const wort = w.__T('ZAHLWORT');
-      [['Text', aText], ['voll', aVoll], ['Abgleich', aTeil]].forEach(([n, t])=>{
-        pruef('Schlüsselwortzahl stimmt (' + n + ')',
-          zahl(t) === wort[felder(t)], zahl(t) + ' vs ' + felder(t));
-      });
-    }
-
-    /* ── Auswahl ── */
-    const menge = () => w.__T(`karteiMenge().map(function(p){return p.id;})`);
-    w.__T(`(function(){ KARTEI_WAHL = new Set(['KA1','KA3']); return 1; })()`);
-    pruef('Die Auswahl liefert genau die angehakten',
-      menge().join(',') === 'KA1,KA3', menge().join(','));
-    const lueMenge = () => w.__T(`karteiLueckenMenge().map(function(p){return p.id;})`);
-    pruef('Die Lücken-Menge nimmt die unvollständige Pflanze', lueMenge().indexOf('KA2') > -1);
-    /* Seit 3.22.0 ist ein fehlendes Foto keine Lücke. */
-    pruef('Eine Pflanze ohne Foto und ohne Lücke ist nicht in der Lücken-Menge', lueMenge().indexOf('KA3') === -1,
-      lueMenge().join(','));
-    {
-      const lu = o => w.__T(`karteiLuecken(${JSON.stringify(o)}).join(',')`);
-      pruef('Frostgrenze und Wuchsform aus der Bibliothek sind keine Lücke',
-        lu({id:'LX1', art:'Efeutute', botanisch:'Epipremnum aureum', typ:'', klasse:'B',
-            sonne:'hell', wichtig:'x', frostMin:null, duenger:'normal', pflege:[], winterruheText:''}) === '',
-        lu({id:'LX1', art:'Efeutute', botanisch:'Epipremnum aureum', typ:'', klasse:'B',
-            sonne:'hell', wichtig:'x', frostMin:null, duenger:'normal', pflege:[], winterruheText:''}));
-      pruef('Ohne Bibliothek bleibt die leere Frostgrenze eine Lücke',
-        lu({id:'LX2', art:'Testkraut', botanisch:'Fictus probatus', typ:'Kraut', klasse:'B',
-            sonne:'hell', wichtig:'x', frostMin:null, duenger:'normal', pflege:[], winterruheText:''}) === 'frostMin');
-    }
-    pruef('Die Lücken-Menge lässt die vollständige stehen', lueMenge().indexOf('KA1') === -1);
-
-    /* ── Startansicht mit zwei Kästchen (3.20.0) ── */
-    w.__T(`(function(){ delete S.kartei; KARTEI_WAHL = new Set(); KARTEI_WAHL_BEREIT = false;
-      karteiAbschnitt(); return 1; })()`);
-    {
-      const alleIds = w.__T(`allePflanzen().map(function(p){return p.id;}).sort().join(',')`);
-      const wahl = () => w.__T(`Array.from(KARTEI_WAHL).sort().join(',')`);
-      const kA = () => d.querySelector('[data-karteikasten="alle"]');
-      const kL = () => d.querySelector('[data-karteikasten="luecken"]');
-      const los = () => String((d.querySelector('[data-do="kartei-los"]') || {}).textContent);
-      const gitter = d.getElementById('kartei-gitter');
-      pruef('Das Gitter steht ohne weiteren Tipp da', !!gitter && !gitter.hidden
-        && !!d.querySelector('#kartei-liste [data-karteip="KA1"]'));
-      pruef('Kein Knopf „Einzelne auswählen“ mehr',
-        !d.querySelector('[data-karteiart]') && !/Einzelne auswählen/.test(String(d.getElementById('kartei-innen').textContent)));
-      pruef('Kein „Alle anhaken“ und kein „Auswahl leeren“ mehr',
-        !d.querySelector('[data-do="kartei-alle"]') && !d.querySelector('[data-do="kartei-keine"]'));
-      pruef('Zwei Kästchen zum Anhaken', !!kA() && !!kL()
-        && kA().type === 'checkbox' && kL().type === 'checkbox');
-      const nL = w.__T(`karteiLueckenMenge().length`);
-      {
-        const kopf = String((d.querySelector('#kartei-innen .fhint') || {}).textContent);
-        const m = kopf.match(/(\d+) mit Lücken/);
-        pruef('Kopfzeile und Kästchen nennen dieselbe Lückenzahl', !!m && Number(m[1]) === nL, kopf + ' / ' + nL);
-      }
-      pruef('Die Kästchen tragen ihre Zahl',
-        /\(\d+\)/.test(kA().parentNode.textContent)
-        && kL().parentNode.textContent.indexOf('(' + nL + ')') > -1, kL().parentNode.textContent);
-      pruef('Beim ersten Öffnen ist alles angehakt', wahl() === alleIds);
-      pruef('Dann ist „Alle“ angehakt', kA().checked === true);
-      pruef('Der Startknopf zählt alle',
-        los().indexOf('(' + w.__T(`allePflanzen().length`) + ')') > -1, los());
-
-      kA().click(); await tick();
-      pruef('„Alle“ abhaken leert die Auswahl', w.__T(`KARTEI_WAHL.size`) === 0);
-      pruef('Der Startknopf zählt null', /\(0\)/.test(los()), los());
-      pruef('Die Kacheln sind nicht mehr gedrückt',
-        d.querySelector('[data-karteip="KA1"]').getAttribute('aria-pressed') === 'false');
-
-      kL().click(); await tick();
-      pruef('„Nur mit Lücken“ wählt genau die Lücken-Menge',
-        wahl() === lueMenge().slice().sort().join(','), wahl());
-      pruef('„Nur mit Lücken“ ist angehakt, „Alle“ nicht', kL().checked === true && kA().checked === false);
-
-      d.querySelector('[data-karteip="KA1"]').click(); await tick();
-      pruef('Eine Kachel dazu hakt „Nur mit Lücken“ ab', kL().checked === false);
-      pruef('Die Kachel ist gewählt', w.__T(`KARTEI_WAHL.has('KA1')`) === true);
-      d.querySelector('[data-karteip="KA1"]').click(); await tick();
-      pruef('Wieder heraus: „Nur mit Lücken“ ist wieder angehakt', kL().checked === true);
-
-      kL().click(); await tick();
-      pruef('„Nur mit Lücken“ abhaken nimmt diese Pflanzen heraus',
-        lueMenge().every(id=>w.__T("KARTEI_WAHL.has('" + id + "')") === false));
-
-      /* Suche aktiv: die Kästchen wirken trotzdem auf alles */
-      const such = d.getElementById('kartei-such');
-      such.value = 'Kartei Voll';
-      such.dispatchEvent(new w.Event('input', {bubbles:true})); await tick();
-      pruef('Die Suche filtert das Gitter',
-        !d.querySelector('#kartei-liste [data-karteip="KA2"]') && !!d.querySelector('#kartei-liste [data-karteip="KA1"]'));
-      kA().click(); await tick();
-      pruef('„Alle“ bei aktiver Suche hakt trotzdem alle an', wahl() === alleIds);
-      pruef('Die Suche bleibt dabei stehen',
-        !d.querySelector('#kartei-liste [data-karteip="KA2"]'));
-
-      /* Die Auswahl bleibt bis zum Neustart stehen */
-      w.__T(`(function(){ KARTEI_WAHL = new Set(['KA2']); karteiAbschnitt(); return 1; })()`);
-      pruef('Neu zeichnen setzt die Auswahl nicht zurück', wahl() === 'KA2', wahl());
-    }
-
-    /* ── Das Bildgitter mit Mehrfachauswahl ── */
-    w.__T(`(function(){ KARTEI_WAHL = new Set(['KA1']);
-      karteiAbschnitt(); return 1; })()`);
-    {
-      const k1 = d.querySelector('[data-karteip="KA1"]');
-      const k2 = d.querySelector('[data-karteip="KA2"]');
-      pruef('Das Gitter zeigt die Kacheln', !!k1 && !!k2);
-      pruef('Die gewählte Kachel ist gedrückt',
-        !!k1 && k1.getAttribute('aria-pressed') === 'true');
-      pruef('Die andere nicht',
-        !!k2 && k2.getAttribute('aria-pressed') === 'false');
-      pruef('Ohne Foto trägt die Kachel eine Marke',
-        /ohne Foto/.test(String((d.querySelector('[data-karteip=\"KA3\"]')||{}).textContent)));
-      if(k2){ k2.click(); await tick(); }
-      pruef('Antippen wählt eine zweite Pflanze dazu',
-        w.__T(`KARTEI_WAHL.has('KA2')`) === true);
-      if(k2){ k2.click(); await tick(); }
-      pruef('Noch einmal antippen nimmt sie wieder heraus',
-        w.__T(`KARTEI_WAHL.has('KA2')`) === false);
-    }
-
-    /* ── Der Lauf ── */
-    const warte = async (bed, ms) => {
-      const bis = Date.now() + (ms || 6000);
-      while(Date.now() < bis){ if(bed()) return true; await tick(); }
-      return bed();
-    };
-    const stand = c => w.__T(`(function(){ var k = karteiStand(); return k ? (${c}) : null; })()`);
-
-    w.__T(`(function(){ S.installiert = false; sichern(); return 1; })()`);
-    w.__ki.zaehler = 0; w.__ki.hoechst = 0; w.__ki.fehler = null; w.__ki.gefragt = false;
-    const vorher = w.__T(`JSON.stringify(allePflanzen().filter(function(p){
-      return String(p.id).slice(0,2)==='KA'; }))`);
-    const editsVorher = w.__T(`JSON.stringify(S.edits || {})`);
-
-    w.__T(`karteiStarten(['KA1','KA2','KA3'])`);
-    pruef('Der Lauf legt eine Schlange an', stand('k.gesamt') === 3, String(stand('k.gesamt')));
-    pruef('Die Leiste erscheint', !!d.getElementById('kartei-streifen'));
-    pruef('Die Leiste zeigt den Stand ohne Prozentzahl (3.23.0)',
-      /Prüfe \d+ von 3/.test(String((d.getElementById('kartei-streifen')||{}).textContent))
-      && !/%/.test(String((d.getElementById('kartei-streifen')||{}).textContent)),
-      String((d.getElementById('kartei-streifen')||{}).textContent));
-    pruef('Der Lauf merkt sich die ganze Liste', stand('k.alle.join(",")') === 'KA1,KA2,KA3');
-    {
-      const innen = d.getElementById('kartei-innen');
-      pruef('Während des Laufs ist die Auswahl weg',
-        !innen.querySelector('[data-karteikasten]') && !innen.querySelector('#kartei-liste')
-        && !innen.querySelector('#kartei-such'));
-      pruef('Und der Startknopf auch', !innen.querySelector('[data-do="kartei-los"]'));
-      pruef('Stattdessen ein Fortschrittsbalken', !!innen.querySelector('.kartei-balken'));
-      pruef('Im Abschnitt der Stand ohne Prozentzahl', /Prüfe \d+ von 3/.test(innen.textContent)
-        && !/%/.test(innen.querySelector('.kartei-stand').textContent), innen.textContent);
-      pruef('Und dem Knopf Anhalten', !!innen.querySelector('[data-do="kartei-stopp"]')
-        && /Anhalten/.test(innen.querySelector('[data-do="kartei-stopp"]').textContent));
-    }
-    pruef('Im Browser wird nicht nach der Benachrichtigung gefragt', w.__ki.gefragt !== true);
-    await warte(()=>stand('k.aktiv') === false, 8000);
-    pruef('Der Lauf ist durch', stand('k.aktiv') === false);
-    pruef('Drei Antworten liegen vor',
-      stand('Object.keys(k.fertig).length') === 3, String(stand('Object.keys(k.fertig).length')));
-    /* Seit 3.26.0: zwei Bündel gleichzeitig. Drei Pflanzen (zwei mit, eine ohne Foto)
-       sind zwei Anfragen statt drei. */
-    pruef('3.26.0: Höchstens zwei Anfragen gleichzeitig',
-      w.__ki.hoechst > 0 && w.__ki.hoechst <= 2, String(w.__ki.hoechst));
-    pruef('3.26.0: Drei Pflanzen brauchen zwei Anfragen', w.__ki.zaehler === 2, String(w.__ki.zaehler));
-    /* geminiLesen legt den botanischen Namen unter `bot` ab, nicht
-       unter `botanisch` — die Schluessel der Antwort sind nicht die
-       Feldnamen der Pflanze. Fuer E2 ist das die Stelle, an der die
-       Zuordnung gebaut werden muss. */
-    pruef('Die Antwort ist gelesen worden',
-      stand(`k.fertig['KA1'].felder.bot`) === 'Epipremnum aureum',
-      String(stand(`k.fertig['KA1'].felder.bot`)));
-    pruef('Ein Zustand in der Antwort erscheint nicht im Abgleich',
-      stand(`karteiAbweichungen(allePflanzen().find(function(x){return x.id==='KA1';}), k.fertig['KA1'])
-        .zeilen.every(function(z){ return z.key !== 'zustand'; })`) === true);
-    pruef('Jedes Ergebnis trägt seinen Zeitpunkt',
-      stand(`['KA1','KA2','KA3'].every(function(i){ return k.fertig[i].zeit > 0; })`) === true);
-    pruef('Der Auftrag steht beim Ergebnis',
-      stand(`k.fertig['KA3'].art`) === 'text', String(stand(`k.fertig['KA3'].art`)));
-    pruef('Keine Pflanze ist verändert worden',
-      w.__T(`JSON.stringify(allePflanzen().filter(function(p){
-        return String(p.id).slice(0,2)==='KA'; }))`) === vorher);
-    pruef('Auch S.edits ist nicht gewachsen',
-      w.__T(`JSON.stringify(S.edits || {})`) === editsVorher);
-    pruef('Die Leiste meldet das Ende',
-      /aufgefrischt/.test(String((d.getElementById('kartei-streifen')||{}).textContent)));
-
-    /* Die Ergebnisliste */
-    w.__T(`(function(){ var kopf = document.querySelector('[data-mh-go=\"kartei\"]');
-      karteiAbschnitt(); return 1; })()`);
-    pruef('Die Ergebnisliste zeigt drei Zeilen',
-      d.querySelectorAll('#kartei-innen .kartei-zeile').length === 3,
-      String(d.querySelectorAll('#kartei-innen .kartei-zeile').length));
-    pruef('Die Ergebnisliste zeigt ohne Auswahl keine Kästchen',
-      d.querySelectorAll('#kartei-innen [data-karteierg]').length === 0);
-    pruef('Der Abschnitt sagt, dass sich nur Übernommenes ändert',
-      /ändert sich nur, was du im Fenster selbst übernimmst/.test(String((d.getElementById('kartei-innen')||{}).textContent)));
-    pruef('Der Satz von der nächsten Fassung ist weg',
-      !/nächsten Fassung/.test(String((d.getElementById('kartei-innen')||{}).textContent)));
-
-    /* Noch einmal prüfen */
-    {
-      const zeitKA1 = stand(`k.fertig['KA1'].zeit`);
-      const zeitKA2 = stand(`k.fertig['KA2'].zeit`);
-      const wahlKnopf = d.querySelector('#kartei-innen [data-do="kartei-wahl"]');
-      pruef('Der Knopf Noch einmal prüfen ist da', !!wahlKnopf);
-      if(wahlKnopf){ wahlKnopf.click(); await tick(); }
-      const haken = d.querySelector('[data-karteierg="KA2"]');
-      if(haken){ haken.checked = true; haken.dispatchEvent(new w.Event('change', {bubbles:true})); }
-      w.__ki.zaehler = 0;
-      const b = d.querySelector('[data-do="kartei-nochmal"]');
-      pruef('Der Knopf Ausgewählte prüfen ist da und nennt die Zahl',
-        !!b && !b.disabled && /Ausgewählte prüfen \(1\)/.test(b.textContent), b ? b.textContent : 'fehlt');
-      if(b){ b.click(); await tick(); }
-      await warte(()=>stand('k.aktiv') === false, 6000);
-      pruef('Noch einmal prüfen startet genau eine Anfrage',
-        w.__ki.zaehler === 1, String(w.__ki.zaehler));
-      pruef('Die Ergebnisse der übrigen Pflanzen bleiben stehen',
-        stand('Object.keys(k.fertig).sort().join(",")') === 'KA1,KA2,KA3',
-        String(stand('Object.keys(k.fertig).join(",")')));
-      pruef('Das Ergebnis der angehakten Pflanze ist ersetzt',
-        stand(`k.fertig['KA2'].zeit`) > zeitKA2 && stand(`k.fertig['KA1'].zeit`) === zeitKA1);
-      pruef('Die Leiste zählt nur den Nachlauf',
-        /1 von 1/.test(String((d.getElementById('kartei-streifen')||{}).textContent)),
-        String((d.getElementById('kartei-streifen')||{}).textContent));
-
-      /* Wer einen Nachlauf verwirft, behält das Ergebnis davor */
-      w.__ki.verzug = 400;
-      w.__T(`karteiLos(['KA3'], true)`);
-      await tick();
-      pruef('Der Nachlauf läuft', stand('k.aktiv') === true);
-      w.__T(`karteiVerwerfen()`);
-      pruef('Verwerfen des Nachlaufs lässt das Ergebnis davor stehen',
-        stand('k.aktiv') === false && stand('Object.keys(k.fertig).sort().join(",")') === 'KA1,KA2',
-        String(stand('Object.keys(k.fertig).join(",")')));
-      await new Promise(r => setTimeout(r, 500));
-      pruef('Die verworfene Antwort trägt nichts nach',
-        stand('Object.keys(k.fertig).sort().join(",")') === 'KA1,KA2');
-      w.__ki.verzug = 40;
-    }
-
-    /* Fehlschlag reisst den Lauf nicht mit */
-    w.__ki.zaehler = 0;
-    w.__ki.fehler = nr => (nr === 1 ? 400 : null);
-    /* Ohne Denkstufen-Nachfrage, damit der 400 als Fehlschlag stehen bleibt. */
-    w.__T(`(function(){ KI_DENKEN_AUS['models/gemini-3-flash'] = true; return 1; })()`);
-    w.__T(`karteiVerwerfen()`);
-    /* Fuenf Pflanzen bei drei Spuren: die letzten beiden stehen noch in
-       der Schlange, wenn die erste scheitert. Nur so zeigt sich, ob ein
-       Fehlschlag den Rest des Laufs mitnimmt. */
-    w.__T(`karteiStarten(['KA1','KA2','KA3','KA4','KA5'])`);
-    await warte(()=>stand('k.aktiv') === false, 12000);
-    pruef('Ein Fehlschlag bricht den Lauf nicht ab',
-      stand('Object.keys(k.fertig).length') === 5,
-      String(stand('Object.keys(k.fertig).length')));
-    pruef('Die Pflanzen hinter dem Fehlschlag kommen trotzdem dran',
-      stand(`['KA4','KA5'].every(function(i){ return !!k.fertig[i]; })`) === true);
-    /* Seit 3.26.0 scheitert ein ganzes Bündel: KA1 und KA2 (mit Foto) oder KA3 bis KA5 (ohne). */
-    pruef('Der Fehlschlag steht als Fehlschlag in der Liste',
-      ['KA1,KA2', 'KA3,KA4,KA5'].indexOf(stand(`Object.keys(k.fertig).filter(function(i){return k.fertig[i].stand==='fehler';}).sort().join(',')`)) > -1,
-      String(stand(`Object.keys(k.fertig).filter(function(i){return k.fertig[i].stand==='fehler';}).length`)));
-    pruef('Er nennt einen Grund',
-      String(stand(`Object.keys(k.fertig).map(function(i){return k.fertig[i].fehler||'';}).join('')`)).length > 5);
-    w.__ki.fehler = null;
-    w.__T(`(function(){ delete KI_DENKEN_AUS['models/gemini-3-flash']; return 1; })()`);
-
-    /* Anhalten und Fortsetzen (3.20.0) */
-    w.__ki.verzug = 400;
-    w.__T(`karteiVerwerfen()`);
-    w.__ki.zaehler = 0;
-    w.__T(`karteiStarten(['KA1','KA2','KA3','KA4','KA5'])`);
-    await tick();
-    pruef('3.26.0: Zwei Bündel mit allen fünf Pflanzen sind unterwegs',
-      w.__T(`KARTEI_AKTIV`) === 2 && w.__T(`karteiLaufend()`) === 5, w.__T(`KARTEI_AKTIV`) + '/' + w.__T(`karteiLaufend()`));
-    {
-      const stopp = d.querySelector('#kartei-streifen [data-do="kartei-stopp"]');
-      pruef('Die Leiste heißt Anhalten', !!stopp && /Anhalten/.test(stopp.textContent));
-      if(stopp){ stopp.click(); await tick(); }
-    }
-    pruef('Anhalten hält den Lauf an', stand('k.aktiv') === false);
-    pruef('Der Lauf gilt als angehalten', stand('k.pausiert') === true);
-    pruef('Die laufenden Anfragen stehen wieder in der Warteschlange',
-      stand('k.offen.slice().sort().join(",")') === 'KA1,KA2,KA3,KA4,KA5',
-      String(stand('k.offen.join(",")')));
-    pruef('Das bis dahin Gesammelte bleibt', stand('k.gesamt') === 5);
-    pruef('Die Leiste bietet Fortsetzen',
-      !!d.querySelector('#kartei-streifen [data-do="kartei-weiter"]'));
-    pruef('Die Leiste nennt den Stand beim Anhalten, ohne Prozentzahl',
-      /Angehalten bei 0 von 5/.test(String(d.getElementById('kartei-streifen').textContent))
-      && !/%/.test(String(d.getElementById('kartei-streifen').textContent)));
-    {
-      const innen = d.getElementById('kartei-innen');
-      pruef('Der Abschnitt zeigt Fortsetzen und Verwerfen',
-        !!innen.querySelector('[data-do="kartei-weiter"]') && !!innen.querySelector('[data-do="kartei-weg"]'));
-      pruef('Der Abschnitt zeigt keine Auswahl', !innen.querySelector('[data-karteikasten]'));
-    }
-    /* Die abgebrochenen Antworten kommen spaeter an — sie duerfen nichts eintragen */
-    await new Promise(r => setTimeout(r, 500));
-    pruef('Abgebrochene Antworten tragen nichts ein', stand('Object.keys(k.fertig).length') === 0,
-      String(stand('Object.keys(k.fertig).length')));
-    w.__ki.verzug = 40;
-    {
-      const weiter = d.querySelector('#kartei-innen [data-do="kartei-weiter"]');
-      if(weiter){ weiter.click(); await tick(); }
-    }
-    pruef('Fortsetzen lässt den Lauf wieder laufen',
-      stand('k.pausiert') === false && w.__ki.zaehler > 2, String(w.__ki.zaehler));
-    await warte(()=>stand('k.aktiv') === false, 12000);
-    pruef('Nach dem Fortsetzen hat jede Pflanze ein Ergebnis',
-      stand('Object.keys(k.fertig).sort().join(",")') === 'KA1,KA2,KA3,KA4,KA5',
-      String(stand('Object.keys(k.fertig).join(",")')));
-    pruef('Die Leiste meldet 5 von 5',
-      /5 von 5/.test(String((d.getElementById('kartei-streifen')||{}).textContent)));
-    pruef('Nach dem Ende steht die Ergebnisansicht',
-      d.querySelectorAll('#kartei-innen .kartei-zeile').length === 5
-      && !!d.querySelector('#kartei-innen [data-do="kartei-wahl"]'));
-
-    /* Wiederaufnahme nach Unterbrechung */
-    await tick(); await tick();
-    w.__T(`(function(){
-      S.kartei = {start:Date.now(), gesamt:2, offen:['KA1'], alle:['KA1','KA3'],
-                  fertig:{KA3:{stand:'ok', art:'text', felder:{}, anzahl:0}},
-                  versuch:{}, aktiv:true};
-      KARTEI_CTRL = {};
-      sichern(); return 1;
-    })()`);
-    w.__ki.zaehler = 0;
-    w.__T(`karteiWiederaufnehmen()`);
-    await warte(()=>stand('k.aktiv') === false, 6000);
-    pruef('Ein unterbrochener Lauf nimmt die offene Pflanze wieder auf',
-      w.__ki.zaehler === 1, String(w.__ki.zaehler));
-    pruef('Das vorher Gesammelte bleibt dabei stehen',
-      stand('Object.keys(k.fertig).length') === 2,
-      String(stand('Object.keys(k.fertig).length')));
-
-    /* Anfragen, die beim Schliessen unterwegs waren, werden nachgeholt */
-    w.__T(`(function(){
-      S.kartei = {start:Date.now(), gesamt:3, offen:[], alle:['KA1','KA2','KA3'],
-                  fertig:{KA3:{stand:'ok', art:'text', felder:{}, anzahl:0}},
-                  versuch:{}, aktiv:true};
-      KARTEI_CTRL = {}; sichern(); laden(); return 1;
-    })()`);
-    w.__ki.zaehler = 0;
-    w.__T(`karteiWiederaufnehmen()`);
-    await warte(()=>stand('k.aktiv') === false, 6000);
-    pruef('Nach dem Neustart werden verlorene Anfragen nachgeholt (als ein Bündel)',
-      w.__ki.zaehler === 1, String(w.__ki.zaehler));
-    pruef('Der Lauf endet mit allen drei',
-      stand('Object.keys(k.fertig).length') === 3, String(stand('Object.keys(k.fertig).length')));
-
-    /* Ein Lauf aus 3.19.x ohne vollständige Liste lässt sich nur verwerfen */
-    w.__T(`(function(){
-      S.kartei = {start:Date.now(), gesamt:4, offen:['KA1'],
-                  fertig:{}, versuch:{}, aktiv:true};
-      KARTEI_CTRL = {}; sichern(); return 1;
-    })()`);
-    w.__ki.zaehler = 0;
-    w.__T(`karteiWiederaufnehmen()`);
-    await tick();
-    pruef('Ein alter Lauf ohne Liste startet nicht', w.__ki.zaehler === 0, String(w.__ki.zaehler));
-    pruef('Er steht als angehalten da', stand('k.pausiert') === true && stand('k.aktiv') === false);
-    pruef('Die Leiste bietet kein Fortsetzen',
-      !d.querySelector('#kartei-streifen [data-do="kartei-weiter"]')
-      && !!d.querySelector('#kartei-streifen [data-do="kartei-weg"]'));
-    {
-      const innen = d.getElementById('kartei-innen');
-      pruef('Der Abschnitt bietet nur Verwerfen',
-        !innen.querySelector('[data-do="kartei-weiter"]') && !!innen.querySelector('[data-do="kartei-weg"]')
-        && /älteren Fassung/.test(innen.textContent));
-      const weg = innen.querySelector('[data-do="kartei-weg"]');
-      if(weg){ weg.click(); await tick(); }
-      pruef('Lauf verwerfen im Abschnitt leert das Zwischenlager', w.__T(`!S.kartei`) === true);
-      pruef('Danach steht die Startansicht wieder da',
-        !!d.querySelector('#kartei-innen [data-karteikasten="alle"]')
-        && !!d.querySelector('#kartei-innen [data-do="kartei-los"]'));
-    }
-
-    /* Ein alter Lauf startet nicht von selbst */
-    w.__T(`(function(){
-      S.kartei = {start:Date.now() - (3*60*60*1000), gesamt:2, offen:['KA1'], alle:['KA1','KA3'],
-                  fertig:{}, versuch:{}, aktiv:true};
-      KARTEI_CTRL = {}; sichern(); return 1;
-    })()`);
-    w.__ki.zaehler = 0;
-    w.__T(`karteiWiederaufnehmen()`);
-    await tick();
-    pruef('Ein alter Lauf startet nicht von selbst', w.__ki.zaehler === 0, String(w.__ki.zaehler));
-    pruef('Er bietet stattdessen das Fortsetzen an', stand('k.pausiert') === true);
-    pruef('Die Leiste zeigt den Fortsetzen-Knopf',
-      !!d.querySelector('#kartei-streifen [data-do="kartei-weiter"]'));
-
-    /* Verwerfen */
-    {
-      const weg = d.querySelector('#kartei-streifen [data-do="kartei-weg"]');
-      w.__T(`(function(){ var k = karteiStand(); k.aktiv = false; k.pausiert = false;
-        k.offen = []; sichern(); karteiLeiste(); return 1; })()`);
-      const weg2 = d.querySelector('#kartei-streifen [data-do="kartei-weg"]');
-      pruef('Der Verwerfen-Knopf ist da', !!weg2);
-      if(weg2){ weg2.click(); await tick(); }
-      pruef('Verwerfen leert das Zwischenlager', w.__T(`!S.kartei`) === true);
-      pruef('Und nimmt die Leiste weg', !d.getElementById('kartei-streifen'));
-    }
-
-    /* Der eigene Abbrecher — ohne ihn träfe kiAbbrechen die falsche Anfrage */
-    {
-      w.__ki.verzug = 300;
-      w.__T(`(function(){ KI_LAEUFT = null;
-        kiFragen('x', null, 'models/gemini-3-flash', new AbortController()); return 1; })()`);
-      await tick();
-      pruef('Mit eigenem Abbrecher bleibt KI_LAEUFT unberührt',
-        w.__T(`KI_LAEUFT`) === null, String(w.__T(`KI_LAEUFT`)));
-      w.__T(`(function(){ KI_LAEUFT = null;
-        kiFragen('x', null, 'models/gemini-3-flash'); return 1; })()`);
-      await tick();
-      pruef('Ohne eigenen Abbrecher wird KI_LAEUFT wie bisher gesetzt',
-        w.__T(`KI_LAEUFT !== null`) === true);
-      w.__T(`kiAbbrechen()`);
-      w.__ki.verzug = 40;
-      await tick(); await tick();
-    }
-
-    /* Ohne Schlüssel passiert nichts — außer einer Auskunft */
-    {
-      w.__T(`(function(){ kiSchluesselSetzen('');
-        KARTEI_WAHL = new Set(['KA1']); karteiAbschnitt(); return 1; })()`);
-      w.__ki.zaehler = 0;
-      const los = d.querySelector('[data-do="kartei-los"]');
-      pruef('Der Startknopf ist da', !!los);
-      pruef('Der Startknopf nennt die Zahl',
-        !!los && /\(1\)/.test(los.textContent), los ? los.textContent : '');
-      if(los){ los.click(); await tick(); }
-      pruef('Ohne Schlüssel startet kein Lauf', w.__ki.zaehler === 0, String(w.__ki.zaehler));
-      pruef('Stattdessen steht da, wo der Schlüssel herkommt',
-        /Schlüssel/.test(String((d.getElementById('kartei-meld')||{}).textContent)));
-    }
-
-    /* ══ Das Abgleich-Fenster (3.21.0) ══ */
-    {
-      const karteIst = () => w.__T(`JSON.stringify(allePflanzen().filter(function(p){
-        return String(p.id).slice(0,2)==='KB'; })) + JSON.stringify(S.lernen || {})`);
-      w.__T(`(function(){
-        delete S.kartei; KARTEI_CTRL = {};
-        S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KB'; });
-        S.eigene.push({id:'KB1', eigen:true, name:'Abgleich eins', art:'Efeutute',
-          botanisch:'Epipremnum aureum', typ:'Kletterpflanze', klasse:'B', sonne:'indirekt',
-          wichtig:'keine', frostMin:10, duenger:'normal', merkmale:'Bib', notiz:'',
-          quellen:{art:'bib', botanisch:'bib', typ:'bib', klasse:'hand', sonne:'bib', wichtig:'bib', frostMin:'bib'}});
-        S.eigene.push({id:'KB2', eigen:true, name:'Abgleich zwei', art:'Bogenhanf',
-          botanisch:'Dracaena trifasciata', typ:'Sukkulente', klasse:'C', sonne:'hell',
-          wichtig:'keine', frostMin:10});
-        S.eigene.push({id:'KB3', eigen:true, name:'Abgleich drei', art:'Grünlilie',
-          botanisch:'Chlorophytum comosum', typ:'Rosettenpflanze', klasse:'B', sonne:'hell',
-          wichtig:'keine', frostMin:5});
-        var jetzt = Date.now();
-        S.kartei = {start:jetzt - 60000, ende:jetzt, gesamt:3, offen:[], alle:['KB1','KB2','KB3'],
-          versuch:{}, aktiv:false, fertig:{
-            KB3:{stand:'fehler', art:'text', fehler:'Attrappe', zeit:jetzt},
-            KB2:{stand:'ok', art:'text', zeit:jetzt, felder:{art:'Bogenhanf', bot:'Dracaena trifasciata',
-              typ:'Sukkulente', frost:'10'}},
-            KB1:{stand:'ok', art:'teil', zeit:jetzt - 30000, felder:{
-              art:'Efeutute', bot:'Epipremnum aureum', sicher:'hoch', klasse:'kakteenmodus', licht:'hell',
-              familie:'Testgewächse', duenger:'sparsam', sortenmerkmale:'gelb marmoriert',
-              zustand:'Wurzelfäule', befund:'Faulig.', topf:'zu klein | Kunststoff | Ablauf vorhanden | umtopfen',
-              schritte:'Erde nass | Austopfen | sofort | einmalig',
-              vermehrung:'Kopfsteckling | 90 | Frühjahr | Wasserglas | 3 Wochen',
-              speicher:'kein Speicher', giessart:'Wasserkultur'}}
-          }};
-        sichern(); karteiAbschnitt(); return 1;
-      })()`);
-      const zeile = id => d.querySelector('#kartei-innen [data-karteiauf="' + id + '"]');
-      const innen = () => String((d.getElementById('kartei-innen') || {}).textContent);
-      pruef('Die Ergebniszeile zählt die Abweichungen',
-        !!zeile('KB1') && /7 Abweichungen/.test(zeile('KB1').textContent),
-        zeile('KB1') ? zeile('KB1').textContent : 'fehlt');
-      pruef('Ohne Abweichung steht „Keine Abweichung“',
-        !!zeile('KB2') && /Keine Abweichung/.test(zeile('KB2').textContent));
-      const wahl = async an => {
-        const b = d.querySelector('#kartei-innen [data-do="' + (an ? 'kartei-wahl' : 'kartei-wahl-zu') + '"]');
-        if(b){ b.click(); await tick(); }
-        return !!b;
-      };
-      pruef('„Durchsehen ›“ nur an der Zeile mit Abweichungen',
-        [...d.querySelectorAll('#kartei-innen .kz-durch')].map(x=>x.dataset.karteiauf).join(',') === 'KB1',
-        [...d.querySelectorAll('#kartei-innen .kz-durch')].map(x=>x.dataset.karteiauf).join(','));
-      pruef('Ohne Auswahl keine Kästchen in der Ergebnisliste',
-        !d.querySelector('#kartei-innen [data-karteierg]'));
-      pruef('In die Auswahl geht es über „Noch einmal prüfen“', await wahl(true));
-      pruef('Ein Fehlschlag öffnet kein Fenster, bleibt aber anhakbar',
-        !zeile('KB3') && !!d.querySelector('#kartei-innen [data-karteierg="KB3"]'));
-      {
-        const reihe = [...d.querySelectorAll('#kartei-innen [data-karteierg]')].map(x=>x.dataset.karteierg).join(',');
-        pruef('Offene Pflanzen oben, Fehlschläge unten', reihe === 'KB1,KB2,KB3', reihe);
-      }
-      pruef('In der Auswahl ist nichts angehakt und kein „Durchsehen ›“ zu sehen',
-        !d.querySelector('#kartei-innen [data-karteierg]:checked') && !d.querySelector('#kartei-innen .kz-durch')
-        && !zeile('KB1'));
-      {
-        const b = d.querySelector('#kartei-innen [data-do="kartei-nochmal"]');
-        pruef('„Ausgewählte prüfen“ ist bei 0 gesperrt',
-          !!b && b.disabled && /Ausgewählte prüfen \(0\)/.test(b.textContent), b ? b.textContent : 'fehlt');
-        const name = d.querySelector('#kartei-innen [data-karteierg="KB1"]');
-        const txt = name ? name.closest('label').querySelector('.kz-txt') : null;
-        if(txt){ txt.click(); await tick(); }
-        pruef('Tipp auf den Namen hakt an und öffnet kein Fenster',
-          !!name && name.checked && w.__T(`modalOffen('kartei-abgleich')`) === false
-          && /\(1\)/.test(b.textContent), b ? b.textContent : 'fehlt');
-      }
-      {
-        const vorKB = w.__T(`JSON.stringify(S.kartei)`);
-        pruef('„Abbrechen“ verlässt die Auswahl', await wahl(false)
-          && !d.querySelector('#kartei-innen [data-karteierg]') && !!zeile('KB1'));
-        pruef('„Abbrechen“ ändert nichts am Ergebnis', w.__T(`JSON.stringify(S.kartei)`) === vorKB);
-      }
-      if(d.querySelector('#kartei-innen .kz-durch')){
-        d.querySelector('#kartei-innen .kz-durch').click(); await tick();
-        pruef('„Durchsehen ›“ öffnet das Fenster der richtigen Pflanze',
-          w.__T(`modalOffen('kartei-abgleich') && KA_PFLANZE === 'KB1'`) === true);
-        w.__T(`modalZu('kartei-abgleich')`); await tick();
-      } else pruef('„Durchsehen ›“ öffnet das Fenster der richtigen Pflanze', false, 'Knopf fehlt');
-      pruef('Der Abschnitt nennt die Pflanzen mit Abweichungen',
-        /Eine Pflanze mit Abweichungen/.test(innen()), innen().slice(0, 200));
-
-      const vorher = karteIst();
-      if(zeile('KB1')){ zeile('KB1').click(); await tick(); }
-      pruef('Tipp auf den Namen öffnet das Fenster', w.__T(`modalOffen('kartei-abgleich')`) === true);
-      const fz = () => [...d.querySelectorAll('#ka-inhalt [data-kazeile]')].map(x=>x.dataset.kazeile);
-      const ka = () => String((d.getElementById('ka-inhalt') || {}).textContent);
-      pruef('Das Fenster zeigt genau die abweichenden Angaben',
-        fz().slice().sort().join(',') === 'duenger,familie,klasse,sonne,sortenmerkmale,speicher,vermehrung',
-        fz().join(','));
-      pruef('Kein Zustand, Befund, Topf und keine Maßnahme im Fenster',
-        !fz().some(k=>/zustand|befund|topf|schritte/.test(k))
-        && !/Wurzelfäule|Austopfen|umtopfen/.test(ka()));
-      pruef('Der Widerspruch steht oben und ist markiert',
-        fz()[0] === 'klasse'
-        && /von dir gesetzt/.test(String((d.querySelector('#ka-inhalt [data-kazeile="klasse"]') || {}).textContent)));
-      pruef('Wasserkultur steht nur als Hinweis', /Wasserkultur/.test(ka()) && fz().indexOf('giessart') === -1);
-      pruef('Das Fenster nennt das Datum der Antwort', /Antwort vom \d/.test(ka()), ka().slice(0, 80));
-      pruef('Ein leerer alter Wert heißt „leer“',
-        /leer/.test(String((d.querySelector('#ka-inhalt [data-kazeile="speicher"] .ka-leer') || {}).textContent)));
-      pruef('Ein leeres Feld zeigt den Wert der Bibliothek als alten Wert',
-        /Aronstabgewächse/.test(String((d.querySelector('#ka-inhalt [data-kazeile="familie"] .ab-alt') || {}).textContent)),
-        String((d.querySelector('#ka-inhalt [data-kazeile="familie"]') || {}).textContent));
-      /* Seit 3.24.0: nur Kreuze, ein Sammelknopf für den Rest */
-      const kAlle = () => d.querySelector('#ka-inhalt [data-do="ka-alle"]');
-      const zahl = () => kAlle() ? kAlle().textContent : 'fehlt';
-      pruef('3.24.0: Keine Kästchen im Fenster',
-        !d.querySelector('#ka-inhalt input[type="checkbox"]') && !d.querySelector('#ka-inhalt [data-kahaken]'));
-      pruef('3.24.0: Kein „Ausgewählte übernehmen“ mehr', !d.querySelector('#ka-inhalt [data-do="ka-auswahl"]'));
-      pruef('3.24.0: Jede Zeile hat genau ein ×',
-        d.querySelectorAll('#ka-inhalt .ka-zeile [data-do="ka-weg"]').length === fz().length);
-      /* 3.27.0: Klasse, Licht und Dünger weichen von der Bibliothek ab (Epipremnum aureum) */
-      const eins = () => Array.prototype.map.call(d.querySelectorAll('#ka-inhalt [data-do="ka-eins"]'), b=>b.dataset.k).sort().join(',');
-      pruef('3.27.0: Abweichungen von der Bibliothek sind nur einzeln übernehmbar',
-        eins() === 'duenger,klasse,sonne', eins());
-      pruef('3.27.0: Sie nennen den Bibliothekswert',
-        /Weicht von der Bibliothek ab/.test(String((d.querySelector('#ka-inhalt [data-kazeile="sonne"]') || {}).textContent)));
-      pruef('3.24.0: „Übrige übernehmen“ nennt die Zahl ohne die Einzelnen',
-        !!kAlle() && /^Übrige übernehmen \(4\)$/.test(kAlle().textContent), zahl());
-      pruef('3.24.0: Die eigene Angabe ist hervorgehoben',
-        !!d.querySelector('#ka-inhalt [data-kazeile="klasse"].ka-eigen'));
-
-      w.__T(`modalZu('kartei-abgleich')`);
-      await tick(); await tick();
-      pruef('Zurück schließt das Fenster', w.__T(`modalOffen('kartei-abgleich')`) === false);
-      pruef('Öffnen und Schließen ändert an der Pflanze nichts', karteIst() === vorher);
-      if(zeile('KB1')){ zeile('KB1').click(); await tick(); }
-      pruef('Nach dem Schließen stehen alle Zeilen noch da', fz().length === 7, fz().join(','));
-
-      const kb = c => w.__T(`(function(){ var p = allePflanzen().find(function(x){return x.id==='KB1';}); return ${c}; })()`);
-      const tipp = async (was, key) => {
-        const b = d.querySelector('#ka-inhalt [data-do="' + was + '"]' + (key ? '[data-k="' + key + '"]' : ''));
-        pruef('Der Knopf ' + was + ' ' + (key || '') + ' ist da', !!b);
-        if(b){ b.click(); await tick(); }
-      };
-
-      await tipp('ka-weg', 'familie');
-      pruef('× entfernt die Zeile', fz().indexOf('familie') === -1);
-      pruef('und ändert die Pflanze nicht', !kb('p.familie'));
-      pruef('3.24.0: Die Zahl im Knopf folgt dem Kreuz', /\(3\)/.test(zahl()), zahl());
-      w.__T(`(function(){ laden(); karteiFensterZeichnen(); return 1; })()`);
-      pruef('Nach dem Neuladen bleiben verworfene Zeilen weg',
-        fz().indexOf('familie') === -1 && fz().length === 6, fz().join(','));
-
-      await tipp('ka-weg', 'duenger');
-      await tipp('ka-weg', 'speicher');
-      pruef('3.24.0: Nach zwei weiteren Kreuzen stehen vier da',
-        fz().slice().sort().join(',') === 'klasse,sonne,sortenmerkmale,vermehrung' && /\(2\)/.test(zahl()),
-        fz().join(',') + ' ' + zahl());
-      await tipp('ka-alle');
-      pruef('3.24.0: „Übrige übernehmen“ schreibt alles Nicht-Weggekreuzte',
-        kb('p.sortenmerkmale') === 'gelb marmoriert'
-        && kb('(vermehrungKiVon(p) || {wege:[]}).wege.length') === 1,
-        kb('JSON.stringify([p.sonne, p.sortenmerkmale])'));
-      pruef('3.27.0: Die Einzelnen bleiben dabei unberührt',
-        kb('p.sonne') === 'indirekt' && kb('p.klasse') === 'B' && fz().slice().sort().join(',') === 'klasse,sonne',
-        fz().join(','));
-      pruef('3.27.0: Ohne Sammelzeilen verschwindet der Sammelknopf', !kAlle());
-      await tipp('ka-eins', 'klasse');
-      pruef('3.24.0: Die eigene Angabe geht einzeln mit', kb('p.klasse') === 'C' && kb(`herkunftVon(p, 'klasse')`) === 'ki');
-      await tipp('ka-eins', 'sonne');
-      pruef('mit Stempel ki', kb('p.sonne') === 'hell' && kb(`herkunftVon(p, 'sonne')`) === 'ki');
-      pruef('3.24.0: Weggekreuztes bleibt unverändert',
-        !kb('p.familie') && kb('p.duenger') === 'normal' && !kb('p.speicher'),
-        kb('JSON.stringify([p.familie, p.duenger, p.speicher])'));
-      pruef('Sortenmerkmale landen in sortenmerkmale, nicht in merkmale', kb('p.merkmale') === 'Bib');
-      pruef('beta.27: Die Kartei setzt keinen Tag', kb('tagEintraege(p.id).length') === 0);
-      await tick();
-      pruef('3.24.0: Danach ist die Pflanze durch und das Fenster zu',
-        w.__T(`modalOffen('kartei-abgleich')`) === false);
-      await wahl(true);
-      pruef('Die durchgesehene Pflanze ist aus der Liste',
-        !d.querySelector('#kartei-innen [data-karteierg="KB1"]')
-        && !!d.querySelector('#kartei-innen [data-karteierg="KB3"]'));
-      await wahl(false);
-      pruef('Sie ist auch ohne Auswahl weg', !zeile('KB1') && d.querySelectorAll('#kartei-innen .kartei-zeile').length === 2);
-      pruef('Mit einem Fehlschlag bleibt das Ergebnis stehen', w.__T(`!!S.kartei`) === true);
-
-      w.__T(`(function(){ S.eigene = S.eigene.filter(function(p){ return p.id !== 'KB2'; });
-        sichern(); karteiAbschnitt(); return 1; })()`);
-      await wahl(true);
-      pruef('Eine gelöschte Pflanze fällt aus dem Ergebnis',
-        w.__T(`!S.kartei.fertig.KB2`) === true && !d.querySelector('#kartei-innen [data-karteierg="KB2"]')
-        && !!d.querySelector('#kartei-innen [data-karteierg="KB3"]'));
-      await wahl(false);
-
-      /* Die letzte offene Zeile — und die Rückfrage bei Klasse S */
-      w.__T(`(function(){
-        S.eigene.push({id:'KB4', eigen:true, name:'Abgleich vier', art:'Venusfliegenfalle',
-          botanisch:'Dionaea muscipula', typ:'Karnivore', klasse:'S', sonne:'voll', wichtig:'keine', frostMin:-5});
-        S.kartei = {start:Date.UTC(2026, 0, 15, 12), ende:Date.now(), gesamt:1, offen:[], alle:['KB4'],
-          versuch:{}, aktiv:false, fertig:{KB4:{stand:'ok', art:'text', felder:{klasse:'normal', licht:'hell'}}}};
-        sichern(); karteiAbschnitt(); return 1;
-      })()`);
-      if(zeile('KB4')){ zeile('KB4').click(); await tick(); }
-      pruef('Ohne Zeitpunkt zeigt das Fenster das Startdatum',
-        ka().indexOf(new Date(Date.UTC(2026, 0, 15, 12)).toLocaleDateString('de-DE')) > -1, ka().slice(0, 80));
-      const vorherConfirm = w.confirm;
-      w.confirm = () => false;
-      /* 3.27.0: Beide weichen von der Bibliothek ab (Dionaea) — einzeln. */
-      await tipp('ka-eins', 'klasse');
-      pruef('Abgelehnte Rückfrage bei Klasse S schreibt nichts',
-        w.__T(`allePflanzen().find(function(x){return x.id==='KB4';}).klasse`) === 'S');
-      pruef('Die Meldung nennt, was offen bleibt',
-        /Gießklasse bleibt offen/.test(String((d.getElementById('ka-meld') || {}).textContent)),
-        String((d.getElementById('ka-meld') || {}).textContent));
-      await tipp('ka-eins', 'sonne');
-      pruef('und nur diese Zeile bleibt stehen', fz().join(',') === 'klasse', fz().join(','));
-      pruef('Die übrige Zeile ist übernommen',
-        w.__T(`allePflanzen().find(function(x){return x.id==='KB4';}).sonne`) === 'hell');
-      w.confirm = vorherConfirm;
-      await tipp('ka-fertig');
-      await tick();
-      pruef('„Fertig“ verwirft den Rest',
-        w.__T(`allePflanzen().find(function(x){return x.id==='KB4';}).klasse`) === 'S');
-      pruef('Nach der letzten Zeile ist das Ergebnis weg', w.__T(`!S.kartei`) === true);
-      pruef('und die Startansicht steht da', !!d.querySelector('#kartei-innen [data-do="kartei-los"]'));
-      pruef('Das Fenster ist zu', w.__T(`modalOffen('kartei-abgleich')`) === false);
-
-      /* „Übrige übernehmen“: alles, die Art zuerst (3.22.0) */
-      w.__T(`(function(){
-        S.eigene.push({id:'KB7', eigen:true, name:'Abgleich sieben', art:'Probepflanze',
-          botanisch:'Fictus probus', typ:'Kletterpflanze', klasse:'B', sonne:'indirekt',
-          wichtig:'keine', frostMin:12, quellen:{klasse:'hand'}});
-        S.kartei = {start:Date.now(), ende:Date.now(), gesamt:1, offen:[], alle:['KB7'],
-          versuch:{}, aktiv:false, fertig:{KB7:{stand:'ok', art:'teil', zeit:Date.now(), felder:{
-            art:'Grünlilie', bot:'Chlorophytum comosum', sicher:'hoch', klasse:'kakteenmodus', licht:'hell'}}}};
-        window.__reihe = [];
-        var a0 = artUebernehmen, s0 = aenderungSetzen;
-        artUebernehmen = function(){ __reihe.push('ART'); return a0.apply(this, arguments); };
-        aenderungSetzen = function(id, f){ __reihe.push(Object.keys(f || {}).join('+')); return s0.apply(this, arguments); };
-        window.__zurueck = function(){ artUebernehmen = a0; aenderungSetzen = s0; };
-        sichern(); karteiAbschnitt(); return 1;
-      })()`);
-      if(zeile('KB7')){ zeile('KB7').click(); await tick(); }
-      pruef('Die Art steht nicht oben, die eigene Angabe schon', fz()[0] === 'klasse' && fz().indexOf('art') > 0, fz().join(','));
-      await tipp('ka-alle');
-      const reihe7 = w.__T(`__reihe.join(',')`);
-      w.__T(`__zurueck()`);
-      const kb7 = c => w.__T(`(function(){ var p = allePflanzen().find(function(x){return x.id==='KB7';}); return ${c}; })()`);
-      pruef('„Übrige übernehmen“ schreibt jede Zeile',
-        kb7('p.art') === 'Grünlilie' && kb7('p.botanisch') === 'Chlorophytum comosum'
-        && kb7('p.klasse') === 'C' && kb7('p.sonne') === 'hell',
-        kb7('JSON.stringify([p.art, p.botanisch, p.klasse, p.sonne])'));
-      pruef('Die Art wird zuerst übernommen', reihe7.split(',')[0] === 'ART', reihe7);
-      pruef('Danach ist das Ergebnis weg und das Fenster zu',
-        w.__T(`!S.kartei`) === true && w.__T(`modalOffen('kartei-abgleich')`) === false);
-
-      /* Sortenschutz: ein längerer alter Name mit gleicher Gattung und Art */
-      {
-        w.__T(`(function(){
-          S.eigene.push({id:'KB8', eigen:true, name:'Jimmini Probe', art:'Dreifarbiger Kletterphilodendron',
-            botanisch:'Philodendron hederaceum Brasil (Dreifarbiger Kletterphilodendron)', typ:'Kletterpflanze',
-            klasse:'B', sonne:'indirekt', wichtig:'keine', frostMin:12});
-          sichern(); return 1; })()`);
-        const ab8 = felder => w.__T(`karteiAbweichungen(allePflanzen().find(function(x){return x.id==='KB8';}),
-          {stand:'ok', felder:${JSON.stringify(felder)}}).zeilen.map(function(z){return z.key;}).join(',')`);
-        const kurz8 = ab8({art:'Kletterphilodendron', bot:'Philodendron hederaceum', sicher:'hoch'});
-        pruef('Eine Sorte im botanischen Namen ergibt keine Zeile Botanisch', kurz8.split(',').indexOf('botanisch') === -1, kurz8);
-        pruef('und keine Zeile Art', kurz8.split(',').indexOf('art') === -1, kurz8);
-        const anders8 = ab8({art:'Dreifarbiger Kletterphilodendron', bot:'Philodendron erubescens', sicher:'hoch'});
-        pruef('Eine andere Art im botanischen Namen ergibt weiter eine Zeile', anders8.split(',').indexOf('botanisch') > -1, anders8);
-      }
-
-      /* Die Giftfrage: verschärfen ja, entwarnen nie */
-      w.__T(`(function(){
-        S.eigene.push({id:'KB5', eigen:true, name:'Giftprobe unbekannt', art:'Testkraut',
-          botanisch:'Fictus probatus', typ:'Kraut', klasse:'B', sonne:'hell', wichtig:'keine', frostMin:5});
-        S.eigene.push({id:'KB6', eigen:true, name:'Giftprobe Efeutute', art:'Efeutute',
-          botanisch:'Epipremnum aureum', typ:'Kletterpflanze', klasse:'B', sonne:'hell', wichtig:'keine', frostMin:10});
-        sichern(); return 1;
-      })()`);
-      const gz = (id, katzen) => JSON.parse(w.__T(`(function(){
-        var p = allePflanzen().find(function(x){return x.id==='${id}';});
-        var a = karteiAbweichungen(p, {stand:'ok', felder:{katzen:'${katzen}'}});
-        var z = a.zeilen.find(function(x){return x.key==='gift';});
-        return JSON.stringify({knopf: z ? z.knopf : null, hinweis: a.hinweise.join(' ')});
-      })()`));
-      const katze = id => w.__T(`giftVon(allePflanzen().find(function(x){return x.id==='${id}';})).tiere.katze`);
-      const status = id => w.__T(`giftVon(allePflanzen().find(function(x){return x.id==='${id}';})).status`);
-      pruef('Eine unbekannte Art ist zu Beginn ungeprüft', katze('KB5') === 'unklar', String(katze('KB5')));
-      pruef('„unbedenklich“ bei unbekannter Art ergibt keinen Knopf',
-        gz('KB5', 'unbedenklich, harmlos').knopf === null
-        && /Entwarnung/.test(gz('KB5', 'unbedenklich, harmlos').hinweis));
-      pruef('„giftig“ bei unbekannter Art bietet die Verschärfung an',
-        gz('KB5', 'giftig, enthält Oxalat').knopf === 'Als giftig übernehmen');
-      w.__T(`karteiAbweichungen(allePflanzen().find(function(x){return x.id==='KB5';}),
-        {stand:'ok', felder:{katzen:'giftig, enthält Oxalat'}}).zeilen
-        .find(function(x){return x.key==='gift';}).nimm()`);
-      pruef('Die Übernahme verschärft', katze('KB5') !== 'unklar' && katze('KB5') !== 'keine', String(katze('KB5')));
-      const k6 = katze('KB6');
-      pruef('Die Efeutute ist laut Tabelle giftig', k6 !== 'keine' && k6 !== 'unklar', String(k6));
-      pruef('„unbedenklich“ bei giftiger Art bietet nur „strittig“ an',
-        gz('KB6', 'unbedenklich, harmlos').knopf === 'Als strittig vermerken');
-      w.__T(`karteiAbweichungen(allePflanzen().find(function(x){return x.id==='KB6';}),
-        {stand:'ok', felder:{katzen:'unbedenklich, harmlos'}}).zeilen
-        .find(function(x){return x.key==='gift';}).nimm()`);
-      pruef('Strittig vermerkt, die Warnung bleibt', status('KB6') === 'strittig' && katze('KB6') === k6,
-        status('KB6') + ' ' + katze('KB6'));
-
-      /* Nicht zuordenbare Werte erscheinen nicht; zuordenbare schreiben genau ihr Feld */
-      {
-        const ab = felder => JSON.parse(w.__T(`JSON.stringify(karteiAbweichungen(
-          allePflanzen().find(function(x){return x.id==='KB5';}),
-          {stand:'ok', felder:${JSON.stringify(felder)}}).zeilen.map(function(z){return z.key;}))`));
-        pruef('Unbekannte Wörter ergeben keine Zeile',
-          ab({duenger:'reichlich', speicher:'großer Tank', giessart:'irgendwie'}).length === 0,
-          ab({duenger:'reichlich', speicher:'großer Tank', giessart:'irgendwie'}).join(','));
-        const gaAlt = w.__T(`giessartVon(allePflanzen().find(function(x){return x.id==='KB5';}))`);
-        const gaNeu = gaAlt === 'schluck' ? 'tauchen' : 'schluck';
-        pruef('Eine andere Gießart ergibt eine Zeile', ab({giessart:gaNeu}).join(',') === 'giessart');
-        w.__T(`karteiAbweichungen(allePflanzen().find(function(x){return x.id==='KB5';}),
-          {stand:'ok', felder:{giessart:'${gaNeu}', familie:'Probegewächse', duenger:'sparsam'}}).zeilen
-          .forEach(function(z){ z.nimm(); })`);
-        const kb5 = c => w.__T(`(function(){ var p = allePflanzen().find(function(x){return x.id==='KB5';}); return ${c}; })()`);
-        pruef('Gießart, Familie und Düngebedarf werden geschrieben',
-          kb5('p.giessart') === gaNeu && kb5('p.familie') === 'Probegewächse' && kb5('p.duenger') === 'sparsam',
-          kb5('JSON.stringify([p.giessart, p.familie, p.duenger])'));
-      }
-
-      w.__T(`(function(){
-        delete S.kartei; KA_PFLANZE = null;
-        S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KB'; });
-        if(S.edits){ ['KB1','KB2','KB3','KB4','KB5','KB6','KB7','KB8'].forEach(function(i){ delete S.edits[i]; }); }
-        sichern(); karteiLeiste(); karteiAbschnitt(); return 1;
-      })()`);
-    }
-
-    /* Der Menüpunkt selbst */
-    pruef('Der Punkt steht unter Mehr',
-      !!d.querySelector('section[data-mh="kartei"]'));
-    pruef('Er liegt in einer Gruppe',
-      !!d.querySelector('.mh-gruppe section[data-mh="kartei"]'));
-
-    /* Aufräumen */
-    w.__T(`(function(){
-      delete S.kartei;
-      KARTEI_CTRL = {}; KARTEI_WAHL = new Set(); KARTEI_WAHL_BEREIT = false;
-      S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KA'; });
-      ['KA1','KA2'].forEach(function(i){ delete S.fotos[i]; });
-      if(S.edits){ ['KA1','KA2','KA3','KA4','KA5'].forEach(function(i){ delete S.edits[i]; }); }
-      sichern(); karteiLeiste();
-      return 1;
-    })()`);
   }
 
   /* ══════════ Löschen einer Pflanze (3.19.1) ══════════
@@ -8135,39 +7163,16 @@ setTimeout(async () => {
       w.__T(`S.eigene.some(p=>p.id==='${lid}')`) === false);
     pruef('Die Mutter bleibt stehen', w.__T(`S.eigene.some(p=>p.id==='LO1')`) === true);
 
-    /* Löschen während eines laufenden Abgleichs */
-    w.__T(`(function(){
-      S.eigene.push({id:'LO2', eigen:true, name:'Loeschlauf zwei', art:'Efeutute', klasse:Object.keys(KLASSEN)[0], sonne:Object.keys(SONNE)[0]});
-      S.eigene.push({id:'LO3', eigen:true, name:'Loeschlauf drei', art:'Efeutute', klasse:Object.keys(KLASSEN)[0], sonne:Object.keys(SONNE)[0]});
-      S.kiModelle = [{id:'models/gemini-3-flash', anzeige:'3 flash', empfohlen:true}];
-      S.kiModell = 'models/gemini-3-flash';
-      sichern(); render();
-      kiSchluesselSetzen('${ATTRAPPE_ECHT}');
-      return 1;
-    })()`);
-    w.__ki.fehler = null; w.__ki.verzug = 150; w.__ki.antwort = '```\nART: Efeutute\n```';
-    w.__T(`karteiStarten(['LO2','LO3'])`);
-    await new Promise(r => setTimeout(r, 30));
-    const vorLf2 = lf();
-    knopf = await oeffneBearbeiten('LO3');
-    if (knopf) { knopf.click(); await tick(); }
-    for (let i = 0; i < 20 && w.__T(`!!(S.kartei && S.kartei.aktiv)`); i++) await tick();
-    pruef('Löschen während des Laufs wirft nicht', lf() === vorLf2, fehler.slice(-1)[0]);
-    pruef('Der Lauf endet trotzdem', w.__T(`!!S.kartei && !S.kartei.aktiv`) === true);
-    w.__T(`karteiAbschnitt()`);
-    const erg = String((d.getElementById('kartei-innen') || {}).textContent);
-    pruef('Die gelöschte Pflanze steht nicht in der Ergebnisliste',
-      erg.indexOf('Loeschlauf drei') === -1 && erg.indexOf('Loeschlauf zwei') !== -1, erg.slice(0, 200));
+    /* 4.0-beta.30 (B3): „Löschen während eines laufenden Abgleichs“ entfällt mit der Kartei */
 
     /* Aufräumen */
     w.confirm = vorherConfirm;
     w.__ki.verzug = 40;
     w.__T(`(function(){
       if(modalOffen('karte-modal')) modalZu('karte-modal');
-      delete S.kartei; KARTEI_CTRL = {};
       S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'LO'; });
       kiSchluesselSetzen('');
-      sichern(); karteiLeiste(); render();
+      sichern(); render();
       return 1;
     })()`);
     await tick();
@@ -8221,8 +7226,6 @@ setTimeout(async () => {
     pruef('Ein eigener Wert bleibt', q('AE3', 'p.wichtig') === 'Eigener Hinweis');
     pruef('Ohne Mutter bleibt das Feld leer', !q('AE4', 'p.wichtig'));
     pruef('Der Enkel erbt über den Ableger', q('AE5', 'p.wichtig') === 'Nie ins Herz gießen', String(q('AE5', 'p.wichtig')));
-    pruef('Der Ableger zählt danach nicht mehr als Lücke', q('AE2', 'karteiLuecken(p).join(",")') === '',
-      q('AE2', 'karteiLuecken(p).join(",")'));
     w.__T(`(function(){
       var p = S.eigene.find(function(x){ return x.id === 'AE2'; });
       p.wichtig = ''; sichern(); laden(); return 1;
@@ -8248,10 +7251,6 @@ setTimeout(async () => {
       !/\nSORTE: /.test(fmt) && /Nenne keinen Sortennamen, auch keinen vermuteten\./.test(fmt)
       && /Häng keinen Sortennamen an — panaschierte Sorten/.test(fmt)
       && /8\. Steht in BOTANISCH und MERKMALE kein Sortenname\?/.test(fmt));
-    const kfoto = String(w.__T('auftragMitTieren(KARTEI_FELD_FOTO, KARTEI_SONICHT, karteiPruefliste(true))'));
-    pruef('E4: Der Kartei-Auftrag mit Foto fragt SORTE',
-      /\nSORTE: /.test(kfoto) && /4\. Steht ein Sortenname nur in SORTE und nicht in BOTANISCH oder MERKMALE\?/.test(kfoto)
-      && /Den Sortennamen nennst du nur in SORTE/.test(kfoto));
     w.__T(`(function(){
       S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'SK'; });
       var basis = {eigen:true, klasse:'B', sonne:'hell', typ:'Kletterpflanze', wichtig:'keine', frostMin:10,
@@ -8266,10 +7265,6 @@ setTimeout(async () => {
       neu({id:'SK6', name:'Sammel', art:'Efeutute', botanisch:'Epipremnum aureum', sorte:''});
       sichern(); return 1;
     })()`);
-    const kontext = String(w.__T(`karteiAuftrag(allePflanzen().find(function(x){ return x.id === 'SK1'; })).text`));
-    pruef('E4: Ohne Foto fragt die Kartei SORTE mit Zusatz',
-      /\nSORTE: [^\n]*Ohne Foto: Nenne eine Sorte nur/.test(kontext)
-      && /Steht ein Sortenname nur in SORTE und nicht in BOTANISCH\?/.test(kontext));
 
     /* Der Leser */
     const lies = t => w.__T(`JSON.stringify(sorteLesen((geminiLesen(${JSON.stringify(t)}) || {}).sorte))`);
@@ -8338,80 +7333,8 @@ setTimeout(async () => {
     w.__T(`(function(){ S.eigene = S.eigene.filter(function(p){ return !/^SortenAnlegen/.test(p.name); });
       sichern(); return 1; })()`);
 
-    /* Die Kartei */
-    const ab = (id, felder) => `karteiAbweichungen(allePflanzen().find(function(x){ return x.id === '${id}'; }),
-      {stand:'ok', felder:${JSON.stringify(felder)}})`;
-    const zeile = (id, felder, key) => w.__T(`JSON.stringify(${ab(id, felder)}.zeilen.find(function(z){ return z.key === '${key}'; }) || null)`);
-    const zl = (id, felder, key) => JSON.parse(zeile(id, felder, key));
-    const z1 = zl('SK1', {sorte:'Albo | hoch', sortebeleg:'sichtbare Merkmale'}, 'sorte');
-    pruef('E4: Kartei zeigt die Zeile Sorte', !!z1 && z1.neu === 'Albo' && z1.alt === ''
-      && /Setzt die Sorte · Sicherheit hoch/.test(z1.wirkung) && !z1.hand, JSON.stringify(z1));
-    pruef('E4: Gleiche Sorte in anderer Schreibweise gibt keine Zeile', zl('SK2', {sorte:'albo | hoch', sortebeleg:'sichtbare Merkmale'}, 'sorte') === null);
-    pruef('E4: Niedrig gibt keine Zeile, aber einen Hinweis',
-      zl('SK1', {sorte:'Albo | niedrig'}, 'sorte') === null
-      && /vermutet die Sorte „Albo“/.test(w.__T(`${ab('SK1', {sorte:'Albo | niedrig'})}.hinweise.join(' ')`)));
-    pruef('E4: „keine“ bietet nie an, eine Sorte zu löschen',
-      w.__T(`${ab('SK2', {sorte:'keine'})}.zeilen.length`) === 0);
-    const zh = zl('SK2', {sorte:'Thai Constellation | mittel', sortebeleg:'sichtbare Merkmale'}, 'sorte');
-    pruef('E4: Eine selbst eingetragene Sorte gilt als eigene', !!zh && zh.hand === true && zh.alt === 'Albo', JSON.stringify(zh));
-    const zk = zl('SK3', {sorte:'Thai Constellation | mittel', sortebeleg:'sichtbare Merkmale'}, 'sorte');
-    pruef('E4: Eine KI-Sorte gilt nicht als eigene', !!zk && zk.hand === false, JSON.stringify(zk));
-
-    w.__T(`(function(){
-      S.kartei = {start:Date.now(), ende:Date.now(), gesamt:1, offen:[], alle:['SK1'], versuch:{}, aktiv:false,
-        fertig:{SK1:{stand:'ok', art:'foto', zeit:Date.now(), felder:{sorte:'Albo | hoch', sortebeleg:'sichtbare Merkmale'}}}};
-      sichern(); karteiFensterAuf('SK1'); return 1; })()`);
-    await tick();
-    const haken = d.querySelector('#ka-inhalt [data-kazeile="sorte"]');
-    w.__T(`modalZu('kartei-abgleich')`);
-    await tick();
-    pruef('E4: Öffnen und Schließen ändert die Sorte nicht (Regel 10.8)',
-      !!haken && w.__T(`allePflanzen().find(function(x){ return x.id === 'SK1'; }).sorte`) === '');
-    w.__T(`(function(){ KA_PFLANZE = 'SK1'; karteiAktion('nimm', ['sorte']); return 1; })()`);
-    pruef('E4: Übernommen mit KI-Stempel',
-      w.__T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'SK1'; });
-        return p.sorte === 'Albo' && p.quellen.sorte === 'ki'; })()`) === true);
-
-    const zb = zl('SK4', {sorte:'keine'}, 'sortebot');
-    pruef('E4: Sorte aus dem botanischen Namen wird angeboten',
-      !!zb && zb.alt === 'Philodendron hederaceum Brasil' && zb.neu === 'Sorte Brasil · Botanisch Philodendron hederaceum',
-      JSON.stringify(zb));
-    pruef('E4: Auch ohne SORTE-Zeile in der Antwort', !!zl('SK4', {}, 'sortebot'));
-    pruef('E4: Dabei keine Zeilen Botanisch und Art',
-      zl('SK4', {art:'Kletterphilodendron', bot:'Philodendron hederaceum', sicher:'hoch'}, 'botanisch') === null
-      && zl('SK4', {art:'Philodendron', bot:'Philodendron hederaceum', sicher:'hoch'}, 'art') === null);
-    const za = zl('SK4', {sorte:'Micans | hoch', sortebeleg:'sichtbare Merkmale'}, 'sorte');
-    pruef('E4: Andere Sorte als im Namen: normale Zeile mit Hinweis',
-      !!za && /Im botanischen Namen steht „Brasil“/.test(za.wirkung)
-      && zl('SK4', {sorte:'Micans | hoch', sortebeleg:'sichtbare Merkmale'}, 'sortebot') === null, JSON.stringify(za));
-    pruef('E4: Varietät ist keine Sorte', zl('SK5', {}, 'sortebot') === null);
-    w.__T(`(${ab('SK4', {sorte:'keine'})}.zeilen.find(function(z){ return z.key === 'sortebot'; }) || {nimm:function(){}}).nimm()`);
-    pruef('E4: Die Übernahme setzt Sorte und kürzt den Namen',
-      w.__T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'SK4'; });
-        return JSON.stringify([p.sorte, p.botanisch, (p.quellen || {}).sorte]); })()`)
-      === '["Brasil","Philodendron hederaceum","ki"]',
-      w.__T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'SK4'; });
-        return JSON.stringify([p.sorte, p.botanisch, p.quellen]); })()`));
-    pruef('E4: Danach wird nichts mehr angeboten', w.__T(`${ab('SK4', {sorte:'Brasil | hoch', sortebeleg:'sichtbare Merkmale'})}.zeilen.length`) === 0);
-
-    /* Reihenfolge beim Sammelübernehmen */
-    const reihe = w.__T(`(function(){
-      S.kartei = {start:Date.now(), ende:Date.now(), gesamt:1, offen:[], alle:['SK6'], versuch:{}, aktiv:false,
-        fertig:{SK6:{stand:'ok', art:'foto', zeit:Date.now(),
-          felder:{art:'Fensterblatt', bot:'Monstera deliciosa', sicher:'hoch', sorte:'Albo | hoch', sortebeleg:'sichtbare Merkmale', licht:'indirekt'}}}};
-      var log = [], echt = aenderungSetzen;
-      aenderungSetzen = function(id, f){ if(id === 'SK6') log.push(Object.keys(f).join('+')); return echt.apply(null, arguments); };
-      try { KA_PFLANZE = 'SK6'; karteiAktion('nimm', ['sonne', 'sorte', 'art']); }
-      finally { aenderungSetzen = echt; }
-      return log.join(',');
-    })()`);
-    pruef('E4: Sammelübernehmen setzt erst die Art, dann die Sorte, dann den Rest',
-      /^art\+botanisch,/.test(reihe) && reihe.indexOf('sorte') > 0 && reihe.indexOf('sonne') > reihe.indexOf('sorte'), reihe);
-    pruef('E4: Beides ist danach gesetzt',
-      w.__T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'SK6'; });
-        return p.art === 'Fensterblatt' && p.sorte === 'Albo' && p.sonne === 'indirekt'; })()`) === true);
-
-    /* Stempel */
+    /* Stempel (4.0-beta.30, B3: die KI-Sorte für SK1 setzt jetzt der Test selbst, vorher die Kartei) */
+    w.__T(`aenderungSetzen('SK1', {sorte:'Albo'}, 'ki')`);
     w.__T(`aenderungSetzen('SK3', {sorte:'Von Hand'})`);
     pruef('E4: Von Hand geändert fällt der KI-Stempel weg',
       w.__T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'SK3'; });
@@ -8422,64 +7345,8 @@ setTimeout(async () => {
         return p && p.sorte === 'Albo' && p.quellen && p.quellen.sorte === 'ki'; })()`) === true);
 
     w.__T(`(function(){
-      if(typeof modalOffen === 'function' && modalOffen('kartei-abgleich')) modalZu('kartei-abgleich');
-      KA_PFLANZE = null; delete S.kartei;
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'SK' && p.id !== '${kind}'; });
-      sichern(); karteiLeiste(); karteiAbschnitt(); render(); return 1;
-    })()`);
-  }
-
-  /* ══ 3.23.0: Fortschrittsbalken ══ */
-  {
-    w.__T(`(function(){
-      S.eigene = (S.eigene||[]).filter(function(p){ return String(p.id).slice(0,2) !== 'KZ'; });
-      ['KZ1','KZ2','KZ3'].forEach(function(id){
-        S.eigene.push({id:id, eigen:true, name:'Balken ' + id, art:'Fensterblatt', klasse:'B', todo:[], log:[]});
-      });
-      S.kartei = {start:Date.now(), gesamt:1, offen:[], alle:['KZ1'], fertig:{}, versuch:{}, aktiv:true};
-      KARTEI_CTRL = {KZ1:{abort:function(){}}};
-      sichern(); return 1;
-    })()`);
-    const teil = ms => w.__T(`(function(){ KARTEI_START = {KZ1: Date.now() - ${ms}}; return karteiFortschritt(S.kartei).teil; })()`);
-    pruef('K: Der Balken beginnt bei 0', teil(0) === 0, String(teil(0)));
-    pruef('K: Nach 1 Sekunde 30 %', teil(1500) === 30, String(teil(1500)));
-    pruef('K: Nach 4 Sekunden 60 %', teil(5000) === 60, String(teil(5000)));
-    pruef('K: Nach 10 Sekunden 85 %', teil(11000) === 85, String(teil(11000)));
-    pruef('K: Nach 20 Sekunden weiter 85 %', teil(20000) === 85, String(teil(20000)));
-    pruef('K: Der Text nennt keine Prozentzahl',
-      w.__T(`karteiFortschritt(S.kartei).text`) === 'Prüfe 1 von 1', w.__T(`karteiFortschritt(S.kartei).text`));
-    w.__T(`(function(){ KARTEI_START = {KZ1: Date.now() - 5000}; karteiLeiste(); karteiAbschnitt(); return 1; })()`);
-    pruef('K: Während des Laufs läuft der Zeitgeber', w.__T(`KARTEI_UHR !== null`) === true);
-    w.__T(`karteiBalkenSetzen()`);
-    {
-      const b = d.querySelector('#kartei-innen .kartei-balken');
-      const i = b ? b.querySelector('i') : null;
-      const s = d.querySelector('#kartei-streifen .ks-balken i');
-      pruef('K: Balken, Leiste und aria-valuenow zeigen dieselbe Zahl',
-        !!i && i.style.width === '60%' && !!s && s.style.width === '60%' && b.getAttribute('aria-valuenow') === '60',
-        [i && i.style.width, s && s.style.width, b && b.getAttribute('aria-valuenow')].join(' '));
-      pruef('K: Die Leiste nennt keine Prozentzahl',
-        !/%/.test(String((d.getElementById('kartei-streifen')||{}).textContent)));
-    }
-    pruef('K: Drei Pflanzen, eine fertig, eine seit 5 s → 53 %',
-      w.__T(`(function(){
-        S.kartei.gesamt = 3; S.kartei.alle = ['KZ1','KZ2','KZ3']; S.kartei.offen = ['KZ3'];
-        S.kartei.fertig = {KZ1:{stand:'ok', felder:{}, zeit:Date.now()}};
-        KARTEI_CTRL = {KZ2:{abort:function(){}}};
-        KARTEI_START = {KZ1: Date.now() - 30000, KZ2: Date.now() - 5000};
-        return karteiFortschritt(S.kartei).teil; })()`) === 53);
-    w.__T(`(function(){
-      KARTEI_CTRL = {};
-      S.kartei.offen = [];
-      S.kartei.fertig.KZ2 = {stand:'ok', felder:{}, zeit:Date.now()};
-      S.kartei.fertig.KZ3 = {stand:'ok', felder:{}, zeit:Date.now()};
-      karteiFertig(); return 1; })()`);
-    pruef('K: Nach dem Ende 100 %', w.__T(`karteiFortschritt(S.kartei).teil`) === 100);
-    pruef('K: Nach dem Ende läuft kein Zeitgeber', w.__T(`KARTEI_UHR === null`) === true);
-    w.__T(`(function(){
-      delete S.kartei; KARTEI_START = {};
-      S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'KZ'; });
-      sichern(); karteiLeiste(); karteiAbschnitt(); render(); return 1;
+      sichern(); render(); return 1;
     })()`);
   }
 
@@ -8496,24 +7363,7 @@ setTimeout(async () => {
       S.eigene.push({id:'PF3', eigen:true, name:'Venus alt', art:'Venusfliegenfalle', botanisch:'Dionaea muscipula',
         typ:'Karnivore', klasse:'S', sonne:'voll', wichtig:'keine', frostMin:-5, duenger:'nie', winterruhe:true});
       sichern(); return 1; })()`);
-    const lu = id => T(`karteiLuecken(allePflanzen().find(function(x){return x.id==='${id}';})).join(',')`);
-    pruef('E3: Fehlende Pflegeschritte und Winterruhe sind eine Lücke', lu('PF1') === 'pflege,winterruheText', lu('PF1'));
-    pruef('E3: Mit Texten keine Lücke', lu('PF2') === '', lu('PF2'));
-    pruef('E3: Ein geprüftes „keine“ ist keine Lücke',
-      T(`karteiLuecken({botanisch:'Fictus rankens', typ:'x', klasse:'B', sonne:'hell', frostMin:1, duenger:'normal', wichtig:'x', pflege:[], winterruheText:''}).length`) === 0);
-    pruef('E3: Die Lücke steht als Name im Auftrag',
-      /Pflegeschritte, Winterruhe/.test(T(`karteiKontext(allePflanzen().find(function(x){return x.id==='PF1';})).join(' ')`)));
-
-    /* Auftrag */
-    const aufT = T(`karteiAuftrag(allePflanzen().find(function(x){return x.id==='PF2';})).text`);
-    pruef('E3: Die Kartei fragt PFLEGE und WINTERRUHE', /^PFLEGE:/m.test(aufT) && /^WINTERRUHE:/m.test(aufT));
-    pruef('E3: Regeln für jede Zimmerpflanze sind verboten', /für jede Zimmerpflanze gelten/.test(aufT));
-    pruef('E3: WICHTIG, PFLEGE und WINTERRUHE erlauben „wie Karte“',
-      ['WICHTIG','PFLEGE','WINTERRUHE'].every(n => new RegExp('^' + n + ':[^\\n]*wie Karte', 'm').test(aufT)));
-    pruef('E3: Die Texte der Karte gehen mit',
-      /bei Wichtig: Nie ins Herz gießen/.test(aufT) && /Pflegeschritte: Alte Triebe im Frühjahr kappen/.test(aufT)
-      && /zur Winterruhe: Kühl bei 12 °C/.test(aufT));
-    pruef('E3: Steckbriefwerte bleiben verborgen', !/Frost[^\\n]*7/.test(aufT.split('\n\n')[0] + aufT.split('\n\n')[1]));
+    /* 4.0-beta.30 (B3): Lücken, Auftrag und Abgleich der Kartei entfernt */
     const anlT = T(`anlegenFormat()`);
     pruef('E3: Das Anlegen fragt PFLEGE und WINTERRUHE', /^PFLEGE:/m.test(anlT) && /^WINTERRUHE:/m.test(anlT));
     pruef('E3: Das Anlegen kennt kein „wie Karte“', !/wie Karte/.test(anlT));
@@ -8531,40 +7381,8 @@ setTimeout(async () => {
     pruef('E3: „wie Karte“ erkannt', pl('Wie Karte.').typ === 'wie' && pl('unverändert').typ === 'wie');
     pruef('E3: „keine“ erkannt', pl('keine').typ === 'keine' && pl('Keine besonderen.').typ === 'keine');
 
-    /* Abgleich */
-    const ab = (id, f) => JSON.parse(T(`JSON.stringify(karteiAbweichungen(allePflanzen().find(function(x){return x.id==='${id}';}),
-      {stand:'ok', felder:${JSON.stringify(f)}}))`));
-    const zk = (id, f, k) => ab(id, f).zeilen.find(z => z.key === k) || null;
-    const z1 = zk('PF1', {pflege:'Triebe kappen | Luftwurzeln stehen lassen'}, 'pflege');
-    pruef('E3: Leere Karte bekommt die Zeile Pflegeschritte',
-      !!z1 && z1.alt === '' && /Triebe kappen · Luftwurzeln/.test(z1.neu) && /Setzt/.test(z1.wirkung), JSON.stringify(z1));
-    pruef('E3: „wie Karte“ gibt keine Zeile',
-      !zk('PF2', {pflege:'wie Karte', winterruhe:'wie Karte', wichtig:'wie Karte'}, 'pflege')
-      && !zk('PF2', {pflege:'wie Karte', winterruhe:'wie Karte', wichtig:'wie Karte'}, 'winterruhe')
-      && !zk('PF2', {pflege:'wie Karte', winterruhe:'wie Karte', wichtig:'wie Karte'}, 'wichtig'));
-    pruef('E3: „keine“ löscht nie vorhandene Texte',
-      !zk('PF2', {pflege:'keine', winterruhe:'keine'}, 'pflege') && !zk('PF2', {pflege:'keine', winterruhe:'keine'}, 'winterruhe'));
-    const z2 = zk('PF2', {pflege:'Neu schneiden'}, 'pflege');
-    pruef('E3: Eigene Pflegeschritte sind markiert und werden ersetzt', !!z2 && z2.hand === true && /Ersetzt/.test(z2.wirkung), JSON.stringify(z2));
-    const z3 = zk('PF1', {pflege:'keine', winterruhe:'keine'}, 'winterruhe');
-    pruef('E3: „keine“ bei leerer Karte schließt die Lücke per Zeile', !!z3 && z3.neu === 'keine', JSON.stringify(z3));
-    const a4 = ab('PF3', {winterruhe:'keine'});
-    pruef('E3: Karte mit Winterruhe und Antwort „keine“: nur ein Hinweis',
-      !a4.zeilen.some(z => z.key === 'winterruhe') && /keine Winterruhe/.test(a4.hinweise.join(' ')));
-    const z5 = zk('PF3', {winterruhe:'November bis Februar bei 5 °C'}, 'winterruhe');
-    pruef('E3: Alte Winterruhe ohne Text bekommt eine Zeile', !!z5 && /allgemeiner Text/.test(z5.alt), JSON.stringify(z5));
-
-    /* Übernahme */
-    T(`(function(){ S.kartei = {start:Date.now(), ende:Date.now(), gesamt:1, offen:[], alle:['PF1'], versuch:{}, aktiv:false,
-      fertig:{PF1:{stand:'ok', art:'text', zeit:Date.now(), felder:{pflege:'Triebe kappen | Luftwurzeln stehen lassen', winterruhe:'Kühl bei 10 °C'}}}};
-      KA_PFLANZE = 'PF1'; karteiAktion('nimm', ['pflege', 'winterruhe']); return 1; })()`);
-    const pf = c => T(`(function(){ var p = allePflanzen().find(function(x){return x.id==='PF1';}); return ${c}; })()`);
-    pruef('E3: Übernommen als Liste und Text',
-      pf('JSON.stringify(p.pflege)') === '["Triebe kappen","Luftwurzeln stehen lassen"]' && pf('p.winterruheText') === 'Kühl bei 10 °C');
-    pruef('E3: mit Stempel ki', pf(`herkunftVon(p, 'pflege')`) === 'ki' && pf(`herkunftVon(p, 'winterruheText')`) === 'ki');
-    pruef('E3: Danach keine Lücke mehr', lu('PF1') === '', lu('PF1'));
-
-    /* Karte zeigt den eigenen Text */
+    /* Karte zeigt den eigenen Text (4.0-beta.30, B3: die Texte setzt der Test, vorher die Kartei) */
+    T(`aenderungSetzen('PF1', {pflege:['Triebe kappen', 'Luftwurzeln stehen lassen'], winterruheText:'Kühl bei 10 °C'}, 'ki')`);
     const karte = id => T(`kartenDetailHTML(allePflanzen().find(function(x){return x.id==='${id}';}))`);
     pruef('E3: Die Karte zeigt den eigenen Winterruhe-Text', /Kühl bei 10 °C/.test(karte('PF1')) && !/Ist Pflicht/.test(karte('PF1')));
     pruef('E3: Ohne Text bleibt der alte Text', /Ist Pflicht/.test(karte('PF3')));
@@ -8587,7 +7405,7 @@ setTimeout(async () => {
     const np = c => T(`(function(){ var p = allePflanzen().find(function(x){ return x.name === 'PflegeAnlegen'; }); return p ? ${c} : 'fehlt'; })()`);
     pruef('E3: Anlegen speichert Pflegeschritte mit Stempel ki',
       np('JSON.stringify(p.pflege)') === '["Triebe kappen","Stützstab geben"]' && np('p.quellen.pflege') === 'ki', np('JSON.stringify([p.pflege, p.quellen])'));
-    pruef('E3: „keine“ Winterruhe als geprüft', np('p.winterruheText') === '' && np('karteiLuecken(p).indexOf("winterruheText")') === -1);
+    pruef('E3: „keine“ Winterruhe als geprüft', np('p.winterruheText') === '');
 
     /* Bearbeiten */
     const bid = np('p.id');
@@ -8605,7 +7423,7 @@ setTimeout(async () => {
       npi('JSON.stringify([p.pflege, p.quellen])'));
     T(`(function(){ var b = document.getElementById('b-${bid}'); if(b) b.remove();
       S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'PF' && p.id !== '${bid}'; });
-      delete S.kartei; KA_PFLANZE = null; sichern(); render(); return 1; })()`);
+      sichern(); render(); return 1; })()`);
   }
 
   /* ══════════ Kartei schneller (3.26.0) ══════════ */
@@ -8644,9 +7462,11 @@ setTimeout(async () => {
     pruef('3.26.0: Ohne Option keine Denkstufe (Anlegen, Doktor)', !!l3 && !l3.generationConfig.thinkingConfig);
     w.__plan = [{status:400, fehler:{error:{message:'Thinking level is not supported for this model.'}}}, {text:'ok'}];
     const vor = w.__leiber.length;
-    const t4 = await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig', denkenNochmal:true})`));
-    pruef('3.26.0: Lehnt das Modell die Denkstufe ab, fragt die Kartei einmal ohne',
-      t4 === 'ok' && w.__leiber.length === vor + 2 && !w.__leiber[vor + 1].generationConfig.thinkingConfig);
+    /* 4.0-beta.30 (B3): Die Wiederholung ohne Denkstufe gab es nur für die Kartei; auch mit der alten Option bleibt es bei einer Anfrage. */
+    let t4 = '';
+    try{ await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig', denkenNochmal:true})`)); t4 = 'kam durch'; }catch(e){ t4 = String(e.message || e); }
+    pruef('beta.30 B3: Eine abgelehnte Denkstufe wird nie wiederholt, auch nicht mit denkenNochmal',
+      w.__leiber.length === vor + 1 && /Denkstufe/.test(t4), (w.__leiber.length - vor) + ' | ' + t4);
     pruef('3.26.0: und das Modell wird gemerkt', T(`KI_DENKEN_AUS['models/gemini-3-flash'] === true`) === true);
     T(`(function(){ delete KI_DENKEN_AUS['models/gemini-3-flash']; return 1; })()`);
     /* 3.32.0: Ohne denkenNochmal bleibt es bei einer Anfrage. */
@@ -8662,7 +7482,7 @@ setTimeout(async () => {
     w.__plan = [{status:400, fehler:{error:{message:'Image input modality is not enabled for this model'}}}, {text:'ok'}];
     const vor3 = w.__leiber.length;
     try{ await haengt(T(`kiFragen('x', null, null, null, {denken:'niedrig', denkenNochmal:true})`)); }catch(e){}
-    pruef('3.32.0: Ein anderer 400 wird auch in der Kartei nicht wiederholt', w.__leiber.length === vor3 + 1, String(w.__leiber.length - vor3));
+    pruef('3.32.0: Ein anderer 400 wird nicht wiederholt', w.__leiber.length === vor3 + 1, String(w.__leiber.length - vor3));
     pruef('3.32.0: und das Modell wird nicht als ohne Denkstufe gemerkt', T(`!KI_DENKEN_AUS['models/gemini-3-flash']`) === true);
 
     /* Kontingent lesen */
@@ -8676,91 +7496,7 @@ setTimeout(async () => {
     let e2 = null; try{ await haengt(T(`kiFragen('x', null).catch(function(e){ return Promise.reject({tag:e.tag, warte:e.warte}); })`)); }catch(e){ e2 = e; }
     pruef('3.26.0: Minutenlimit mit Wartezeit von Google', !!e2 && e2.tag === false && e2.warte === 12000, JSON.stringify(e2));
 
-    /* Bündel: Auftrag, Blöcke, Gruppen */
-    T(`(function(){
-      S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'BU'; });
-      ['BU1','BU2','BU3','BU4','BU5','BU6','BU7'].forEach(function(id, i){
-        S.eigene.push({id:id, eigen:true, name:'Bündel ' + (i + 1), art:'Testranke', botanisch:'Fictus rankens',
-          typ:'Kletterpflanze', klasse:'B', sonne:'hell', wichtig:'x', frostMin:5, pflege:[], winterruheText:''});
-      });
-      sichern(); return 1; })()`);
-    const ps = "['BU1','BU2','BU3'].map(function(i){ return allePflanzen().find(function(x){return x.id===i;}); })";
-    const auf = T(`karteiBuendelAuftrag(${ps}, 'foto', [1,3])`);
-    pruef('3.26.0: Der Bündel-Auftrag nennt jede Pflanze mit Nummer',
-      /^PFLANZE 1 — Testranke \(Fictus rankens\)$/m.test(auf) && /^PFLANZE 3 — Testranke \(Fictus rankens\)$/m.test(auf));
-    pruef('3.27.0: Kein Spitzname im Bündel-Auftrag', !/Bündel \d/.test(auf));
-    pruef('3.27.0: Gleiche Art, gleiche Artangaben', /Pflanzen derselben Art bekommen dieselben Artangaben/.test(auf));
-    pruef('3.26.0: Die Fotos sind den Nummern zugeordnet',
-      /Foto 1 zeigt PFLANZE 1, Foto 2 zeigt PFLANZE 3/.test(auf) && /Ohne Foto: PFLANZE 2/.test(auf));
-    pruef('3.26.0: Der Auftrag verlangt Blöcke mit PFLANZE: <Nummer>', /PFLANZE: <Nummer>, danach/.test(auf) && !/Name wie oben/.test(auf));
-    const bl = t => JSON.parse(T(`JSON.stringify(karteiBloecke(${JSON.stringify(t)}, ${ps}).map(function(b){ return b === null ? null : b.trim(); }))`));
-    const b1 = bl('```\nPFLANZE: 1\nART: A\nPFLANZE: 3 | Testranke\nART: C\n```');
-    pruef('3.26.0: Blöcke werden der Nummer zugeordnet, ein fehlender bleibt leer',
-      b1[0] === 'ART: A' && b1[1] === null && b1[2] === 'ART: C', JSON.stringify(b1));
-    const b2 = bl('```\nPFLANZE: 1 | Monstera\nART: A\nPFLANZE: 2\nART: B\n```');
-    pruef('3.26.0: Ein falscher Name im Kopf zählt als fehlend, ohne Namen gilt die Nummer',
-      b2[0] === null && b2[1] === 'ART: B', JSON.stringify(b2));
-    const b3 = bl('```\nPFLANZE: 2\nART: A\nPFLANZE: 2\nART: B\n```');
-    pruef('3.26.0: Eine doppelte Nummer zählt als fehlend', b3[1] === null, JSON.stringify(b3));
-    const gruppe = T(`(function(){ var k = {offen:['BU1','BU2','BU3','BU4','BU5','BU6','BU7'], einzeln:{BU2:true}};
-      var a = karteiNaechste(k); var b = karteiNaechste(k); return JSON.stringify([a, b, k.offen]); })()`);
-    pruef('3.26.0: Höchstens fünf je Bündel, wer einzeln muss, geht allein',
-      gruppe === JSON.stringify([['BU1','BU3','BU4','BU5','BU6'], ['BU2'], ['BU7']]), gruppe);
-
-    /* Ein Lauf: fehlende Pflanze geht allein noch einmal */
-    w.__plan = [
-      {text: leib => { const n = [...leib.contents[0].parts[0].text.matchAll(/^PFLANZE (\d+) — (.*)$/gm)];
-        return '```\n' + n.filter(m => m[1] !== '2').map(m => 'PFLANZE: ' + m[1] + ' | ' + m[2] + '\nART: Testranke\nLICHT: halbschatten').join('\n') + '\n```'; }},
-      {text:'```\nART: Testranke\nLICHT: halbschatten\n```'}
-    ];
-    w.__leiber = [];
-    T(`(function(){ delete S.kartei; KARTEI_BREMSE_BIS = 0; karteiStarten(['BU1','BU2','BU3']); return 1; })()`);
-    for(let i = 0; i < 60 && T(`!!(S.kartei && S.kartei.aktiv)`); i++) await new Promise(r => setTimeout(r, 50));
-    pruef('3.26.0: Drei Pflanzen, eine fehlt im Bündel: zwei Anfragen',
-      w.__leiber.length === 2, String(w.__leiber.length));
-    pruef('3.26.0: Die fehlende kam allein und ist fertig',
-      T(`S.kartei.fertig.BU2 && S.kartei.fertig.BU2.stand === 'ok' && !S.kartei.fertig.BU2.buendel`) === true);
-    pruef('3.26.0: Die fehlende ist als einzeln vermerkt, damit sie nicht wieder ins Bündel rutscht',
-      T(`!!(S.kartei.einzeln && S.kartei.einzeln.BU2 === true)`) === true);
-    pruef('3.26.0: Die anderen tragen die Bündelgröße', T(`S.kartei.fertig.BU1.buendel === 3 && S.kartei.fertig.BU3.stand === 'ok'`) === true);
-    pruef('3.26.0: Beide Anfragen mit niedriger Denkstufe',
-      w.__leiber.every(l => l && l.generationConfig.thinkingConfig && l.generationConfig.thinkingConfig.thinkingLevel === 'low'));
-    pruef('3.26.0: Die Laufzeit ist gemerkt', T(`S.kartei.laufMs >= 0 && !S.kartei.laufAb`) === true);
-    const zeileTxt = T(`karteiZeile(allePflanzen().find(function(x){return x.id==='BU1';}), S.kartei.fertig.BU1)`);
-    pruef('3.26.0: Die Ergebniszeile nennt die Dauer', /· \d+ s/.test(zeileTxt), zeileTxt);
-
-    /* Tageskontingent hält den Lauf an */
-    w.__plan = [{status:429, fehler:tag}];
-    T(`(function(){ delete S.kartei; KARTEI_BREMSE_BIS = 0; karteiStarten(['BU4','BU5']); return 1; })()`);
-    for(let i = 0; i < 60 && T(`!!(S.kartei && S.kartei.aktiv)`); i++) await new Promise(r => setTimeout(r, 50));
-    pruef('3.26.0: Tageskontingent: der Lauf hält an',
-      T(`S.kartei.aktiv === false && S.kartei.pausiert === true && S.kartei.halt === 'tag'`) === true,
-      T(`JSON.stringify({a:S.kartei.aktiv, p:S.kartei.pausiert, h:S.kartei.halt, f:Object.keys(S.kartei.fertig)})`));
-    pruef('3.26.0: Keine Pflanze gilt als gescheitert', T(`Object.keys(S.kartei.fertig).length === 0 && S.kartei.offen.length === 2`) === true);
-    T(`karteiAbschnitt(); karteiLeiste()`);
-    pruef('3.26.0: Die Anzeige nennt Kontingent und Uhrzeit',
-      /Tageskontingent erschöpft — wieder ab \d{1,2}:\d{2} Uhr/.test(String(d.getElementById('kartei-innen').textContent))
-      && /Tageskontingent/.test(String((d.getElementById('kartei-streifen') || {}).textContent)));
-    w.__plan = [];
-    T(`karteiFortsetzen()`);
-    pruef('3.26.0: Fortsetzen löscht den Halt', T(`!S.kartei.halt && S.kartei.aktiv === true`) === true);
-    for(let i = 0; i < 60 && T(`!!(S.kartei && S.kartei.aktiv)`); i++) await new Promise(r => setTimeout(r, 50));
-
-    /* Minutenlimit bremst sichtbar */
-    w.__plan = [{status:429, fehler:minute}];
-    T(`(function(){ delete S.kartei; KARTEI_BREMSE_BIS = 0; karteiStarten(['BU6','BU7']); return 1; })()`);
-    for(let i = 0; i < 20 && T(`KARTEI_BREMSE_BIS`) === 0; i++) await new Promise(r => setTimeout(r, 50));
-    const rest = T(`KARTEI_BREMSE_BIS - Date.now()`);
-    pruef('3.26.0: Das Minutenlimit bremst so lange, wie Google sagt', rest > 9000 && rest <= 12000, String(rest));
-    const info = T(`karteiInfo(S.kartei, karteiFortschritt(S.kartei))`);
-    pruef('3.26.0: Die Info nennt Warten, Laufzeit und Modell',
-      /wartet \d+ s — zu viele Anfragen in der Minute/.test(info) && /läuft seit \d+:\d{2}/.test(info) && /Modell 3 flash/.test(info), info);
-    T(`karteiAbschnitt()`);
-    pruef('3.26.0: Die Info steht unter dem Balken', !!d.querySelector('#kartei-innen .kartei-info'));
-    pruef('3.26.0: Die Leiste zeigt die Laufzeit', !!d.querySelector('#kartei-streifen .ks-zeit'));
-    T(`(function(){ karteiVerwerfen(); KARTEI_BREMSE_BIS = 0;
-      S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'BU'; });
-      sichern(); karteiLeiste(); karteiAbschnitt(); return 1; })()`);
+    /* 4.0-beta.30 (B3): Bündel, Lauf, Kontingent und Bremse der Kartei entfernt */
     w.fetch = fetch0;
   }
 
@@ -8791,7 +7527,7 @@ setTimeout(async () => {
     pruef('3.27.0: Trivialname in Klammern ist keine Sorte', !!sg('VS5', {sorte:'(Bogenhand) | mittel', sortebeleg:'x'}).verworfen);
     pruef('3.27.0: Deutscher Artname ist keine Sorte', !!sg('VS5', {sorte:'Bogenhanf | hoch', sortebeleg:'x'}).verworfen);
     pruef('3.27.0: Klammerzusatz im botanischen Namen gibt keine Sorte',
-      T(`karteiSortenZusatz(allePflanzen().find(function(x){return x.id==='VS5';}))`) === '');
+      T(`sortenZusatz(allePflanzen().find(function(x){return x.id==='VS5';}))`) === '');
     pruef('3.27.0: Ohne Foto keine Sorte', !!sg('VS2', {sorte:'Thai Constellation | hoch', sortebeleg:'Sprenkel'}, {ohneFoto:true}).verworfen);
     const t1 = sg('VS2', {sorte:'Thai Constellation | hoch'});
     pruef('3.27.0: Ohne Beleg nur „niedrig“', t1.sicher === 'niedrig', JSON.stringify(t1));
@@ -8802,60 +7538,13 @@ setTimeout(async () => {
     pruef('3.27.0: Ein Spitzname, der nur ein Teil der Sorte ist, sperrt sie nicht („Thai“)', !t3.verworfen);
     pruef('3.27.0: Mit Beleg und ohne Verwechslung bleibt „hoch“', t3.sicher === 'hoch', JSON.stringify(t3));
 
-    const ab = (id, f, art) => JSON.parse(T(`JSON.stringify(karteiAbweichungen(allePflanzen().find(function(x){return x.id==='${id}';}),
-      {stand:'ok', art:'${art || 'foto'}', felder:${JSON.stringify(f)}}))`));
-    const zk = (a, k) => a.zeilen.find(z => z.key === k) || null;
-    const a1 = ab('VS2', {sorte:'Thai Constellation | hoch', sortebeleg:'cremefarbene Sprenkel', sortenverw:'Albo, weiße Sektoren'});
-    const z1 = zk(a1, 'sorte');
-    pruef('3.27.0: Kartei nennt Beleg und Verwechslung, Sicherheit mittel',
-      !!z1 && /Sicherheit mittel/.test(z1.wirkung) && /Erkannt an: cremefarbene Sprenkel/.test(z1.wirkung)
-      && /Verwechslung möglich: Albo/.test(z1.wirkung) && !z1.einzeln, JSON.stringify(z1));
-    const z2 = zk(ab('VS3', {sorte:'Thai Constellation | hoch', sortebeleg:'Sprenkel'}), 'sorte');
-    pruef('3.27.0: Vorhandene Sorte: strittig, nur einzeln',
-      !!z2 && z2.einzeln === true && /strittig/.test(z2.name) && z2.alt === 'Albo' && /Deine Sorte bleibt/.test(z2.wirkung), JSON.stringify(z2));
-    const a3 = ab('VS1', {sorte:'Beauty | hoch', sortebeleg:'rosa'});
-    pruef('3.27.0: Kartei verwirft den Spitznamen mit Hinweis',
-      !zk(a3, 'sorte') && /„Beauty“ als Sorte — verworfen \(dein Name/.test(a3.hinweise.join(' ')), a3.hinweise.join(' | '));
-    pruef('3.27.0: Ohne Foto bietet die Kartei keine Sorte an', !zk(ab('VS2', {sorte:'Thai Constellation | hoch', sortebeleg:'x'}, 'text'), 'sorte'));
-
-    /* Plausibilität */
-    const a4 = ab('VS2', {frost:'0', licht:'volle Sonne', winterruhe:'November bis Februar kühl bei 12 °C'});
-    pruef('3.27.0: Aronstab: Frost unter 5 °C wird nicht angeboten', !zk(a4, 'frostMin') && /Frost unter 5 °C/.test(a4.hinweise.join(' ')), a4.hinweise.join(' | '));
-    pruef('3.27.0: Aronstab: volle Sonne wird nicht angeboten', !zk(a4, 'sonne') && /volle Sonne/.test(a4.hinweise.join(' ')));
-    pruef('3.27.0: Aronstab: keine Winterruhe', !zk(a4, 'winterruhe') && /ruhen im Zimmer nicht/.test(a4.hinweise.join(' ')));
-    const a5 = ab('VS4', {klasse:'durstig'});
-    pruef('3.27.0: Kaktus: dauerhaft feuchte Erde wird nicht angeboten', !zk(a5, 'klasse') && /dauerhaft feuchte Erde/.test(a5.hinweise.join(' ')), JSON.stringify(a5));
-    const z6 = zk(ab('VS2', {klasse:'kakteenmodus'}), 'klasse');
-    pruef('3.27.0: Abweichung von der Bibliothek: nur einzeln', !!z6 && z6.einzeln === true && /Weicht von der Bibliothek ab/.test(z6.wirkung), JSON.stringify(z6));
-
-    /* wie Karte für Merkmale und Vermehrung */
-    const a7 = ab('VS6', {sortenmerkmale:'wie Karte', vermehrung:'wie Karte'});
-    pruef('3.27.0: „wie Karte“ bei Sortenmerkmalen und Vermehrung gibt keine Zeile', !zk(a7, 'sortenmerkmale') && !zk(a7, 'vermehrung'));
+    /* 4.0-beta.30 (B3): Abgleich und Plausibilität der Kartei entfernt */
 
     /* Aufträge */
-    const kf = T(`karteiFormat('foto')`), kt = T(`karteiFormat('text')`), anl = T(`anlegenFormat()`);
-    pruef('3.27.0: Kartei mit Foto fragt SORTE_BELEG und SORTEN_VERWECHSLUNG', /^SORTE_BELEG:/m.test(kf) && /^SORTEN_VERWECHSLUNG:/m.test(kf));
-    pruef('3.27.0: Ohne Foto nicht', !/^SORTE_BELEG:/m.test(kt) && !/^SORTEN_VERWECHSLUNG:/m.test(kt));
+    const anl = T(`anlegenFormat()`);
     pruef('3.27.0: Das Anlegen fragt beides', /^SORTE_BELEG:/m.test(anl) && /^SORTEN_VERWECHSLUNG:/m.test(anl));
-    pruef('3.27.0: Der Beleg verlangt die Genauigkeit am Beispiel Thai Constellation', /Thai Constellation hat cremefarbene Sprenkel/.test(kf));
-    pruef('3.27.0: Spitzname ist nie Sorte — steht im Auftrag', /Ein Name, den ich meiner Pflanze gegeben habe, ist nie eine Sorte/.test(kf));
-    pruef('3.27.0: Verbotene Pflegeschritte stehen im Auftrag', /Blätter abwischen, die Pflanze drehen/.test(kf));
-    pruef('3.27.0: Tropische Arten ruhen nicht', /Tropische Arten, die im Zimmer im Winter nur langsamer wachsen, ruhen nicht/.test(kf));
-    pruef('3.27.0: Merkmale nur der Sorte', /^MERKMALE:[^\n]*Nie Größe, Alter, Zustand/m.test(kf) && /^MERKMALE:[^\n]*Nie Größe/m.test(anl));
-    pruef('3.27.0: Licht bei panaschierten Sorten', /^LICHT:[^\n]*panaschierten Sorte/m.test(kf));
-    pruef('3.27.0: MERKMALE und VERMEHRUNG erlauben „wie Karte“',
-      /^MERKMALE:[^\n]*wie Karte/m.test(kf) && /^VERMEHRUNG:[^\n]*wie Karte/m.test(kf));
+    pruef('3.27.0: Merkmale nur der Sorte (Anlegen)', /^MERKMALE:[^\n]*Nie Größe/m.test(anl));
     pruef('3.27.0: Der Doktor bleibt ohne Sortenbeleg', !/SORTE_BELEG/.test(T('ANTWORT_FORMAT')));
-    const kx = T(`karteiKontext(allePflanzen().find(function(x){return x.id==='VS6';})).join(' ')`);
-    pruef('3.27.0: Kontext ohne Spitznamen, mit Merkmalen und Vermehrung',
-      !/King Green/.test(kx) && /Sortenmerkmale: silbrige Blätter/.test(kx) && /Vermehrungswege: Blattsteckling/.test(kx), kx);
-    pruef('3.27.0: Ohne Art keine Namen im Kontext',
-      !/Namenlos/.test(T(`karteiKontext({id:'x', name:'Namenlos'}).join(' ')`)));
-
-    /* Bündel: gleiche Art zuerst */
-    const g = T(`(function(){ var k = {offen:['VS2','VS4','VS1','VS6','VS3']};
-      var a = karteiNaechste(k); return JSON.stringify(a); })()`);
-    pruef('3.27.0: Gleicher botanischer Name kommt zuerst ins Bündel', /^\["VS2","VS3"/.test(g), g);
 
     /* Herkunft auf der Karte */
     const hz = T(`herkunftZeileHTML({quellen:{sorte:'ki', pflege:'ki', klasse:'hand'}})`);
@@ -8879,12 +7568,7 @@ setTimeout(async () => {
     const lm = w.__leiber[w.__leiber.length - 1].leib;
     pruef('3.27.0: Fotobündel denken auf mittlerer Stufe',
       lm.generationConfig.thinkingConfig && lm.generationConfig.thinkingConfig.thinkingLevel === 'medium', JSON.stringify(lm.generationConfig));
-    w.__plan = [{status:503}, {text:'ausgewichen'}];
-    w.__leiber = [];
-    let r503 = '';
-    try{ r503 = await T(`karteiFragen('x', null, null, {denken:'niedrig'}, KARTEI_GEN)`); }catch(e){ r503 = 'Fehler: ' + e.message; }
-    pruef('3.32.0: Nach 503 weicht die Kartei nicht mehr aus',
-      /^Fehler: /.test(r503) && w.__leiber.length === 1 && /gemini-3-flash/.test(w.__leiber[0].u), r503 + ' | ' + w.__leiber.length);
+    /* 4.0-beta.30 (B3): „Nach 503 weicht die Kartei nicht aus“ entfällt mit der Kartei */
     w.__plan = [];
     T(`(function(){ window.setTimeout = window.__st1; return 1; })()`);
     w.fetch = fetch0;
@@ -9320,57 +8004,7 @@ setTimeout(async () => {
     const T = c => w.__T(c);
     const warte = ms => new Promise(r => setTimeout(r, ms));
 
-    /* Kartei-Meldung: Das Fenster geht über den Verlauf zu, danach
-       zeichnet dessen Aufräumen den Abschnitt neu. */
-    T("ansichtZeigen('mehr'); karteiAbschnitt()");
-    T("modalAuf('kartei-abgleich')");
-    await tick();
-    T("modalZu('kartei-abgleich'); karteiAbschnitt(); karteiMeldung('P330 ist durchgesehen.', 'ok')");
-    await tick(); await warte(1000);
-    const km = (d.getElementById('kartei-meld') || {}).textContent || '';
-    pruef('3.30.0: Kartei-Meldung steht nach dem Schließen noch da', km === 'P330 ist durchgesehen.', JSON.stringify(km));
-    pruef('3.30.0: … mit ihrer Art', /\bok\b/.test((d.getElementById('kartei-meld') || {}).className || ''));
-    T("karteiMeldung('')");
-    /* Ein neuer Lauf nimmt die alte Meldung weg. Starten und Schlüssel
-       sind hier nachgestellt; es geht nur um die Meldung. */
-    const neuLauf = T(`(function(){ var ks = karteiStarten, kb = kiBereit, ka = kiAnbieter;
-      karteiStarten = function(){ return true; }; kiBereit = function(){ return true; }; kiAnbieter = function(){ return null; };
-      try{ karteiMeldung('Alte Meldung', 'ok'); karteiLos(['x']); return KARTEI_MELD.txt; }
-      finally { karteiStarten = ks; kiBereit = kb; kiAnbieter = ka; } })()`);
-    pruef('3.30.0: Ein neuer Lauf nimmt die alte Kartei-Meldung weg', neuLauf === '', JSON.stringify(neuLauf));
-
-    /* Düngung als Lücke */
-    pruef('3.30.0: Fehlende Düngung ist eine Kartei-Lücke',
-      T(`karteiLuecken({id:'L330', art:'X', botanisch:'X y', klasse:'B', duenger:null}).indexOf('duenger') > -1`) === true);
-    pruef('3.30.0: Vorhandene Düngung ist keine Lücke',
-      T(`karteiLuecken({id:'L330', art:'X', botanisch:'X y', klasse:'B', duenger:'normal'}).indexOf('duenger') === -1`) === true);
-    const duBib = T(`(function(){ S.eigene.push({id:'KD330', eigen:true, name:'Dünger330', art:'Fensterblatt', botanisch:'Monstera deliciosa', klasse:'B', sonne:'indirekt', duenger:null});
-      var p = allePflanzen().find(function(x){ return x.id === 'KD330'; }); return karteiBibWert(p, 'duenger') || ''; })()`);
-    pruef('3.30.0: Testvoraussetzung Bibliothek kennt die Düngung', !!duBib, duBib);
-    const duZeile = T(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'KD330'; });
-      return karteiAbweichungen(p, {stand:'ok', felder:{duenger:'${duBib}'}}).zeilen.some(function(z){ return z.key === 'duenger'; }); })()`);
-    pruef('3.30.0: Ohne eigene Angabe wird die Düngung angeboten, auch wenn sie der Bibliothek gleicht', duZeile === true);
-    T(`S.eigene = S.eigene.filter(function(x){ return x.id !== 'KD330'; }); sichern()`);
-
-    /* Kartei-Streifen einklappen */
-    T(`(function(){ S.kartei = {aktiv:false, pausiert:true, offen:['a','b'], fertig:{}, gesamt:2, alle:['a','b'], start:Date.now()}; karteiLeiste(); })()`);
-    const ks = () => d.getElementById('kartei-streifen');
-    pruef('3.30.0: Der Streifen hat einen Einklappknopf', !!(ks() && ks().querySelector('[data-do="kartei-streifen-zu"]')));
-    pruef('3.30.0: Offen hält die Seite unten Platz frei', d.body.classList.contains('ks-platz'));
-    if(ks() && ks().querySelector('[data-do="kartei-streifen-zu"]')) ks().querySelector('[data-do="kartei-streifen-zu"]').click();
-    await tick();
-    pruef('3.30.0: Eingeklappt bleibt nur die Marke', !!ks() && ks().classList.contains('klein')
-      && !!ks().querySelector('[data-do="kartei-streifen-auf"]') && !ks().querySelector('[data-do="kartei-weiter"]'),
-      ks() && ks().innerHTML.slice(0, 200));
-    pruef('3.30.0: Eingeklappt kein zusätzlicher Platz', !d.body.classList.contains('ks-platz'));
-    T('karteiLeiste()');
-    pruef('3.30.0: Der Zustand übersteht das Neuzeichnen', !!ks() && ks().classList.contains('klein'));
-    pruef('3.30.0: Die Marke zeigt Anteil und Zeit', !!ks() && /%/.test(ks().textContent) && /\d:\d\d/.test(ks().textContent), ks() && ks().textContent);
-    if(ks() && ks().querySelector('[data-do="kartei-streifen-auf"]')) ks().querySelector('[data-do="kartei-streifen-auf"]').click();
-    await tick();
-    pruef('3.30.0: Ein Tipp klappt wieder auf', !!ks() && !ks().classList.contains('klein') && !!ks().querySelector('[data-do="kartei-weiter"]'));
-    T('delete S.kartei; sichern(); karteiLeiste()');
-    pruef('3.30.0: Ohne Lauf kein Streifen und kein Platz', !ks() && !d.body.classList.contains('ks-platz'));
+    /* 4.0-beta.30 (B3): Kartei-Meldung, Düngung als Lücke und Kartei-Streifen entfallen mit der Kartei */
 
     /* Zählwort */
     const zw = T(`(function(){ var tiere = S.tiere; S.tiere = {aktiv:true, arten:['katze']};
@@ -9532,9 +8166,10 @@ setTimeout(async () => {
     /* Grundwerte */
     const gw = JSON.parse(T(`JSON.stringify(Object.keys(LEERSTAND()))`));
     const fehlend = ['ablegerErbe','ansicht','anzucht','einfach','fassungGesehen','gruppierung','hinweisWeg','histAnsicht',
-      'installBandWeg','installiert','kartei','kartenTab','kiDienst','pflegehinweise','samAnsicht','sicherTage','sortierung',
+      'installBandWeg','installiert','kartenTab','kiDienst','pflegehinweise','samAnsicht','sicherTage','sortierung',
       'speicherFest','speicherGefragt','teilenDefekt','umtopfPlan'].filter(k => gw.indexOf(k) < 0);
-    pruef('3.31.0: Alle 21 Felder stehen in den Grundwerten', fehlend.length === 0, fehlend.join(','));
+    /* 4.0-beta.30 (B3): „kartei“ entfällt, 20 Felder */
+    pruef('3.31.0: Alle 20 Felder stehen in den Grundwerten', fehlend.length === 0, fehlend.join(','));
     pruef('3.31.0: Nach dem Laden ist jedes Grundfeld gesetzt',
       T(`(function(){ var alt = S; S = {}; grundwerteErgaenzen(); var ok = Object.keys(LEERSTAND()).every(function(k){ return k in S; }); S = alt; return ok; })()`) === true);
     pruef('3.31.0: edits und weg stehen nicht mehr in den Grundwerten', gw.indexOf('edits') < 0 && gw.indexOf('weg') < 0);
@@ -9785,8 +8420,7 @@ setTimeout(async () => {
     pruef('3.32.0: Kein „steige ich um“ mehr in der App', html.indexOf('steige ich auf ein anderes Modell um') === -1);
 
     /* Zeitgrenze: zwei Minuten, keine zweite Anfrage */
-    pruef('3.32.0: Die Frist ist 120 Sekunden, auch für Fotobündel der Kartei',
-      T('KI_FRIST') === 120000 && T('KARTEI_FRIST_BUENDEL') === 120000);
+    pruef('3.32.0: Die Frist ist 120 Sekunden', T('KI_FRIST') === 120000);
     w.__aufrufe = [];
     T(`(function(){ window.__st2 = window.setTimeout;
       window.setTimeout = function(f, ms){ return window.__st2(f, Math.min(ms || 0, 60)); }; return 1; })()`);
@@ -9845,12 +8479,6 @@ setTimeout(async () => {
     pruef('3.32.0: Höchstens 20 Einträge, der neueste oben', prot2.length === 20 && prot2[0].zweck === 'Test 24', prot2.length + ' / ' + (prot2[0] && prot2[0].zweck));
     pruef('3.32.0: Das Protokoll steht nicht in der Sicherung', JSON.stringify(T('sicherungInhalt()')).indexOf('Test 24') === -1);
 
-    /* Kartei: kein Ausweichen, eine abgelehnte Denkstufe einmal ohne */
-    w.__aufrufe = [];
-    w.__antwort = {'*': () => err(503, 'The model is overloaded.')};
-    let fk = '';
-    try{ await haengt(T(`karteiFragen('x', null, null, {denken:'niedrig'}, KARTEI_GEN)`)); }catch(e){ fk = String(e.message || e); }
-    pruef('3.32.0: Die Kartei fragt bei 503 kein anderes Modell', posts().length === 1 && /3\.6 Flash/.test(fk), posts().length + ' | ' + fk);
 
     w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
     T(`kiSchluesselSetzen(''); S.kiModelle = null; S.kiModell = null; KI_BILDER.anlegen.length = 0`);
@@ -9903,8 +8531,6 @@ setTimeout(async () => {
     /* Auftrag: Kreuzungen */
     pruef('3.33.0: Der Anlege-Auftrag nennt die Kreuzungsformel',
       /^BOTANISCH:.*Gattung art × art, etwa Drosera prolifera × schizandra/m.test(T('anlegenPromptBauen()')));
-    pruef('3.33.0: Der Kartei-Auftrag mit und ohne Foto auch',
-      /^BOTANISCH:.*Gattung art × art/m.test(T(`karteiFormat('foto')`)) && /^BOTANISCH:.*Gattung art × art/m.test(T(`karteiFormat('text')`)));
     pruef('3.33.0: Das Antwortformat des Doktors bleibt wortgleich',
       T('ANTWORT_FORMAT').indexOf('Gattung art') === -1 && T('GEMINI_PROMPT').indexOf('Gattung art') === -1);
 
@@ -10443,24 +9069,9 @@ setTimeout(async () => {
     pruef('beta.1: Das Band fängt keine Tipps ab', html.indexOf('#beta-band{position:fixed;top:0;left:0;right:0;z-index:2147483000;pointer-events:none;') > -1);
     pruef('beta.1: Titel GK Beta', d.title === 'GK Beta', d.title);
 
-    /* Keine Benachrichtigungen (F38) */
-    const altSw = Object.getOwnPropertyDescriptor(w.navigator, 'serviceWorker');
-    const altPerm = w.Notification.permission;
-    let gemeldet = false;
-    Object.defineProperty(w.navigator, 'serviceWorker', {configurable:true,
-      value:{ get ready(){ gemeldet = true; return Promise.resolve({showNotification(){ gemeldet = true; }}); } }});
-    w.__ki.gefragt = false;
-    T(`(function(){ var alt = eigenstaendigGestartet; eigenstaendigGestartet = function(){ return true; };
-       try{ karteiErlaubnisFragen(); } finally { eigenstaendigGestartet = alt; } })()`);
-    w.Notification.permission = 'granted';
-    Object.defineProperty(d, 'hidden', {configurable:true, get(){ return true; }});
-    T(`karteiMelden({fertig:{a:{stand:'ok'}}, alle:['a']})`);
-    await tick();
-    delete d.hidden;
-    w.Notification.permission = altPerm;
-    Object.defineProperty(w.navigator, 'serviceWorker', altSw);
-    pruef('beta.1: Die Beta fragt nicht nach Benachrichtigungen', w.__ki.gefragt === false);
-    pruef('beta.1: Die Beta schickt keine Benachrichtigung', gemeldet === false);
+    /* Keine Benachrichtigungen (F38). 4.0-beta.30 (B3): Die einzige Quelle war die Kartei; im Code steht keine mehr. */
+    pruef('beta.1: Die Beta fragt nicht nach Benachrichtigungen', html.indexOf('requestPermission') === -1);
+    pruef('beta.1: Die Beta schickt keine Benachrichtigung', html.indexOf('showNotification') === -1);
 
     /* Sicherungsdatei (F40) */
     pruef('beta.1: Die Sicherungsdatei heißt pflanzen-sicherung-BETA.json', T('sicherungDatei().name') === 'pflanzen-sicherung-BETA.json', T('sicherungDatei().name'));
@@ -10564,7 +9175,9 @@ setTimeout(async () => {
       'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
       'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
-      'sch-pflege','sch-wachstum','sch-befunde','sch-abstammung','sch-giessart',
+      'sch-pflege','sch-befunde','sch-abstammung','sch-giessart',
+      /* seit beta.30 (B2): „Wachstum“ weg, „Symbolzeile“ dazu */
+      'sch-symbole',
       /* seit beta.21 (M2a/M2b): drei Schalter für den Gießmodus */
       'sch-gliste','sch-gmwie'];
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
@@ -10583,8 +9196,6 @@ setTimeout(async () => {
     /* 4.0-beta.29 (B1): Maßnahmen stehen als Text, ohne Haken und ohne Schalter */
     const mn = T(`massnahmenListeHTML([{handlung:'Umtopfen'}])`);
     pruef('beta.5: Maßnahmen des Doktors ohne Schalter', !/type="checkbox"/.test(mn) && !/role="switch"/.test(mn) && /Umtopfen/.test(mn));
-    pruef('beta.5: Kartei-Auswahl und -Ergebnis haben Haken, keine Schalter',
-      !/role="switch"[^>]*data-kartei/.test(quelle) && !/data-kartei[^>]*role="switch"/.test(quelle) && quelle.indexOf('data-karteikasten="alle"') > -1);
 
     /* Aussehen: Schalter 52 × 32 rechts neben dem Text, Haken 24 px */
     const wp = d.getElementById('ck-saison');
@@ -10788,18 +9399,6 @@ setTimeout(async () => {
 
     /* Wetter */
     pruef('beta.7: „Ort“ ist eine normale Feldbeschriftung', !!q('label[for="wt-ort"] > span.lab'));
-
-    /* Kartei: eigene Pflanzen ohne Foto */
-    const altPl = T('JSON.stringify(S.eigene || [])');
-    try {
-      T("S.eigene = [{id:'kb7a', name:'Erster', art:'Monstera', klasse:'B'}, {id:'kb7b', name:'Zweiter', art:'Pilea', klasse:'B'}]; KARTEI_WAHL_BEREIT = false; karteiAbschnittBauen()");
-      const kf = d.getElementById('kartei-ohnefoto');
-      pruef('beta.7: Kartei: Erklärtext unter den Kacheln ist eine Zeile mit „Mehr dazu“',
-        !!kf && kf.classList.contains('erkl') && vornVon(kf) === '2 Pflanzen ohne Foto: nur Angaben aus dem Namen.' && /^Ohne Foto wird nur gefragt, was sich aus dem Namen ergibt — kein Zustand, kein Topfurteil, keine Merkmale\. Betroffen: Erster, Zweiter\.$/.test(restVon(kf) || ''),
-        kf ? vornVon(kf) + ' | ' + restVon(kf) : 'fehlt');
-    } finally {
-      T('S.eigene = ' + altPl + '; KARTEI_WAHL_BEREIT = false; karteiAbschnittBauen()');
-    }
 
     /* Vertretungszettel */
     const vz = d.getElementById('mh-in-urlaub');
@@ -11136,7 +9735,8 @@ setTimeout(async () => {
         var r = intervallVon(p) === Math.max(1, Math.round(KLASSE_IV.S[1])) && !gmAnstauHeute(p); delete S.tagEin.F6; return r; })()`);
       pruef('beta.9: Winterruhe der Karnivore bleibt wie bisher', ruhe === true);
       T("S.anstau = {}");
-      pruef('beta.9: Karte, Reiter Pflege: „Untersetzer: alle 3 Tage nachsehen“', /Untersetzer: alle 3 Tage nachsehen/.test(T("giessAbschnitt(allePflanzen().find(function(x){ return x.id === 'F6'; }))")));
+      /* 4.0-beta.30 (B2): steht jetzt in der Gießzeile im Kopf */
+      pruef('beta.9: Karte, Gießzeile: „Untersetzer alle 3 Tage nachsehen“', /Untersetzer alle 3 Tage nachsehen/.test(T("giessZeileHTML(allePflanzen().find(function(x){ return x.id === 'F6'; }), 'Gießen: heute fällig')")));
       /* Anlegen */
       T("alStart(); neuWegSetzen('bib'); alStufeZeigen(4)");
       const kl = d.getElementById('f-klasse');
@@ -12438,7 +11038,7 @@ setTimeout(async () => {
       pruef('beta.18 (F179): Modus heißt „Entdecker (angepasst)“ und „Zurücksetzen“ erscheint', mt.indexOf('Entdecker (angepasst)') === 0 && !d.getElementById('modus-zurueck-box').hidden, mt);
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
-      d.getElementById('sch-pflege').click(); d.getElementById('sch-wachstum').click();
+      d.getElementById('sch-pflege').click(); d.getElementById('sch-symbole').click();
       d.getElementById('modus-zurueck').click();
       pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '11111101' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       T(`S.pflegehinweise = true; 1`);
@@ -12460,7 +11060,7 @@ setTimeout(async () => {
         return aus === 'none' && an !== 'none' && !d.body.classList.contains('s-aus-' + k);
       };
       [['pflege','<section class="kblock" data-kblock="pflege"></section>'],
-       ['wachstum','<section class="kblock" data-kblock="wachstum"></section>'],
+       ['symbole','<div class="km-zeichen" data-schalter="symbole"></div>'],
        ['befunde','<section class="kblock" data-kblock="befunde"></section>'],
        ['abstammung','<section class="kblock" data-kblock="abstammung"></section>'],
        ['giessart','<details data-schalter="giessart"></details>']].forEach(([k, h]) =>
@@ -13407,7 +12007,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.23 (G1a): Karte zeigt keinen Block „Licht am Platz“ und keinen Grundriss',
         !!rumpf && !rumpf.querySelector('[data-kblock="licht"]') && !rumpf.querySelector('[data-kblock="grundriss"]')
         && !rumpf.querySelector('[data-do="grundriss-fuer"]') && !/Grundriss/.test(rumpf.textContent));
-      pruef('beta.23 (G1a): Karte zeigt weiter Raum und Stellplatz', !!rumpf && !!rumpf.querySelector('[data-lage="raum"]') && !!rumpf.querySelector('[data-lage="platz"]'));
+      pruef('beta.23 (G1a): Karte zeigt weiter Raum und Stellplatz', !!rumpf && !!rumpf.querySelector('[data-lage-k="raum"]') && !!rumpf.querySelector('[data-lage-k="platz"]'));
       T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
       pruef('beta.23 (G1a): Raum und Stellplatz der Pflanzen unverändert', T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'Q1'; }); return p.raum + '|' + p.stellplatz; })()`) === K + '|Fensterbank');
       pruef('beta.23 (G1a): Lagedaten der Skizze bleiben gespeichert (nichts still gelöscht)', T(`!!(S.orte && S.orte.Q1 && S.orte.Q1.x === 40)`) === true);
@@ -14509,9 +13109,9 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.28 G2b-1 (10): Symbol Düngebedarf steht in der Karte', !!ico28 && kmText.indexOf(T(`DUENGER.viel.text`)) !== -1, ico28.slice(0, 80));
       pruef('beta.28 G2b-1 (10): Düngebedarf hat weiter vier Stufen (nie, sparsam, normal, viel)',
         T(`Object.keys(DUENGER).join(',')`) === 'nie,sparsam,normal,viel', T(`Object.keys(DUENGER).join(',')`));
-      pruef('beta.28 G2b-1 (10): Bibliothek und Kartei kennen den Düngebedarf',
-        T(`BIB.some(function(b){ return !!b.duenger; })`) === true && T(`typeof karteiBibWert`) === 'function'
-        && !!T(`karteiBibWert({botanisch:'Monstera deliciosa', art:'Fensterblatt'}, 'duenger')`));
+      /* 4.0-beta.30 (B3): ohne Kartei nur noch die Bibliothek */
+      pruef('beta.28 G2b-1 (10): Bibliothek kennt den Düngebedarf',
+        T(`BIB.some(function(b){ return !!b.duenger; })`) === true);
       await zu();
 
       /* (4) Heute ohne Zeile „zum Düngen“ */
@@ -14772,6 +13372,368 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.eigene = a.eigene; S.water = a.water; S.wish = a.wish; S.giess = a.giess; S.raeume = a.raeume; S.samStufe = a.samStufe; S.acc = a.acc;
         delete S.tasks; delete S.added; delete S.deleted;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt29)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.30: Etappe B2 — Karte aufräumen (F258, F273, F284 A, F298, F301, F309).
+     Gießzeile mit „Ändern“ und Fenster „Gießabstand“, Notiz als Feld,
+     Symbolzeile mit Schalter, schmale Tag-Zeile, Reiter Verlauf, Platz,
+     Pflegeheft, Steckbrief; Wachstum und Tiere-Zeile weg. Legt alles
+     selbst an und stellt den Stand der Hauptseite am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    /* Sicher auswerten: im alten Stand fehlende Namen brechen den Block nicht ab */
+    const TS = c => { try { return w.__T(c); } catch(e){ return 'FEHLER: ' + (e && e.message); } };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const LAGER30 = `{eigene:S.eigene, water:S.water, lernen:S.lernen, tagEin:S.tagEin, ereignisse:S.ereignisse, giess:S.giess, raeume:S.raeume, tiere:S.tiere, blatt:S.blatt, modus:S.modus, schalter:S.schalter, kartenTab:S.kartenTab, ansicht:S.ansicht}`;
+    const alt30 = T(`JSON.stringify(${LAGER30})`);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const q = s => d.querySelector(s);
+    const qa = s => [].slice.call(d.querySelectorAll(s));
+    let w30 = null;
+    try {
+      await zu();
+      T(`(function(){
+        S.giess = Object.assign({}, S.giess, {saison:false});
+        var h = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var r = raumAnlegen('B2 Stube'); var r2 = raumAnlegen('B2 Bad');
+        S.eigene = (S.eigene || []).filter(function(p){ return ['B2A','B2B','B2C'].indexOf(p.id) < 0; });
+        S.eigene.push({id:'B2A', name:'B2 · Alpha', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', sonne:'indirekt', duenger:'normal',
+          intervallEigen:true, intervall:[10, 10], topf:'14', raum:r, stellplatz:'Fensterbank',
+          notiz:'Steht am Ostfenster.\\n\\nBefund vom 1.11.2026: Blätter gesund.', pflege:['B2 Schritt eins'],
+          probleme:[['Gelbe Blätter','Zu nass','Weniger gießen']], beob:['B2 Beobachtung'], log:[]});
+        S.eigene.push({id:'B2B', name:'B2 · Beta', art:'Zamioculcas', botanisch:'Zamioculcas zamiifolia', klasse:'C', log:[], notiz:''});
+        S.eigene.push({id:'B2C', name:'B2 · Gamma', art:'Bogenhanf', botanisch:'Dracaena trifasciata', klasse:'C', log:[], notiz:''});
+        S.water.B2A = [h(3)]; S.water.B2B = [h(5)]; S.water.B2C = [h(1)];
+        if(S.lernen){ delete S.lernen.B2A; delete S.lernen.B2B; delete S.lernen.B2C; }
+        if(S.tagEin){ delete S.tagEin.B2A; delete S.tagEin.B2B; delete S.tagEin.B2C; }
+        S.modus = 'entdecker'; S.schalter = {}; schalterAnwenden();
+        sichern(); render(); return 1; })()`);
+      const ivVorher = T(`JSON.stringify(['B2A','B2B','B2C'].map(function(id){ return intervallVon(allePflanzen().find(function(x){ return x.id === id; })); }))`);
+
+      /* (1) Gießzeile ohne Wirkung, dann mit Tag-Wirkung */
+      TS(`karteOeffnen('B2A')`); await warte(60);
+      const gz = () => (q('#karte-rumpf .km-giess') || {}).textContent || '';
+      pruef('beta.30 B2 (1): Gießzeile „wieder in 7 Tagen · alle 10 Tage“ mit „Ändern“',
+        /Gießen: wieder in 7 Tagen · alle 10 Tage/.test(gz()) && !!q('#karte-rumpf .km-giess [data-do="iv-fenster"]')
+        && !q('#karte-rumpf .km-giess-wirk'), gz().replace(/\s+/g, ' ').trim());
+      TS(`tagSetzen('B2A', 'tv-laenger', {pz:30}); render(); 1`); await warte(40);
+      pruef('beta.30 B2 (1): mit Tag-Wirkung der wirksame Abstand (alle 13 Tage)', /· alle 13 Tage/.test(gz()), gz().replace(/\s+/g, ' ').trim());
+      pruef('beta.30 B2 (1): die Wirkung steht klein darunter', /10 → 13 Tage \(\+30 %\)/.test((q('#karte-rumpf .km-giess-wirk') || {}).textContent || ''),
+        (q('#karte-rumpf .km-giess-wirk') || {}).textContent || 'fehlt');
+      pruef('beta.30 B2 (4): keine Wirkungszeile mehr in der Tag-Zeile', !q('#karte-rumpf .tagk .tag-wirk'));
+
+      /* (2) „Ändern“ öffnet das Fenster; Speichern ändert den Grundabstand */
+      const aendern = q('#karte-rumpf .km-giess [data-do="iv-fenster"]'); if(aendern) aendern.click(); await warte(40);
+      pruef('beta.30 B2 (2): „Ändern“ öffnet das Fenster „Gießabstand“ über der Karte',
+        TS(`modalOffen('iv-modal') && modalOffen('karte-modal')`) === true && !!q('#iv-huelle:not([hidden]) #iv-modal'));
+      const ivTxt = (q('#iv-inhalt') || {}).textContent || '';
+      pruef('beta.30 B2 (2): Fenster nennt die Tag-Wirkung als Hinweis, nicht als Eingabe',
+        /Gerade wirkt „Gießabstand verlängern“: 10 → 13 Tage/.test(ivTxt) && !q('#iv-inhalt input'), ivTxt.slice(0, 160));
+      pruef('beta.30 B2 (2): Zähler Sommer und Winter, Gießart als Knopfliste, keine Systemliste',
+        qa('#iv-modal [data-ivf-schritt]').length === 4 && qa('#iv-modal [data-ivf-art]').length >= 5 && !q('#iv-modal select'));
+      const plus = q('#iv-modal [data-ivf-schritt="s"][data-d="1"]'); if(plus) plus.click();
+      const plusW = q('#iv-modal [data-ivf-schritt="w"][data-d="1"]'); if(plusW){ plusW.click(); }
+      pruef('beta.30 B2 (2): Zähler zeigt 11 Tage vor dem Speichern, gespeichert ist noch 10',
+        ((q('#iv-modal [data-ivf-out="s"]') || {}).textContent || '') === '11 Tage'
+        && TS(`JSON.stringify(allePflanzen().find(function(x){ return x.id === 'B2A'; }).intervall)`) === '[10,10]');
+      const sp = d.getElementById('iv-speichern'); if(sp) sp.click(); await warte(400);
+      pruef('beta.30 B2 (2): Speichern setzt den Grundabstand 11/11 von Hand',
+        TS(`JSON.stringify(ivEigen(allePflanzen().find(function(x){ return x.id === 'B2A'; })))`) === '[11,11]',
+        TS(`JSON.stringify(allePflanzen().find(function(x){ return x.id === 'B2A'; }).intervall)`));
+      pruef('beta.30 B2 (2): Fenster zu, Karte offen, Gießzeile zeigt 11 → 14', TS(`modalOffen('iv-modal')`) === false
+        && /· alle 14 Tage/.test(gz()) && /11 → 14 Tage/.test(gz()), gz().replace(/\s+/g, ' ').trim());
+      /* Abbrechen ändert nichts */
+      TS(`ivFensterAuf('B2A')`); await warte(30);
+      const minus = q('#iv-modal [data-ivf-schritt="s"][data-d="-1"]'); if(minus) minus.click();
+      const ab = d.getElementById('iv-abbrechen'); if(ab) ab.click(); await warte(400);
+      pruef('beta.30 B2 (2): Abbrechen ändert nichts', TS(`JSON.stringify(allePflanzen().find(function(x){ return x.id === 'B2A'; }).intervall)`) === '[11,11]'
+        && TS(`modalOffen('iv-modal')`) === false);
+      /* Vorschlag der Gießklasse: zurück zur Klasse */
+      TS(`ivFensterAuf('B2A')`); await warte(30);
+      const kl = q('#iv-modal [data-ivf-klasse]'); if(kl) kl.click();
+      pruef('beta.30 B2 (2): Vorschlag der Gießklasse steht im Fenster (B: 8 / 12 Tage)',
+        /Gießklasse B: 8 Tage im Sommer, 12 Tage im Winter/.test((q('#iv-inhalt') || {}).textContent || '')
+        && ((q('#iv-modal [data-ivf-out="s"]') || {}).textContent || '') === '8 Tage');
+      const sp2 = d.getElementById('iv-speichern'); if(sp2) sp2.click(); await warte(400);
+      pruef('beta.30 B2 (2): „Vorschlag übernehmen“ und Speichern stellt zurück auf die Gießklasse',
+        TS(`ivEigen(allePflanzen().find(function(x){ return x.id === 'B2A'; }))`) === null);
+      /* Gießart als Knopf: gespeichert wird erst mit „Speichern“ */
+      TS(`ivFensterAuf('B2A')`); await warte(30);
+      const tauch = q('#iv-modal [data-ivf-art="tauchen"]'); if(tauch) tauch.click();
+      pruef('beta.30 B2 (2): Gießart-Knopf gedrückt, noch nicht gespeichert',
+        ((q('#iv-modal [data-ivf-art="tauchen"]') || {getAttribute(){ return ''; }}).getAttribute('aria-pressed')) === 'true'
+        && TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).giessart || ''`) === '');
+      const sp3 = d.getElementById('iv-speichern'); if(sp3) sp3.click(); await warte(400);
+      pruef('beta.30 B2 (2): Speichern übernimmt die Gießart', TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).giessart`) === 'tauchen');
+      TS(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'B2A'; }); delete p.giessart; delete S.tagEin.B2A; sichern(); return 1; })()`);
+
+      /* (3) Unverändert gespeichert schreibt nichts fest; Intervalle wie vorher */
+      TS(`ivFensterAuf('B2B')`); await warte(30);
+      const sp4 = d.getElementById('iv-speichern'); if(sp4) sp4.click(); await warte(400);
+      pruef('beta.30 B2 (3): Speichern ohne Änderung schreibt keinen Handwert',
+        TS(`allePflanzen().find(function(x){ return x.id === 'B2B'; }).intervallEigen === undefined && ivEigen(allePflanzen().find(function(x){ return x.id === 'B2B'; })) === null`) === true);
+      TS(`(function(){ var p = S.eigene.find(function(x){ return x.id === 'B2A'; }); p.intervallEigen = true; p.intervall = [10, 10]; sichern(); return 1; })()`);
+      const ivNach = T(`JSON.stringify(['B2A','B2B','B2C'].map(function(id){ return intervallVon(allePflanzen().find(function(x){ return x.id === id; })); }))`);
+      pruef('beta.30 B2 (3): Intervall jeder Testpflanze unverändert', ivNach === ivVorher, ivVorher + ' → ' + ivNach);
+
+      /* (4) kein Block „Gießen“, keine alte Standzeile außerhalb der Gießzeile */
+      await zu(); TS(`karteOeffnen('B2A')`); await warte(60);
+      pruef('beta.30 B2 (4): kein Block „Gießen“, Standzeile nur in der Gießzeile',
+        !q('#karte-rumpf [data-kblock="giessen"]') && qa('#karte-rumpf .km-stand').length === 1 && !!q('#karte-rumpf .km-giess > .km-stand'));
+
+      /* (5) Notiz oben: zugeklappt, Bearbeiten, Speichern, Befunde bleiben */
+      const nb = () => q('#karte-rumpf .detail > .knotiz');
+      pruef('beta.30 B2 (5): Notiz als Feld unter der Tag-Zeile, ohne Befund',
+        !!nb() && !!nb().previousElementSibling && nb().previousElementSibling.classList.contains('tagk')
+        && /Steht am Ostfenster\./.test(nb().textContent) && !/Blätter gesund/.test(nb().textContent));
+      const stil30 = [].map.call(d.querySelectorAll('style'), s => s.textContent).join('\n');
+      pruef('beta.30 B2 (5): zugeklappt drei Zeilen (Stiltext)',
+        /\.knotiz-text\{[^}]*-webkit-line-clamp:3/.test(stil30) && /\.knotiz\.ganz \.knotiz-text\{[^}]*-webkit-line-clamp:unset/.test(stil30));
+      const bearb = nb() && nb().querySelector('[data-do="notiz-bearb"]'); if(bearb) bearb.click(); await warte(30);
+      const feld = q('#karte-rumpf .knotiz .knotiz-feld');
+      pruef('beta.30 B2 (5): „Bearbeiten“ öffnet im Block ein Textfeld mit „Fertig“, ohne Zeichengrenze',
+        !!feld && feld.value === 'Steht am Ostfenster.' && !feld.hasAttribute('maxlength') && !!q('#karte-rumpf .knotiz [data-do="notiz-fertig"]'));
+      if(feld){ feld.value = 'B2 Neuwort am Westfenster.\nZweite Zeile.'; }
+      const fertig = q('#karte-rumpf .knotiz [data-do="notiz-fertig"]'); if(fertig) fertig.click(); await warte(40);
+      const nt30 = TS(`JSON.stringify(notizTrennen(allePflanzen().find(function(x){ return x.id === 'B2A'; }).notiz))`);
+      pruef('beta.30 B2 (5): „Fertig“ speichert, der Befund bleibt getrennt erhalten',
+        /"eigen":"B2 Neuwort am Westfenster\.\\nZweite Zeile\."/.test(nt30) && /Blätter gesund/.test(nt30) && /"befunde":\[\{/.test(nt30), nt30);
+      pruef('beta.30 B2 (5): danach wieder Lesefeld mit neuem Text', !!nb() && !nb().querySelector('textarea') && /B2 Neuwort/.test(nb().textContent));
+      /* Speichern beim Verlassen */
+      const bearb2 = nb() && nb().querySelector('[data-do="notiz-bearb"]'); if(bearb2) bearb2.click(); await warte(30);
+      const feld2 = q('#karte-rumpf .knotiz .knotiz-feld');
+      if(feld2){ feld2.value = 'B2 Verlassen gespeichert.'; feld2.dispatchEvent(new w.FocusEvent('focusout', {bubbles:true, relatedTarget:null})); }
+      await warte(40);
+      pruef('beta.30 B2 (5): Verlassen des Feldes speichert',
+        /B2 Verlassen gespeichert\./.test(TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).notiz`))
+        && /Befund vom 1\.11\.2026/.test(TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).notiz`)));
+      await zu(); TS(`ansichtZeigen('sammlung')`); await warte(40);
+      d.getElementById('q').value = 'verlassen gespeichert'; TS(`render()`);
+      const treffer = qa('#out .card').map(c => c.dataset.karte).join(',');
+      pruef('beta.30 B2 (5): Suche findet die Notiz', treffer === 'B2A', treffer);
+      d.getElementById('q').value = ''; TS(`render()`);
+      pruef('beta.30 B2 (5): ohne Notiz „Noch keine Notiz. Antippen zum Schreiben.“',
+        /Noch keine Notiz\. Antippen zum Schreiben\./.test(TS(`notizKarteHTML(allePflanzen().find(function(x){ return x.id === 'B2B'; }))`)));
+
+      /* (6) kein Block „Notizen“ im Verlauf */
+      TS(`karteOeffnen('B2A')`); await warte(60);
+      pruef('beta.30 B2 (6): kein Block „Notizen“ im Verlauf, Befunde dort',
+        !q('#karte-rumpf [data-kblock="notiz"]') && !!q('#karte-rumpf [data-kpane="verlauf"] [data-kblock="befunde"]'));
+
+      /* (7) Schalter „Symbolzeile“ je Modus */
+      pruef('beta.30 B2 (7): Symbolzeile mit Licht, Gießklasse, Düngebedarf unter der Gießzeile',
+        !!q('#karte-rumpf .km-giess + .km-zeichen[data-schalter="symbole"]') && qa('#karte-rumpf .km-zeichen .ico').length === 3);
+      TS(`modusSetzen('sammler'); 1`);
+      const sam = d.body.classList.contains('s-aus-symbole') && !(d.getElementById('sch-symbole') || {}).checked;
+      TS(`modusSetzen('entdecker'); 1`);
+      const ent = !d.body.classList.contains('s-aus-symbole') && !!(d.getElementById('sch-symbole') || {}).checked;
+      pruef('beta.30 B2 (7): Schalter „Symbolzeile“ Sammler aus, Entdecker an', sam && ent, sam + '/' + ent);
+      pruef('beta.30 B2 (7): Schalter steht in der Ansicht und ist ein Schalter',
+        !!q('#schalter-karte #sch-symbole[role="switch"]') && /Symbolzeile/.test(((q('#sch-symbole') || {closest(){ return null; }}).closest('label') || {}).textContent || ''));
+
+      /* (8) Tag-Zeile schmal */
+      const tz = q('#karte-rumpf .tagk .tagk-zeile');
+      pruef('beta.30 B2 (8): ohne Tags eine Zeile „Tags · keine · + Tag“',
+        !!tz && /Tags/.test(tz.textContent) && ((tz.querySelector('.tag-leer') || {}).textContent || '') === 'keine' && !!tz.querySelector('.tag-plus'));
+      TS(`tagSetzen('B2A', 'tv-quarantaene'); tagSetzen('B2A', 'tv-kuerzer'); render(); 1`); await warte(40);
+      pruef('beta.30 B2 (8): mit Tags stehen die Chips in derselben Zeile, ohne „keine“',
+        qa('#karte-rumpf .tagk-zeile > .tag-chips > .tag-chip').length === 2 && !q('#karte-rumpf .tagk-zeile .tag-leer'));
+      pruef('beta.30 B2 (8): Chips seitlich wischbar (Stiltext)',
+        /\.tagk-zeile > \.tag-chips\{[^}]*flex-wrap:nowrap;overflow-x:auto/.test(stil30));
+      TS(`delete S.tagEin.B2A; render(); 1`); await warte(30);
+
+      /* (9) vier Reiter, Verlauf offen beim Öffnen */
+      await zu(); TS(`S.kartenTab = 'platz'; karteOeffnen('B2A')`); await warte(60);
+      const reiter = qa('#karte-rumpf .ktab').map(b => b.dataset.ktab + ':' + b.textContent).join(',');
+      pruef('beta.30 B2 (9): vier Reiter Verlauf, Platz, Pflegeheft, Steckbrief', reiter === 'verlauf:Verlauf,platz:Platz,pflegeheft:Pflegeheft,steckbrief:Steckbrief', reiter);
+      pruef('beta.30 B2 (9): „Verlauf“ ist beim Öffnen offen',
+        ((q('#karte-rumpf .ktab[data-ktab="verlauf"]') || {getAttribute(){ return ''; }}).getAttribute('aria-selected')) === 'true'
+        && (q('#karte-rumpf [data-kpane="verlauf"]') || {}).hidden === false && (q('#karte-rumpf [data-kpane="platz"]') || {}).hidden === true);
+
+      /* (10) Platz: Knopflisten, „+ Neu“, keine Systemliste */
+      const kp = q('#karte-rumpf .ktab[data-ktab="platz"]'); if(kp) kp.click(); await warte(30);
+      pruef('beta.30 B2 (10): Platz mit Knopflisten für Raum und Stellplatz, „+ Neuer Raum“, „+ Neuer Stellplatz“',
+        qa('#karte-rumpf [data-kpane="platz"] [data-lage-k="raum"].as-knopf').length >= 2
+        && qa('#karte-rumpf [data-kpane="platz"] [data-lage-k="platz"].as-knopf').length >= 2
+        && !!q('#karte-rumpf [data-kpane="platz"] [data-lage-k="raum"][data-v="__neu"]')
+        && !!q('#karte-rumpf [data-kpane="platz"] [data-lage-k="platz"][data-v="__neu"]'));
+      pruef('beta.30 B2 (10): keine Auswahlliste des Systems in Karte und Fenster',
+        !q('#karte-rumpf select') && !q('#iv-modal select'));
+      const badId = TS(`raumListe().find(function(r){ return r.name === 'B2 Bad'; }).id`);
+      const bad = q('#karte-rumpf [data-lage-k="raum"][data-v="' + badId + '"]'); if(bad) bad.click(); await warte(30);
+      pruef('beta.30 B2 (10): Raum per Knopf gewechselt, Stellplatz geleert',
+        TS(`(function(){ var p = allePflanzen().find(function(x){ return x.id === 'B2A'; }); return p.raum + '|' + p.stellplatz; })()`) === badId + '|');
+      pruef('beta.30 B2 (10): Reiter bleibt nach der Änderung offen', (q('#karte-rumpf [data-kpane="platz"]') || {hidden:true}).hidden === false);
+      const bad2 = q('#karte-rumpf [data-lage-k="raum"][data-v="' + badId + '"]'); if(bad2) bad2.click(); await warte(30);
+      pruef('beta.30 B2 (10): zweiter Tipp auf den gewählten Raum hebt die Wahl auf',
+        TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).raum`) === '');
+      pruef('beta.30 B2 (10): Topf und Substrat stehen im Reiter Platz', !!q('#karte-rumpf [data-kpane="platz"] [data-kblock="topf"]'));
+
+      /* (11) Wachstum weg, Rundgang zählt weiter */
+      pruef('beta.30 B2 (11): kein Wachstum in Karte und Code, kein Schalter „Wachstum“',
+        !q('#karte-rumpf .wachstum') && !q('#karte-rumpf [data-blatt]') && !d.getElementById('sch-wachstum')
+        && html.indexOf('function wachstumHTML(') === -1 && TS(`SCHALTER.some(function(s){ return s.k === 'wachstum'; })`) === false);
+      TS(`(function(){ if(S.blatt) delete S.blatt.B2A; ereignisDazu('B2A', 'blatt', ''); return 1; })()`);
+      pruef('beta.30 B2 (11): ein neues Blatt aus dem Rundgang zählt weiter', TS(`blattLog('B2A').length`) === 1);
+
+      /* (12) keine Tiere-Zeile, die Tierdaten bleiben */
+      TS(`(function(){ S.tiere = {aktiv:true, arten:['katze']}; var p = S.eigene.find(function(x){ return x.id === 'B2A'; }); p.raum = raumListe()[0].id; p.stellplatz = 'Boden'; sichern(); render(); return 1; })()`);
+      await warte(30);
+      pruef('beta.30 B2 (12): keine Tiere-Zeile in der Karte, Daten der Tiere bleiben',
+        !q('#karte-rumpf .lage-tier') && !q('#karte-rumpf [data-kblock="tiere"]') && TS(`meineTiere().join(',')`) === 'katze');
+
+      /* (13) Pflegetexte im Reiter „Pflegeheft“ */
+      const heft = q('#karte-rumpf [data-kpane="pflegeheft"]');
+      const ht = heft ? heft.textContent : '';
+      pruef('beta.30 B2 (13): Pflegeschritte, „Wenn etwas nicht stimmt“, Beobachtungen im Pflegeheft',
+        /B2 Schritt eins/.test(ht) && /Wenn etwas nicht stimmt/.test(ht) && /B2 Beobachtung/.test(ht), ht.slice(0, 120));
+      pruef('beta.30 B2 (13): Steckbrief ohne Pflegetexte, mit Giftigkeit',
+        !!q('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="gift"]') && !/B2 Schritt eins/.test((q('#karte-rumpf [data-kpane="steckbrief"]') || {}).textContent || ''));
+      await zu(); TS(`karteOeffnen('B2B')`); await warte(60);
+      pruef('beta.30 B2 (13): leeres Pflegeheft sagt es', /Noch keine Pflegetexte/.test((q('#karte-rumpf [data-kpane="pflegeheft"]') || {}).textContent || ''));
+      await zu();
+
+      /* Start mit gefülltem Speicher (T9b) und offener Karte */
+      const roh30 = T(`(function(){ var s = JSON.parse(localStorage.getItem(KEY));
+        s.tagEin = s.tagEin || {}; s.tagEin.B2A = [{e:'eB2', t:'tv-laenger', von:'2026-11-01', notiz:'', bis:null, ende:null, er:false, pz:30}];
+        s.schalter = {wachstum:false}; return JSON.stringify(s); })()`);
+      const f30 = [];
+      const dom30 = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.localStorage.setItem('gk-beta', roh30);
+        w2.addEventListener('error', e => f30.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(700);
+      w30 = dom30.window;
+      let k30 = '';
+      try { w30.__T(`karteOeffnen('B2A')`); k30 = (w30.document.querySelector('#karte-rumpf .km-giess') || {}).textContent || ''; } catch(e){ f30.push(String(e && e.message)); }
+      pruef('beta.30 B2: Start mit gefülltem Speicher und offener Karte ohne Laufzeitfehler', f30.length === 0 && /alle 13 Tage/.test(k30),
+        (f30.join(' | ') || k30).slice(0, 300));
+      try { w30.close(); } catch(e){} w30 = null;
+    } catch(e){
+      pruef('beta.30 B2: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if(w30) w30.close(); } catch(e){}
+      try { d.getElementById('q').value = ''; } catch(e){}
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.lernen = a.lernen; S.tagEin = a.tagEin; S.ereignisse = a.ereignisse; S.giess = a.giess;
+        S.raeume = a.raeume; S.tiere = a.tiere; S.blatt = a.blatt; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab;
+        if(typeof schalterAnwenden === 'function') schalterAnwenden();
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt30)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.30: Etappe B3 — „Kartei auffrischen“ entfernt (F307).
+     Einstellungen ohne Abschnitt, kein Abgleich-Fenster, kein Name der
+     Kartei mehr im Code; das Speicherfeld wird beim Laden und Einlesen
+     gelöscht. Anlegen, Doktor und die gemeinsamen Leser bleiben. ══ */
+  {
+    const T = c => w.__T(c);
+    const TS = c => { try { return w.__T(c); } catch(e){ return 'FEHLER: ' + (e && e.message); } };
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt30b = T(`JSON.stringify({eigene:S.eigene, ansicht:S.ansicht})`);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    let w30b = null;
+    try {
+      await zu();
+      /* (1) kein entfernter Name wird noch definiert oder aufgerufen */
+      const namen30 = ['karteiBilder','karteiBuendelFragen','karteiEine','karteiFragen','karteiAbschnitt','karteiAbschnittBauen',
+        'karteiAbweichungen','karteiAktion','karteiAuftrag','karteiBibWert','karteiBloecke','karteiBotKurz','karteiBuendelAuftrag',
+        'karteiEintragen','karteiErlaubnisFragen','karteiFensterAuf','karteiFormat','karteiFortschritt','karteiFortsetzen',
+        'karteiGitter','karteiKontext','karteiKontingent','karteiLeiste','karteiLos','karteiLuecken','karteiMelden','karteiMeldung',
+        'karteiNaechste','karteiPumpe','karteiSortenZusatz','karteiStand','karteiStarten','karteiVerwerfen','karteiWiederaufnehmen',
+        'karteiZeile','artUebernehmen','duengerLesen','giftAbgleichen','klasseSBestaetigt','plausiVerstoss','plausiFamilie','frostRaten'];
+      const da30 = namen30.filter(n => new RegExp('\\b' + n + '\\b').test(html))
+        .concat(['KARTEI_', 'KA_PFLANZE', 'AB_FELDER', 'BENACHRICHTIGUNGEN', 'PLAUSI_', 'denkenNochmal'].filter(n => html.indexOf(n) !== -1));
+      pruef('beta.30 B3 (1): kein entfernter Name der Kartei mehr im Code', da30.length === 0, da30.join(','));
+      pruef('beta.30 B3 (1): kein Aufruf und keine Definition „kartei…“ mehr', !/\bkartei[A-Z]\w*/.test(html), (html.match(/\bkartei[A-Z]\w*/) || [''])[0]);
+      /* (2) Einstellungen ohne Abschnitt und Menüpunkt */
+      pruef('beta.30 B3 (2): kein Abschnitt und kein Menüpunkt „Kartei auffrischen“',
+        !d.getElementById('kartei-sec') && !d.querySelector('[data-mh="kartei"],[data-mh-go="kartei"]')
+        && TS(`MH_GRUPPEN.some(function(g){ return g.punkte.indexOf('kartei') !== -1; })`) === false
+        && !/Kartei auffrischen/.test(((d.querySelector('section[data-ans="mehr"]') || {}).parentNode || d.body).textContent));
+      /* (3) kein Abgleich-Fenster */
+      pruef('beta.30 B3 (3): kein Fenster #kartei-abgleich, nicht angemeldet',
+        !d.getElementById('kartei-abgleich') && TS(`typeof MODAL['kartei-abgleich']`) === 'undefined' && !d.getElementById('kartei-streifen'));
+      pruef('beta.30 B3 (3): keine Stilregeln der Kartei', !/#kartei-streifen\{|#kartei-abgleich \.modal-box\{|\.kartei-zeile\{|\.ka-zeile\{/.test(html));
+
+      /* (4) Start und Einlesen mit alten Karteidaten */
+      pruef('beta.30 B3 (4): kein Feld „kartei“ in den Grundwerten', TS(`'kartei' in LEERSTAND()`) === false);
+      const roh30b = T(`(function(){ var s = JSON.parse(localStorage.getItem(KEY));
+        s.kartei = {start:Date.now(), gesamt:2, offen:['x'], alle:['x','y'], fertig:{y:{stand:'ok', felder:{art:'A'}}}, versuch:{}, aktiv:true};
+        s.eigene = (s.eigene || []).concat([{id:'K3A', name:'K3 · Alt', art:'Efeutute', klasse:'B', familie:'Aronstabgewächse', quellen:{familie:'ki'}}]);
+        return JSON.stringify(s); })()`);
+      const f30b = [];
+      const dom30b = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.localStorage.setItem('gk-beta', roh30b);
+        w2.addEventListener('error', e => f30b.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(700);
+      w30b = dom30b.window;
+      pruef('beta.30 B3 (4): Start mit alten Karteidaten ohne Laufzeitfehler', f30b.length === 0, f30b.join(' | ').slice(0, 300));
+      const st30b = (() => { try { return w30b.__T(`JSON.stringify(['kartei' in S, (S.eigene.find(function(p){ return p.id === 'K3A'; }) || {}).familie || ''])`); } catch(e){ return 'FEHLER ' + e.message; } })();
+      pruef('beta.30 B3 (4): Feld „kartei“ gelöscht, von der Kartei geschriebene Pflanzendaten bleiben', st30b === '[false,"Aronstabgewächse"]', st30b);
+      try { w30b.__T(`sichern()`); } catch(e){}
+      pruef('beta.30 B3 (4): Speicher danach ohne Karteidaten', !/"kartei"/.test(w30b.localStorage.getItem('gk-beta') || ''));
+      try { w30b.close(); } catch(e){} w30b = null;
+      const sich30 = JSON.stringify(Object.assign({__app:'greenkeeperai', __fassung:'4.0-beta.29'}, JSON.parse(roh30b)));
+      const inp30 = d.getElementById('import-file');
+      Object.defineProperty(inp30, 'files', {value:[new w.File([sich30], 'pflanzen-sicherung.json', {type:'application/json'})], configurable:true});
+      inp30.onchange(); await warte(400);
+      pruef('beta.30 B3 (4): eingelesene Sicherung ohne Karteidaten, Pflanze da',
+        TS(`JSON.stringify(['kartei' in S, S.eigene.some(function(p){ return p.id === 'K3A'; })])`) === '[false,true]',
+        TS(`JSON.stringify(['kartei' in S, S.eigene.some(function(p){ return p.id === 'K3A'; })])`));
+      await zu();
+
+      /* (5) Anlegen mit KI wie vorher: die gemeinsamen Leser */
+      pruef('beta.30 B3 (5): Der Leser kennt FAMILIE', TS(`geminiLesen('ART: Efeutute\\nFAMILIE: Aronstabgewächse').familie`) === 'Aronstabgewächse');
+      pruef('beta.30 B3 (5): Der Leser kennt DUENGER', TS(`geminiLesen('ART: Efeutute\\nDUENGER: sparsam').duenger`) === 'sparsam');
+      pruef('beta.30 B3 (5): giessartLesen liest wie bisher das Anlegen',
+        TS(`['Hydrokultur','Wasserglas','Anstau','tauchen','von unten','Schluck','durchdringend','irgendwie'].map(giessartLesen).join(',')`) === 'hydro,wasser,anstau,tauchen,unten,schluck,durch,');
+      pruef('beta.30 B3 (5): Sorte aus dem botanischen Namen wie vorher (botOhneSorte)',
+        TS(`JSON.stringify(botOhneSorte('Philodendron hederaceum Brasil'))`) === '{"bot":"Philodendron hederaceum","sorte":"Brasil"}'
+        && TS(`JSON.stringify(botOhneSorte('Monstera deliciosa var. borsigiana'))`) === '{"bot":"Monstera deliciosa var. borsigiana","sorte":""}',
+        TS(`JSON.stringify(botOhneSorte('Philodendron hederaceum Brasil'))`));
+      pruef('beta.30 B3 (5): Pflege- und Winterleser wie vorher',
+        TS(`JSON.stringify([pflegeLesen('A | B').liste, pflegeLesen('wie Karte').typ, winterLesen('keine').typ, winterLesen('Kühl halten').text])`) === '[["A","B"],"wie","keine","Kühl halten"]');
+      pruef('beta.30 B3 (5): Sortenprüfung wie vorher (Spitzname wird nie Sorte)',
+        !!(JSON.parse(TS(`JSON.stringify(sorteGeprueft({sorte:'Beauty | hoch', sortebeleg:'rosa'}, {p:{name:'Beauty', art:'Königsbegonie'}}) || {})`) || '{}').verworfen));
+      /* Anlegen über Einfügen bis zum Speichern */
+      TS(`(function(){ alStart(); neuWegSetzen('ki');
+        document.getElementById('f-paste').value = 'ART: Efeutute\\nBOTANISCH: Epipremnum aureum\\nGIESSKLASSE: B\\nLICHT: indirekt\\nGIESSART: durchdringend\\nPFLEGE: Triebe kappen | Stütze geben';
+        document.getElementById('btn-paste-los').click(); return 1; })()`);
+      await warte(60);
+      pruef('beta.30 B3 (5): Anlegen über Einfügen füllt Art, botanischen Namen und Gießklasse',
+        ((d.getElementById('f-art') || {}).value || '') === 'Efeutute' && ((d.getElementById('f-bot') || {}).value || '') === 'Epipremnum aureum'
+        && ((d.getElementById('f-klasse') || {}).value || '') === 'B',
+        [(d.getElementById('f-art') || {}).value, (d.getElementById('f-bot') || {}).value, (d.getElementById('f-klasse') || {}).value].join('|'));
+      TS(`alStart()`); await zu();
+
+      /* (6) Doktor wie vorher: Einfügen schreibt den Befund */
+      TS(`(function(){ S.eigene = S.eigene.filter(function(p){ return p.id !== 'K3D'; });
+        S.eigene.push({id:'K3D', name:'K3 · Doktor', art:'Efeutute', botanisch:'Epipremnum aureum', klasse:'B', notiz:'', log:[]});
+        sichern(); dokPflanze = 'K3D';
+        document.getElementById('dok-paste').value = 'ZUSTAND: gesund\\nBEFUND: K3 Blätter kräftig.';
+        document.getElementById('btn-dok-paste').click(); return 1; })()`);
+      await warte(60);
+      pruef('beta.30 B3 (6): Doktor schreibt den Befund wie vorher in den Verlauf',
+        TS(`ereignisse('K3D').some(function(e){ return e.typ === 'notiz' && /^Befund: .*K3 Blätter kräftig\./.test(e.text); })`) === true,
+        TS(`JSON.stringify(ereignisse('K3D'))`));
+      TS(`(function(){ dokPflanze = null; var z = document.getElementById('dok-paste'); if(z) z.value = ''; return 1; })()`);
+
+      /* (7) gemeinsame Namen bleiben */
+      pruef('beta.30 B3 (7): bibExakt, giftFuer, kiFragen, kiModelleHolen, kiModellPruefen bleiben',
+        TS(`[typeof bibExakt, typeof giftFuer, typeof kiFragen, typeof kiModelleHolen, typeof kiModellPruefen].join(',')`) === 'function,function,function,function,function');
+    } catch(e){
+      pruef('beta.30 B3: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if(w30b) w30b.close(); } catch(e){}
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        history.replaceState(null, ''); delete S.kartei;
+        S.eigene = a.eigene; ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt30b)})`);
     }
   }
 
