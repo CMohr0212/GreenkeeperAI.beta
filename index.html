@@ -3345,6 +3345,8 @@ html[data-design] .fgrid.ut-steck > label > :is(input, select){width:100%}
 html[data-design] .fgrid.ut-steck > .ut-art-feld{display:flex;flex-direction:column;gap:6px;margin:0}
 /* 4.0-beta.28: „Tag setzen“ bricht nicht um (Klartext) */
 html[data-design] .ut-fuss > button#ut-tag{flex:0 0 auto;white-space:nowrap;padding:0 18px}
+html[data-design] .ut-fuss > button#ut-termin{flex:0 0 auto;white-space:nowrap;padding:0 18px}
+.ut-fuss > button#ut-termin[hidden]{display:none}
 
 /* Doktor: Fotoknöpfe wie Nebenknöpfe, KI-Modell mit „empfohlen“ darunter */
 html[data-design] .dok-foto-zeile{gap:8px}
@@ -4199,6 +4201,17 @@ html[data-design] #out.sam-waehlen{padding-bottom:160px}
 html[data-design] body.sam-rueck[data-ansicht="sammlung"] #fab-neu,html[data-design] body.sam-rueck[data-ansicht="sammlung"] #fab-filter{display:none}
 html[data-design] #sam-akt-modal .sak-schnell{margin:0 0 10px}
 html[data-design] #sam-akt-modal .gm-zfrage-btns + .fhint{margin-top:8px}
+
+/* ── 4.0-beta.36 (P2 + I-b) ── */
+/* Der Urlaubszettel lag mit Ebene 70 unter dem Fenster der Einstellungen
+   (Ebene 120) und blieb deshalb unsichtbar. */
+#urlaub-blatt{z-index:205}
+html[data-design] .tf-vorlagen{margin-bottom:6px}
+html[data-design] .tf-vorlage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:8px 0 0}
+html[data-design] .tf-vorlage-zeile .fhint{margin:0}
+html[data-design] .gm-terminfrage .gm-termin + .gm-termin{margin-top:10px}
+html[data-design] .gm-termin .gm-ue-pfl-t{flex:1 1 auto;min-width:0}
+html[data-design] .gm-termin button[aria-pressed="true"]{font-weight:600}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -8771,6 +8784,8 @@ const EREIGNIS_ARTEN = {
   umgetopft:   {name:'Umgetopft',        kurz:'umgetopft',     ton:'info'},
   /* 4.0-beta.27 (G2a+c): Setzen, Ersetzen, Beenden und Entfernen eines Tags */
   tag:         {name:'Tag',              kurz:'Tag',           ton:'info'},
+  /* 4.0-beta.36 (P2): ein abgehakter Termin */
+  termin:      {name:'Erledigt',         kurz:'erledigt',      ton:'gut'},
   foto:        {name:'Foto gemacht',     kurz:'Foto',          ton:'info'},
   gesehen:     {name:'Angesehen',        kurz:'angesehen',     ton:'still'},
   notiz:       {name:'Notiz',            kurz:'Notiz',         ton:'info'},
@@ -9798,6 +9813,7 @@ function pflanzeEntfernen(id){
       <div class="ut-fuss">
         <button id="ut-zurueck" hidden>Zurück</button>
         <button type="button" id="ut-tag" hidden>Tag setzen</button>
+        <button type="button" id="ut-termin" hidden>Termin</button>
         <button class="haupt" id="ut-weiter">Weiter</button>
       </div>
     </div>
@@ -11334,7 +11350,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.35';
+const FASSUNG = '4.0-beta.36';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -11588,6 +11604,8 @@ const LEERSTAND = () => ({
   speicherGefragt:null, teilenDefekt:null, umtopfPlan:null,
   /* 4.0-beta.34: Termine des Kalenders und die gewählte Ansicht */
   termine:[], kalAnsicht:null,
+  /* 4.0-beta.36 (P2): eigene Terminvorlagen */
+  terminVorlagen:[],
   /* Sicherung vor der Bereinigung (3.31.0): für welche Fassung die
      Bereinigung erledigt ist, und die höchste je vergebene Nummer. */
   bereinigtFassung:null, idHoch:null
@@ -12775,6 +12793,7 @@ function zeitstrahlEintraege(p){
   });
   (typeof ereignisse === 'function' ? ereignisse(p.id) : []).forEach(e=>{
     if(!e || !e.datum || e.typ === 'foto') return;
+    if(typeof terminEintragDoppelt === 'function' && terminEintragDoppelt(e, p.id)) return;
     const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ, ton:'info'};
     raus.push({datum:e.datum, ton:a.ton || 'info', name:a.name, text:e.text || ''});
   });
@@ -14171,6 +14190,15 @@ function steckbriefDaten(p){
   const b = (typeof bibVon === 'function') ? bibVon(p) : null;
   const hat = re => Object.keys(stamm).some(k=>re.test(k));
   const dazu = {}, vorschlag = [];
+  /* 4.0-beta.36: Was die Pflanze selbst trägt, steht im Steckbrief: Art,
+     botanischer Name, Sorte, Licht und Gießklasse. Bisher standen dort
+     nur Familie, Wuchsform und Frostgrenze; bei einer neuen Art blieb der
+     Steckbrief deshalb fast leer. */
+  const kopf = {};
+  const wert = x => String(x == null ? '' : x).trim();
+  if(wert(p.art) && !hat(/^art$/i)) kopf['Art'] = wert(p.art);
+  if(wert(p.botanisch) && !hat(/botan/i)) kopf['Botanischer Name'] = wert(p.botanisch);
+  if(wert(p.sorte) && !hat(/sorte/i)) kopf['Sorte'] = wert(p.sorte);
   /* beta.2 (F71 B): Was nur die Bibliothek weiß, steht als Vorschlag mit
      Knopf darunter und kommt erst nach dem Tipp in die Karte. */
   const fam = String(p.familie || '').trim();
@@ -14189,7 +14217,12 @@ function steckbriefDaten(p){
     if(!isNaN(frost)) dazu['Frostgrenze'] = frostWort(frost);
     else if(b && b.frost != null && !isNaN(Number(b.frost))) vorschlag.push({feld:'frostMin', lab:'Frostgrenze', text:frostWort(Number(b.frost))});
   }
-  return {daten: Object.assign(stamm, dazu), ausBib:false, vorschlag:vorschlag};
+  if(p.sonne && SONNE[p.sonne] && !hat(/licht|sonne/i)) dazu['Licht'] = SONNE[p.sonne].text;
+  /* Die Gießklasse hat jede Pflanze. Sie allein macht noch keinen
+     Steckbrief; sonst käme „Angaben ergänzen“ nie mehr. */
+  const sonstWas = Object.keys(kopf).length || Object.keys(stamm).length || Object.keys(dazu).length;
+  if(sonstWas && p.klasse && KLASSEN[p.klasse] && !hat(/gie(ß|ss)/i)) dazu['Gießklasse'] = p.klasse + ' · ' + KLASSEN[p.klasse].name;
+  return {daten: Object.assign(kopf, stamm, dazu), ausBib:false, vorschlag:vorschlag};
 }
 
 /* Bei Viktor stand die Wasserregel viermal auf einem Bildschirm —
@@ -17692,14 +17725,116 @@ function terminVorkommen(von, bis){
   });
   return raus.sort((a, b) => a.datum.localeCompare(b.datum) || terminTitel(a.t).localeCompare(terminTitel(b.t), 'de'));
 }
+/* 4.0-beta.36 (P2): „Erledigt“ schreibt je Pflanze einen Verlaufseintrag
+   und setzt den Tag des Termins ab heute (ein laufender Gießtag wird
+   ersetzt; läuft derselbe Tag schon, bleibt er). Alles, was dabei
+   entsteht, trägt die Marke „Termin|Tag“; das Zurücknehmen des Hakens
+   räumt genau diese Einträge wieder ab und lässt alles andere stehen. */
+function terminMarke(tid, d){ return tid + '|' + d; }
+function terminErledigtText(t, d){
+  const ds = terminDaten(t), i = ds.indexOf(d);
+  return terminTitel(t) + (ds.length > 1 && i !== -1 ? ' · ' + (i + 1) + ' von ' + ds.length : '');
+}
+function terminErledigen(t, d){
+  const marke = terminMarke(t.id, d), h = iso(HEUTE);
+  const tg = t.tag ? tagDef(t.tag) : null;
+  const da = {}; allePflanzen().forEach(p => { da[p.id] = true; });
+  (t.pflanzen || []).filter(id => da[id]).forEach(pid => {
+    const vorE = {}; ((S.ereignisse || {})[pid] || []).forEach(e => { if(e) vorE[e.id] = true; });
+    if(tg && !tagLaufend(pid).some(x => x.t.id === tg.id)){
+      const offen = tagEintraege(pid).filter(e => e && !e.ende);
+      const neu = tagSetzen(pid, tg.id, {von:h}, true);
+      if(neu) neu.termin = marke;
+      offen.forEach(e => { if(e.ende) e.ersetztVon = marke; });
+    }
+    ereignisDazu(pid, 'termin', terminErledigtText(t, d));
+    ((S.ereignisse || {})[pid] || []).forEach(e => { if(e && !vorE[e.id]) e.termin = marke; });
+  });
+}
+function terminErledigtZurueck(t, d){
+  const marke = terminMarke(t.id, d);
+  Object.keys(S.ereignisse || {}).forEach(pid => {
+    if(!Array.isArray(S.ereignisse[pid])) return;
+    S.ereignisse[pid] = S.ereignisse[pid].filter(e => !e || e.termin !== marke);
+    if(!S.ereignisse[pid].length) delete S.ereignisse[pid];
+  });
+  Object.keys(S.tagEin || {}).forEach(pid => {
+    if(!Array.isArray(S.tagEin[pid])) return;
+    S.tagEin[pid] = S.tagEin[pid].filter(e => !e || e.termin !== marke);
+    S.tagEin[pid].forEach(e => { if(e && e.ersetztVon === marke){ e.ende = null; delete e.ersetztVon; } });
+    if(!S.tagEin[pid].length) delete S.tagEin[pid];
+  });
+}
+/* Der Verlaufseintrag eines Termins, der am geplanten Tag abgehakt wurde,
+   steht in Kalender und Zeitstrahl schon als erledigter Termin da. */
+function terminEintragDoppelt(e, pid){
+  if(!e || e.typ !== 'termin' || !e.termin) return false;
+  const i = e.termin.lastIndexOf('|');
+  const tid = e.termin.slice(0, i), d = e.termin.slice(i + 1);
+  if(d !== e.datum) return false;
+  const t = termineListe().find(x => x.id === tid);
+  return !!(t && terminErledigt(t, d) && (!pid || (t.pflanzen || []).indexOf(pid) !== -1));
+}
 function terminErledigtUm(tid, d){
   const t = (S.termine || []).find(x => x && x.id === tid);
   if(!t || terminDaten(t).indexOf(d) === -1) return false;
   t.erl = Array.isArray(t.erl) ? t.erl : [];
   const i = t.erl.indexOf(d);
-  if(i === -1) t.erl.push(d); else t.erl.splice(i, 1);
+  if(i === -1){ t.erl.push(d); terminErledigen(t, d); }
+  else { t.erl.splice(i, 1); terminErledigtZurueck(t, d); }
   sichern();
   return true;
+}
+
+/* ── Vorlagen (4.0-beta.36, P2) ──────────────────────────────────
+   Eine Vorlage füllt Titel, Tag, Wiederholung und Notiz; Datum und
+   Pflanzen bleiben, wie sie sind. Feste Vorlagen stehen im Code, eigene
+   in S.terminVorlagen. */
+const TERMIN_VORLAGEN = [
+  {id:'v-neem',      titel:'Neemöl spritzen',       n:7,  k:3},
+  {id:'v-kontrolle', titel:'Auf Schädlinge prüfen', n:7,  k:4},
+  {id:'v-duenger',   titel:'Düngen',                n:14, k:6, vorgabe:'duenger'},
+  {id:'v-abduschen', titel:'Abduschen',             n:30, k:3},
+  {id:'v-umtopfen',  titel:'Umtopfen',              n:1,  k:1}
+];
+const TERMIN_VORLAGEN_MAX = 12;
+function terminSerieText(n, k){
+  if(!(k > 1)) return 'einmalig';
+  return k + '× ' + (n === 1 ? 'täglich' : 'alle ' + n + ' Tage');
+}
+function terminVorlagenEigen(){
+  return (Array.isArray(S.terminVorlagen) ? S.terminVorlagen : []).filter(v => v && v.id && v.titel);
+}
+function terminVorlagen(){
+  return TERMIN_VORLAGEN.map(v => {
+    const tg = v.vorgabe ? tagListe().find(t => t.vorgabe === v.vorgabe) : null;
+    return {id:v.id, titel:v.titel, n:v.n, k:v.k, tag:tg ? tg.id : '', notiz:'', fest:true};
+  }).concat(terminVorlagenEigen());
+}
+function terminVorlageMerken(d){
+  const tg = d.tag && tagDef(d.tag) ? d.tag : '';
+  const name = String(d.titel || '').trim().slice(0, TERMIN_TITEL_MAX) || (tg ? tagDef(tg).name : '');
+  if(!name) return {fehler:'Gib der Vorlage erst einen Titel oder wähle einen Tag.'};
+  const k = d.wdh ? Math.max(2, Math.min(TERMIN_ANZAHL_MAX, Math.round(Number(d.k) || 2))) : 1;
+  const n = k > 1 ? Math.max(1, Math.min(TERMIN_ABSTAND_MAX, Math.round(Number(d.n) || 1))) : 1;
+  if(!Array.isArray(S.terminVorlagen)) S.terminVorlagen = [];
+  const v = {id:'', titel:name, tag:tg, n:n, k:k, notiz:String(d.notiz || '').trim().slice(0, TERMIN_NOTIZ_MAX)};
+  const alt = S.terminVorlagen.find(x => x && String(x.titel || '').toLowerCase() === name.toLowerCase());
+  if(alt){ v.id = alt.id; S.terminVorlagen[S.terminVorlagen.indexOf(alt)] = v; }
+  else {
+    if(terminVorlagenEigen().length >= TERMIN_VORLAGEN_MAX)
+      return {fehler:'Mehr als ' + TERMIN_VORLAGEN_MAX + ' eigene Vorlagen gehen nicht. Lösche erst eine.'};
+    v.id = 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    S.terminVorlagen.push(v);
+  }
+  sichern();
+  return {v:v, ersetzt:!!alt};
+}
+function terminVorlageLoeschen(id){
+  const vor = terminVorlagenEigen().length;
+  S.terminVorlagen = terminVorlagenEigen().filter(v => v.id !== id);
+  if(S.terminVorlagen.length !== vor) sichern();
+  return S.terminVorlagen.length !== vor;
 }
 function terminLoeschen(tid){
   const vor = (S.termine || []).length;
@@ -17833,7 +17968,7 @@ function kalTagZeilen(d){
   }
   Object.keys(pf).forEach(id => {
     ((S.ereignisse || {})[id] || []).forEach(e => {
-      if(!e || e.datum !== d || e.typ === 'gesehen') return;
+      if(!e || e.datum !== d || e.typ === 'gesehen' || terminEintragDoppelt(e, id)) return;
       const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ};
       z.push(kalTextZeile('e', nice(pf[id]), e.typ === 'tag' ? (e.text || a.name) : a.name + (e.text ? ' · ' + e.text : '')));
     });
@@ -17928,7 +18063,7 @@ function kalSchritt(r){
 
 /* ── Terminfenster ───────────────────────────────────────────── */
 /* `pflanzen` wählt bei einem neuen Termin Pflanzen vor (Karte). */
-function terminFensterAuf(tid, datum, ausloeser, pflanzen){
+function terminFensterAuf(tid, datum, ausloeser, pflanzen, vor){
   const t = tid ? termineListe().find(x => x.id === tid) : null;
   if(tid && !t) return false;
   TF = t
@@ -17936,6 +18071,15 @@ function terminFensterAuf(tid, datum, ausloeser, pflanzen){
        wdh:t.k > 1, n:t.k > 1 ? t.n : 7, k:t.k > 1 ? t.k : 3, notiz:t.notiz || '', waehlen:false, suche:'', fehler:'', frage:false}
     : {id:null, titel:'', tag:'', pflanzen:(Array.isArray(pflanzen) ? pflanzen : []).filter(Boolean), datum:datum || iso(HEUTE),
        wdh:false, n:7, k:3, notiz:'', waehlen:false, suche:'', fehler:'', frage:false};
+  TF.vorlage = ''; TF.vmeld = '';
+  /* 4.0-beta.36 (P2): Doktor, Umtopfen und Anzucht füllen einen neuen
+     Termin vor; gespeichert wird erst mit „Speichern“. */
+  if(!t && vor && typeof vor === 'object'){
+    if(vor.titel) TF.titel = String(vor.titel).slice(0, TERMIN_TITEL_MAX);
+    if(vor.tag && tagDef(vor.tag)) TF.tag = vor.tag;
+    if(vor.k > 1){ TF.wdh = true; TF.k = Math.round(vor.k); TF.n = Math.max(1, Math.round(vor.n || 7)); }
+    if(vor.notiz) TF.notiz = String(vor.notiz).slice(0, TERMIN_NOTIZ_MAX);
+  }
   terminFensterZeichnen();
   return modalAuf('termin-modal', ausloeser);
 }
@@ -18023,7 +18167,13 @@ function terminFensterZeichnen(){
   }
   if(titelEl) titelEl.textContent = TF.id ? 'Termin' : 'Neuer Termin';
   const tags = tagListe().map(t => tvKnopf('data-tf-tag', t.id, t.name, TF.tag === t.id)).join('');
-  box.innerHTML = `<label class="fspan"><span class="lab">Titel</span>
+  /* 4.0-beta.36 (P2): Vorlagen nur beim neuen Termin */
+  const vEigen = TF.vorlage ? terminVorlagenEigen().find(v => v.id === TF.vorlage) : null;
+  const vorlagen = TF.id ? '' : `<p class="ein-abschnitt">Vorlage (wahlweise)</p>
+    <div class="as-knoepfe tf-vorlagen" role="group" aria-label="Vorlage">${terminVorlagen().map(v =>
+      `<button type="button" class="as-knopf" data-tf-vorlage="${esc(v.id)}" aria-pressed="${TF.vorlage === v.id}"><b>${esc(v.titel)}</b><i>${esc(terminSerieText(v.n, v.k))}</i></button>`).join('')}</div>
+    ${vEigen ? `<p class="tf-vorlage-zeile"><button type="button" class="mehr-dazu" data-tf="vorlage-weg">Vorlage „${esc(vEigen.titel)}“ löschen</button></p>` : ''}`;
+  box.innerHTML = `${vorlagen}<label class="fspan"><span class="lab">Titel</span>
       <input type="text" id="tf-titel" maxlength="${TERMIN_TITEL_MAX}" value="${esc(TF.titel)}" placeholder="z. B. Neemöl spritzen" autocomplete="off"></label>
     <p class="ein-abschnitt">Datum</p>
     <div class="segment" role="group" aria-label="Datum">
@@ -18047,6 +18197,8 @@ function terminFensterZeichnen(){
     ${tfPflanzenZeile()}
     <label class="fspan tag-notizfeld"><span class="lab">Notiz</span>
       <textarea id="tf-notiz" rows="2" maxlength="${TERMIN_NOTIZ_MAX}" placeholder="Mittel, Menge, Grund …">${esc(TF.notiz)}</textarea></label>
+    <p class="tf-vorlage-zeile"><button type="button" class="mehr-dazu" data-tf="vorlage-merken">Als Vorlage merken</button>${
+      TF.vmeld ? `<span class="fhint" role="status">${esc(TF.vmeld)}</span>` : ''}</p>
     ${TF.fehler ? `<p class="tv-fehler" role="alert">${esc(TF.fehler)}</p>` : ''}
     ${TF.id ? `<div class="tools tag-weg"><button type="button" class="loeschen" data-tf="loeschen">${TF.frage ? 'Wirklich löschen?' : 'Termin löschen'}</button></div>` : ''}`;
 }
@@ -18065,6 +18217,42 @@ function terminSpeichern(){
   modalZu('termin-modal');
   kalNachAenderung();
   return true;
+}
+
+/* 4.0-beta.36 (P2): Ein Werkzeug bietet seinen Termin an. Ist kein Platz
+   für ein weiteres Fenster, schließt erst das oberste; das Terminblatt
+   öffnet, wenn dessen Schließen über den Verlauf durch ist. */
+function terminNachZu(id, vor, ausloeser){
+  const auf = () => terminFensterAuf(null, vor && vor.datum, ausloeser || null, vor && vor.pflanzen, vor);
+  if(!id || !modalOffen(id)){ auf(); return; }
+  let fertig = false;
+  const los = () => {
+    if(fertig) return;
+    fertig = true;
+    window.removeEventListener('popstate', bei);
+    if(modalOffen(id)) _modalWeg(id);
+    auf();
+  };
+  const bei = () => setTimeout(los, 0);
+  window.addEventListener('popstate', bei);
+  setTimeout(los, 800);
+}
+function terminAnbieten(vor, ausloeser){
+  if(MODAL_STAPEL.length < MODAL_TIEFE){ terminNachZu(null, vor, ausloeser); return true; }
+  const oben = modalOben();
+  modalZu(oben);
+  terminNachZu(oben, vor, null);
+  return true;
+}
+/* Erst wenn kein Fenster und keine Auswahl mehr im Verlauf liegt. */
+function nachVerlaufRuhe(fn){
+  let n = 0;
+  const pruefen = () => {
+    const st = history.state;
+    if((!MODAL_STAPEL.length && !(st && (st.gkSamWahl || st.gkModal))) || ++n > 25){ fn(); return; }
+    setTimeout(pruefen, 60);
+  };
+  setTimeout(pruefen, 60);
 }
 
 /* ── Heute: Kachel und Hinweiszeile ──────────────────────────── */
@@ -18186,7 +18374,7 @@ function kalkEintraege(p){
     if(typeof d === 'string' && d <= h) raus.push({datum:d, art:'g', rang:2, titel:'Gegossen', text:''});
   });
   ((S.ereignisse || {})[p.id] || []).forEach(e => {
-    if(!e || !e.datum || e.typ === 'gesehen') return;
+    if(!e || !e.datum || e.typ === 'gesehen' || terminEintragDoppelt(e, p.id)) return;
     const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ};
     raus.push({datum:e.datum, art:'e', rang:3, titel:e.typ === 'tag' ? (e.text || a.name) : a.name,
       text:e.typ === 'tag' ? '' : (e.text || '')});
@@ -18307,6 +18495,19 @@ document.addEventListener('click', e => {
   if(wd){ terminFensterLesen(); TF.wdh = wd.dataset.tfWdh === 'an'; TF.fehler = ''; terminFensterZeichnen(); return; }
   const tt = t.closest('[data-tf-tag]');
   if(tt){ terminFensterLesen(); TF.tag = TF.tag === tt.dataset.tfTag ? '' : tt.dataset.tfTag; TF.fehler = ''; terminFensterZeichnen(); return; }
+  const vg = t.closest('[data-tf-vorlage]');
+  if(vg){
+    terminFensterLesen();
+    const v = terminVorlagen().find(x => x.id === vg.dataset.tfVorlage);
+    if(v && TF.vorlage === v.id) TF.vorlage = '';
+    else if(v){
+      TF.vorlage = v.id; TF.titel = v.titel; TF.tag = v.tag && tagDef(v.tag) ? v.tag : '';
+      TF.wdh = v.k > 1; if(v.k > 1){ TF.n = v.n; TF.k = v.k; }
+      if(v.notiz) TF.notiz = v.notiz;
+    }
+    TF.fehler = ''; TF.vmeld = ''; TF.frage = false;
+    terminFensterZeichnen(); return;
+  }
   const pf = t.closest('[data-tf-pfl]');
   if(pf){
     const id = pf.dataset.tfPfl, i = TF.pflanzen.indexOf(id);
@@ -18323,6 +18524,19 @@ document.addEventListener('click', e => {
     tfGitterZeichnen(); return;
   }
   if(aktion.dataset.tf === 'keine'){ TF.pflanzen = []; tfGitterZeichnen(); return; }
+  if(aktion.dataset.tf === 'vorlage-merken'){
+    terminFensterLesen();
+    const r = terminVorlageMerken(TF);
+    TF.fehler = r.fehler || '';
+    TF.vmeld = r.fehler ? '' : (r.ersetzt ? 'Vorlage „' + r.v.titel + '“ aktualisiert.' : 'Vorlage „' + r.v.titel + '“ gemerkt.');
+    if(r.v) TF.vorlage = r.v.id;
+    terminFensterZeichnen(); return;
+  }
+  if(aktion.dataset.tf === 'vorlage-weg'){
+    terminFensterLesen();
+    terminVorlageLoeschen(TF.vorlage); TF.vorlage = ''; TF.vmeld = 'Vorlage gelöscht.';
+    terminFensterZeichnen(); return;
+  }
   if(aktion.dataset.tf === 'loeschen'){
     if(!TF.frage){ TF.frage = true; terminFensterZeichnen(); return; }
     terminLoeschen(TF.id); modalZu('termin-modal'); kalNachAenderung(); return;
@@ -18567,10 +18781,23 @@ function samAktionenZeichnen(){
         `<button type="button" class="as-knopf" data-sak-tag="${esc(t.id)}"><b>${esc(t.name)}</b></button>`).join('')}</div>` : ''}
       <div class="wahl-liste">${sakZeile('data-sak', 'tags', 'Alle Tags', tagListe().length + ' zur Wahl')}</div>
       <p class="ein-abschnitt">Verschieben</p>
-      <div class="wahl-liste">${sakZeile('data-sak', 'raum', 'Raum und Stellplatz', 'Alle Gewählten an denselben Platz')}</div>`;
+      <div class="wahl-liste">${sakZeile('data-sak', 'raum', 'Raum und Stellplatz', 'Alle Gewählten an denselben Platz')}</div>
+      <p class="ein-abschnitt">Termin</p>
+      <div class="wahl-liste">${sakZeile('data-sak', 'termin', 'Termin planen', 'Ein Termin für alle Gewählten, auch als Serie')}</div>`;
   }
   box.innerHTML = h;
   if(fuss) fuss.innerHTML = f;
+}
+/* 4.0-beta.36 (P2): Sammelanlage. Die Auswahl endet, das Terminblatt
+   öffnet mit den Gewählten; angelegt wird erst mit „Speichern“. */
+function sakTermin(){
+  const ids = sakIds();
+  if(!ids.length) return;
+  modalZu('sam-akt-modal');
+  samRueckWeg();
+  samWahlEnde();
+  render();
+  nachVerlaufRuhe(() => terminFensterAuf(null, null, null, ids));
 }
 function sakTagWahl(tid){
   const ids = sakIds();
@@ -18624,6 +18851,7 @@ document.addEventListener('click', e => {
   if(was === 'zu'){ modalZu('sam-akt-modal'); return; }
   if(was === 'tags' || was === 'raum'){ SAK.seite = was; samAktionenZeichnen(); return; }
   if(was === 'tagja'){ sakTagTun(); return; }
+  if(was === 'termin'){ sakTermin(); return; }
   if(was === 'zurueck'){
     SAK.seite = SAK.seite === 'platz' ? 'raum' : (SAK.seite === 'tagfrage' && SAK.vor === 'tags' ? 'tags' : 'start');
     samAktionenZeichnen(); return;
@@ -22665,6 +22893,51 @@ let gmTeil = null;
    Rest stehen. */
 /* 4.0-beta.28 (G2b-1): 'dueng' ist mit dem alten Düngerweg weg. */
 const GM_SNAP_FAECHER = ['water', 'lernen', 'tagEin', 'feuchtRueck', 'gesehen', 'anstau', 'spuelen'];
+
+/* ── 4.0-beta.36 (P2): Zeile „Erledigt“ ──────────────────────────
+   Offene Termine von heute und früher stehen in der Übersicht und auf der
+   Karte ihrer Pflanze. Was in diesem Durchgang abgehakt wurde, bleibt
+   stehen und lässt sich mit einem zweiten Tipp zurücknehmen. Der Haken
+   gehört nicht zur Meldung der Karte: „Rückgängig“ lässt ihn stehen,
+   deshalb zieht der gemerkte Stand der Pflanze beim Tag nach. */
+var gmTerminDa = {};
+function gmTermineOffen(pid){
+  const h = iso(HEUTE);
+  return terminVorkommen('0000-01-01', h).filter(v =>
+    (!v.erledigt || gmTerminDa[terminMarke(v.t.id, v.datum)])
+    && (!pid || (v.t.pflanzen || []).indexOf(pid) !== -1));
+}
+function gmTerminZeilen(liste, pid){
+  const h = iso(HEUTE);
+  return liste.map(v => {
+    const teile = [];
+    if(!v.erledigt && v.datum < h) teile.push('überfällig seit ' + tagDatumKurz(v.datum));
+    if(v.von > 1) teile.push(v.nr + ' von ' + v.von);
+    const n = (v.t.pflanzen || []).length;
+    if(pid){ if(n > 1) teile.push('gilt für ' + n + ' Pflanzen'); }
+    else { const pt = terminPflanzenText(v.t); if(pt) teile.push(pt); }
+    const tg = v.t.tag ? tagDef(v.t.tag) : null;
+    if(tg) teile.push('setzt „' + tg.name + '“');
+    return `<div class="gm-ue-pfl gm-termin"><span class="gm-ue-pfl-t"><b>${esc(terminTitel(v.t))}</b>${teile.length ? `<i>${esc(teile.join(' · '))}</i>` : ''}</span>
+      <span class="gm-zfrage-btns gm-ue-mit"><button type="button" data-gm-termin="${esc(terminMarke(v.t.id, v.datum))}" aria-pressed="${v.erledigt}">${v.erledigt ? 'Erledigt ✓' : 'Erledigt'}</button></span></div>`;
+  }).join('');
+}
+function gmTerminTipp(marke){
+  const i = String(marke).lastIndexOf('|');
+  const tid = marke.slice(0, i), d = marke.slice(i + 1);
+  const t = termineListe().find(x => x.id === tid);
+  if(!t || !terminErledigtUm(tid, d)) return false;
+  gmTerminDa[marke] = true;
+  Object.keys(gmSnaps).forEach(k => {
+    const sn = gmSnaps[k];
+    if(!sn || !sn.f || (t.pflanzen || []).indexOf(sn.id) === -1) return;
+    const v = S.tagEin ? S.tagEin[sn.id] : undefined;
+    sn.f.tagEin = v !== undefined ? JSON.stringify(v) : null;
+  });
+  if(gmPhase === 'uebersicht') gmZeichnenUebersicht();
+  else if(gmPhase === 'karte') gmZeichnen();
+  return true;
+}
 function gmSnapPflanze(id){
   const o = {id, f:{}};
   GM_SNAP_FAECHER.forEach(k => {
@@ -22806,6 +23079,7 @@ function gmStarten(){
     return;
   }
   gmZwHinweisMerken();
+  gmTerminDa = {};
   gmIndex = 0; gmErledigt = 0; gmUebersprungen = 0; gmAzErledigt = 0; gmBefunde = [];
   gmVerlauf = []; gmSnaps = {}; gmNeuMelden = null;
   gmListeAktiv = false; gmHaken = {}; gmStill = false; gmTeil = null;
@@ -23369,6 +23643,10 @@ function gmZeichnen(){
          </div>
        </div>` : '';
 
+  /* 4.0-beta.36 (P2): offene Termine dieser Pflanze zum Abhaken */
+  const gmT = gmTermineOffen(p.id);
+  const terminFrage = gmT.length ? `<div class="gm-zfrage gm-terminfrage"><p><b>Geplant</b></p>${gmTerminZeilen(gmT, p.id)}</div>` : '';
+
   /* 4.0-beta.9: Gießweg und Menge stehen sichtbar auf der Karte (I);
      der Satz zur Probe bleibt hinter dem Streifen. */
   const wz = stopp > 0 ? null : gmWegZeile(p);
@@ -23386,6 +23664,7 @@ function gmZeichnen(){
     ${wz && !schalterAn('gmwie') ? `<p class="gm-weg gm-weg-text${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span></p>` : ''}
     ${wz && schalterAn('gmwie') ? `<button type="button" class="gm-weg${wz.anders ? ' anders' : ''}${wz.weg === 'spuelen' ? ' spuelen' : ''}" data-gm-wie="${esc(wz.weg)}" data-id="${esc(p.id)}">${gmIcon(wz.weg)}<span class="gm-weg-t">${esc(wz.text)}</span><span class="gm-weg-p" aria-hidden="true">›</span></button>` : ''}
     ${zFrage}
+    ${terminFrage}
     ${tFrage}
     ${kasten.map(k=>`<p class="gm-hinweis${k.warn?' warn':''}">${esc(k.text)}</p>`).join('')}
     </div>`;
@@ -23762,6 +24041,7 @@ function gmZeichnenUebersicht(){
       ${gmGtHinweisHTML() ? `<div class="ein-karte gm-ue-k gm-gt-k">${gmGtHinweisHTML()}</div>` : ''}
       ${brauch ? `<div class="ein-karte gm-ue-k">${brauch}</div>` : ''}
       ${gwAlle.length ? `<div class="ein-karte gm-ue-k gm-gw-k">${wegHtml}</div>` : ''}
+      ${gmUeAbschnitt('Heute geplant', gmTerminZeilen(gmTermineOffen(null), null))}
       ${gmUeAbschnitt('Heute dran', heute)}
       ${gmUeAbschnitt('Morgen dran', morgen)}
     </div>`;
@@ -24027,6 +24307,8 @@ function gmZeichnenEnde(){
 document.addEventListener('click', e=>{
   const tb = e.target.closest('[data-gm-topf]');
   if(tb){ gmTopfAntwort(tb.dataset.gmTopf === 'ja'); return; }
+  const gt = e.target.closest('[data-gm-termin]');
+  if(gt){ gmTerminTipp(gt.dataset.gmTermin); return; }
   /* 4.0-beta.10: Icon oder Balken öffnet das Hinweiskärtchen. */
   const wb = e.target.closest('[data-gm-wie]');
   if(wb){ if(schalterAn('gmwie')) gmWieZeigen(wb.dataset.gmWie, wb.dataset.id || null); return; }
@@ -26325,6 +26607,30 @@ function dokAufbau(){
 /* 4.0-beta.27 (F250): Befund des Doktors als Kurznotiz im Verlauf,
    höchstens TAG_NOTIZ_MAX Zeichen. Gibt false zurück, wenn derselbe
    Befund heute schon dasteht. */
+/* 4.0-beta.36 (I-b): Der Befund bietet seinen Termin an. Schädlinge und
+   Pilze brauchen eine Serie, alles andere eine Kontrolle nach einer Woche.
+   Angelegt wird erst im Terminblatt mit „Speichern“. */
+const DOK_SERIEN = {
+  spinnmilben:{n:7, k:3}, wolllaeuse:{n:7, k:3}, schildlaeuse:{n:10, k:3}, blattlaeuse:{n:7, k:3},
+  trauermuecken:{n:7, k:4}, mehltau:{n:7, k:3}
+};
+function dokTerminVorgabe(did){
+  const pid = dokPflanze && allePflanzen().some(x => x.id === dokPflanze) ? dokPflanze : null;
+  const kurz = (x, max) => { x = String(x || '').replace(/\s+/g, ' ').trim(); return x.length > max ? x.slice(0, max - 1).trimEnd() + '…' : x; };
+  const d = did ? DIAGNOSEN.find(x => x.id === did) : null;
+  if(d){
+    const s = DOK_SERIEN[d.id];
+    return s
+      ? {titel:kurz('Behandlung: ' + d.name, TERMIN_TITEL_MAX), n:s.n, k:s.k, datum:iso(HEUTE),
+         notiz:kurz(d.sofort.join(' · '), TERMIN_NOTIZ_MAX), pflanzen:pid ? [pid] : []}
+      : {titel:kurz('Kontrolle: ' + d.name, TERMIN_TITEL_MAX), k:1, datum:tagPlusTage(iso(HEUTE), 7),
+         notiz:kurz(d.sofort[0], TERMIN_NOTIZ_MAX), pflanzen:pid ? [pid] : []};
+  }
+  const k = dokKiDaten || {};
+  const schritt = k.schritte ? String(k.schritte).split('\n').map(z => (z.split('|')[1] || z.split('|')[0] || z).trim()).filter(Boolean)[0] : '';
+  return {titel:kurz('Kontrolle: ' + (k.zustand || 'Befund des Doktors'), TERMIN_TITEL_MAX), k:1,
+    datum:tagPlusTage(iso(HEUTE), 7), notiz:kurz(schritt, TERMIN_NOTIZ_MAX), pflanzen:pid ? [pid] : []};
+}
 function dokBefundVerlauf(pid, text){
   const max = (typeof TAG_NOTIZ_MAX === 'number') ? TAG_NOTIZ_MAX : 200;
   let kurz = 'Befund: ' + String(text || '').replace(/\s+/g, ' ').trim();
@@ -26355,6 +26661,7 @@ function dokKiErgebnisHTML(d){
     ${schritte.length ? `<p class="dg-schritt-kopf">Was jetzt zu tun ist</p>
       <ol class="dg-schritte">${schritte.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>` : ''}
     ${p ? `<div class="tools">
+      <button data-do="dok-termin">Als Termin planen</button>
       <button data-do="dok-neu">Noch einmal von vorn</button>
     </div>` : '<p class="dg-hinweis">Ohne gewählte Pflanze bleibt die Einschätzung nur hier stehen.</p>'}
   </div>`;
@@ -26402,6 +26709,7 @@ function dokErgebnis(){
         ${d.gegen?`<p class="dg-gegen">${esc(d.gegen)}</p>`:''}
         <p class="dg-schritt-kopf">Was jetzt zu tun ist</p>
         <ol class="dg-schritte">${d.sofort.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+        ${p && !p.nurBib ? `<div class="tools"><button data-do="dok-termin" data-d="${esc(d.id)}">${DOK_SERIEN[d.id] ? 'Behandlung als Termin planen' : 'Kontrolle als Termin planen'}</button></div>` : ''}
       </div>`;
     }).join('');
 }
@@ -26664,6 +26972,10 @@ document.addEventListener('click', e=>{
   }
   /* Die Kästen „Abgleich“, „andere Art“, „Sortenmerkmale“ und die
      Giftfrage sind mit 3.21.0 in die Kartei gezogen. */
+  if(btn.dataset.do === 'dok-termin'){
+    terminAnbieten(dokTerminVorgabe(btn.dataset.d || ''), btn);
+    return;
+  }
   if(btn.dataset.do === 'dok-neu'){
     dokSchritt = 2; dokWeg = null; dokKiFertig = false; dokKiDaten = null;
     dokSymptome.clear(); dokAntworten = {};
@@ -27336,6 +27648,8 @@ function utZeichnen(){
   /* 4.0-beta.28 (F274, F275): nach „Eintragen“ steht „Tag setzen“ neben „Fertig“ */
   const tgk = document.getElementById('ut-tag');
   if(tgk) tgk.hidden = !UT.erledigt;
+  const tmk = document.getElementById('ut-termin');
+  if(tmk) tmk.hidden = !UT.erledigt;
   if(wei){
     wei.hidden = false;
     wei.textContent = UT.erledigt ? 'Fertig'
@@ -27518,6 +27832,17 @@ document.addEventListener('click', e=>{
   /* 4.0-beta.28 (F274, F275): „Tag setzen“ schließt den Assistenten und
      öffnet das Tag-Fenster für diese Pflanze, ohne Vorauswahl. Der
      Assistent setzt selbst nichts. */
+  /* 4.0-beta.36 (I-b): Frisches Substrat ist vorgedüngt; der Assistent
+     bietet den Termin „wieder düngen“ in sechs Wochen an. */
+  if(e.target.closest('#ut-termin')){
+    if(!UT.erledigt || !UT.pflanze) return;
+    const pid = UT.pflanze;
+    const dt = tagListe().find(t => t.vorgabe === 'duenger');
+    utAbschliessen();
+    terminNachZu('sek-modal', {titel:'Nach dem Umtopfen wieder düngen', k:1, tag:dt ? dt.id : '',
+      datum:tagPlusTage(iso(HEUTE), 42), pflanzen:[pid], notiz:'Frisches Substrat ist etwa sechs Wochen vorgedüngt.'});
+    return;
+  }
   if(e.target.closest('#ut-tag')){
     if(!UT.erledigt || !UT.pflanze) return;
     const pid = UT.pflanze;
@@ -29390,6 +29715,8 @@ function azGefaessHTML(id){
       + '" aria-label="Foto löschen">×</button></figure>').join('')
     + '<label class="az-fotoneu"><span aria-hidden="true">+</span><span>Foto</span>'
     + '<input type="file" accept="image/*" hidden data-az-foto="' + esc(g.id) + '"></label></div>';
+  /* 4.0-beta.36 (I-b): Kontrolle der Bewurzelung als Termin */
+  if(n) h += '<p class="ein-abschnitt">Termin</p><div class="tools"><button type="button" data-az="termin" data-g="' + esc(g.id) + '">Bewurzelung prüfen: als Termin planen</button></div>';
   h += '<p class="ein-abschnitt">Gefäß</p>' + azGefaessFelderHTML(g)
     + '<div class="tools"><button type="button" class="haupt" data-az="gef-speichern" data-g="' + esc(g.id) + '">Speichern</button>'
     + '<button type="button" data-az="gef-weg" data-g="' + esc(g.id) + '"' + (n ? ' disabled' : '') + '>Auflösen</button></div>'
@@ -29767,6 +30094,13 @@ document.addEventListener('click', e=>{
   if(!k) return;
   const a = k.dataset.az;
   if(a === 'liste'){ azZeigen({art:'liste'}); return; }
+  if(a === 'termin'){
+    const g = azGefaess(k.dataset.g);
+    if(!g) return;
+    terminAnbieten({titel:('Bewurzelung prüfen: ' + g.name).slice(0, TERMIN_TITEL_MAX), n:7, k:4,
+      datum:tagPlusTage(iso(HEUTE), 7), pflanzen:[]}, k);
+    return;
+  }
   if(a === 'neu-stecklinge'){ azAssistentNeu(); return; }
   if(a === 'frei'){ azZeigen({art:'frei'}); return; }
   if(a === 'neu-gefaess'){ azZeigen({art:'neuGefaess'}); return; }

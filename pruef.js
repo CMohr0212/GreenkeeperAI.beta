@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.35', w.__T('FASSUNG') === '4.0-beta.35', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.36', w.__T('FASSUNG') === '4.0-beta.36', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -12820,6 +12820,218 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(a.giess === undefined) delete S.giess; else S.giess = a.giess;
         S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt35)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.36: Etappe 4 (P2 + I-b). „Erledigt“ mit Verlaufseintrag und Tag,
+     Vorlagen, Sammelanlage, Zeile im Gießmodus, Termin aus Doktor, Umtopfen und
+     Anzucht; dazu Urlaubszettel und Steckbrief. Legt alles selbst an, stellt am
+     Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const qa = s => Array.from(d.querySelectorAll(s));
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const alt36 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, tagEin:S.tagEin, termine:S.termine,
+      lernen:S.lernen, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, ansicht:S.ansicht, gesehen:S.gesehen,
+      tags:S.tags, tagVorgabenAus:S.tagVorgabenAus, terminVorlagen:S.terminVorlagen, schalter:S.schalter})`);
+    const heuteAlt = T(`HEUTE.getTime()`);
+    try {
+      await zu();
+      const heute = T(`iso(HEUTE)`);
+      const plus = n => T(`tagPlusTage('${heute}', ${n})`);
+      const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+      T(`(function(){
+        S.giess = {art:'leitung', haerte:'', saison:false, saisonStaerke:'normal'};
+        S.raeume = [{id:'rH1', name:'H Zimmer', plaetze:[]}];
+        var p = function(id, name){ return {id:id, eigen:true, name:name, art:'Art ' + id, klasse:'B', topf:'12', log:[], notiz:'',
+          raum:'rH1', stellplatz:'', intervallEigen:true, intervall:[10, 10]}; };
+        S.eigene = [p('H1', 'H Alpha'), p('H2', 'H Beta'), p('H3', 'H Gamma')];
+        S.water = {H1:['${plus(-10)}'], H2:['${plus(-1)}'], H3:['${plus(-1)}']};
+        S.ereignisse = {}; S.tagEin = {}; S.termine = []; S.lernen = {}; S.feuchtRueck = {}; S.terminVorlagen = [];
+        tagVorgabenSichern(true); if(typeof samRueckWeg === 'function') samRueckWeg();
+        ansichtZeigen('sammlung'); sichern(); render(); return 1; })()`);
+      const kTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'kuerzer'; }) || {}).id || ''`);
+      const lTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'laenger'; }) || {}).id || ''`);
+      const laeuft = (id, tid) => T(`tagLaufend('${id}').filter(function(x){ return x.t.id === '${tid}'; }).length`);
+      const stand = id => T(`JSON.stringify({t:S.tagEin['${id}'] || null, e:S.ereignisse['${id}'] || null})`);
+      const iv = id => T(`intervallVon(${P(id)})`);
+
+      /* ── E: Erledigt ── */
+      T(`(function(){
+        S.tagEin.H1 = [{e:'e-l1', t:'${lTag}', von:'${plus(-4)}', bis:null, ende:null, notiz:'', pz:25}];
+        S.termine = [
+          terminSauber({id:'tA', titel:'Neemöl spritzen', tag:'${kTag}', pflanzen:['H1', 'H2'], datum:'${plus(-7)}', n:7, k:3}),
+          terminSauber({id:'tC', titel:'Abduschen', pflanzen:['H3'], datum:'${heute}', k:1}),
+          terminSauber({id:'tD', titel:'Ohne Pflanze', pflanzen:[], datum:'${heute}', k:1})];
+        sichern(); return 1; })()`);
+      const v1 = stand('H1'), v2 = stand('H2'), v3 = stand('H3');
+      pruef('beta.36 (Voraussetzung): Abstand 10 Tage, bei H1 mit „verlängern“ 13', iv('H2') === 10 && iv('H1') === 13 && !!kTag && !!lTag, iv('H1') + ' ' + iv('H2'));
+      pruef('beta.36 (E1): Abhaken gelingt und steht am Termin', T(`terminErledigtUm('tA', '${heute}')`) === true && T(`terminErledigt(S.termine[0], '${heute}')`) === true);
+      pruef('beta.36 (E1): Je Pflanze steht ein Verlaufseintrag „Erledigt“ mit Titel und Serie',
+        ['H1', 'H2'].every(id => T(`(S.ereignisse.${id} || []).filter(function(e){ return e.typ === 'termin' && e.text === 'Neemöl spritzen · 2 von 3' && e.datum === '${heute}'; }).length`) === 1), stand('H2'));
+      pruef('beta.36 (E1): Der Tag des Termins läuft bei beiden Pflanzen ab heute', laeuft('H1', kTag) === 1 && laeuft('H2', kTag) === 1
+        && T(`S.tagEin.H2[0].von`) === heute, stand('H2'));
+      pruef('beta.36 (E1): Der Tag wirkt auf den Gießabstand (10 → 8 Tage)', iv('H2') === 8 && iv('H1') === 8, iv('H1') + ' ' + iv('H2'));
+      pruef('beta.36 (E1): Der laufende Gießtag ist ersetzt und beendet', laeuft('H1', lTag) === 0 && T(`S.tagEin.H1[0].ende`) === heute);
+      pruef('beta.36 (E1): Gegenprobe: eine Pflanze außerhalb des Termins bleibt unberührt', stand('H3') === v3);
+      /* Zwischen Abhaken und Zurücknehmen wird gegossen: das bleibt stehen */
+      T(`(function(){ S.water.H2.unshift('${heute}'); sichern(); return 1; })()`);
+      pruef('beta.36 (E2): Der Haken lässt sich zurücknehmen', T(`terminErledigtUm('tA', '${heute}')`) === true && T(`terminErledigt(S.termine[0], '${heute}')`) === false);
+      pruef('beta.36 (E2): Danach stehen Tags und Verlauf genau wie vorher, der alte Gießtag läuft wieder', stand('H1') === v1 && stand('H2') === v2 && laeuft('H1', lTag) === 1 && iv('H1') === 13 && iv('H2') === 10, stand('H1'));
+      pruef('beta.36 (E2): Gegenprobe: das Gießen dazwischen bleibt', T(`S.water.H2[0]`) === heute);
+      T(`(function(){ S.water.H2.shift(); sichern(); return 1; })()`);
+      /* Derselbe Tag läuft schon: kein zweiter Eintrag, das Zurücknehmen lässt ihn stehen */
+      T(`(function(){ S.tagEin.H2 = [{e:'e-k2', t:'${kTag}', von:'${plus(-2)}', bis:null, ende:null, notiz:'', pz:25}]; sichern(); return 1; })()`);
+      T(`terminErledigtUm('tA', '${plus(-7)}')`);
+      pruef('beta.36 (E3): Läuft derselbe Tag schon, kommt kein zweiter', laeuft('H2', kTag) === 1 && T(`S.tagEin.H2.length`) === 1 && T(`S.tagEin.H2[0].e`) === 'e-k2');
+      pruef('beta.36 (E3): Ein später abgehakter Termin steht am Tag des Abhakens im Zeitstrahl',
+        T(`zeitstrahlEintraege(${P('H2')}).filter(function(x){ return x.name === 'Erledigt' && x.datum === '${heute}' && /1 von 3/.test(x.text); }).length`) === 1);
+      T(`terminErledigtUm('tA', '${plus(-7)}')`);
+      pruef('beta.36 (E3): Zurücknehmen lässt den Tag stehen, der schon vorher lief', laeuft('H2', kTag) === 1 && T(`(S.ereignisse.H2 || []).length`) === 0, stand('H2'));
+      T(`(function(){ delete S.tagEin.H2; sichern(); return 1; })()`);
+      /* Termin ohne Tag, Termin ohne Pflanze */
+      T(`terminErledigtUm('tC', '${heute}')`);
+      pruef('beta.36 (E4): Ein Termin ohne Tag schreibt nur den Verlaufseintrag', T(`(S.ereignisse.H3 || []).length`) === 1 && T(`S.ereignisse.H3[0].text`) === 'Abduschen' && T(`S.tagEin.H3 === undefined`) === true, stand('H3'));
+      pruef('beta.36 (E4): Am geplanten Tag abgehakt, steht er im Zeitstrahl und im Kalender der Karte nur einmal',
+        T(`zeitstrahlEintraege(${P('H3')}).filter(function(x){ return /Abduschen/.test(x.name + ' ' + x.text); }).length`) === 1
+        && T(`kalkEintraege(${P('H3')}).filter(function(x){ return x.datum === '${heute}' && /Abduschen/.test(x.titel + ' ' + x.text); }).length`) === 1);
+      pruef('beta.36 (E4): Ein Termin ohne Pflanze lässt sich abhaken und schreibt nichts', T(`terminErledigtUm('tD', '${heute}')`) === true
+        && T(`Object.keys(S.ereignisse).join()`) === 'H3');
+      T(`(function(){ terminErledigtUm('tC', '${heute}'); terminErledigtUm('tD', '${heute}'); return 1; })()`);
+      pruef('beta.36 (E4): Nach dem Zurücknehmen ist der Verlauf wieder leer', T(`Object.keys(S.ereignisse).length`) === 0);
+
+      /* ── V: Vorlagen ── */
+      T(`terminFensterAuf(null, '${plus(2)}', null, ['H1'])`); await warte(120);
+      pruef('beta.36 (V1): Ein neuer Termin bietet die festen Vorlagen mit Serie an',
+        qa('#termin-inhalt [data-tf-vorlage]').length === 5 && /Neemöl spritzen\s*3× alle 7 Tage/.test(q('#termin-inhalt [data-tf-vorlage="v-neem"]').textContent.replace(/\s+/g, ' ').replace('spritzen', 'spritzen ')),
+        qa('#termin-inhalt [data-tf-vorlage]').map(b => b.textContent).join('|'));
+      q('#termin-inhalt [data-tf-vorlage="v-neem"]').click();
+      pruef('beta.36 (V1): Die Vorlage füllt Titel und Serie; Datum und Pflanze bleiben',
+        q('#tf-titel').value === 'Neemöl spritzen' && q('#tf-n').value === '7' && q('#tf-k').value === '3' && q('#tf-datum').value === plus(2) && T(`TF.pflanzen.join()`) === 'H1',
+        q('#tf-titel').value);
+      q('#termin-speichern').click(); await warte(250);
+      pruef('beta.36 (V1): Gespeichert wird eine Serie 3× alle 7 Tage', T(`(function(){ var t = S.termine[S.termine.length - 1]; return t.titel + '|' + t.n + '|' + t.k + '|' + t.datum + '|' + t.pflanzen.join(); })()`) === 'Neemöl spritzen|7|3|' + plus(2) + '|H1');
+      T(`terminFensterAuf(null, '${heute}', null, [])`); await warte(120);
+      q('#tf-titel').value = 'Kalk abwischen';
+      qa('#termin-inhalt [data-tf-wdh]').find(b => b.dataset.tfWdh === 'an').click();
+      q('#tf-n').value = '30'; q('#tf-k').value = '4';
+      q('#termin-inhalt [data-tf="vorlage-merken"]').click();
+      pruef('beta.36 (V2): „Als Vorlage merken“ legt eine eigene Vorlage an und zeigt sie',
+        T(`S.terminVorlagen.length`) === 1 && T(`S.terminVorlagen[0].titel + '|' + S.terminVorlagen[0].n + '|' + S.terminVorlagen[0].k`) === 'Kalk abwischen|30|4'
+        && qa('#termin-inhalt [data-tf-vorlage]').length === 6 && /gemerkt/.test(q('#termin-inhalt .tf-vorlage-zeile .fhint').textContent), T(`JSON.stringify(S.terminVorlagen)`));
+      q('#termin-inhalt [data-tf="vorlage-merken"]').click();
+      pruef('beta.36 (V2): Derselbe Titel ersetzt die Vorlage, statt eine zweite anzulegen', T(`S.terminVorlagen.length`) === 1);
+      pruef('beta.36 (V2): Die eigene Vorlage lässt sich löschen, die festen nicht', !!q('#termin-inhalt [data-tf="vorlage-weg"]'));
+      q('#termin-inhalt [data-tf-vorlage="v-neem"]').click();
+      pruef('beta.36 (V2): Bei einer festen Vorlage gibt es kein „löschen“', !q('#termin-inhalt [data-tf="vorlage-weg"]'));
+      q('#termin-inhalt [data-tf-vorlage="' + T(`S.terminVorlagen[0].id`) + '"]').click();
+      q('#termin-inhalt [data-tf="vorlage-weg"]').click();
+      pruef('beta.36 (V2): Nach dem Löschen stehen wieder nur die festen Vorlagen da', T(`S.terminVorlagen.length`) === 0 && qa('#termin-inhalt [data-tf-vorlage]').length === 5);
+      await zu();
+      T(`terminFensterAuf('tA', null, null)`); await warte(120);
+      pruef('beta.36 (V3): Ein vorhandener Termin zeigt keine Vorlagen', qa('#termin-inhalt [data-tf-vorlage]').length === 0 && !!q('#tf-titel'));
+      await zu();
+
+      /* ── S: Sammelanlage aus der Mehrfachauswahl ── */
+      T(`(function(){ ansichtZeigen('sammlung'); render(); return 1; })()`);
+      T(`(function(){ if(SAM_WAHL) samWahlEnde(); samWahlStarten('H1'); samWahlUmschalten('H3'); return 1; })()`);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      pruef('beta.36 (S1): Das Blatt „Aktionen“ bietet „Termin planen“', !!q('#sam-akt-inhalt [data-sak="termin"]'));
+      const vorT = T(`S.termine.length`);
+      q('#sam-akt-inhalt [data-sak="termin"]').click(); await warte(900);
+      pruef('beta.36 (S1): Danach ist die Auswahl beendet und das Terminblatt offen, die Gewählten sind vorgewählt',
+        T(`SAM_WAHL === null && modalOffen('termin-modal') && !modalOffen('sam-akt-modal')`) === true && T(`TF.pflanzen.slice().sort().join()`) === 'H1,H3',
+        T(`JSON.stringify({w:!!SAM_WAHL, m:MODAL_STAPEL, p:TF && TF.pflanzen})`));
+      pruef('beta.36 (S1): Angelegt ist bis dahin nichts', T(`S.termine.length`) === vorT);
+      q('#tf-titel').value = 'Sammeltermin';
+      q('#termin-speichern').click(); await warte(300);
+      pruef('beta.36 (S1): „Speichern“ legt einen Termin für alle Gewählten an', T(`S.termine.length`) === vorT + 1
+        && T(`(function(){ var t = S.termine[S.termine.length - 1]; return t.titel + '|' + t.pflanzen.slice().sort().join(); })()`) === 'Sammeltermin|H1,H3');
+      await zu();
+
+      /* ── G: Zeile „Erledigt“ im Gießmodus ── */
+      T(`(function(){ S.ereignisse = {}; S.tagEin = {};
+        S.termine = [terminSauber({id:'tG', titel:'Blätter abwischen', tag:'${kTag}', pflanzen:['H1'], datum:'${plus(-2)}', k:1}),
+          terminSauber({id:'tZ', titel:'Erst morgen', pflanzen:['H1'], datum:'${plus(1)}', k:1})];
+        S.schalter = Object.assign({}, S.schalter, {gliste:false}); sichern(); render(); gmStarten(); return 1; })()`);
+      await warte(200);
+      pruef('beta.36 (G1): Die Übersicht nennt offene Termine unter „Heute geplant“, künftige nicht',
+        /Heute geplant/.test(q('#gm-inhalt').textContent) && qa('#gm-inhalt [data-gm-termin]').length === 1 && /Blätter abwischen/.test(q('#gm-inhalt .gm-termin').textContent)
+        && /überfällig/.test(q('#gm-inhalt .gm-termin').textContent), q('#gm-inhalt').textContent.replace(/\s+/g, ' ').slice(0, 200));
+      q('#gm-knoepfe [data-gm="los"]').click(); await warte(120);
+      pruef('beta.36 (G2): Die Karte der Pflanze zeigt die Zeile mit „Erledigt“', T(`gmListe[gmIndex].id`) === 'H1' && !!q('#gm-inhalt .gm-terminfrage [data-gm-termin]')
+        && q('#gm-inhalt .gm-terminfrage [data-gm-termin]').textContent === 'Erledigt', q('#gm-inhalt').textContent.replace(/\s+/g, ' ').slice(0, 200));
+      q('#gm-inhalt [data-gm-termin]').click();
+      pruef('beta.36 (G2): Ein Tipp hakt ab: Termin erledigt, Verlaufseintrag da, Tag läuft, die Zeile bleibt stehen',
+        T(`terminErledigt(S.termine[0], '${plus(-2)}')`) === true && laeuft('H1', kTag) === 1
+        && T(`(S.ereignisse.H1 || []).some(function(e){ return e.typ === 'termin' && e.text === 'Blätter abwischen'; })`) === true
+        && (q('#gm-inhalt [data-gm-termin]') || {}).textContent === 'Erledigt ✓' && q('#gm-inhalt [data-gm-termin]').getAttribute('aria-pressed') === 'true', stand('H1'));
+      q('#gm-knoepfe [data-gm="ja"]').click(); await warte(150);
+      pruef('beta.36 (G3): Gegossen ist eingetragen', T(`S.water.H1.indexOf('${heute}') !== -1`) === true, T(`JSON.stringify(S.water.H1)`));
+      T(`gmRueckgaengig()`); await warte(100);
+      pruef('beta.36 (G3): „Rückgängig“ nimmt das Gießen zurück, der Haken und sein Tag bleiben',
+        T(`S.water.H1.join()`) === plus(-10) && T(`terminErledigt(S.termine[0], '${plus(-2)}')`) === true && laeuft('H1', kTag) === 1, stand('H1'));
+      q('#gm-inhalt [data-gm-termin]').click();
+      pruef('beta.36 (G3): Ein zweiter Tipp nimmt den Haken samt Tag und Verlaufseintrag zurück',
+        T(`terminErledigt(S.termine[0], '${plus(-2)}')`) === false && laeuft('H1', kTag) === 0 && T(`(S.ereignisse.H1 || []).filter(function(e){ return e.typ === 'termin' || e.typ === 'tag'; }).length`) === 0
+        && (q('#gm-inhalt [data-gm-termin]') || {}).textContent === 'Erledigt', stand('H1'));
+      await zu();
+
+      /* ── D: Doktor, Umtopfen und Anzucht bieten den Termin an ── */
+      T(`dokPflanze = 'H1'`);
+      const dv = JSON.parse(T(`JSON.stringify(dokTerminVorgabe('spinnmilben'))`));
+      pruef('beta.36 (D1): Spinnmilben ergeben eine Behandlungsserie 3× alle 7 Tage ab heute für die Pflanze',
+        dv.titel === 'Behandlung: Spinnmilben' && dv.n === 7 && dv.k === 3 && dv.datum === heute && dv.pflanzen.join() === 'H1' && dv.notiz.length > 0 && dv.notiz.length <= 200, JSON.stringify(dv));
+      const dv2 = JSON.parse(T(`JSON.stringify(dokTerminVorgabe('staunaesse'))`));
+      pruef('beta.36 (D1): Staunässe ergibt eine einmalige Kontrolle in 7 Tagen', /^Kontrolle: Staunässe/.test(dv2.titel) && dv2.k === 1 && dv2.datum === plus(7), JSON.stringify(dv2));
+      const vorD = T(`S.termine.length`);
+      T(`terminAnbieten(dokTerminVorgabe('spinnmilben'), null)`); await warte(200);
+      pruef('beta.36 (D2): Das Angebot öffnet das Terminblatt vorgefüllt und legt nichts an',
+        T(`modalOffen('termin-modal')`) === true && q('#tf-titel').value === 'Behandlung: Spinnmilben' && q('#tf-n').value === '7' && q('#tf-k').value === '3' && T(`S.termine.length`) === vorD,
+        q('#tf-titel') ? q('#tf-titel').value : 'kein Feld');
+      await zu();
+      T(`(function(){ karteOeffnen('H1'); return 1; })()`); await warte(150);
+      T(`(function(){ sektionOeffnen('doktor'); return 1; })()`); await warte(150);
+      pruef('beta.36 (Voraussetzung): Karte und Doktor liegen übereinander', T(`MODAL_STAPEL.length`) === 2, T(`MODAL_STAPEL.join()`));
+      T(`terminAnbieten(dokTerminVorgabe('mehltau'), null)`); await warte(1000);
+      pruef('beta.36 (D3): Bei zwei offenen Fenstern schließt das obere, dann öffnet das Terminblatt',
+        T(`modalOffen('termin-modal') && !modalOffen('sek-modal') && MODAL_STAPEL.length === 2`) === true && q('#tf-titel').value === 'Behandlung: Mehltau', T(`MODAL_STAPEL.join()`));
+      await zu();
+      pruef('beta.36 (D4): Der Umtopf-Assistent hat den Knopf „Termin“ und zeigt ihn erst am Ende', !!q('#ut-termin') && q('#ut-termin').hidden === true);
+
+      /* ── U: Urlaubszettel ── */
+      const stil = d.querySelector('style').textContent;
+      const zBlatt = (stil.match(/#urlaub-blatt\{z-index:(\d+)\}/) || [])[1];
+      const zSek = (stil.match(/\.sekm\{position:fixed;inset:0;z-index:(\d+)/) || [])[1];
+      pruef('beta.36 (U1): Der Urlaubszettel liegt über dem Fenster der Einstellungen', Number(zBlatt) > Number(zSek) && Number(zSek) > 0, zBlatt + ' ' + zSek);
+      T(`(function(){ sektionOeffnen('urlaub'); return 1; })()`); await warte(150);
+      q('#url-von').value = heute; q('#url-bis').value = plus(7);
+      q('#btn-url-blatt').click(); await warte(150);
+      pruef('beta.36 (U1): „Zettel anzeigen“ öffnet das Blatt mit Inhalt', T(`modalOffen('urlaub-blatt')`) === true && q('#urlaub-blatt').hidden === false && q('#ub-inhalt').textContent.length > 20,
+        T(`MODAL_STAPEL.join()`));
+      await zu();
+
+      /* ── B: Steckbrief ── */
+      const sb = JSON.parse(T(`JSON.stringify(steckbriefDaten({id:'X1', art:'Sonnentau', botanisch:'Drosera capensis', sorte:'Alba', typ:'Karnivore', sonne:'hell', klasse:'S'}).daten)`));
+      pruef('beta.36 (B1): Der Steckbrief nennt Art, botanischen Namen, Sorte, Wuchsform, Licht und Gießklasse',
+        sb['Art'] === 'Sonnentau' && sb['Botanischer Name'] === 'Drosera capensis' && sb['Sorte'] === 'Alba' && sb['Wuchsform'] === 'Karnivore' && sb['Licht'] === 'Hell' && /^S · /.test(sb['Gießklasse'] || ''), JSON.stringify(sb));
+      const sb2 = JSON.parse(T(`JSON.stringify(steckbriefDaten({id:'X2', art:'Sonnentau', sonne:'hell', klasse:'S', stamm:{Licht:'Südfenster'}}).daten)`));
+      pruef('beta.36 (B1): Gegenprobe: eine eigene Angabe bleibt, Leeres ergibt keine Zeile', sb2['Licht'] === 'Südfenster' && !('Sorte' in sb2) && !('Botanischer Name' in sb2), JSON.stringify(sb2));
+      pruef('beta.36 (B1): Die Gießklasse allein füllt den Steckbrief nicht („Angaben ergänzen“ bleibt)',
+        T(`Object.keys(steckbriefDaten({id:'X3', art:'', klasse:'B'}).daten).length`) === 0);
+    } catch(e){
+      pruef('beta.36: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); samRueckWeg(); KALK = null;
+        history.replaceState(null, ''); HEUTE = new Date(${heuteAlt}); dokPflanze = null;
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.tagEin = a.tagEin; S.termine = a.termine || [];
+        S.lernen = a.lernen; S.feuchtRueck = a.feuchtRueck; S.raeume = a.raeume; S.gesehen = a.gesehen;
+        if(a.giess === undefined) delete S.giess; else S.giess = a.giess;
+        if(a.schalter === undefined) delete S.schalter; else S.schalter = a.schalter;
+        S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.terminVorlagen = a.terminVorlagen || [];
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt36)})`);
     }
   }
 
