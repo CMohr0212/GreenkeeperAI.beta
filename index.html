@@ -2040,6 +2040,7 @@ body.gm-offen{overflow:hidden}
 .zs-punkt{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--schrift-3);align-self:center}
 .zs-punkt[data-ton="gut"]{background:var(--moss)}
 .zs-punkt[data-ton="warn"]{background:var(--terra)}
+.zs-punkt[data-ton="plan"]{background:transparent;border:2px solid var(--ruhe)}
 .zs-punkt[data-ton="wasser"]{background:var(--water)}
 .zs-d{flex:0 0 auto;min-width:66px;font-size:var(--t-s);color:var(--schrift-2)}
 .zs-t{font-size:var(--t-s);line-height:1.45}
@@ -2228,20 +2229,6 @@ html[data-design="klartext"] .km-neben button{min-height:var(--tap);border-width
 .warnbox.unklar .pruef{display:inline-block;margin-top:4px;font-weight:600;
   font-size:var(--t-s);color:var(--duenger-tief);text-decoration:underline}
 
-/* Pflegehinweise: bewusst leiser als die Warnungen. Grau statt rot,
-   ohne Ausrufezeichen, mit einem × zum Wegräumen. */
-.pflegehinweis{border:1px solid var(--line);border-radius:var(--r-mittel);
-  background:var(--ton-tipp);padding:2px 4px 2px 10px;margin:0 0 12px}
-.ph-zeile{display:flex;align-items:flex-start;gap:6px;padding:7px 0;
-  border-top:1px solid var(--line)}
-.ph-zeile:first-child{border-top:0}
-.ph-text{margin:0;flex:1;font-size:var(--t-s);line-height:1.45;
-  color:var(--peat);overflow-wrap:anywhere}
-.ph-text b{display:block;color:var(--ink);font-weight:600;margin-bottom:1px}
-.ph-weg{flex:0 0 auto;width:26px;height:26px;padding:0;border:0;background:none;
-  color:var(--peat);font-size:17px;line-height:26px;cursor:pointer;border-radius:4px}
-.ph-weg:hover{background:var(--ton-tipp-hover);color:var(--ink)}
-
 /* Einfacher Modus: alles ausblenden, was Einsteiger nur bremst.
    Der Grundriss ist kein eigener Reiter, sondern ein Block auf der
    Werkzeuge-Seite — deshalb über seine eigene Kennung. */
@@ -2312,8 +2299,7 @@ body.s-aus-abstammung .kblock[data-kblock="abstammung"]{display:none!important}
 .sam-zeilen .card:not(.open) .thumb,
 .sam-zeilen .card:not(.open) .icons,
 .sam-zeilen .card:not(.open) .bar,
-.sam-zeilen .card:not(.open) .warnbox,
-.sam-zeilen .card:not(.open) .pflegehinweis{display:none}
+.sam-zeilen .card:not(.open) .warnbox{display:none}
 .sam-zeilen .card:not(.open) .card-body{padding:11px 13px}
 .sam-zeilen .card:not(.open) .card-body h2{font-size:var(--t-m);margin:0}
 .sam-zeilen .card:not(.open) .card-body .lat,
@@ -2344,7 +2330,6 @@ body.s-aus-abstammung .kblock[data-kblock="abstammung"]{display:none!important}
 .sam-raster .card:not(.open) .card-bot,
 .sam-raster .card:not(.open) .card-lage,
 .sam-raster .card:not(.open) .warnbox,
-.sam-raster .card:not(.open) .pflegehinweis,
 .sam-raster .card:not(.open) .bar{display:none}
 .sam-raster .card:not(.open) .card-name{margin:0;font-size:var(--t-m);line-height:1.25;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -2932,7 +2917,6 @@ html[data-design="botanisch"] #karte-rumpf .warnbox{margin:16px 0 0;padding:13px
 html[data-design="botanisch"] #karte-rumpf .warnbox p{font-weight:400;color:var(--gift)}
 html[data-design="botanisch"] #karte-rumpf .warnbox p b{font-weight:600}
 html[data-design="botanisch"] #karte-rumpf .warnbox.unklar{background:var(--ton-unklar)}
-html[data-design="botanisch"] #karte-rumpf .pflegehinweis{margin-top:12px;border:0;border-radius:var(--r-mittel);background:var(--fl-karte);box-shadow:var(--sch-karte)}
 html[data-design="botanisch"] #karte-rumpf .acc-zeile{margin:12px 0 0;border:0;border-radius:var(--r-mittel);background:var(--fl-karte);box-shadow:var(--sch-karte)}
 html[data-design="botanisch"] #karte-rumpf .acc-zeile>summary{gap:13px;padding:12px 14px;font-family:var(--f-body);font-weight:400;font-size:var(--t-m)}
 html[data-design="botanisch"] #karte-rumpf .acc-zeile>summary:hover{background:transparent}
@@ -3840,7 +3824,7 @@ html[data-design] #out.sam-zeilen .card:not(.open) .card-btn:not(:has(.thumb))::
   flex:0 0 56px;width:56px;height:56px;margin:0;border-radius:var(--r-klein);background:var(--fl-bildleer)}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-body{flex:1 1 auto;min-width:0;padding:0;background:none;
   display:flex;flex-direction:column;justify-content:center;gap:3px}
-html[data-design] #out.sam-zeilen .card:not(.open) :is(.card-bot,.card-lage,.icons,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-zeilen .card:not(.open) :is(.card-bot,.card-lage,.icons,.bar,.warnbox){display:none}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-name{margin:0;font-size:var(--t-l);line-height:1.25;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html[data-design] #out.sam-zeilen .card:not(.open) .card-stand{display:flex;margin:0;font-size:var(--t-s)}
@@ -3916,7 +3900,7 @@ html[data-design]:not([data-design="terrarium"]) #out.sam-raster:is([data-spalte
   content:'';display:block;width:100%;background:var(--fl-bildleer)}
 /* Inhalt ab drei Spalten: Bild, Name, Fälligkeit (Punkt 5, F220) */
 html[data-design] #out .card-kurz{display:none}
-html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.bar,.warnbox,.pflegehinweis){display:none}
+html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) :is(.card-bot,.card-lage,.card-stand,.icons,.bar,.warnbox){display:none}
 html[data-design] #out.sam-raster:is([data-spalten="3"],[data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{
   display:block;position:static;width:auto;height:auto;margin:0;padding:7px 8px 9px;clip:auto;overflow:hidden;text-align:left}
 html[data-design] #out.sam-raster:is([data-spalten="4"],[data-spalten="5"]) .card:not(.open) .card-body{padding:5px 6px 6px}
@@ -4163,6 +4147,62 @@ html[data-design] #heft-modal .heft-spick-x{display:block;font-size:var(--t-m);o
 html[data-design] #heft-modal .heft-spick-hinw{display:block;margin-top:4px;color:var(--gift, #b3261e)}
 html[data-design] #heft-modal .heft-spick-ok{color:var(--schrift-3)}
 html[data-design] .heft-kat .heft-ki-kat{display:inline-block;margin-top:6px}
+/* 4.0-beta.34 (P1): Kalender, Terminblatt, Hinweiszeile */
+html[data-design] .kal-fest{padding:6px 16px 0}
+html[data-design] .kal-nav{display:flex;align-items:center;gap:6px;margin:4px 0 10px}
+html[data-design] .kal-nav button{min-height:var(--tap);min-width:var(--tap);padding:0 12px;border-radius:var(--r-mittel);
+  border:1px solid var(--linie);background:transparent;color:var(--schrift);font:inherit;cursor:pointer}
+html[data-design] .kal-nav .kal-label{flex:1;text-align:center;font-size:var(--t-md);font-weight:600;color:var(--schrift)}
+html[data-design] .kal-woche{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 8px}
+html[data-design] .kal-kopfzeile,html[data-design] .kal-raster{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+html[data-design] .kal-kopfzeile span{text-align:center;font-size:var(--t-xs);color:var(--schrift-3);padding:2px 0}
+html[data-design] .kal-zelle{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;
+  min-height:var(--tap);padding:5px 0 4px;border-radius:var(--r-mittel);border:1px solid transparent;
+  background:transparent;color:var(--schrift);font:inherit;cursor:pointer}
+html[data-design] .kal-zelle.aus{color:var(--schrift-3);opacity:.7}
+html[data-design] .kal-zelle.heute .kal-zahl{font-weight:700;text-decoration:underline}
+html[data-design] .kal-zelle[aria-pressed="true"]{background:var(--fl-akzent);color:var(--schrift-invers);border-color:var(--fl-akzent)}
+html[data-design] .kal-wt{font-size:var(--t-xs);color:inherit;opacity:.8}
+html[data-design] .kal-zahl{font-size:var(--t-l)}
+html[data-design] .kal-punkte{display:flex;gap:3px;min-height:7px}
+html[data-design] .kal-p{width:6px;height:6px;border-radius:50%;background:var(--wasser)}
+html[data-design] .kal-p-t{background:var(--duenger-tief)}
+html[data-design] .kal-p-t.erl{background:transparent;border:1.5px solid var(--duenger-tief)}
+html[data-design] .kal-p-w.vor{background:transparent;border:1.5px solid var(--wasser)}
+html[data-design] .kal-p-e{background:var(--gesund)}
+html[data-design] .kal-zelle[aria-pressed="true"] .kal-p{background:var(--schrift-invers);border-color:var(--schrift-invers)}
+html[data-design] .kal-liste{margin:8px 0 24px}
+html[data-design] .kal-dkopf{margin:16px 0 4px;font-size:var(--t-md);font-weight:600;color:var(--schrift)}
+html[data-design] .kal-dkopf.gewaehlt{color:var(--fl-akzent)}
+html[data-design] .kal-leer{font-size:var(--t-m);color:var(--schrift-2);margin:4px 0}
+html[data-design] .kal-zeile{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--linie)}
+html[data-design] .kal-dkopf + .kal-zeile{border-top:0}
+html[data-design] .kal-txt{flex:1;min-width:0;display:block;text-align:left;background:none;border:0;padding:0;font:inherit;color:var(--schrift)}
+html[data-design] .kal-txt b{display:block;font-weight:600;font-size:var(--t-l);overflow-wrap:anywhere}
+html[data-design] .kal-txt i{display:block;font-style:normal;font-size:var(--t-s);color:var(--schrift-2);overflow-wrap:anywhere}
+html[data-design] .kal-termin.erl .kal-txt b{text-decoration:line-through;color:var(--schrift-2)}
+html[data-design] .kal-termin.ueber .kal-txt i{color:var(--alarm);font-weight:600}
+html[data-design] .kal-haken{flex:0 0 auto;width:var(--tap);height:var(--tap);margin:-8px 0 -8px -8px;display:flex;align-items:center;justify-content:center;
+  background:none;border:0;cursor:pointer;color:transparent}
+html[data-design] .kal-haken span{width:24px;height:24px;border:2px solid var(--linie-stark);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px}
+html[data-design] .kal-haken[aria-pressed="true"] span{background:var(--gesund);border-color:var(--gesund);color:var(--schrift-invers)}
+html[data-design] .kal-pt{flex:0 0 auto;width:10px;height:10px;margin:6px 11px 0 0;border-radius:50%;background:var(--wasser)}
+html[data-design] .kal-pt-g{background:var(--gesund)}
+html[data-design] .kal-pt-e{background:var(--duenger)}
+html[data-design] .heute-hinweis{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--tap);margin:0 0 12px;padding:10px 13px;
+  border-radius:var(--r-mittel);border:1px solid var(--linie);background:var(--ton-unklar);color:var(--schrift);font:inherit;text-align:left;cursor:pointer}
+html[data-design] .hh-punkt{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:var(--duenger)}
+html[data-design] .hh-txt{flex:1;min-width:0;font-size:var(--t-m);overflow-wrap:anywhere}
+html[data-design] .hh-p{color:var(--schrift-2);font-size:1.3rem}
+html[data-design] .hw-zeile{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--linie)}
+html[data-design] .hw-zeile:first-child{border-top:0}
+html[data-design] .hw-txt{flex:1;min-width:0}
+html[data-design] .hw-txt b,html[data-design] .hw-txt i{display:block;font-style:normal}
+html[data-design] .hw-txt i{font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .hw-zeile button{min-height:var(--tap);padding:0 14px;border-radius:var(--r-mittel);border:1px solid var(--linie);background:transparent;color:var(--schrift);font:inherit;cursor:pointer}
+html[data-design] #termin-modal .zeile{display:flex;align-items:center;justify-content:space-between;gap:12px}
+html[data-design] #termin-modal .zeile input{width:6rem}
+html[data-design] #termin-modal .tag-datumfeld{margin-top:8px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9313,8 +9353,9 @@ document.addEventListener('click', e=>{
    Bis 3.30.0 blieben Ereignisse, „gesehen“ und der Umtopfplan liegen. */
 function pflanzeEntfernen(id){
   S.eigene = (S.eigene||[]).filter(x=>x.id!==id);
-  ['water','fotos','zustand','ereignisse','gesehen','umtopfPlan']
+  ['water','fotos','zustand','ereignisse','gesehen','umtopfPlan','tagEin']
     .forEach(k=>{ if(S[k] && typeof S[k] === 'object') delete S[k][id]; });
+  if(typeof terminePflanzeWeg === 'function') terminePflanzeWeg(id);
 }
 
 </script>
@@ -9479,6 +9520,7 @@ function pflanzeEntfernen(id){
     <h2>Heute dran</h2>
     <div id="sicher-erinnerung"></div>
     <div id="heute-status"></div>
+    <div id="heute-hinweis" hidden></div>
     <div class="heute-start">
       <button id="btn-giessmodus" class="haupttat">
         <span class="ht-marke" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2s7 8 7 12a7 7 0 0 1-14 0c0-4 7-12 7-12z"/></svg></span>
@@ -9489,6 +9531,10 @@ function pflanzeEntfernen(id){
         <button id="btn-doktor-heute" class="nt">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/></svg>
           <b>Pflanzendoktor</b><i>Symptome deuten</i>
+        </button>
+        <button id="btn-kalender-heute" class="nt" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          <b>Kalender</b><i id="kal-kachel-sub">Noch nichts geplant</i>
         </button>
       </div>
     </div>
@@ -10079,11 +10125,11 @@ function pflanzeEntfernen(id){
        Anlegen einer Pflanze zu sehen. Wer vor einem Kauf nachschlagen
        wollte, musste eine Pflanze anlegen, die es noch gar nicht gibt. -->
   <section data-ans="mehr" class="plan mh" id="bib-sec" data-mh="bibliothek">
-    <h2 class="wz-h2">Bibliothek</h2>
+    <h2 class="wz-h2">Nachschlagen</h2>
     <div class="wz-kopfzeile">
       <button class="wz-kopf" data-mh-go="bibliothek" aria-expanded="false" aria-controls="mh-in-bibliothek">
-        <span class="wz-t">Bibliothek</span><span class="wz-p" aria-hidden="true">›</span></button>
-      <button class="wz-i" data-mh-info="bibliothek" aria-expanded="false" aria-label="Wozu ist die Bibliothek da?">i</button>
+        <span class="wz-t">Nachschlagen</span><span class="wz-p" aria-hidden="true">›</span></button>
+      <button class="wz-i" data-mh-info="bibliothek" aria-expanded="false" aria-label="Wozu ist Nachschlagen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-bibliothek" hidden>
       <p class="wz-hilfe" hidden>Zum Nachschlagen, unabhängig von deiner Sammlung. Die Artentabelle sagt, was eine Pflanze braucht, bevor du sie kaufst. Unter Wissenswertes steht, was rund um Wasser, Substrat und Nährstoffe immer wieder aufkommt. Die Gießklassen nennen die Richtwerte, mit denen die App rechnet.</p>
@@ -10148,11 +10194,11 @@ function pflanzeEntfernen(id){
   <!-- Das Gießcenter ist ein Dach, kein neues Werkzeug: Vertretungszettel,
        Wasser und Rhythmus an einer Stelle. -->
   <section data-ans="mehr" class="plan mh" id="giess-sec" data-mh="giess">
-    <h2 class="wz-h2">Gießcenter</h2>
+    <h2 class="wz-h2">Gießen</h2>
     <div class="wz-kopfzeile">
       <button class="wz-kopf" data-mh-go="giess" aria-expanded="false" aria-controls="mh-in-giess">
-        <span class="wz-t">Gießcenter</span><span class="wz-p" aria-hidden="true">›</span></button>
-      <button class="wz-i" data-mh-info="giess" aria-expanded="false" aria-label="Wozu ist das Gießcenter da?">i</button>
+        <span class="wz-t">Gießen</span><span class="wz-p" aria-hidden="true">›</span></button>
+      <button class="wz-i" data-mh-info="giess" aria-expanded="false" aria-label="Wozu ist Gießen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-giess" hidden>
       <p class="wz-hilfe" hidden>Alles zum Gießen an einer Stelle. Oben der Zettel für die Vertretung. Darunter, was für alle Pflanzen gilt: welches Wasser du nimmst und ob die App im Winter von selbst größere Abstände ansetzt.</p>
@@ -10401,9 +10447,6 @@ function pflanzeEntfernen(id){
     <div class="gm-zfrage-btns" id="modus-zurueck-box" hidden><button type="button" id="modus-zurueck">Zurücksetzen</button></div>
     <p class="ein-abschnitt">Anzeige</p>
     <div class="ein-karte" id="schalter-karte">
-      <label class="fspan check">
-        <input type="checkbox" role="switch" id="ans-hinweise"> <span class="lab" style="display:inline">Pflegehinweise auf den Karten</span></label>
-      <p class="fhint" id="hinweise-text" hidden></p>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-pflege"> <span class="lab" style="display:inline">Pflegeheft in der Karte</span></label>
       <label class="fspan check">
@@ -10813,6 +10856,49 @@ function pflanzeEntfernen(id){
   </div>
   <div class="sekm-rumpf" id="heft-inhalt"></div>
   <div class="as-fuss" id="heft-fuss"></div>
+</div>
+</div>
+
+<!-- 4.0-beta.34 (P1): Kalender, Terminblatt und Hinweisliste -->
+<div id="kal-modal" class="sekm" hidden>
+  <div class="sekm-kopf">
+    <button class="sekm-raus" id="kal-zu" type="button" aria-label="Zurück zu Heute">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <h2 class="sekm-titel" id="kal-titel" tabindex="-1">Kalender</h2>
+    <button class="sekm-i" type="button" data-kal="neu" aria-label="Neuer Termin"><span aria-hidden="true">+</span></button>
+  </div>
+  <div class="sekm-fest kal-fest">
+    <div class="segment" role="group" aria-label="Ansicht">
+      <button type="button" data-kal-ansicht="woche" aria-pressed="true">Woche</button>
+      <button type="button" data-kal-ansicht="monat" aria-pressed="false">Monat</button>
+    </div>
+  </div>
+  <div class="sekm-rumpf" id="kal-inhalt"></div>
+</div>
+
+<div id="termin-huelle" aria-labelledby="termin-titel" hidden>
+<div id="termin-modal" class="sekm as-fenster">
+  <div class="sekm-kopf">
+    <h2 class="sekm-titel" id="termin-titel" tabindex="-1">Neuer Termin</h2>
+  </div>
+  <div class="sekm-rumpf" id="termin-inhalt"></div>
+  <div class="as-fuss">
+    <button id="termin-abbrechen" type="button">Abbrechen</button>
+    <button id="termin-speichern" type="button" class="haupt">Speichern</button>
+  </div>
+</div>
+</div>
+
+<div id="hinweis-huelle" aria-labelledby="hinweis-titel" hidden>
+<div id="hinweis-modal" class="sekm as-fenster">
+  <div class="sekm-kopf">
+    <h2 class="sekm-titel" id="hinweis-titel" tabindex="-1">Tags zu Ende</h2>
+  </div>
+  <div class="sekm-rumpf" id="hinweis-inhalt"></div>
+  <div class="as-fuss">
+    <button id="hinweis-zu" type="button" class="haupt">Schließen</button>
+  </div>
 </div>
 </div>
 
@@ -11286,7 +11372,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.33';
+const FASSUNG = '4.0-beta.34';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -11534,10 +11620,12 @@ const LEERSTAND = () => ({
   ablegerErbe:null, ansicht:null, anzucht:null, einfach:null, fassungGesehen:null,
   /* 4.0-beta.18: Modus ('sammler' | 'entdecker') und Abweichungen davon */
   modus:null, schalter:null,
-  gruppierung:null, hinweisWeg:null, histAnsicht:null, installBandWeg:null,
-  installiert:null, kartenTab:null, kiDienst:null, pflegehinweise:null,
+  gruppierung:null, histAnsicht:null, installBandWeg:null,
+  installiert:null, kartenTab:null, kiDienst:null,
   samAnsicht:null, sicherTage:null, sortierung:null, speicherFest:null,
   speicherGefragt:null, teilenDefekt:null, umtopfPlan:null,
+  /* 4.0-beta.34: Termine des Kalenders und die gewählte Ansicht */
+  termine:[], kalAnsicht:null,
   /* Sicherung vor der Bereinigung (3.31.0): für welche Fassung die
      Bereinigung erledigt ist, und die höchste je vergebene Nummer. */
   bereinigtFassung:null, idHoch:null
@@ -11760,6 +11848,10 @@ function grundwerteErgaenzen(){
      Wiederholbar, ohne Merker. */
   delete S.rundgang; delete S.blatt; delete S.wish; delete S.sammlungOffen;
   planerDatenWeg();
+  /* 4.0-beta.34 (F350): Der Schalter „Pflegehinweise auf den Karten“ ist
+     entfernt, seine Felder auch. Wiederholbar, ohne Merker. */
+  delete S.pflegehinweise; delete S.hinweisWeg;
+  if(S.schalter && typeof S.schalter === 'object') delete S.schalter.hinweise;
   /* 4.0-beta.27 (G2a+c): Umbau der Zustände, Vorgaben, erreichte Enden */
   if(typeof tagsBereit === 'function') tagsBereit();
   bereinigungAnstossen();
@@ -12720,6 +12812,7 @@ function zeitstrahlEintraege(p){
     raus.push({datum:d, ton:'warn', name:'Befund des Doktors',
                text: kurz.length > 90 ? kurz.slice(0, 88) + '…' : kurz});
   });
+  if(typeof kalZeitstrahlFuer === 'function') kalZeitstrahlFuer(p).forEach(x => raus.push(x));
   return raus.sort((a,b)=>b.datum.localeCompare(a.datum));
 }
 function zeitstrahlHTML(p){
@@ -14221,30 +14314,6 @@ function warnungenHTML(p){
   return `<div class="warnbox">${w.map(x=>`<p>⚠ ${x}</p>`).join('')}</div>` + unklarBox;
 }
 
-/* ── Pflegehinweise ──────────────────────────────────────────
-   Alles, was gut zu wissen, aber nicht dringend ist. Bewusst von
-   den Warnungen getrennt: Warnungen bleiben stehen, Hinweise lassen
-   sich einzeln wegklicken und komplett abschalten. Sie verbieten
-   nichts — eine Pflanze darf überall stehen, auch wo weniger Sonne
-   ankommt, als für ihre Art üblich ist. */
-function hinweisWeg(id, key){ return !!((S.hinweisWeg || {})[id + '|' + key]); }
-
-function pflegeHinweiseHTML(p){
-  if(S.pflegehinweise === false) return '';
-  const teile = [];
-
-  /* Der einzige Hinweis war der Lichtabgleich mit dem Grundriss. Die
-     Liste bleibt als Ort für künftige Hinweise. */
-
-  if(!teile.length) return '';
-  return '<div class="pflegehinweis">' + teile.map(t=>
-    `<div class="ph-zeile">
-       <p class="ph-text"><b>${esc(t.titel)}</b> ${esc(t.text)}</p>
-       <button class="ph-weg" data-do="hinweis-weg" data-p="${esc(p.id)}" data-k="${esc(t.key)}"
-         aria-label="Diesen Hinweis ausblenden" title="Diesen Hinweis ausblenden">×</button>
-     </div>`).join('') + '</div>';
-}
-
 /* ── Reiter „Platz“ (4.0-beta.30, B2, F309) ──────────────────
    Raum und Stellplatz als Knopflisten (Regel 9.10), darunter Topf und
    Substrat. Ein zweiter Tipp auf den gewählten Knopf hebt die Wahl
@@ -14983,7 +15052,6 @@ function kartenDetailHTML(p){
       ${hinweis}
       ${typeof anzuchtMutterHTML === 'function' ? anzuchtMutterHTML(p) : ''}
       ${warnungenHTML(p)}
-      ${pflegeHinweiseHTML(p)}
       ${tagKarteHTML(p)}
       ${notizKarteHTML(p)}
       ${kartenReiter(p.id, [
@@ -16629,6 +16697,7 @@ function render(){
      eintragen" sucht dort niemand — sie steht weiterhin im Raum
      selbst. */
   $('#heute-status').innerHTML = wetterZeileHTML() + kennzahlenHTML();
+  if(typeof heuteKalenderZeichnen === 'function') heuteKalenderZeichnen();
   meldeRender();
   if(typeof rundeAngebotZeichnen === 'function') rundeAngebotZeichnen();
   /* Der Stammbaum baut sich beim Öffnen auf, nicht bei jedem Rendern —
@@ -17548,6 +17617,564 @@ modalAnmelden('iv-modal', {el:'iv-huelle', groesse:'blatt', schleier:true, fokus
 modalAnmelden('heft-modal', {el:'heft-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
   nachZu: ()=>{ if(HFT && HFT.laeuft && typeof kiAbbrechen === 'function') kiAbbrechen(); HFT = null; }});
 
+/* ══════════════════ Kalender (4.0-beta.34, Etappe 2, P1) ══════════════════
+   Neu ist nur S.termine für Geplantes. Vergangenes liest der Kalender aus
+   S.water, S.ereignisse und S.tagEin, ohne Datenumbau. Eine Serie ist eine
+   Regel (Start, alle n Tage, k-mal); ihre Termine werden berechnet, nie
+   einzeln gespeichert. Erledigte Tage stehen in `erl`.
+   Termin: {id, titel, tag, pflanzen[], datum, n, k, erl[], notiz} */
+var KAL = null;      /* offenes Kalenderfenster: {ansicht, tag, plan} */
+var TF = null;       /* offenes Terminfenster */
+const TERMIN_TITEL_MAX = 60, TERMIN_NOTIZ_MAX = 200, TERMIN_ANZAHL_MAX = 99, TERMIN_ABSTAND_MAX = 365;
+const KAL_WT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+modalAnmelden('kal-modal', {groesse:'voll', schleier:false,
+  nachZu: ()=>{ KAL = null; }});
+modalAnmelden('termin-modal', {el:'termin-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
+  nachZu: ()=>{ TF = null; }});
+modalAnmelden('hinweis-modal', {el:'hinweis-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true});
+
+/* ── Daten ───────────────────────────────────────────────────── */
+function termineListe(){
+  return (Array.isArray(S.termine) ? S.termine : []).filter(t =>
+    t && typeof t === 'object' && t.id && /^\d{4}-\d{2}-\d{2}$/.test(t.datum || ''));
+}
+function terminNeuId(){ return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function terminTitel(t){
+  if(t.titel) return t.titel;
+  const tg = t.tag ? tagDef(t.tag) : null;
+  return tg ? tg.name : 'Termin';
+}
+/* Alle Tage einer Serie: Start, dann alle n Tage, insgesamt k Mal. */
+function terminDaten(t){
+  const k = Math.max(1, Math.min(TERMIN_ANZAHL_MAX, Math.round(Number(t.k) || 1)));
+  const n = Math.max(1, Math.min(TERMIN_ABSTAND_MAX, Math.round(Number(t.n) || 1)));
+  const raus = [];
+  for(let i = 0; i < k; i++) raus.push(i ? tagPlusTage(t.datum, i * n) : t.datum);
+  return raus;
+}
+function terminErledigt(t, d){ return Array.isArray(t.erl) && t.erl.indexOf(d) !== -1; }
+function terminSauber(d){
+  const k = Math.max(1, Math.min(TERMIN_ANZAHL_MAX, Math.round(Number(d.k) || 1)));
+  const n = k > 1 ? Math.max(1, Math.min(TERMIN_ABSTAND_MAX, Math.round(Number(d.n) || 1))) : 1;
+  const t = {id:d.id || terminNeuId(), titel:String(d.titel || '').trim().slice(0, TERMIN_TITEL_MAX),
+    tag:(d.tag && tagDef(d.tag)) ? d.tag : '',
+    pflanzen:Array.from(new Set((d.pflanzen || []).filter(Boolean))),
+    datum:d.datum, n:n, k:k, erl:[],
+    notiz:String(d.notiz || '').trim().slice(0, TERMIN_NOTIZ_MAX)};
+  const ds = terminDaten(t);
+  t.erl = (d.erl || []).filter(x => ds.indexOf(x) !== -1);
+  return t;
+}
+/* Die Vorkommen im Zeitraum [von, bis], nach Tag und Titel geordnet. */
+function terminVorkommen(von, bis){
+  const raus = [];
+  termineListe().forEach(t => {
+    const ds = terminDaten(t);
+    ds.forEach((d, i) => {
+      if(d < von || d > bis) return;
+      raus.push({t:t, datum:d, nr:i + 1, von:ds.length, erledigt:terminErledigt(t, d)});
+    });
+  });
+  return raus.sort((a, b) => a.datum.localeCompare(b.datum) || terminTitel(a.t).localeCompare(terminTitel(b.t), 'de'));
+}
+function terminErledigtUm(tid, d){
+  const t = (S.termine || []).find(x => x && x.id === tid);
+  if(!t || terminDaten(t).indexOf(d) === -1) return false;
+  t.erl = Array.isArray(t.erl) ? t.erl : [];
+  const i = t.erl.indexOf(d);
+  if(i === -1) t.erl.push(d); else t.erl.splice(i, 1);
+  sichern();
+  return true;
+}
+function terminLoeschen(tid){
+  const vor = (S.termine || []).length;
+  S.termine = (S.termine || []).filter(x => !x || x.id !== tid);
+  if(S.termine.length !== vor) sichern();
+  return S.termine.length !== vor;
+}
+/* Eine gelöschte Pflanze verschwindet aus ihren Terminen; ein Termin,
+   der nur für sie da war, fällt weg. */
+function terminePflanzeWeg(id){
+  if(!Array.isArray(S.termine)) return;
+  S.termine = S.termine.filter(t => {
+    if(!t || !Array.isArray(t.pflanzen) || t.pflanzen.indexOf(id) === -1) return true;
+    t.pflanzen = t.pflanzen.filter(x => x !== id);
+    return t.pflanzen.length > 0;
+  });
+}
+function terminPflanzenText(t){
+  const ids = {}; allePflanzen().forEach(p => { ids[p.id] = p; });
+  const namen = (t.pflanzen || []).map(id => ids[id]).filter(Boolean).map(p => nice(p));
+  if(!namen.length) return '';
+  return namen.length > 2 ? namen.slice(0, 2).join(', ') + ' +' + (namen.length - 2) : namen.join(', ');
+}
+
+/* ── Zeit ────────────────────────────────────────────────────── */
+function kalWochentag(d){ return new Date(d + 'T12:00:00').getDay(); }
+function kalMontag(d){ return tagPlusTage(d, -((kalWochentag(d) + 6) % 7)); }
+function kalMonatErster(d){ return d.slice(0, 8) + '01'; }
+function kalMonatPlus(d, n){
+  const x = new Date(d + 'T12:00:00');
+  return iso(new Date(x.getFullYear(), x.getMonth() + n, 1, 12));
+}
+function kalTageZwischen(a, b){
+  return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
+}
+function kalDatumLang(d){
+  return new Date(d + 'T12:00:00').toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'});
+}
+function kalTagKurz(d){
+  const h = iso(HEUTE), n = kalTageZwischen(h, d);
+  if(n === 0) return 'Heute';
+  if(n === 1) return 'Morgen';
+  return new Date(d + 'T12:00:00').toLocaleDateString('de-DE', {weekday:'short', day:'numeric', month:'numeric'});
+}
+function kalWochenLabel(mo){
+  const so = tagPlusTage(mo, 6);
+  const a = new Date(mo + 'T12:00:00'), b = new Date(so + 'T12:00:00');
+  const mon = x => x.toLocaleDateString('de-DE', {month:'long'});
+  return a.getMonth() === b.getMonth()
+    ? a.getDate() + '.–' + b.getDate() + '. ' + mon(b) + ' ' + b.getFullYear()
+    : a.getDate() + '. ' + mon(a) + ' – ' + b.getDate() + '. ' + mon(b) + ' ' + b.getFullYear();
+}
+function kalMonatLabel(d){
+  return new Date(d + 'T12:00:00').toLocaleDateString('de-DE', {month:'long', year:'numeric'});
+}
+
+/* ── Was an einem Tag steht ──────────────────────────────────── */
+function kalPlan(){
+  if(!KAL) return giessplanDaten(28);
+  return KAL.plan || (KAL.plan = giessplanDaten(28));
+}
+function kalName(x){ return x && x.anzucht ? x.name : nice(x); }
+function kalNamen(liste){
+  const n = liste.map(kalName);
+  return n.length > 3 ? n.slice(0, 3).join(', ') + ' +' + (n.length - 3) : n.join(', ');
+}
+function kalPflanzenMap(){
+  const m = {}; allePflanzen().forEach(p => { m[p.id] = p; });
+  return m;
+}
+/* Zeichen je Tag für Wochenleiste und Monatsraster */
+function kalMarken(von, bis){
+  const m = {}, h = iso(HEUTE);
+  const get = d => m[d] || (m[d] = {termin:0, offen:0, giessen:0, gegossen:0, ereignis:0});
+  terminVorkommen(von, bis).forEach(v => { const x = get(v.datum); x.termin++; if(!v.erledigt) x.offen++; });
+  const plan = kalPlan();
+  plan.tage.forEach((l, i) => {
+    if(!l.length) return;
+    const d = tagPlusTage(h, i);
+    if(d >= von && d <= bis) get(d).giessen = l.length;
+  });
+  if(plan.ueber.length && h >= von && h <= bis) get(h).giessen += plan.ueber.length;
+  const pf = kalPflanzenMap();
+  Object.keys(pf).forEach(id => {
+    giessTermine(id).forEach(d => { if(typeof d === 'string' && d >= von && d <= bis && d <= h) get(d).gegossen++; });
+    ((S.ereignisse || {})[id] || []).forEach(e => {
+      if(e && e.typ !== 'gesehen' && e.datum >= von && e.datum <= bis) get(e.datum).ereignis++;
+    });
+    tagEintraege(id).forEach(e => {
+      if(e.von > h && e.von >= von && e.von <= bis) get(e.von).ereignis++;
+      if(e.bis && !e.ende && e.bis > h && e.bis >= von && e.bis <= bis) get(e.bis).ereignis++;
+    });
+  });
+  return m;
+}
+function kalTerminZeile(v){
+  const h = iso(HEUTE), t = v.t;
+  const teile = [];
+  const pt = terminPflanzenText(t); if(pt) teile.push(pt);
+  const tg = t.tag ? tagDef(t.tag) : null; if(tg && tg.name !== t.titel) teile.push(tg.name);
+  if(v.von > 1) teile.push(v.nr + ' von ' + v.von);
+  if(t.notiz) teile.push(t.notiz);
+  const ueber = !v.erledigt && v.datum < h;
+  if(ueber) teile.unshift('überfällig');
+  return `<div class="kal-zeile kal-termin${v.erledigt ? ' erl' : ''}${ueber ? ' ueber' : ''}">
+    <button type="button" class="kal-haken" data-kal-erl="${esc(t.id)}|${v.datum}" aria-pressed="${v.erledigt}"
+      aria-label="${esc((v.erledigt ? 'Wieder offen: ' : 'Erledigt: ') + terminTitel(t))}"><span aria-hidden="true">✓</span></button>
+    <button type="button" class="kal-txt" data-kal-termin="${esc(t.id)}"><b>${esc(terminTitel(t))}</b>${
+      teile.length ? `<i>${esc(teile.join(' · '))}</i>` : ''}</button></div>`;
+}
+function kalTextZeile(art, titel, text){
+  return `<div class="kal-zeile"><span class="kal-pt kal-pt-${art}" aria-hidden="true"></span>
+    <span class="kal-txt"><b>${esc(titel)}</b>${text ? `<i>${esc(text)}</i>` : ''}</span></div>`;
+}
+/* Eine Tagesliste; leer, wenn an dem Tag nichts steht. */
+function kalTagZeilen(d){
+  const h = iso(HEUTE), z = [];
+  terminVorkommen(d, d).forEach(v => z.push(kalTerminZeile(v)));
+  if(d >= h){
+    const plan = kalPlan();
+    const i = kalTageZwischen(h, d);
+    if(d === h && plan.ueber.length)
+      z.push(kalTextZeile('w', 'Überfällig · ' + plan.ueber.length, kalNamen(plan.ueber.map(x => x.p))));
+    if(i < 28 && plan.tage[i] && plan.tage[i].length)
+      z.push(kalTextZeile('w', (d === h ? 'Dran · ' : 'Gießen · ') + plan.tage[i].length, kalNamen(plan.tage[i])));
+  }
+  const pf = kalPflanzenMap();
+  if(d <= h){
+    const gegossen = Object.keys(pf).filter(id => giessTermine(id).indexOf(d) !== -1).map(id => pf[id]);
+    if(gegossen.length) z.push(kalTextZeile('g', 'Gegossen · ' + gegossen.length, kalNamen(gegossen)));
+  }
+  Object.keys(pf).forEach(id => {
+    ((S.ereignisse || {})[id] || []).forEach(e => {
+      if(!e || e.datum !== d || e.typ === 'gesehen') return;
+      const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ};
+      z.push(kalTextZeile('e', nice(pf[id]), e.typ === 'tag' ? (e.text || a.name) : a.name + (e.text ? ' · ' + e.text : '')));
+    });
+    if(d > h) tagEintraege(id).forEach(e => {
+      const t = tagDef(e.t); if(!t) return;
+      if(e.von === d) z.push(kalTextZeile('e', nice(pf[id]), t.name + ' beginnt'));
+      if(e.bis === d && !e.ende) z.push(kalTextZeile('e', nice(pf[id]), t.name + ' endet'));
+    });
+  });
+  return z.join('');
+}
+function kalZelleHTML(d, mk, monat, aus){
+  const x = mk || {}, h = iso(HEUTE);
+  const punkte = (x.termin ? `<span class="kal-p kal-p-t${x.offen ? '' : ' erl'}"></span>` : '')
+    + (x.gegossen ? '<span class="kal-p kal-p-w"></span>' : '')
+    + (x.giessen ? '<span class="kal-p kal-p-w vor"></span>' : '')
+    + (x.ereignis ? '<span class="kal-p kal-p-e"></span>' : '');
+  const was = [x.termin ? (x.termin === 1 ? 'ein Termin' : x.termin + ' Termine') : '',
+    (x.giessen || x.gegossen) ? 'Gießen' : ''].filter(Boolean).join(', ');
+  return `<button type="button" class="kal-zelle${d === h ? ' heute' : ''}${aus ? ' aus' : ''}" data-kal-tag="${d}"
+    aria-pressed="${d === KAL.tag}" aria-label="${esc(kalDatumLang(d) + (was ? ', ' + was : ''))}">${
+    monat ? '' : `<span class="kal-wt">${KAL_WT[kalWochentag(d)]}</span>`}<span class="kal-zahl">${Number(d.slice(8))}</span><span class="kal-punkte" aria-hidden="true">${punkte}</span></button>`;
+}
+function kalTagBlock(d, immer){
+  const h = iso(HEUTE);
+  const z = kalTagZeilen(d);
+  if(!z && !immer) return '';
+  return `<p class="kal-dkopf${d === KAL.tag ? ' gewaehlt' : ''}">${esc(kalDatumLang(d))}${d === h ? ' · heute' : ''}</p>`
+    + (z || '<p class="kal-leer">Nichts eingetragen.</p>');
+}
+function kalWocheHTML(){
+  const mo = kalMontag(KAL.tag), so = tagPlusTage(mo, 6);
+  const m = kalMarken(mo, so);
+  let streifen = '', liste = '';
+  for(let i = 0; i < 7; i++){
+    const d = tagPlusTage(mo, i);
+    streifen += kalZelleHTML(d, m[d], false, false);
+    liste += kalTagBlock(d, d === KAL.tag);
+  }
+  return `<div class="kal-woche" role="group" aria-label="Woche">${streifen}</div><div class="kal-liste">${liste}</div>`;
+}
+function kalMonatHTML(){
+  const erster = kalMonatErster(KAL.tag);
+  const letzter = tagPlusTage(kalMonatPlus(erster, 1), -1);
+  const start = kalMontag(erster);
+  const wochen = Math.ceil((((kalWochentag(erster) + 6) % 7) + Number(letzter.slice(8))) / 7);
+  const ende = tagPlusTage(start, wochen * 7 - 1);
+  const m = kalMarken(start, ende);
+  let zellen = '';
+  for(let i = 0; i < wochen * 7; i++){
+    const d = tagPlusTage(start, i);
+    zellen += kalZelleHTML(d, m[d], true, d.slice(0, 7) !== erster.slice(0, 7));
+  }
+  const kopf = [1, 2, 3, 4, 5, 6, 0].map(w => `<span>${KAL_WT[w]}</span>`).join('');
+  return `<div class="kal-monat"><div class="kal-kopfzeile" aria-hidden="true">${kopf}</div>
+    <div class="kal-raster" role="group" aria-label="Monat">${zellen}</div></div>
+    <div class="kal-liste">${kalTagBlock(KAL.tag, true)}</div>`;
+}
+function kalZeichnen(){
+  const box = document.getElementById('kal-inhalt');
+  if(!box || !KAL) return;
+  KAL.plan = null;
+  document.querySelectorAll('#kal-modal [data-kal-ansicht]').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.kalAnsicht === KAL.ansicht)));
+  const monat = KAL.ansicht === 'monat';
+  const label = monat ? kalMonatLabel(KAL.tag) : kalWochenLabel(kalMontag(KAL.tag));
+  box.innerHTML = `<div class="kal-nav">
+      <button type="button" data-kal="zurueck" aria-label="${monat ? 'Vorheriger Monat' : 'Vorherige Woche'}">‹</button>
+      <b class="kal-label" aria-live="polite">${esc(label)}</b>
+      <button type="button" data-kal="vor" aria-label="${monat ? 'Nächster Monat' : 'Nächste Woche'}">›</button>
+      <button type="button" data-kal="heute">Heute</button></div>`
+    + (monat ? kalMonatHTML() : kalWocheHTML());
+}
+function kalOeffnen(ausloeser){
+  KAL = {ansicht:S.kalAnsicht === 'monat' ? 'monat' : 'woche', tag:iso(HEUTE), plan:null};
+  kalZeichnen();
+  return modalAuf('kal-modal', ausloeser);
+}
+function kalNachAenderung(){
+  if(KAL) kalZeichnen();
+  if(typeof render === 'function') render();
+}
+function kalSchritt(r){
+  const h = iso(HEUTE);
+  if(r === 'heute'){ KAL.tag = h; return; }
+  const n = r === 'vor' ? 1 : -1;
+  if(KAL.ansicht === 'monat'){
+    const neu = kalMonatPlus(KAL.tag, n);
+    KAL.tag = neu.slice(0, 7) === h.slice(0, 7) ? h : neu;
+  } else KAL.tag = tagPlusTage(KAL.tag, 7 * n);
+}
+
+/* ── Terminfenster ───────────────────────────────────────────── */
+function terminFensterAuf(tid, datum, ausloeser){
+  const t = tid ? termineListe().find(x => x.id === tid) : null;
+  if(tid && !t) return false;
+  TF = t
+    ? {id:t.id, titel:t.titel, tag:t.tag || '', pflanzen:(t.pflanzen || []).slice(), datum:t.datum,
+       wdh:t.k > 1, n:t.k > 1 ? t.n : 7, k:t.k > 1 ? t.k : 3, notiz:t.notiz || '', waehlen:false, fehler:'', frage:false}
+    : {id:null, titel:'', tag:'', pflanzen:[], datum:datum || iso(HEUTE),
+       wdh:false, n:7, k:3, notiz:'', waehlen:false, fehler:'', frage:false};
+  terminFensterZeichnen();
+  return modalAuf('termin-modal', ausloeser);
+}
+function terminFensterLesen(){
+  if(!TF) return;
+  const v = id => document.getElementById(id);
+  if(v('tf-titel')) TF.titel = v('tf-titel').value.slice(0, TERMIN_TITEL_MAX);
+  if(v('tf-datum') && v('tf-datum').value) TF.datum = v('tf-datum').value;
+  if(v('tf-n')) TF.n = Math.max(1, Math.min(TERMIN_ABSTAND_MAX, Math.round(Number(v('tf-n').value) || 1)));
+  if(v('tf-k')) TF.k = Math.max(2, Math.min(TERMIN_ANZAHL_MAX, Math.round(Number(v('tf-k').value) || 2)));
+  if(v('tf-notiz')) TF.notiz = v('tf-notiz').value.slice(0, TERMIN_NOTIZ_MAX);
+}
+function terminVorschauText(){
+  if(!TF || !TF.wdh) return '';
+  const ds = terminDaten({datum:TF.datum, n:TF.n, k:TF.k});
+  const kurz = d => new Date(d + 'T12:00:00').toLocaleDateString('de-DE', {day:'numeric', month:'numeric'});
+  return ds.length + ' Termine: ' + ds.slice(0, 4).map(kurz).join(', ') + (ds.length > 4 ? ' … ' + kurz(ds[ds.length - 1]) : '');
+}
+function tfGruppen(){
+  const alle = allePflanzen(), g = [];
+  raumListe().forEach(r => {
+    const l = alle.filter(p => p.raum === r.id);
+    if(l.length) g.push({name:r.name, l:l});
+  });
+  const ohne = alle.filter(p => !p.raum || !raumNameVon(p.raum));
+  if(ohne.length) g.push({name:'Ohne Raum', l:ohne});
+  return g;
+}
+function tfPflanzenZusammen(){
+  const n = TF.pflanzen.length;
+  return n ? (n === 1 ? 'Eine Pflanze gewählt' : n + ' Pflanzen gewählt') : 'Ohne Pflanze: gilt für dich, nicht für eine bestimmte Pflanze.';
+}
+function terminFensterZeichnen(){
+  const box = document.getElementById('termin-inhalt');
+  if(!box || !TF) return;
+  const h = iso(HEUTE), m = tagPlusTage(h, 1), w = tagPlusTage(h, 7);
+  const titelEl = document.getElementById('termin-titel');
+  if(titelEl) titelEl.textContent = TF.id ? 'Termin' : 'Neuer Termin';
+  const tags = tagListe().map(t => tvKnopf('data-tf-tag', t.id, t.name, TF.tag === t.id)).join('');
+  const gruppen = TF.waehlen ? tfGruppen().map((g, i) => {
+    const alle = g.l.every(p => TF.pflanzen.indexOf(p.id) !== -1);
+    return `<p class="ein-abschnitt tf-raum">${esc(g.name)} <button type="button" class="mehr-dazu tf-alle" data-tf-raum="${i}">${alle ? 'Keine' : 'Alle'}</button></p>
+      <div class="as-knoepfe">${g.l.map(p => tvKnopf('data-tf-pfl', p.id, nice(p), TF.pflanzen.indexOf(p.id) !== -1)).join('')}</div>`;
+  }).join('') : '';
+  box.innerHTML = `<label class="fspan"><span class="lab">Titel</span>
+      <input type="text" id="tf-titel" maxlength="${TERMIN_TITEL_MAX}" value="${esc(TF.titel)}" placeholder="z. B. Neemöl spritzen" autocomplete="off"></label>
+    <p class="ein-abschnitt">Datum</p>
+    <div class="segment" role="group" aria-label="Datum">
+      <button type="button" data-tf-datum="${h}" aria-pressed="${TF.datum === h}">Heute</button>
+      <button type="button" data-tf-datum="${m}" aria-pressed="${TF.datum === m}">Morgen</button>
+      <button type="button" data-tf-datum="${w}" aria-pressed="${TF.datum === w}">In 7 Tagen</button></div>
+    <input type="date" id="tf-datum" class="tag-datumfeld" value="${esc(TF.datum)}" aria-label="Anderes Datum">
+    <p class="ein-abschnitt">Wiederholung</p>
+    <div class="segment" role="group" aria-label="Wiederholung">
+      <button type="button" data-tf-wdh="aus" aria-pressed="${!TF.wdh}">Einmalig</button>
+      <button type="button" data-tf-wdh="an" aria-pressed="${TF.wdh}">Wiederholen</button></div>
+    ${TF.wdh ? `<label class="fspan zeile"><span class="lab">Alle … Tage</span>
+        <input type="number" id="tf-n" min="1" max="${TERMIN_ABSTAND_MAX}" inputmode="numeric" value="${TF.n}"></label>
+      <label class="fspan zeile"><span class="lab">Insgesamt … Mal</span>
+        <input type="number" id="tf-k" min="2" max="${TERMIN_ANZAHL_MAX}" inputmode="numeric" value="${TF.k}"></label>
+      <p class="fhint" id="tf-vorschau">${esc(terminVorschauText())}</p>` : ''}
+    <p class="ein-abschnitt">Tag (wahlweise)</p>
+    ${tags ? `<div class="as-knoepfe" role="group" aria-label="Tag">${tags}</div>`
+           : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>'}
+    <p class="ein-abschnitt">Pflanzen (wahlweise)</p>
+    <p class="fhint" id="tf-pfl-text">${esc(tfPflanzenZusammen())}</p>
+    <button type="button" class="mehr-dazu" data-tf="waehlen" aria-expanded="${TF.waehlen}">${TF.waehlen ? 'Auswahl schließen' : 'Pflanzen wählen'}</button>
+    ${gruppen}
+    <label class="fspan tag-notizfeld"><span class="lab">Notiz</span>
+      <textarea id="tf-notiz" rows="2" maxlength="${TERMIN_NOTIZ_MAX}" placeholder="Mittel, Menge, Grund …">${esc(TF.notiz)}</textarea></label>
+    ${TF.fehler ? `<p class="tv-fehler" role="alert">${esc(TF.fehler)}</p>` : ''}
+    ${TF.id ? `<div class="tools tag-weg"><button type="button" class="loeschen" data-tf="loeschen">${TF.frage ? 'Wirklich löschen?' : 'Termin löschen'}</button></div>` : ''}`;
+}
+function terminSpeichern(){
+  if(!TF) return false;
+  terminFensterLesen();
+  const tg = TF.tag && tagDef(TF.tag) ? tagDef(TF.tag) : null;
+  if(!TF.titel.trim() && !tg){ TF.fehler = 'Gib dem Termin einen Titel oder wähle einen Tag.'; terminFensterZeichnen(); return false; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(TF.datum)){ TF.fehler = 'Wähle ein Datum.'; terminFensterZeichnen(); return false; }
+  if(!Array.isArray(S.termine)) S.termine = [];
+  const alt = TF.id ? S.termine.find(x => x && x.id === TF.id) : null;
+  const neu = terminSauber({id:TF.id, titel:TF.titel, tag:TF.tag, pflanzen:TF.pflanzen, datum:TF.datum,
+    n:TF.n, k:TF.wdh ? TF.k : 1, notiz:TF.notiz, erl:alt ? alt.erl : []});
+  if(alt) S.termine[S.termine.indexOf(alt)] = neu; else S.termine.push(neu);
+  sichern();
+  modalZu('termin-modal');
+  kalNachAenderung();
+  return true;
+}
+
+/* ── Heute: Kachel und Hinweiszeile ──────────────────────────── */
+function kalKachelText(){
+  const h = iso(HEUTE);
+  let ueber = 0, naechst = null;
+  termineListe().forEach(t => terminDaten(t).forEach(d => {
+    if(terminErledigt(t, d)) return;
+    if(d < h) ueber++;
+    else if(!naechst || d < naechst.d) naechst = {d:d, t:t};
+  }));
+  if(ueber) return ueber === 1 ? 'Ein Termin überfällig' : ueber + ' Termine überfällig';
+  if(naechst) return kalTagKurz(naechst.d) + ' · ' + terminTitel(naechst.t);
+  return 'Noch nichts geplant';
+}
+/* Tags mit „Erinnerung bei Ende“, deren Hinweis noch nicht gesehen ist */
+function endeHinweise(){
+  const pf = kalPflanzenMap(), raus = [];
+  Object.keys(S.tagEin || {}).forEach(pid => {
+    if(!pf[pid]) return;
+    tagEintraege(pid).forEach(e => {
+      const t = tagDef(e.t);
+      if(e.hinweis && t) raus.push({p:pf[pid], e:e, t:t});
+    });
+  });
+  return raus.sort((a, b) => String(b.e.ende || b.e.bis || '').localeCompare(String(a.e.ende || a.e.bis || '')));
+}
+function heuteKalenderZeichnen(){
+  const sub = document.getElementById('kal-kachel-sub');
+  if(sub) sub.textContent = kalKachelText();
+  const box = document.getElementById('heute-hinweis');
+  if(!box) return;
+  const l = endeHinweise();
+  box.hidden = !l.length;
+  if(!l.length){ box.innerHTML = ''; return; }
+  const text = l.length === 1
+    ? l[0].t.name + ' ist vorbei · ' + nice(l[0].p)
+    : l.length + ' Hinweise: Tags sind zu Ende';
+  box.innerHTML = `<button type="button" class="heute-hinweis" data-hinweis-liste="1" aria-haspopup="dialog">
+    <span class="hh-punkt" aria-hidden="true"></span><span class="hh-txt">${esc(text)}</span><span class="hh-p" aria-hidden="true">›</span></button>`;
+}
+function hinweisListeZeichnen(){
+  const box = document.getElementById('hinweis-inhalt');
+  if(!box) return;
+  const l = endeHinweise();
+  box.innerHTML = l.length ? l.map(x => `<div class="hw-zeile">
+      <span class="hw-txt"><b>${esc(nice(x.p))}</b><i>${esc(x.t.name)} · zu Ende am ${esc(tagDatumKurz(x.e.ende || x.e.bis))}</i></span>
+      <button type="button" data-hinweis-gesehen="1" data-p="${esc(x.p.id)}" data-e="${esc(x.e.e)}">Gesehen</button></div>`).join('')
+    : '<p class="kal-leer">Keine Hinweise.</p>';
+}
+function hinweisListeAuf(ausloeser){
+  hinweisListeZeichnen();
+  return modalAuf('hinweis-modal', ausloeser);
+}
+
+/* ── Karte: Geplantes und Erledigtes auf dem Zeitstrahl ──────── */
+function kalZeitstrahlFuer(p){
+  const h = iso(HEUTE), raus = [];
+  termineListe().forEach(t => {
+    if((t.pflanzen || []).indexOf(p.id) === -1) return;
+    const ds = terminDaten(t);
+    ds.forEach((d, i) => {
+      const erl = terminErledigt(t, d);
+      const rest = ds.length > 1 ? (i + 1) + ' von ' + ds.length : '';
+      if(erl) raus.push({datum:d, ton:'gut', name:terminTitel(t), text:['erledigt', rest].filter(Boolean).join(' · ')});
+      else raus.push({datum:d, ton:'plan', name:terminTitel(t),
+        text:[d < h ? 'überfällig' : 'geplant', rest].filter(Boolean).join(' · ')});
+    });
+  });
+  tagEintraege(p.id).forEach(e => {
+    const t = tagDef(e.t); if(!t) return;
+    if(e.von > h) raus.push({datum:e.von, ton:'plan', name:t.name + ' beginnt', text:'geplant'});
+    if(e.bis && !e.ende && e.bis > h) raus.push({datum:e.bis, ton:'plan', name:t.name + ' endet', text:'geplant'});
+  });
+  return raus;
+}
+
+/* ── Bedienung ───────────────────────────────────────────────── */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const kachel = t.closest('#btn-kalender-heute');
+  if(kachel){ kalOeffnen(kachel); return; }
+  const hl = t.closest('[data-hinweis-liste]');
+  if(hl){ hinweisListeAuf(hl); return; }
+  if(t.closest('#kal-zu')){ modalZu('kal-modal'); return; }
+  if(t.closest('#hinweis-zu')){ modalZu('hinweis-modal'); return; }
+  if(t.closest('#termin-abbrechen')){ modalZu('termin-modal'); return; }
+  if(t.closest('#termin-speichern')){ terminSpeichern(); return; }
+  const hg = t.closest('[data-hinweis-gesehen]');
+  if(hg){
+    tagGesehen(hg.dataset.p, hg.dataset.e);
+    hinweisListeZeichnen();
+    if(!endeHinweise().length) modalZu('hinweis-modal');
+    if(typeof render === 'function') render();
+    return;
+  }
+  if(KAL && t.closest('#kal-modal')){
+    const an = t.closest('[data-kal-ansicht]');
+    if(an){ KAL.ansicht = an.dataset.kalAnsicht === 'monat' ? 'monat' : 'woche'; S.kalAnsicht = KAL.ansicht; sichern(); kalZeichnen(); return; }
+    const sc = t.closest('[data-kal]');
+    if(sc){
+      if(sc.dataset.kal === 'neu'){ terminFensterAuf(null, KAL.tag, sc); return; }
+      kalSchritt(sc.dataset.kal); kalZeichnen(); return;
+    }
+    const tg = t.closest('[data-kal-tag]');
+    if(tg){ KAL.tag = tg.dataset.kalTag; kalZeichnen(); return; }
+    const er = t.closest('[data-kal-erl]');
+    if(er){ const [tid, d] = er.dataset.kalErl.split('|'); terminErledigtUm(tid, d); kalNachAenderung(); return; }
+    const tm = t.closest('[data-kal-termin]');
+    if(tm){ terminFensterAuf(tm.dataset.kalTermin, null, tm); return; }
+    return;
+  }
+  if(!TF || !t.closest('#termin-modal')) return;
+  const dt = t.closest('[data-tf-datum]');
+  if(dt){
+    terminFensterLesen(); TF.datum = dt.dataset.tfDatum;
+    const f = document.getElementById('tf-datum'); if(f) f.value = TF.datum;
+    document.querySelectorAll('#termin-modal [data-tf-datum]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tfDatum === TF.datum)));
+    const vo = document.getElementById('tf-vorschau'); if(vo) vo.textContent = terminVorschauText();
+    return;
+  }
+  const wd = t.closest('[data-tf-wdh]');
+  if(wd){ terminFensterLesen(); TF.wdh = wd.dataset.tfWdh === 'an'; TF.fehler = ''; terminFensterZeichnen(); return; }
+  const tt = t.closest('[data-tf-tag]');
+  if(tt){ terminFensterLesen(); TF.tag = TF.tag === tt.dataset.tfTag ? '' : tt.dataset.tfTag; TF.fehler = ''; terminFensterZeichnen(); return; }
+  const pf = t.closest('[data-tf-pfl]');
+  if(pf){
+    const id = pf.dataset.tfPfl, i = TF.pflanzen.indexOf(id);
+    if(i === -1) TF.pflanzen.push(id); else TF.pflanzen.splice(i, 1);
+    pf.setAttribute('aria-pressed', String(i === -1));
+    const x = document.getElementById('tf-pfl-text'); if(x) x.textContent = tfPflanzenZusammen();
+    return;
+  }
+  const rm = t.closest('[data-tf-raum]');
+  if(rm){
+    const g = tfGruppen()[Number(rm.dataset.tfRaum)]; if(!g) return;
+    const alle = g.l.every(p => TF.pflanzen.indexOf(p.id) !== -1);
+    g.l.forEach(p => {
+      const i = TF.pflanzen.indexOf(p.id);
+      if(alle && i !== -1) TF.pflanzen.splice(i, 1);
+      if(!alle && i === -1) TF.pflanzen.push(p.id);
+    });
+    terminFensterLesen(); terminFensterZeichnen();
+    return;
+  }
+  const aktion = t.closest('[data-tf]');
+  if(!aktion) return;
+  if(aktion.dataset.tf === 'waehlen'){ terminFensterLesen(); TF.waehlen = !TF.waehlen; terminFensterZeichnen(); return; }
+  if(aktion.dataset.tf === 'loeschen'){
+    if(!TF.frage){ TF.frage = true; terminFensterZeichnen(); return; }
+    terminLoeschen(TF.id); modalZu('termin-modal'); kalNachAenderung(); return;
+  }
+});
+document.addEventListener('input', e => {
+  if(!TF) return;
+  const id = e.target && e.target.id;
+  if(id === 'tf-datum' && e.target.value){
+    TF.datum = e.target.value;
+    document.querySelectorAll('#termin-modal [data-tf-datum]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tfDatum === TF.datum)));
+  }
+  if(id === 'tf-n' || id === 'tf-k' || id === 'tf-datum'){
+    terminFensterLesen();
+    const vo = document.getElementById('tf-vorschau'); if(vo) vo.textContent = terminVorschauText();
+  }
+});
+
 modalAnmelden('lightbox', {
   groesse:'voll',
   zeigen:    el=>el.classList.add('on'),
@@ -18281,22 +18908,6 @@ function massnahmenListeHTML(liste, kopf){
     <ol class="dg-schritte">${liste.map(m=>`<li>${esc(massnahmeText(m))}</li>`).join('')}</ol>
   </div>`;
 }
-
-/* Einzelnen Hinweis ausblenden. Gemerkt wird je Pflanze und Anlass,
-   damit ein weggeklickter Standorthinweis nicht auch den Hinweis zu
-   einem späteren Schädlingsbefall verschluckt. */
-document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-do="hinweis-weg"]');
-  if(!b) return;
-  e.preventDefault(); e.stopPropagation();
-  S.hinweisWeg = S.hinweisWeg || {};
-  S.hinweisWeg[b.dataset.p + '|' + b.dataset.k] = true;
-  sichern();
-  const zeile = b.closest('.ph-zeile');
-  const kasten = b.closest('.pflegehinweis');
-  if(zeile) zeile.remove();
-  if(kasten && !kasten.querySelector('.ph-zeile')) kasten.remove();
-});
 
 /* ── Haustier-Einstellungen ──────────────────────────────── */
 function tierArtenZeichnen(){
@@ -21553,8 +22164,8 @@ sicherungStempel();
 function giessListe(){
   return allePflanzen()
     .map(p=>({p, st:giessStatus(p)}))
-    /* Pflanzen in der Gießpause kommen bewusst mit: der Modus soll
-       gerade dort bremsen, wo man sonst aus Gewohnheit gießt. */
+    /* Pflanzen in der Gießpause stehen hier noch drin. Der Gießmodus
+       und Heute nehmen heuteDran(), also ohne sie (F349). */
     /* „bald fällig" ist eine Warnung auf der Karte, kein Auftrag. In den
        Gießmodus kommt nur, was heute oder überfällig ist. */
     .filter(x=>!x.st.feuchtHeute)
@@ -21685,7 +22296,8 @@ function gmAnstauHeute(p){
   return !!p && !p.anzucht && !p.untersetzer && giessartVon(p) === 'anstau' && anstauLage(p) !== 'ruhe';
 }
 function gmListeBauen(){
-  const heute = giessListe();
+  /* 4.0-beta.34 (F349): ohne Pflanzen in der Gießpause */
+  const heute = heuteDran();
   const da = {};
   heute.forEach(p => { da[p.id] = true; });
   const mit = allePflanzen().filter(p => gmMit[p.id] && !da[p.id]);
@@ -23297,8 +23909,8 @@ const ANSICHT_KOPF = {
    dem Giesknopf steht, aber als Satz. */
 /* Was auf Heute als „dran“ zählt: die Gießliste ohne Pflanzen in der
    Gießpause. Die werden gerade nicht gegossen, also wartet dort
-   nichts. giessListe() selbst bleibt unverändert — der Gießmodus
-   entscheidet weiter selbst, was er zeigt. */
+   nichts. giessListe() selbst bleibt unverändert; der Gießmodus
+   baut seine Liste ebenfalls aus heuteDran() (F349). */
 function heuteDran(){
   return giessListe().filter(p => !(typeof stoppRest === 'function' && stoppRest(p) > 0));
 }
@@ -24437,6 +25049,63 @@ document.addEventListener('click', e=>{
   }
 });
 
+/* ── Wischen zwischen den Reitern (4.0-beta.34) ──────────────
+   Heute, Sammlung und BOTaniker lassen sich auch durch Wischen nach
+   links oder rechts wechseln. Gewischt wird nur, wenn die Geste klar
+   waagerecht ist, und nie über Eingabefeldern, waagerecht scrollbaren
+   Flächen, offenen Fenstern, der Tour oder am äußersten Rand (dort
+   wartet die Zurück-Geste des Telefons). */
+const WISCH_REITER = ['heute', 'sammlung', 'botaniker'];
+const WISCH_MIN = 70, WISCH_RAND = 24, WISCH_ZEIT = 700;
+var WISCH = null;
+function wischRichtung(dx, dy, dt){
+  if(dt > WISCH_ZEIT) return 0;
+  if(Math.abs(dx) < WISCH_MIN || Math.abs(dx) < Math.abs(dy) * 2) return 0;
+  return dx < 0 ? 1 : -1;
+}
+function wischZiel(ansicht, r){
+  const i = WISCH_REITER.indexOf(ansicht);
+  if(i === -1 || !r) return null;
+  return WISCH_REITER[i + r] || null;
+}
+function wischBlockiert(el, x){
+  if(typeof modalOffen === 'function' && modalOffen()) return true;
+  if(typeof SAM_WAHL !== 'undefined' && SAM_WAHL) return true;
+  const tour = document.getElementById('tour'); if(tour && !tour.hidden) return true;
+  const wk = document.getElementById('willkommen'); if(wk && !wk.hidden) return true;
+  if(x < WISCH_RAND || x > window.innerWidth - WISCH_RAND) return true;
+  for(let n = el; n && n !== document.body && n.nodeType === 1; n = n.parentElement){
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.isContentEditable) return true;
+    if(n.scrollWidth > n.clientWidth + 2){
+      const o = getComputedStyle(n).overflowX;
+      if(o === 'auto' || o === 'scroll') return true;
+    }
+  }
+  return false;
+}
+document.addEventListener('touchstart', e => {
+  WISCH = null;
+  if(e.touches.length !== 1) return;
+  if(WISCH_REITER.indexOf(S.ansicht || 'heute') === -1) return;
+  const t = e.touches[0];
+  if(wischBlockiert(e.target, t.clientX)) return;
+  WISCH = {x:t.clientX, y:t.clientY, t:Date.now()};
+}, {passive:true});
+document.addEventListener('touchmove', e => { if(e.touches.length > 1) WISCH = null; }, {passive:true});
+document.addEventListener('touchcancel', () => { WISCH = null; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const w = WISCH; WISCH = null;
+  if(!w || !e.changedTouches.length) return;
+  const sel = window.getSelection && window.getSelection();
+  if(sel && String(sel).length) return;
+  const t = e.changedTouches[0];
+  const r = wischRichtung(t.clientX - w.x, t.clientY - w.y, Date.now() - w.t);
+  const ziel = wischZiel(S.ansicht || 'heute', r);
+  if(!ziel) return;
+  ansichtZeigen(ziel);
+  window.scrollTo(0, 0);
+}, {passive:true});
+
 /* Zähler nach jedem Neuaufbau nachziehen */
 const _renderVorherNav = render;
 render = function(){
@@ -24467,24 +25136,6 @@ function einfachSetzen(an){
   document.body.classList.toggle('einfach', !!an);
   sichern();
 }
-/* ── Pflegehinweise ein oder aus ─────────────────────────────
-   Standard ist an. Weggeklickte Einzelhinweise bleiben gemerkt und
-   sind nach dem Wiedereinschalten weiterhin weg — wer sie zurück
-   will, setzt sie unten zurück. */
-function hinweiseSetzen(an){
-  S.pflegehinweise = !!an;
-  /* Erklärt wird der Schalter hinter dem Info-Knopf. Hier steht nur,
-     was dort nicht stehen kann: wie viele Hinweise weggeklickt sind. */
-  const txt = document.getElementById('hinweise-text');
-  const weg = Object.keys(S.hinweisWeg || {}).length;
-  if(txt){
-    txt.hidden = !(an && weg);
-    txt.textContent = weg ? weg + (weg === 1 ? ' Hinweis ist' : ' Hinweise sind') + ' weggeklickt.' : '';
-  }
-  sichern();
-  if(typeof render === 'function') render();
-}
-
 /* ── Modi und Schalter (4.0-beta.18, Plan M1a, F179) ───────────
    Zwei Modi als Vorgabe, darunter jeder Schalter einzeln. Gespeichert
    werden der Modus und nur die Abweichungen von seiner Vorgabe. Ein
@@ -24495,7 +25146,6 @@ var MODI = {
   entdecker: {name:'Entdecker', dichte:'normal', kiStufe:'voll', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
 };
 var SCHALTER = [
-  {k:'hinweise',   id:'ans-hinweise',   vor:{sammler:false, entdecker:true}},
   /* 4.0-beta.31 (B4a, F255): blendet den Reiter Pflegeheft aus, Vorgabe in beiden Modi an */
   {k:'pflege',     id:'sch-pflege',     vor:{sammler:true,  entdecker:true}},
   {k:'befunde',    id:'sch-befunde',    vor:{sammler:false, entdecker:true}},
@@ -24552,13 +25202,11 @@ function modusAngepasst(){
   return SCHALTER.filter(sc => Object.prototype.hasOwnProperty.call(S.schalter || {}, sc.k)).length
     + (DICHTEN.indexOf((S.schalter || {}).dichte) !== -1 ? 1 : 0);
 }
-/* Bestand: „Einfacher Modus“ wird Sammler, sonst Entdecker; abgeschaltete
-   Pflegehinweise bleiben als Abweichung abgeschaltet. Nichts wird gelöscht. */
+/* Bestand: „Einfacher Modus“ wird Sammler, sonst Entdecker. */
 function modusUebernehmen(){
   if(MODI[S.modus]) return;
   S.modus = S.einfach ? 'sammler' : 'entdecker';
   S.schalter = S.schalter || {};
-  if(S.pflegehinweise === false && S.modus === 'entdecker') S.schalter.hinweise = false;
 }
 function schalterAnwenden(){
   const m = modusVon();
@@ -24568,8 +25216,6 @@ function schalterAnwenden(){
     const el = document.getElementById(sc.id);
     if(el) el.checked = an;
   });
-  /* Ältere Stellen lesen S.pflegehinweise und body.einfach weiter */
-  S.pflegehinweise = schalterAn('hinweise');
   S.dichte = dichteVon();
   if(typeof dichteZeichnen === 'function') dichteZeichnen();
   document.querySelectorAll('#modus-wahl [data-modus]').forEach(b =>
@@ -24589,7 +25235,8 @@ function modusSetzen(m){
   delete S.kiStufe;
   einfachSetzen(m === 'sammler');
   schalterAnwenden();
-  hinweiseSetzen(schalterAn('hinweise'));
+  sichern();
+  if(typeof render === 'function') render();
 }
 function schalterSetzen(k, an){
   const sc = SCHALTER.find(x => x.k === k);
@@ -24598,8 +25245,7 @@ function schalterSetzen(k, an){
   if(!!an === !!sc.vor[modusVon()]) delete S.schalter[k];
   else S.schalter[k] = !!an;
   schalterAnwenden();
-  if(k === 'hinweise') hinweiseSetzen(!!an);
-  else sichern();
+  sichern();
 }
 modusUebernehmen();
 dichteUebernehmen();
@@ -24616,17 +25262,6 @@ document.querySelectorAll('#modus-wahl [data-modus]').forEach(b =>
 }
 einfachSetzen(modusVon() === 'sammler');
 schalterAnwenden();
-/* Nur den Text setzen, nicht neu zeichnen — die Karten stehen zu
-   diesem Zeitpunkt noch gar nicht. */
-(function(){
-  const txt = document.getElementById('hinweise-text');
-  const an = S.pflegehinweise !== false;
-  const weg = Object.keys(S.hinweisWeg || {}).length;
-  if(txt){
-    txt.hidden = !(an && weg);
-    txt.textContent = weg ? weg + (weg === 1 ? ' Hinweis ist' : ' Hinweise sind') + ' weggeklickt.' : '';
-  }
-})();
 ansichtZeigen(S.ansicht || 'heute', false);
 
 
@@ -29237,7 +29872,7 @@ const TOUR_KAPITEL = {
       { vor: ()=>ansichtZeigen('mehr'),
         ziel: ()=>document.querySelector('.mh-menue, .mh-gruppe'),
         titel: 'Alles Weitere',
-        text: 'Hinter dem Zahnrad: Sicherung, Gießcenter, Bibliothek und die Einstellungen. Hier findest du auch diese Runde wieder.',
+        text: 'Hinter dem Zahnrad: Sicherung, Gießen, Nachschlagen und die Einstellungen. Hier findest du auch diese Runde wieder.',
         warte: 320 },
 
       { vor: ()=>ansichtZeigen('sammlung'),

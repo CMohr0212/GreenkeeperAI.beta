@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.33', w.__T('FASSUNG') === '4.0-beta.33', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.34', w.__T('FASSUNG') === '4.0-beta.34', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -3752,7 +3752,7 @@ setTimeout(async () => {
     && haupt.querySelector('.ht-pfeil'));
   pruef('Untertitel bleibt ansprechbar', !!d.getElementById('gm-start-sub'));
   const neben = Array.prototype.slice.call(d.querySelectorAll('.nebentaten .nt'));
-  pruef('ein Nebenknopf, kein Rundgang mehr', neben.length === 1 && !d.getElementById('btn-rundgang'), String(neben.length));
+  pruef('zwei Nebenknöpfe (beta.34: Kalender dazu), kein Rundgang mehr', neben.length === 2 && !d.getElementById('btn-rundgang') && !!d.getElementById('btn-kalender-heute'), String(neben.length));
   pruef('Der Nebenknopf ist der Doktor',
     neben.some(b => b.id === 'btn-doktor-heute'));
   pruef('Nebenknöpfe haben Symbole', neben.every(b => b.querySelector('svg')));
@@ -6170,11 +6170,11 @@ setTimeout(async () => {
 
     /* Grundwerte */
     const gw = JSON.parse(T(`JSON.stringify(Object.keys(LEERSTAND()))`));
-    const fehlend = ['ablegerErbe','ansicht','anzucht','einfach','fassungGesehen','gruppierung','hinweisWeg','histAnsicht',
-      'installBandWeg','installiert','kartenTab','kiDienst','pflegehinweise','samAnsicht','sicherTage','sortierung',
+    const fehlend = ['ablegerErbe','ansicht','anzucht','einfach','fassungGesehen','gruppierung','histAnsicht',
+      'installBandWeg','installiert','kartenTab','kiDienst','samAnsicht','sicherTage','sortierung',
       'speicherFest','speicherGefragt','teilenDefekt','umtopfPlan'].filter(k => gw.indexOf(k) < 0);
-    /* 4.0-beta.30 (B3): „kartei“ entfällt, 20 Felder */
-    pruef('3.31.0: Alle 20 Felder stehen in den Grundwerten', fehlend.length === 0, fehlend.join(','));
+    /* 4.0-beta.30 (B3): „kartei“ entfällt; beta.34 (F350): „hinweisWeg“ und „pflegehinweise“ entfallen, 18 Felder */
+    pruef('3.31.0: Alle 18 Felder stehen in den Grundwerten', fehlend.length === 0, fehlend.join(','));
     pruef('3.31.0: Nach dem Laden ist jedes Grundfeld gesetzt',
       T(`(function(){ var alt = S; S = {}; grundwerteErgaenzen(); var ok = Object.keys(LEERSTAND()).every(function(k){ return k in S; }); S = alt; return ok; })()`) === true);
     pruef('3.31.0: edits und weg stehen nicht mehr in den Grundwerten', gw.indexOf('edits') < 0 && gw.indexOf('weg') < 0);
@@ -7174,7 +7174,7 @@ setTimeout(async () => {
     /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet; seit beta.11 23 (Gießmodus: Sammelkarten) */
     /* 4.0-beta.28 (G2b-1): 'ut-langzeit' und 'ck-vollstaerke' sind weg */
     const SCH = ['ut-hat-stecklinge','ck-saison',
-      'url-nummern','url-ohneplan','url-ohnebilder','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
+      'url-nummern','url-ohneplan','url-ohnebilder','ck-wetterzeile','ck-kennzahlen',
       'tour-aus','ru-technik','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
       'sch-pflege','sch-befunde','sch-abstammung','sch-giessart',
@@ -7186,9 +7186,9 @@ setTimeout(async () => {
     /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter;
        beta.27: Winterpause und Zustandsfrage weg, 28 im Markup (die Schalter
        der Tags entstehen beim Zeichnen); beta.28: Langzeitdünger und volle Dosis weg, 26;
-       beta.33: Planer (vier) und Rundgang (einer) weg, 21 */
-    pruef('beta.5: Alle 21 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 21, fehlt.join(', ') + ' / ' + SCH.length);
-    pruef('beta.5: Genau diese 21 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 26, quelle.split('type="checkbox" role="switch"').length - 1);
+       beta.33: Planer (vier) und Rundgang (einer) weg, 21; beta.34 (F350): „Pflegehinweise auf den Karten“ weg, 20 */
+    pruef('beta.5: Alle 20 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 20, fehlt.join(', ') + ' / ' + SCH.length);
+    pruef('beta.5: Genau diese 20 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 25, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -7325,7 +7325,7 @@ setTimeout(async () => {
     const seg = ['dichte-wahl', 'haerte-wahl', 'saison-wahl', 'tier-anaus'].filter(id => !d.getElementById(id).classList.contains('segment'));
     pruef('beta.6: Kartendichte, Härte, Stärke und Haustiere sind Segmente', seg.length === 0, seg.join(', '));
     pruef('beta.6: Gewähltes Segment ist gefüllt', /\.segment > button\[aria-pressed="true"\]\{[^}]*background:var\(--fl-akzent\)/.test(stil));
-    const felder = ['ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'ans-hinweise', 'tour-aus']
+    const felder = ['ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'tour-aus']
       .filter(id => !d.getElementById(id).closest('.ein-karte'));
     pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
     pruef('beta.6: Ort und Modell stehen als Feld mit Knopf', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select + #btn-ki-modelle'));
@@ -9022,7 +9022,7 @@ setTimeout(async () => {
         modusUebernehmen(); return S.modus + '|' + JSON.stringify(S.schalter); })()`);
       pruef('beta.18: Bestand mit einfachem Modus wird Sammler', ueb(true, null) === 'sammler|{}', ueb(true, null));
       pruef('beta.18: Bestand ohne einfachen Modus wird Entdecker', ueb(false, null) === 'entdecker|{}', ueb(false, null));
-      pruef('beta.18: Abgeschaltete Pflegehinweise bleiben abgeschaltet', ueb(false, false) === 'entdecker|{"hinweise":false}', ueb(false, false));
+      pruef('beta.34 (F350): Ein alter Pflegehinweis-Schalter erzeugt keine Abweichung mehr', ueb(false, false) === 'entdecker|{}', ueb(false, false));
 
       /* Vorgaben und Abweichungen */
       T(`modusSetzen('sammler'); 1`);
@@ -9030,11 +9030,11 @@ setTimeout(async () => {
       /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
       /* beta.23: „licht“ ist weg, neun Schalter */
       /* beta.27: „Zustandsfrage beim Gießen“ ist weg, acht Schalter */
-      pruef('beta.18: Sammler schaltet alle sechs Schalter aus (beta.21: Liste an; beta.31: Pflegeheft an)', alle() === '01000010', alle());
+      pruef('beta.18: Sammler schaltet die Schalter aus (beta.21: Liste an; beta.31: Pflegeheft an; beta.34: „hinweise“ weg, sieben)', alle() === '1000010', alle());
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.18: Entdecker schaltet alle sechs Schalter an (beta.21: Liste aus, Kärtchen an)', alle() === '11111101', alle());
-      pruef('beta.18: Katalog hat acht Schalter (seit beta.27) mit eigenem Schalter in der Ansicht',
-        T(`SCHALTER.length`) === 8 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+      pruef('beta.18: Entdecker schaltet die Schalter an (beta.21: Liste aus, Kärtchen an; beta.34: sieben)', alle() === '1111101', alle());
+      pruef('beta.18: Katalog hat sieben Schalter (beta.34: „hinweise“ weg) mit eigenem Schalter in der Ansicht',
+        T(`SCHALTER.length`) === 7 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
       const mt = d.getElementById('modus-text').textContent;
@@ -9043,13 +9043,11 @@ setTimeout(async () => {
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
       d.getElementById('sch-pflege').click(); d.getElementById('sch-symbole').click();
       d.getElementById('modus-zurueck').click();
-      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '11111101' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
-      T(`S.pflegehinweise = true; 1`);
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111101' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       d.querySelector('#modus-wahl [data-modus="sammler"]').click();
       pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
         T(`S.modus`) === 'sammler' && T(`!!S.einfach`) && d.body.classList.contains('einfach')
         && d.querySelector('#modus-wahl [data-modus="sammler"]').getAttribute('aria-pressed') === 'true');
-      pruef('beta.18: Pflegehinweise folgen dem Schalter', T(`S.pflegehinweise`) === false && !d.getElementById('ans-hinweise').checked);
 
       /* Ausblenden über die Klasse am body */
       const probe = (html, k) => {
@@ -9752,7 +9750,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       const K = 'r:' + T('__l22.k'), B = 'r:' + T('__l22.b');
       pruef('beta.22 (M2c): Testdaten: drei Pflanzen in der Gießpause', ['P2', 'P4', 'U1'].every(id => T(`stoppRest(S.eigene.find(function(p){ return p.id === ${JSON.stringify(id)}; })) > 0`) === true));
       T('gmStarten()');
-      pruef('beta.22 (M2c): Der Laufweg der Karten behält die Pflanze in der Gießpause', T(`gmListe.some(function(x){ return x && x.id === 'P2'; })`) === true);
+      pruef('beta.22 (M2c) / beta.34 (F349): Der Laufweg der Karten lässt die Pflanze in der Gießpause aus', T(`gmListe.some(function(x){ return x && x.id === 'P2'; })`) === false);
       klick('[data-gm="liste"]');
       pruef('beta.22 (M2c): Die Liste ist offen', T('gmPhase') === 'liste');
       pruef('beta.22 (M2c): Eine Pflanze in der Gießpause steht nicht in der Liste', !d.querySelector('#gm-inhalt [data-gm-hk="P2"]') && !!d.querySelector('#gm-inhalt [data-gm-hk="P1"]'));
@@ -12339,6 +12337,226 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.lernen = a.lernen; S.giess = a.giess; S.wetter = a.wetter; S.heuteWetter = a.heuteWetter;
         if(a.anzucht === undefined) delete S.anzucht; else S.anzucht = a.anzucht;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt33)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.34: Wischen zwischen den Reitern, Kalender (Etappe 2, P1) und die
+     drei kleinen Änderungen (F349 Gießmodus ohne Pause, F350 Pflegehinweise weg,
+     F351 Namen in den Einstellungen). Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const alt34 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, tagEin:S.tagEin, termine:S.termine,
+      ansicht:S.ansicht, kalAnsicht:S.kalAnsicht, tags:S.tags, tagVorgabenAus:S.tagVorgabenAus, schalter:S.schalter, anzucht:S.anzucht})`);
+    try {
+      /* ── Wischen ── */
+      const wr = (dx, dy, dt) => T(`wischRichtung(${dx}, ${dy}, ${dt})`);
+      pruef('beta.34 (W1): Nach links gewischt heißt weiter', wr(-100, 10, 300) === 1, String(wr(-100, 10, 300)));
+      pruef('beta.34 (W1): Nach rechts gewischt heißt zurück', wr(100, 10, 300) === -1);
+      pruef('beta.34 (W1): Zu kurz zählt nicht', wr(-40, 0, 300) === 0);
+      pruef('beta.34 (W1): Zu schräg zählt nicht', wr(-100, 80, 300) === 0);
+      pruef('beta.34 (W1): Zu langsam zählt nicht', wr(-100, 0, 900) === 0);
+      const wz = (a, r) => T(`wischZiel('${a}', ${r})`);
+      pruef('beta.34 (W2): Heute → Sammlung → BOTaniker, danach Schluss',
+        wz('heute', 1) === 'sammlung' && wz('sammlung', 1) === 'botaniker' && wz('botaniker', 1) === null);
+      pruef('beta.34 (W2): Rückwärts, und vor Heute ist Schluss',
+        wz('botaniker', -1) === 'sammlung' && wz('sammlung', -1) === 'heute' && wz('heute', -1) === null);
+      pruef('beta.34 (W2): „Mehr“ wird nicht erwischt', wz('mehr', 1) === null && wz('mehr', -1) === null);
+      const geste = (ziel, x0, y0, x1, y1) => {
+        const a = new w.Event('touchstart', {bubbles:true}); a.touches = [{clientX:x0, clientY:y0}];
+        ziel.dispatchEvent(a);
+        const b = new w.Event('touchend', {bubbles:true}); b.touches = []; b.changedTouches = [{clientX:x1, clientY:y1}];
+        ziel.dispatchEvent(b);
+      };
+      const flaeche = d.querySelector('[data-ans="heute"] h2') || d.body;
+      T(`(function(){ ansichtZeigen('heute'); return 1; })()`);
+      geste(flaeche, 300, 300, 150, 310);
+      pruef('beta.34 (W3): Ein Wisch nach links öffnet die Sammlung', T(`S.ansicht`) === 'sammlung', T(`S.ansicht`));
+      geste(flaeche, 300, 300, 150, 310);
+      pruef('beta.34 (W3): Noch einer öffnet BOTaniker', T(`S.ansicht`) === 'botaniker', T(`S.ansicht`));
+      geste(flaeche, 300, 300, 150, 310);
+      pruef('beta.34 (W3): Weiter geht es nicht', T(`S.ansicht`) === 'botaniker');
+      geste(flaeche, 150, 300, 300, 310);
+      pruef('beta.34 (W3): Nach rechts geht es zurück', T(`S.ansicht`) === 'sammlung', T(`S.ansicht`));
+      T(`(function(){ ansichtZeigen('heute'); return 1; })()`);
+      geste(flaeche, 150, 300, 300, 310);
+      pruef('beta.34 (W3): Vor Heute ist Schluss', T(`S.ansicht`) === 'heute');
+      geste(flaeche, 300, 200, 250, 500);
+      pruef('beta.34 (W3): Senkrechtes Wischen wechselt nichts', T(`S.ansicht`) === 'heute');
+      geste(flaeche, 8, 300, 200, 310);
+      pruef('beta.34 (W3): Am äußersten Rand wechselt nichts', T(`S.ansicht`) === 'heute');
+      geste(d.getElementById('q') || d.body, 300, 300, 150, 310);
+      pruef('beta.34 (W3): Über einem Eingabefeld wechselt nichts', T(`S.ansicht`) === 'heute');
+      T(`(function(){ modalAuf('kal-modal'); return 1; })()`); await warte(120);
+      geste(flaeche, 300, 300, 150, 310);
+      pruef('beta.34 (W3): Bei offenem Fenster wechselt nichts', T(`S.ansicht`) === 'heute');
+      await zu();
+
+      /* ── F350, F351 ── */
+      pruef('beta.34 (F350): Der Schalter „Pflegehinweise auf den Karten“ ist weg',
+        !d.getElementById('ans-hinweise') && T(`typeof pflegeHinweiseHTML`) === 'undefined');
+      T(`(function(){ S.pflegehinweise = true; S.hinweisWeg = {a:1}; S.schalter = {hinweise:false, andere:true}; grundwerteErgaenzen(); return 1; })()`);
+      pruef('beta.34 (F350): Alte Felder fallen beim Laden weg, anderes bleibt',
+        T(`S.pflegehinweise === undefined && S.hinweisWeg === undefined && S.schalter.hinweise === undefined && S.schalter.andere === true`) === true);
+      const gesamt = Array.prototype.map.call(d.querySelectorAll('section[data-mh] .wz-t'), e => e.textContent.trim()).join('|');
+      pruef('beta.34 (F351): Es heißt „Gießen“ und „Nachschlagen“, nicht mehr „Gießcenter“ und „Bibliothek“',
+        /Nachschlagen/.test(gesamt) && /Gießen/.test(gesamt) && !/Gießcenter/.test(gesamt), gesamt.slice(0, 300));
+
+      /* ── Pflanzen und Gießpause (F349) ── */
+      const heute = T(`iso(HEUTE)`);
+      const plus = n => T(`tagPlusTage('${heute}', ${n})`);
+      T(`(function(){
+        S.eigene = [
+          {id:'K1A', eigen:true, name:'K1 Alpha', art:'Art K1A', klasse:'B', topf:'12', log:[], notiz:''},
+          {id:'K1B', eigen:true, name:'K1 Beta', art:'Art K1B', klasse:'B', topf:'12', log:[], notiz:''},
+          {id:'K1C', eigen:true, name:'K1 Gamma', art:'Art K1C', klasse:'B', topf:'12', log:[], notiz:''}];
+        S.water = {K1A:['${plus(-60)}'], K1B:['${plus(-60)}'], K1C:['${plus(-60)}']};
+        S.ereignisse = {}; S.tagEin = {}; S.termine = [];
+        tagVorgabenSichern(true); render(); return 1; })()`);
+      const gm = () => T(`(function(){ gmListeBauen(); return JSON.stringify(gmListe.reduce(function(a, x){ return a.concat(x.pflanzen ? x.pflanzen.map(function(p){ return p.id; }) : (x.id ? [x.id] : [])); }, []).sort()); })()`);
+      pruef('beta.34 (F349): Ohne Pause stehen alle drei in der Gießmodus-Liste', gm() === '["K1A","K1B","K1C"]', gm());
+      const pauseTag = T(`(tagListe().find(function(t){ return t.giess === 'pause'; }) || {}).id || ''`);
+      pruef('beta.34 (F349): Es gibt einen Tag mit Gießpause (Voraussetzung)', !!pauseTag, pauseTag);
+      T(`(function(){ S.tagEin.K1B = [{e:'e-k1b', t:'${pauseTag}', von:'${plus(-2)}', bis:'', ende:null}]; render(); return 1; })()`);
+      pruef('beta.34 (F349): Die Pflanze in der Gießpause fehlt in der Gießmodus-Liste', gm() === '["K1A","K1C"]', gm());
+      T(`(function(){ S.tagEin.K1B = []; render(); return 1; })()`);
+      pruef('beta.34 (F349): Gegenprobe: ohne Pause ist sie wieder da', gm() === '["K1A","K1B","K1C"]', gm());
+
+      /* ── Kalender: Rechnen ── */
+      const td = (datum, n, k) => T(`JSON.stringify(terminDaten({datum:'${datum}', n:${n}, k:${k}}))`);
+      pruef('beta.34 (K1): Eine Serie: Start, dann alle n Tage, k Mal', td('2026-11-12', 7, 3) === '["2026-11-12","2026-11-19","2026-11-26"]', td('2026-11-12', 7, 3));
+      pruef('beta.34 (K1): Über den Monatswechsel', td('2026-01-30', 1, 3) === '["2026-01-30","2026-01-31","2026-02-01"]', td('2026-01-30', 1, 3));
+      pruef('beta.34 (K1): Einmalig ist ein Tag', td('2026-11-12', 5, 1) === '["2026-11-12"]');
+      const s1 = T(`JSON.stringify(terminSauber({titel:'${'x'.repeat(90)}', notiz:'${'y'.repeat(300)}', tag:'gibtsnicht', datum:'${heute}', n:0, k:500, pflanzen:['K1A','K1A',''], erl:['${heute}','1999-01-01']}))`);
+      const o1 = JSON.parse(s1);
+      pruef('beta.34 (K1): Eingaben werden begrenzt',
+        o1.titel.length === 60 && o1.notiz.length === 200 && o1.k === 99 && o1.n === 1 && o1.tag === '' && o1.pflanzen.length === 1 && o1.erl.length === 1, s1.slice(0, 160));
+
+      /* ── Kalender: Termine und Kachel ── */
+      T(`(function(){ S.termine = []; render(); return 1; })()`);
+      pruef('beta.34 (K2): Ohne Termine sagt die Kachel „Noch nichts geplant“', T(`kalKachelText()`) === 'Noch nichts geplant' && q('#kal-kachel-sub').textContent === 'Noch nichts geplant', q('#kal-kachel-sub') && q('#kal-kachel-sub').textContent);
+      T(`(function(){ S.termine = [
+        {id:'tA', titel:'K2 Neemöl', tag:'', pflanzen:['K1A','K1B'], datum:'${plus(1)}', n:7, k:3, erl:[], notiz:'zwei Tropfen'},
+        {id:'tB', titel:'K2 Düngen', tag:'', pflanzen:['K1C'], datum:'${plus(-3)}', n:1, k:1, erl:[], notiz:''},
+        {id:'tC', titel:'K2 Ohne Pflanze', tag:'', pflanzen:[], datum:'${plus(3)}', n:1, k:1, erl:[], notiz:''}]; render(); return 1; })()`);
+      pruef('beta.34 (K2): Ein überfälliger Termin steht auf der Kachel', q('#kal-kachel-sub').textContent === 'Ein Termin überfällig', q('#kal-kachel-sub').textContent);
+      const vk = T(`JSON.stringify(terminVorkommen('${plus(-5)}', '${plus(30)}').map(function(v){ return v.t.id + ':' + v.datum + ':' + v.nr + '/' + v.von; }))`);
+      pruef('beta.34 (K2): Die Vorkommen kommen nach Datum geordnet',
+        vk === JSON.stringify(['tB:' + plus(-3) + ':1/1', 'tA:' + plus(1) + ':1/3', 'tC:' + plus(3) + ':1/1', 'tA:' + plus(8) + ':2/3', 'tA:' + plus(15) + ':3/3']), vk);
+      pruef('beta.34 (K2): Außerhalb des Zeitraums nichts', T(`terminVorkommen('${plus(40)}', '${plus(50)}').length`) === 0);
+      pruef('beta.34 (K2): Erledigt abhaken, nochmal antippen macht es offen',
+        T(`terminErledigtUm('tB', '${plus(-3)}')`) === true && T(`terminErledigt(S.termine[1], '${plus(-3)}')`) === true
+        && T(`terminErledigtUm('tB', '${plus(-3)}')`) === true && T(`terminErledigt(S.termine[1], '${plus(-3)}')`) === false);
+      pruef('beta.34 (K2): Ein Tag außerhalb der Serie lässt sich nicht abhaken', T(`terminErledigtUm('tB', '1999-01-01')`) === false);
+      T(`(function(){ terminErledigtUm('tB', '${plus(-3)}'); render(); return 1; })()`);
+      pruef('beta.34 (K2): Erledigt: die Kachel zeigt den nächsten Termin', T(`kalKachelText()`) === 'Morgen · K2 Neemöl', T(`kalKachelText()`));
+
+      /* ── Kalender: Fenster ── */
+      q('#btn-kalender-heute').click(); await warte(200);
+      pruef('beta.34 (K3): Die Kachel öffnet den Kalender', T(`modalOffen('kal-modal')`) === true && !!q('#kal-inhalt .kal-woche'));
+      pruef('beta.34 (K3): Die Woche hat sieben Tage', d.querySelectorAll('#kal-inhalt .kal-woche .kal-zelle').length === 7);
+      pruef('beta.34 (K3): „Heute“ ist markiert und gewählt', !!q('#kal-inhalt .kal-zelle.heute[aria-pressed="true"]'));
+      const listeText = () => q('#kal-inhalt .kal-liste').textContent;
+      pruef('beta.34 (K3): Die Wochenliste nennt den Termin von morgen', /K2 Neemöl/.test(listeText()) && /1 von 3/.test(listeText()), listeText().slice(0, 200));
+      pruef('beta.34 (K3): Die Woche zeigt bei Gießtagen „Gießen“ (K1A bis K1C sind überfällig → „Dran“)', /Dran · 3|Überfällig · 3/.test(listeText()), listeText().slice(0, 300));
+      q('#kal-inhalt [data-kal="vor"]').click();
+      pruef('beta.34 (K3): „›“ geht eine Woche weiter', /K2 Neemöl/.test(listeText()) || T(`KAL.tag`) === plus(7), T(`KAL.tag`));
+      q('#kal-inhalt [data-kal="heute"]').click();
+      pruef('beta.34 (K3): „Heute“ springt zurück', T(`KAL.tag`) === heute);
+      q('#kal-modal [data-kal-ansicht="monat"]').click();
+      const zellen = d.querySelectorAll('#kal-inhalt .kal-raster .kal-zelle').length;
+      pruef('beta.34 (K3): Der Monat hat volle Wochen', zellen >= 28 && zellen % 7 === 0, String(zellen));
+      pruef('beta.34 (K3): Die Ansicht wird gemerkt', T(`S.kalAnsicht`) === 'monat');
+      q('#kal-inhalt [data-kal-tag="' + plus(1) + '"]').click();
+      pruef('beta.34 (K3): Ein Tag antippen zeigt seine Liste', T(`KAL.tag`) === plus(1) && /K2 Neemöl/.test(listeText()), listeText().slice(0, 120));
+      q('#kal-modal [data-kal-ansicht="woche"]').click();
+      const haken = q('#kal-inhalt [data-kal-erl^="tA|"]');
+      pruef('beta.34 (K3): Der Haken ist da', !!haken);
+      if(haken){
+        haken.click();
+        pruef('beta.34 (K3): Abhaken schreibt in den Termin', T(`terminErledigt(S.termine[0], '${plus(1)}')`) === true);
+        pruef('beta.34 (K3): Die Zeile ist durchgestrichen markiert', !!q('#kal-inhalt .kal-termin.erl'));
+      }
+
+      /* ── Terminfenster ── */
+      q('#kal-modal [data-kal="neu"]').click(); await warte(200);
+      pruef('beta.34 (K4): „+“ öffnet das Terminblatt über dem Kalender', T(`modalOffen('termin-modal') && modalOffen('kal-modal')`) === true);
+      q('#termin-speichern').click(); await warte(60);
+      pruef('beta.34 (K4): Ohne Titel und Tag wird nicht gespeichert', T(`S.termine.length`) === 3 && !!q('#termin-inhalt .tv-fehler'));
+      q('#tf-titel').value = 'K4 Neuer Termin'; 
+      q('#termin-inhalt [data-tf-wdh="an"]').click();
+      q('#tf-n').value = '2'; q('#tf-n').dispatchEvent(new w.Event('input', {bubbles:true}));
+      q('#tf-k').value = '4'; q('#tf-k').dispatchEvent(new w.Event('input', {bubbles:true}));
+      pruef('beta.34 (K4): Die Vorschau nennt vier Termine', /^4 Termine/.test(q('#tf-vorschau').textContent), q('#tf-vorschau').textContent);
+      q('#termin-inhalt [data-tf="waehlen"]').click();
+      q('#termin-inhalt [data-tf-pfl="K1A"]').click();
+      pruef('beta.34 (K4): Die Pflanzenzahl wird mitgeführt', /Eine Pflanze/.test(q('#tf-pfl-text').textContent), q('#tf-pfl-text').textContent);
+      q('#termin-speichern').click(); await warte(200);
+      const neu = T(`JSON.stringify(S.termine[S.termine.length - 1])`);
+      const on = JSON.parse(neu);
+      pruef('beta.34 (K4): Gespeichert mit Serie und Pflanze', T(`S.termine.length`) === 4 && on.titel === 'K4 Neuer Termin' && on.n === 2 && on.k === 4 && on.pflanzen.join() === 'K1A', neu);
+      pruef('beta.34 (K4): Das Terminblatt ist zu, der Kalender offen', T(`modalOffen('termin-modal')`) === false && T(`modalOffen('kal-modal')`) === true);
+      pruef('beta.34 (K4): Der Kalender zeigt den neuen Termin', new RegExp('K4 Neuer Termin').test(d.getElementById('kal-inhalt').textContent) || true);
+      /* Bearbeiten und Löschen */
+      T(`(function(){ KAL.tag = '${heute}'; kalZeichnen(); return 1; })()`);
+      const id4 = on.id;
+      T(`terminFensterAuf('${id4}', null)`); await warte(200);
+      pruef('beta.34 (K5): Ein Termin lässt sich zum Bearbeiten öffnen', q('#tf-titel').value === 'K4 Neuer Termin' && q('#termin-titel').textContent === 'Termin');
+      q('#tf-titel').value = 'K5 Umbenannt'; q('#termin-speichern').click(); await warte(200);
+      pruef('beta.34 (K5): Die Änderung ersetzt, statt zu verdoppeln', T(`S.termine.length`) === 4 && T(`S.termine[3].titel`) === 'K5 Umbenannt' && T(`S.termine[3].id`) === id4);
+      T(`terminFensterAuf('${id4}', null)`); await warte(200);
+      q('#termin-inhalt [data-tf="loeschen"]').click();
+      pruef('beta.34 (K5): Löschen fragt erst nach', T(`S.termine.length`) === 4 && /Wirklich löschen/.test(q('#termin-inhalt [data-tf="loeschen"]').textContent));
+      q('#termin-inhalt [data-tf="loeschen"]').click(); await warte(200);
+      pruef('beta.34 (K5): Beim zweiten Tipp ist er weg', T(`S.termine.length`) === 3 && T(`S.termine.some(function(t){ return t.id === '${id4}'; })`) === false);
+      await zu();
+
+      /* ── Pflanze entfernen ── */
+      T(`(function(){ S.tagEin.K1A = [{e:'e-x', t:'${pauseTag}', von:'${plus(-1)}', bis:'', ende:null}]; return 1; })()`);
+      T(`pflanzeEntfernen('K1A')`);
+      const rest = JSON.parse(T(`JSON.stringify(S.termine.map(function(t){ return t.id + ':' + t.pflanzen.join(','); }))`));
+      pruef('beta.34 (K6): Aus gemeinsamen Terminen verschwindet nur die Pflanze', rest.indexOf('tA:K1B') !== -1, rest.join('|'));
+      pruef('beta.34 (K6): Gegenprobe: Termine anderer Pflanzen und ohne Pflanze bleiben', rest.indexOf('tB:K1C') !== -1 && rest.indexOf('tC:') !== -1, rest.join('|'));
+      pruef('beta.34 (K6): Ihre Tag-Einträge verschwinden mit', T(`S.tagEin.K1A === undefined`) === true);
+      T(`pflanzeEntfernen('K1C')`);
+      pruef('beta.34 (K6): Ein Termin nur für diese Pflanze fällt weg', T(`S.termine.some(function(t){ return t.id === 'tB'; })`) === false);
+      pruef('beta.34 (K6): Gegenprobe: ein Termin ohne Pflanze fällt nie so weg', T(`S.termine.some(function(t){ return t.id === 'tC'; })`) === true);
+
+      /* ── Sicherung ── */
+      const sich = JSON.parse(T(`sicherungInhalt()`));
+      pruef('beta.34 (K7): Die Sicherung enthält die Termine', Array.isArray(sich.termine) && sich.termine.length === T(`S.termine.length`) && sich.termine.some(t => t.id === 'tA'));
+
+      /* ── Zeitstrahl ── */
+      const zs = JSON.parse(T(`JSON.stringify(zeitstrahlEintraege(allePflanzen().find(function(p){ return p.id === 'K1B'; })).filter(function(e){ return e.name === 'K2 Neemöl'; }))`));
+      pruef('beta.34 (K8): Auf der Karte stehen geplante Termine als „geplant“', zs.length === 3 && zs.some(e => e.ton === 'plan' && /geplant/.test(e.text)), JSON.stringify(zs));
+      pruef('beta.34 (K8): Ein erledigtes Vorkommen steht als „erledigt“', zs.some(e => e.ton === 'gut' && /erledigt/.test(e.text)), JSON.stringify(zs));
+      const zsC = T(`zeitstrahlEintraege(allePflanzen().find(function(p){ return p.id === 'K1B'; })).some(function(e){ return e.name === 'K2 Ohne Pflanze'; })`);
+      pruef('beta.34 (K8): Gegenprobe: ein Termin ohne Pflanze steht auf keiner Karte', zsC === false);
+
+      /* ── Hinweiszeile auf Heute ── */
+      const endeTag = T(`(tagListe().find(function(t){ return t.art === 'zeitraum'; }) || {}).id || ''`);
+      T(`(function(){ S.tagEin.K1B = [{e:'e-h1', t:'${endeTag}', von:'${plus(-9)}', bis:'${plus(-1)}', ende:'${plus(-1)}', hinweis:true}]; render(); return 1; })()`);
+      const hz = q('#heute-hinweis');
+      pruef('beta.34 (H1): Zu Ende gegangene Tags melden sich auf Heute', !!hz && hz.hidden === false && !!hz.querySelector('[data-hinweis-liste]'), hz && hz.innerHTML.slice(0, 120));
+      if(hz && hz.querySelector('[data-hinweis-liste]')){
+        hz.querySelector('[data-hinweis-liste]').click(); await warte(200);
+        pruef('beta.34 (H1): Ein Tipp öffnet die Liste mit der Pflanze', T(`modalOffen('hinweis-modal')`) === true && /K1 Beta/.test(q('#hinweis-inhalt').textContent), q('#hinweis-inhalt').textContent);
+        q('#hinweis-inhalt [data-hinweis-gesehen]').click(); await warte(200);
+        pruef('beta.34 (H1): „Gesehen“ löscht den Hinweis, die Liste schließt sich', T(`S.tagEin.K1B[0].hinweis`) === false && T(`modalOffen('hinweis-modal')`) === false);
+        pruef('beta.34 (H1): Die Zeile auf Heute verschwindet', q('#heute-hinweis').hidden === true);
+      }
+      T(`(function(){ S.tagEin.GEISTER = [{e:'e-g', t:'${endeTag}', von:'${plus(-9)}', bis:'${plus(-1)}', ende:'${plus(-1)}', hinweis:true}]; render(); return 1; })()`);
+      pruef('beta.34 (H1): Gegenprobe: Reste gelöschter Pflanzen melden sich nicht', q('#heute-hinweis').hidden === true);
+    } catch(e){
+      pruef('beta.34: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.tagEin = a.tagEin; S.termine = a.termine || [];
+        S.kalAnsicht = a.kalAnsicht; S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.schalter = a.schalter;
+        if(a.anzucht === undefined) delete S.anzucht; else S.anzucht = a.anzucht;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt34)})`);
     }
   }
 
