@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.34', w.__T('FASSUNG') === '4.0-beta.34', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.35', w.__T('FASSUNG') === '4.0-beta.35', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -1613,9 +1613,6 @@ setTimeout(async () => {
       w.__T(`ereignisse('${kid}')[0].bezug`) === mid);
     pruef('Beide Ereignisarten sind bekannt',
       !!w.__T('EREIGNIS_ARTEN.vermehrt') && !!w.__T('EREIGNIS_ARTEN.entstanden'));
-    pruef('Sie stehen nicht als Knopf im Verlauf',
-      w.__T("statusHTML({id:'X-1'}).indexOf('data-typ=\"vermehrt\"')") === -1
-      && w.__T("statusHTML({id:'X-1'}).indexOf('data-typ=\"entstanden\"')") === -1);
 
     /* Abstammungsblock über dem Zeitstrahl */
     const abM = w.__T(`abstammungHTML(allePflanzen().find(x=>x.id==='${mid}'))`);
@@ -1630,15 +1627,6 @@ setTimeout(async () => {
     pruef('Ableger verlinkt zurück zur Mutter',
       abK.indexOf('data-go="' + mid + '"') !== -1);
 
-    pruef('Der Zeitstrahl verlinkt das Gegenüber',
-      w.__T(`statusHTML(allePflanzen().find(x=>x.id==='${mid}'))`)
-        .indexOf('data-go="' + kid + '"') !== -1);
-    /* Die Abstammung lag zuerst in statusHTML und landete damit im
-       Akkordeon „Statusänderung und Verlauf“ — zwei Ebenen tief und
-       zugeklappt. Sie gehört offen an den Anfang des Reiters. */
-    pruef('Abstammung steckt nicht im Zeitstrahl',
-      w.__T(`statusHTML(allePflanzen().find(x=>x.id==='${mid}'))`)
-        .indexOf('abstammung') === -1);
 
     /* Ohne Abstammung bleibt der Block weg — sonst hätte jede
        Pflanze einen leeren Kasten im Verlauf. */
@@ -2216,9 +2204,6 @@ setTimeout(async () => {
       d.querySelectorAll('#filter-sort .as-knopf').length === 4);
 
     /* ── Karte unten ── */
-    pruef('Eintragen sitzt unter dem Verlauf',
-      w.__T("statusHTML({id:'fa'})").indexOf('stat-liste')
-        < w.__T("statusHTML({id:'fa'})").indexOf('stat-auf'));
 
     /* Der rote Kasten sagte bei Karnivoren zweimal dasselbe. */
     const karni = {id:'k1', name:'Vivi', art:'Venusfliegenfalle',
@@ -2341,16 +2326,6 @@ setTimeout(async () => {
       const tippFrei = w.__T(`giesstippRest({id:'A1F', art:'Testart', botanisch:'Testus probus', klasse:'B',
         giesstipp:'Nur Regenwasser verwenden.'})`);
       pruef('Gießtipp ohne passende Warnung bleibt ganz', tippFrei === 'Nur Regenwasser verwenden.', tippFrei);
-
-      /* Einträge: fünf offen, ältere eingeklappt */
-      const st = w.__T(`(function(){
-        const alt = S.ereignisse; S.ereignisse = {A1V:[]};
-        for(let i=0;i<7;i++) S.ereignisse.A1V.push({id:'t'+i, datum:iso(new Date(HEUTE-i*86400000)), typ:'blatt', text:''});
-        const h = statusHTML({id:'A1V'}); S.ereignisse = alt; return h; })()`);
-      const sb = d.createElement('div'); sb.innerHTML = st;
-      pruef('Einträge: fünf offen', sb.querySelectorAll(':scope .stat > .stat-liste > li').length === 5,
-        String(sb.querySelectorAll(':scope .stat > .stat-liste > li').length));
-      pruef('Einträge: ältere eingeklappt', /2 ältere anzeigen/.test(st));
 
       w.__T(`S.eigene = (S.eigene||[]).filter(x=>['A1V','A1B','A1N'].indexOf(x.id) < 0); sichern();`);
       pruef('A1-Testpflanzen wieder entfernt',
@@ -2639,28 +2614,17 @@ setTimeout(async () => {
       w.__T(`lernFaktorVon('A3P')`) === 1, String(w.__T(`lernFaktorVon('A3P')`)));
     w.__T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
 
-    /* ── Historie: Balken und Zeitstrahl ── */
+    /* ── Historie: Kalender und Zeitstrahl (beta.35: Kalender statt Balken) ── */
     w.__T(`S.histAnsicht = 'balken'; sichern();`);
     const hist = () => karte3('A3P').querySelector('[data-kblock="historie"]');
     pruef('Die Historie steht im Reiter Verlauf',
       !!karte3('A3P').querySelector('[data-kpane="verlauf"] [data-kblock="historie"]'));
-    pruef('Es gibt einen Umschalter Balken / Zeitstrahl',
-      (((hist() || {}).querySelectorAll ? hist().querySelectorAll('.hist-um [data-do="hist-um"]') : []).length) === 2);
-    const svg = hist().querySelector('.v-svg');
-    pruef('Ein Balken je Abstand, der aelteste links',
-      !!svg && svg.querySelectorAll('.vb').length === 3,
-      String(svg ? svg.querySelectorAll('.vb').length : 0));
-    pruef('Die Marke beim gerechneten Rhythmus ist gezeichnet',
-      !!svg && !!svg.querySelector('.v-ziel'));
-    pruef('Jeder Balken traegt Datum und Tage zum Antippen',
-      !!svg && /^\d{4}-\d{2}-\d{2}\|\d+$/.test(svg.querySelector('.vb').getAttribute('data-vb')),
-      svg ? svg.querySelector('.vb').getAttribute('data-vb') : '');
-    /* Gegenprobe: mit zwei Terminen gibt es kein Diagramm, sondern
-       eine ruhige Zeile. */
-    giessen3(['2026-08-01', '2026-08-08']);
-    pruef('Gegenprobe: zu wenige Termine ergeben kein leeres Diagramm',
-      !hist().querySelector('.v-svg') && !!hist().querySelector('.kb-leer'),
-      (hist().textContent || '').slice(0, 60));
+    pruef('Es gibt einen Umschalter Kalender / Zeitstrahl',
+      (((hist() || {}).querySelectorAll ? hist().querySelectorAll('.hist-um [data-do="hist-um"]') : []).length) === 2
+      && !!hist().querySelector('[data-do="hist-um"][data-v="kalender"]') && !hist().querySelector('[data-v="balken"]'));
+    pruef('beta.35: Eine alte Wahl „Balken“ zeigt den Kalender, kein Diagramm',
+      !!hist().querySelector('.kalk .kal-raster') && !hist().querySelector('.v-svg')
+      && hist().querySelector('[data-v="kalender"]').getAttribute('aria-pressed') === 'true');
     giessen3(['2026-08-01', '2026-08-08', '2026-08-16', '2026-08-24']);
 
     w.__T(`ereignisDazu('A3P', 'umgetopft', 'Testeintrag')`);
@@ -2679,7 +2643,7 @@ setTimeout(async () => {
     pruef('Ohne jeden Eintrag bleibt der Zeitstrahl ruhig',
       /kb-leer/.test(w.__T(`zeitstrahlHTML({id:'A3XNIX', notiz:''})`)),
       w.__T(`zeitstrahlHTML({id:'A3XNIX', notiz:''})`).slice(0, 60));
-    w.__T(`S.histAnsicht = 'balken'; sichern();`);
+    w.__T(`S.histAnsicht = 'kalender'; sichern();`);
 
     /* ── Gegenprobe zum Lernen ohne Handwert: derselbe Weg bewegt
        dort sehr wohl etwas. ── */
@@ -7475,7 +7439,7 @@ setTimeout(async () => {
       });
       pruef('beta.8: Karte ohne Foto: ein Platzhalter „Foto hinzufügen“ in jeder Ansicht', reihe.every(x => x === '0/1/1'), reihe.join(' '));
       const hv = T("giessVerlaufHTML(S.eigene.find(p => p.id === 'kb8a'))");
-      pruef('beta.8: Karte: Umschalter „Balken | Zeitstrahl“ im Segment-Aussehen', /class="sam-ansicht hist-um segment"/.test(hv));
+      pruef('beta.8: Karte: Umschalter „Kalender | Zeitstrahl“ im Segment-Aussehen', /class="sam-ansicht hist-um segment"/.test(hv));
     } finally {
       T('S.eigene = ' + altPl + '; S.design = ' + JSON.stringify(altDes));
     }
@@ -9920,8 +9884,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         T(`modalOffen('karte-modal')`) === false && T('SAM_WAHL && SAM_WAHL.has("Q1")') === true);
       const lst = d.getElementById('sam-wahl-leiste');
       pruef('beta.23 (G1a): Leiste ist sichtbar und zeigt die Zahl', !!lst && !lst.hidden && d.getElementById('sam-wahl-zahl').textContent === '1 Pflanze gewählt');
-      pruef('beta.23 (G1a): Leiste hat nur „Gegossen“ und „Abbrechen“',
-        Array.prototype.map.call(lst.querySelectorAll('button'), b => b.textContent.trim()).sort().join('|') === 'Abbrechen|Gegossen');
+      pruef('beta.23 (G1a) / beta.35 (G3a): Leiste hat „Abbrechen“, „Aktionen“ und „Gegossen“',
+        Array.prototype.map.call(lst.querySelectorAll('button'), b => b.textContent.trim()).sort().join('|') === 'Abbrechen|Aktionen|Gegossen');
       pruef('beta.23 (G1a): Gewählte Kachel ist markiert', out.querySelector('.card[data-karte="Q1"]').classList.contains('gewaehlt')
         && kb('Q1').getAttribute('aria-pressed') === 'true' && out.classList.contains('sam-waehlen'));
       T('_samSchluck = 0');
@@ -10951,9 +10915,9 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       await zu();
 
       /* (19) keine Ereignisknöpfe, keine Zustandsfrage, kein Schalter */
-      const st = T(`statusHTML(${P('A1')})`);
-      pruef('beta.27 (19): Verlauf ohne Ereignisknöpfe, nur „Nur angesehen“',
-        (st.match(/data-do="ereignis"/g) || []).length === 1 && /data-typ="gesehen"/.test(st), String((st.match(/data-do="ereignis"/g) || []).length));
+      const st = T(`kartenDetailHTML(${P('A1')})`);
+      pruef('beta.27 (19) / beta.35: Verlauf ohne Ereignisknöpfe, auch „Nur angesehen“ ist weg',
+        (st.match(/data-do="ereignis"/g) || []).length === 0 && !/data-typ="gesehen"/.test(st), String((st.match(/data-do="ereignis"/g) || []).length));
       pruef('beta.27 (19): kein Schalter „Zustandsfrage“, keine Nachfrage auf Heute',
         !d.getElementById('sch-gmzustand') && T(`SCHALTER.some(function(x){ return x.k === 'gmzustand'; })`) === false && !d.getElementById('stichtage'));
     } catch(e){
@@ -12493,6 +12457,10 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       q('#termin-inhalt [data-tf="waehlen"]').click();
       q('#termin-inhalt [data-tf-pfl="K1A"]').click();
       pruef('beta.34 (K4): Die Pflanzenzahl wird mitgeführt', /Eine Pflanze/.test(q('#tf-pfl-text').textContent), q('#tf-pfl-text').textContent);
+      q('#termin-fertig').click();
+      pruef('beta.35: „Fertig“ führt zurück zum Termin, Titel und Serie stehen noch da',
+        q('#tf-titel') && q('#tf-titel').value === 'K4 Neuer Termin' && q('#tf-n').value === '2' && q('#tf-k').value === '4'
+        && /Eine Pflanze/.test(q('#tf-pfl-text').textContent), q('#tf-titel') ? q('#tf-titel').value : 'kein Titelfeld');
       q('#termin-speichern').click(); await warte(200);
       const neu = T(`JSON.stringify(S.termine[S.termine.length - 1])`);
       const on = JSON.parse(neu);
@@ -12557,6 +12525,301 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.kalAnsicht = a.kalAnsicht; S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.schalter = a.schalter;
         if(a.anzucht === undefined) delete S.anzucht; else S.anzucht = a.anzucht;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt34)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.35: Kalender und „Geplant“ im Verlauf der Karte, Pflanzenauswahl im
+     Terminblatt mit Bildern und Suche, Mehrfachauswahl mit Aktionen (Etappe 3, G3a).
+     Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const qa = s => Array.from(d.querySelectorAll(s));
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const alt35 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, tagEin:S.tagEin, termine:S.termine,
+      lernen:S.lernen, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, ansicht:S.ansicht, histAnsicht:S.histAnsicht,
+      tags:S.tags, tagVorgabenAus:S.tagVorgabenAus})`);
+    const heuteAlt = T(`HEUTE.getTime()`);
+    try {
+      await zu();
+      const heute = T(`iso(HEUTE)`);
+      const plus = n => T(`tagPlusTage('${heute}', ${n})`);
+      const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+      const neuStart = () => T(`(function(){
+        S.giess = {art:'leitung', haerte:'', saison:false, saisonStaerke:'normal'};
+        S.raeume = [{id:'rG1', name:'G3 Wohnzimmer', plaetze:['G3 Vitrine']}, {id:'rG2', name:'G3 Bad', plaetze:[]}];
+        var p = function(id, name, raum, platz){ return {id:id, eigen:true, name:name, art:'Art ' + id, klasse:'B', topf:'12', log:[], notiz:'',
+          raum:raum, stellplatz:platz, intervallEigen:true, intervall:[10, 10]}; };
+        S.eigene = [p('G1', 'G3 Alpha', 'rG1', 'Regal'), p('G2', 'G3 Beta', 'rG1', 'G3 Vitrine'), p('G3', 'G3 Gamma', 'rG2', ''),
+          p('G4', 'G3 Delta', 'rG2', 'Boden'), p('G5', 'G3 Epsilon', 'rG1', 'Tisch')];
+        S.water = {G1:['${plus(-10)}'], G2:['${plus(-15)}'], G3:['${plus(-5)}'], G5:['${plus(-10)}']};
+        S.ereignisse = {}; S.tagEin = {}; S.termine = []; S.lernen = {}; S.feuchtRueck = {};
+        tagVorgabenSichern(true); if(typeof samRueckWeg === 'function') samRueckWeg();
+        ansichtZeigen('sammlung'); sichern(); render(); return 1; })()`);
+      neuStart();
+      const rest = id => T(`giessStatus(${P(id)}).rest`);
+      const dran = () => T(`JSON.stringify(heuteDran().map(function(p){ return p.id; }).sort())`);
+      pruef('beta.35 (Voraussetzung): Abstand 10 Tage, G1 heute dran, G2 fünf Tage überfällig, G3 in fünf Tagen',
+        T(`intervallVon(${P('G1')})`) === 10 && rest('G1') === 0 && rest('G2') === -5 && rest('G3') === 5 && rest('G4') === null,
+        [T(`intervallVon(${P('G1')})`), rest('G1'), rest('G2'), rest('G3'), rest('G4')].join(' '));
+
+      /* ── Karte: Kalender im Verlauf ── */
+      const zeitraumTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'quarantaene'; }) || {}).id || ''`);
+      T(`(function(){ S.histAnsicht = null; S.termine = [
+        {id:'cA', titel:'G3 Neemöl', tag:'', pflanzen:['G1'], datum:'${plus(3)}', n:7, k:2, erl:[], notiz:'zwei Tropfen'},
+        {id:'cB', titel:'G3 Fremder Termin', tag:'', pflanzen:['G2'], datum:'${plus(3)}', n:1, k:1, erl:[], notiz:''},
+        {id:'cC', titel:'G3 Überfällig', tag:'', pflanzen:['G1', 'G2'], datum:'${plus(-2)}', n:1, k:1, erl:[], notiz:''},
+        {id:'cD', titel:'G3 Erledigt', tag:'', pflanzen:['G1'], datum:'${plus(1)}', n:1, k:1, erl:['${plus(1)}'], notiz:''},
+        {id:'cE', titel:'G3 Ohne Pflanze', tag:'', pflanzen:[], datum:'${plus(2)}', n:1, k:1, erl:[], notiz:''}];
+        S.tagEin = {G1:[{e:'e-c1', t:'${zeitraumTag}', von:'${plus(5)}', bis:'${plus(12)}', ende:null}]};
+        sichern(); render(); return 1; })()`);
+      const kd = () => { const b = d.createElement('div'); b.innerHTML = T(`(function(){ KALK = null; return kartenDetailHTML(${P('G1')}); })()`); return b; };
+      const k1 = kd();
+      const bloecke = Array.from(k1.querySelectorAll('[data-kpane="verlauf"] [data-kblock]')).map(x => x.getAttribute('data-kblock'));
+      pruef('beta.35 (C1): Im Verlauf steht der Kalender, darunter „Geplant“; „Einträge“ ist weg',
+        bloecke[0] === 'historie' && bloecke[1] === 'geplant' && bloecke.indexOf('status') === -1, bloecke.join(','));
+      pruef('beta.35 (C1): Der Umschalter heißt Kalender | Zeitstrahl, Kalender ist die Vorgabe',
+        Array.from(k1.querySelectorAll('.hist-um [data-do="hist-um"]')).map(b => b.textContent + ':' + b.getAttribute('aria-pressed')).join('|') === 'Kalender:true|Zeitstrahl:false');
+      const zellen = k1.querySelectorAll('.kalk .kal-raster .kal-zelle');
+      pruef('beta.35 (C1): Der Kalender der Karte zeigt volle Wochen', zellen.length >= 28 && zellen.length % 7 === 0, String(zellen.length));
+      pruef('beta.35 (C1): Heute ist gewählt und nennt das fällige Gießen',
+        !!k1.querySelector('.kalk .kal-zelle.heute[aria-pressed="true"]') && /Gießen/.test(k1.querySelector('.kalk .kal-liste').textContent),
+        k1.querySelector('.kalk .kal-liste').textContent.replace(/\s+/g, ' ').slice(0, 120));
+      const tagHTML = dt => { const b = d.createElement('div'); b.innerHTML = T(`(function(){ kalkSchritt(${P('G1')}, 'tag', '${dt}'); return kalKarteHTML(${P('G1')}); })()`); return b; };
+      const t3 = tagHTML(plus(3));
+      const z3 = t3.querySelector('.kal-zelle[data-v="' + plus(3) + '"]');
+      pruef('beta.35 (C2): Der Tag mit Termin trägt den Termin-Punkt und ist gewählt', !!z3 && z3.getAttribute('aria-pressed') === 'true' && !!z3.querySelector('.kal-p-t'));
+      pruef('beta.35 (C2): Die Tagesliste nennt den Termin mit Serie und Notiz',
+        /G3 Neemöl/.test(t3.querySelector('.kal-liste').textContent) && /1 von 2/.test(t3.querySelector('.kal-liste').textContent) && /zwei Tropfen/.test(t3.querySelector('.kal-liste').textContent));
+      pruef('beta.35 (C2): Gegenprobe: der Termin einer anderen Pflanze und der ohne Pflanze stehen nicht da',
+        !/Fremder Termin/.test(t3.textContent) && !/Ohne Pflanze/.test(tagHTML(plus(2)).querySelector('.kal-liste').textContent));
+      const tg = tagHTML(plus(-10));
+      const zg = tg.querySelector('.kal-zelle[data-v="' + plus(-10) + '"]');
+      pruef('beta.35 (C2): Ein Gießtag der Vergangenheit trägt den Wasser-Punkt und heißt „Gegossen“',
+        !!zg && !!zg.querySelector('.kal-p-w:not(.vor)') && /Gegossen/.test(tg.querySelector('.kal-liste').textContent));
+      const tb = tagHTML(plus(5));
+      pruef('beta.35 (C2): Ein angekündigter Tag steht am Starttag', /Quarantäne beginnt/.test(tb.querySelector('.kal-liste').textContent), tb.querySelector('.kal-liste').textContent.replace(/\s+/g, ' ').slice(0, 100));
+      pruef('beta.35 (C2): Vor heute gibt es kein „+ Termin an diesem Tag“, ab heute schon',
+        !tg.querySelector('[data-do="termin-neu"]') && !!t3.querySelector('.kalk [data-do="termin-neu"][data-v="' + plus(3) + '"]'));
+      const monat0 = T(`(function(){ KALK = null; kalkStand(${P('G1')}); return KALK.tag.slice(0, 7); })()`);
+      const monat1 = T(`(function(){ kalkSchritt(${P('G1')}, 'vor'); return KALK.tag.slice(0, 7); })()`);
+      const monat2 = T(`(function(){ kalkSchritt(${P('G1')}, 'zurueck'); return KALK.tag; })()`);
+      pruef('beta.35 (C2): „›“ geht einen Monat weiter, „‹“ zurück auf heute', monat1 !== monat0 && monat1 > monat0 && monat2 === heute, monat0 + ' ' + monat1 + ' ' + monat2);
+
+      /* ── Karte: „Geplant“ ── */
+      const gp = JSON.parse(T(`JSON.stringify(geplantFuer(${P('G1')}).map(function(e){ return e.datum + ' ' + e.titel; }))`));
+      pruef('beta.35 (C3): „Geplant“ ordnet nach Datum, Überfälliges zuerst',
+        JSON.stringify(gp) === JSON.stringify([plus(-2) + ' G3 Überfällig', plus(3) + ' G3 Neemöl', plus(5) + ' Quarantäne beginnt', plus(10) + ' G3 Neemöl', plus(12) + ' Quarantäne endet']), JSON.stringify(gp));
+      pruef('beta.35 (C3): Gegenprobe: Erledigtes, Fremdes und das Gießen stehen nicht unter „Geplant“',
+        !gp.some(x => /Erledigt|Fremder|Ohne Pflanze|Gießen|Gegossen/.test(x)));
+      const gb = k1.querySelector('[data-kblock="geplant"]');
+      pruef('beta.35 (C3): Der Block zeigt die nächsten drei und nennt den Rest',
+        !!gb && gb.querySelectorAll('.zs-zeile').length === 3 && /2 weitere im Kalender/.test(gb.textContent) && !!gb.querySelector('[data-do="termin-neu"][data-p="G1"]'),
+        gb ? gb.textContent.replace(/\s+/g, ' ').slice(0, 160) : 'kein Block');
+      const leerHTML = T(`geplantHTML(${P('G4')})`);
+      pruef('beta.35 (C3): Ohne Geplantes steht „Nichts geplant.“ und „+ Termin“', /Nichts geplant\./.test(leerHTML) && /data-do="termin-neu"/.test(leerHTML));
+
+      /* ── Karte am echten Fenster: blättern, Termin anlegen ── */
+      T(`(function(){ KALK = null; karteOeffnen('G1'); return 1; })()`); await warte(200);
+      pruef('beta.35 (C4): Die offene Karte zeigt den Kalender', T(`modalOffen('karte-modal')`) === true && !!q('#karte-rumpf .kalk .kal-raster'));
+      const zk = q('#karte-rumpf .kalk [data-do="kalk-tag"][data-v="' + plus(3) + '"]');
+      if(zk) zk.click();
+      pruef('beta.35 (C4): Ein Tipp auf einen Tag zeigt seine Liste, die Karte bleibt offen',
+        !zk || (T(`KALK.tag`) === plus(3) && /G3 Neemöl/.test(q('#karte-rumpf .kalk .kal-liste').textContent) && T(`modalOffen('karte-modal')`) === true),
+        q('#karte-rumpf .kalk') ? q('#karte-rumpf .kalk .kal-liste').textContent.replace(/\s+/g, ' ').slice(0, 100) : 'kein Kalender');
+      q('#karte-rumpf .kalk [data-do="kalk-nav"][data-v="heute"]').click();
+      pruef('beta.35 (C4): „Heute“ springt zurück', T(`KALK.tag`) === heute && !!q('#karte-rumpf .kalk .kal-zelle.heute[aria-pressed="true"]'));
+      q('#karte-rumpf [data-kblock="geplant"] [data-do="termin-neu"]').click(); await warte(200);
+      pruef('beta.35 (C5): „+ Termin“ öffnet das Terminblatt über der Karte, die Pflanze ist vorgewählt',
+        T(`modalOffen('termin-modal') && modalOffen('karte-modal')`) === true && T(`JSON.stringify(TF.pflanzen)`) === '["G1"]' && /Eine Pflanze gewählt/.test(q('#tf-pfl-text').textContent),
+        T(`JSON.stringify(TF && TF.pflanzen)`));
+      pruef('beta.35 (C5): Der Knopf zur Pflanzenwahl nennt die gewählte Pflanze', /G3 Alpha/.test(q('#termin-inhalt .tf-pfl-zeile').textContent));
+
+      /* ── Terminblatt: Pflanzenauswahl mit Bildern und Suche ── */
+      q('#tf-titel').value = 'G3 Aus der Karte';
+      q('#termin-inhalt [data-tf="waehlen"]').click();
+      pruef('beta.35 (P1): Die Auswahl ist eine eigene Seite mit Suchfeld und Kachelgitter',
+        !!q('#termin-inhalt #tf-such') && !!q('#termin-inhalt #tf-gitter.pwahl-gitter') && q('#termin-titel').textContent === 'Pflanzen wählen' && !q('#tf-titel'));
+      pruef('beta.35 (P1): Jede Pflanze ist eine Kachel mit Bildfläche und Name',
+        qa('#tf-gitter .pwahl-k').length === 5 && qa('#tf-gitter .pwahl-k .pwahl-bild').length === 5 && /G3 Beta/.test(q('#tf-gitter [data-tf-pfl="G2"] .pwahl-txt b').textContent),
+        String(qa('#tf-gitter .pwahl-k').length));
+      pruef('beta.35 (P1): Die vorgewählte Pflanze ist markiert, nur sie',
+        qa('#tf-gitter .pwahl-k[aria-pressed="true"]').map(b => b.getAttribute('data-tf-pfl')).join() === 'G1');
+      pruef('beta.35 (P1): Unten steht „Fertig“ statt „Speichern“', q('#termin-fertig').hidden === false && q('#termin-speichern').hidden === true && q('#termin-abbrechen').hidden === true);
+      pruef('beta.35 (P1): Keine Auswahlliste des Systems', !q('#termin-modal select'));
+      const such = wert => { const f = q('#tf-such'); f.value = wert; f.dispatchEvent(new w.Event('input', {bubbles:true})); };
+      such('g3 bad');
+      pruef('beta.35 (P2): Die Suche findet nach dem Raum', qa('#tf-gitter .pwahl-k').map(b => b.getAttribute('data-tf-pfl')).join() === 'G3,G4', qa('#tf-gitter .pwahl-k').map(b => b.getAttribute('data-tf-pfl')).join());
+      pruef('beta.35 (P2): Das Suchfeld bleibt beim Tippen stehen', q('#tf-such') && q('#tf-such').value === 'g3 bad');
+      q('#termin-inhalt [data-tf="alle"]').click();
+      pruef('beta.35 (P2): „Alle angezeigten“ nimmt die Treffer dazu', T(`JSON.stringify(TF.pflanzen.slice().sort())`) === '["G1","G3","G4"]' && /3 Pflanzen gewählt/.test(q('#tf-pfl-text').textContent), T(`JSON.stringify(TF.pflanzen)`));
+      such('epsilon');
+      pruef('beta.35 (P2): Die Suche findet nach dem Namen', qa('#tf-gitter .pwahl-k').map(b => b.getAttribute('data-tf-pfl')).join() === 'G5');
+      q('#tf-gitter [data-tf-pfl="G5"]').click();
+      such('gibtsnicht35');
+      pruef('beta.35 (P2): Ohne Treffer steht ein Hinweis da', !!q('#tf-gitter .pwahl-leertext') && qa('#tf-gitter .pwahl-k').length === 0);
+      such('');
+      q('#tf-gitter [data-tf-pfl="G1"]').click();
+      pruef('beta.35 (P2): Ein zweiter Tipp wählt ab', T(`JSON.stringify(TF.pflanzen.slice().sort())`) === '["G3","G4","G5"]' && q('#tf-gitter [data-tf-pfl="G1"]').getAttribute('aria-pressed') === 'false');
+      T(`modalZu('termin-modal')`); await warte(250);
+      pruef('beta.35 (P3): Zurück aus der Auswahl führt zum Termin, nicht aus dem Blatt',
+        T(`modalOffen('termin-modal')`) === true && T(`TF.waehlen`) === false && !!q('#tf-titel') && q('#tf-titel').value === 'G3 Aus der Karte',
+        String(T(`modalOffen('termin-modal')`)) + ' ' + (q('#tf-titel') ? q('#tf-titel').value : 'kein Titelfeld'));
+      pruef('beta.35 (P3): Zurück im Termin steht wieder „Speichern“', q('#termin-fertig').hidden === true && q('#termin-speichern').hidden === false);
+      q('#termin-inhalt [data-tf="waehlen"]').click();
+      q('#termin-inhalt [data-tf="keine"]').click();
+      pruef('beta.35 (P3): „Keine“ leert die Auswahl', T(`TF.pflanzen.length`) === 0 && qa('#tf-gitter .pwahl-k[aria-pressed="true"]').length === 0);
+      q('#tf-gitter [data-tf-pfl="G1"]').click();
+      q('#termin-fertig').click();
+      q('#termin-speichern').click(); await warte(250);
+      const gesp = T(`JSON.stringify((S.termine.find(function(t){ return t.titel === 'G3 Aus der Karte'; }) || {}).pflanzen || null)`);
+      pruef('beta.35 (C5): Gespeichert mit der Pflanze; das Blatt ist zu, die Karte offen',
+        gesp === '["G1"]' && T(`modalOffen('termin-modal')`) === false && T(`modalOffen('karte-modal')`) === true, gesp);
+      pruef('beta.35 (C5): Die Karte zeigt den neuen Termin sofort unter „Geplant“', /G3 Aus der Karte/.test((q('#karte-rumpf [data-kblock="geplant"]') || {}).textContent || ''),
+        ((q('#karte-rumpf [data-kblock="geplant"]') || {}).textContent || '').replace(/\s+/g, ' ').slice(0, 160));
+      const auf = q('#karte-rumpf [data-kblock="geplant"] [data-do="termin-auf"]');
+      if(auf){ auf.click(); await warte(200); }
+      pruef('beta.35 (C5): Ein Termin unter „Geplant“ öffnet sich zum Bearbeiten', !!auf && T(`modalOffen('termin-modal')`) === true && q('#termin-titel').textContent === 'Termin');
+      await zu();
+      pruef('beta.35 (P4): Das Auswahlgitter findet eine Pflanze über ihren Raum', T(`pwahlPasst(${P('G3')}, 'g3 bad')`) === true && T(`pwahlPasst(${P('G1')}, 'g3 bad')`) === false);
+
+      /* ── G3a: „Später“ (Gießlogik) ── */
+      neuStart();
+      pruef('beta.35 (S0): Vorher stehen G1 und G2 unter „Heute dran“ (G4 ohne Gießdatum auch)', dran() === '["G1","G2","G4","G5"]', dran());
+      const sp = T(`JSON.stringify(samSpaeter(['G1', 'G2', 'G3', 'G4'], 2))`);
+      pruef('beta.35 (S1): „Später“ meldet drei verschobene und eine ohne Gießtermin', sp === '{"neu":3,"ohne":1}', sp);
+      pruef('beta.35 (S1): Heute dran rückt um zwei Tage, Überfälliges zählt ab heute, Künftiges ab seinem Termin',
+        rest('G1') === 2 && rest('G2') === 2 && rest('G3') === 7, [rest('G1'), rest('G2'), rest('G3')].join(' '));
+      pruef('beta.35 (S1): Der Rhythmus bleibt bei 10 Tagen', T(`intervallVon(${P('G1')})`) === 10 && T(`intervallVon(${P('G3')})`) === 10);
+      pruef('beta.35 (S1): Verschobene stehen nicht mehr unter „Heute dran“', dran() === '["G4","G5"]', dran());
+      const plan = JSON.parse(T(`(function(){ var x = giessplanDaten(28); return JSON.stringify({in2:x.tage[2].map(function(p){ return p.id; }).sort(), in7:x.tage[7].map(function(p){ return p.id; }), ueber:x.ueber.map(function(u){ return u.p.id; })}); })()`));
+      pruef('beta.35 (S1): Die Vorschau im Kalender zeigt sie am neuen Tag', plan.in2.join() === 'G1,G2' && plan.in7.join() === 'G3' && plan.ueber.indexOf('G2') === -1, JSON.stringify(plan));
+      pruef('beta.35 (S1): Gemerkt wird der neue Tag je Pflanze', T(`S.lernen.G1.spaeter.bis`) === plus(2) && T(`S.lernen.G3.spaeter.bis`) === plus(7) && T(`S.lernen.G4 === undefined`) === true);
+      pruef('beta.35 (S1): Gegenprobe: eine nicht gewählte Pflanze bleibt, wie sie war', rest('G5') === 0);
+      T(`(function(){ var x = new Date(${heuteAlt}); HEUTE = new Date(x.getFullYear(), x.getMonth(), x.getDate() + 2, 12); return 1; })()`);
+      pruef('beta.35 (S2): Am neuen Tag ist die Pflanze wieder dran', rest('G1') === -2 && T(`heuteDran().some(function(p){ return p.id === 'G1'; })`) === true, String(rest('G1')));
+      T(`HEUTE = new Date(${heuteAlt})`);
+      T(`samGegossen(['G1'])`);
+      pruef('beta.35 (S2): Nach dem Gießen gilt die Verschiebung nicht mehr', rest('G1') === 10 && T(`spaeterVon(${P('G1')})`) === 0, String(rest('G1')));
+      T(`samSpaeter(['G3'], 9)`);
+      pruef('beta.35 (S2): Mehr als drei Tage auf einmal gibt es nicht', rest('G3') === 10, String(rest('G3')));
+
+      /* ── G3a: Leiste, Blatt, Zurück-Taste ── */
+      neuStart();
+      const waehle = ids => T(`(function(){ if(SAM_WAHL) samWahlEnde(); ${JSON.stringify(ids)}.forEach(function(id, i){ if(i === 0) samWahlStarten(id); else samWahlUmschalten(id); }); return SAM_WAHL.size; })()`);
+      pruef('beta.35 (A1): Die Auswahl legt einen Verlaufseintrag an', waehle(['G1', 'G2']) === 2 && T(`!!(history.state && history.state.gkSamWahl)`) === true);
+      pruef('beta.35 (A1): Die Leiste bietet „Aktionen“ und „Gegossen“', !!q('#sam-wahl-leiste #sam-wahl-mehr') && !!q('#sam-wahl-leiste #sam-wahl-giessen') && q('#sam-wahl-leiste').hidden === false);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      pruef('beta.35 (A1): „Aktionen“ öffnet das Blatt mit der Zahl im Titel', T(`modalOffen('sam-akt-modal')`) === true && q('#sam-akt-titel').textContent === '2 Pflanzen', q('#sam-akt-titel').textContent);
+      pruef('beta.35 (A1): Drei Knöpfe „Gießen später“', qa('#sam-akt-inhalt [data-sak-spaeter]').map(b => b.textContent).join('|') === '1 Tag|2 Tage|3 Tage');
+      pruef('beta.35 (A1): Schnellknöpfe Quarantäne, Gießabstand verkürzen und verlängern stehen oben',
+        qa('#sam-akt-inhalt .sak-schnell [data-sak-tag]').map(b => b.textContent).join('|') === 'Quarantäne|Gießabstand verkürzen|Gießabstand verlängern',
+        qa('#sam-akt-inhalt .sak-schnell [data-sak-tag]').map(b => b.textContent).join('|'));
+      pruef('beta.35 (A1): Keine Auswahlliste des Systems', !q('#sam-akt-modal select'));
+      q('#sam-akt-inhalt [data-sak="tags"]').click();
+      pruef('beta.35 (A1): „Alle Tags“ zeigt jeden Tag', qa('#sam-akt-inhalt [data-sak-tag]').length === T(`tagListe().length`) && T(`tagListe().length`) > 3, String(qa('#sam-akt-inhalt [data-sak-tag]').length));
+      q('#sam-akt-inhalt [data-sak="zurueck"]').click();
+      pruef('beta.35 (A1): „Zurück“ führt auf die erste Seite', qa('#sam-akt-inhalt [data-sak-spaeter]').length === 3);
+      T(`modalZu('sam-akt-modal')`); await warte(250);
+      pruef('beta.35 (A2): Das Blatt schließen beendet die Auswahl nicht', T(`modalOffen('sam-akt-modal')`) === false && T(`samWahlAktiv() && SAM_WAHL.size === 2`) === true && T(`!!(history.state && history.state.gkSamWahl)`) === true);
+      T(`history.back()`); await warte(250);
+      pruef('beta.35 (A2): Die Zurück-Taste beendet die Auswahl', T(`samWahlAktiv()`) === false && q('#sam-wahl-leiste').hidden === true && T(`!!(history.state && history.state.gkSamWahl)`) === false);
+      waehle(['G1']);
+      q('#sam-wahl-ab').click(); await warte(250);
+      pruef('beta.35 (A2): „Abbrechen“ beendet die Auswahl und nimmt den Verlaufseintrag weg', T(`samWahlAktiv()`) === false && T(`!!(history.state && history.state.gkSamWahl)`) === false);
+      pruef('beta.35 (A2): Abbrechen schreibt nichts und bietet kein „Rückgängig“ an', q('#sam-rueck-leiste').hidden === true && T(`JSON.stringify(S.lernen)`) === '{}');
+
+      /* ── G3a: jede Aktion mit Rückgängig ── */
+      const stand = id => T(`JSON.stringify({w:S.water['${id}'] || null, l:S.lernen['${id}'] || null, t:S.tagEin['${id}'] || null, e:S.ereignisse['${id}'] || null, r:${P(id)}.raum, s:${P(id)}.stellplatz})`);
+      const v1 = stand('G1'), v2 = stand('G2'), v3 = stand('G3'), v5 = stand('G5');
+      /* Später über das Blatt */
+      waehle(['G1', 'G2']);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      q('#sam-akt-inhalt [data-sak-spaeter="1"]').click(); await warte(450);
+      pruef('beta.35 (R1): „1 Tag“ verschiebt beide, schließt das Blatt und beendet die Auswahl',
+        rest('G1') === 1 && rest('G2') === 1 && T(`modalOffen('sam-akt-modal')`) === false && T(`samWahlAktiv()`) === false, [rest('G1'), rest('G2')].join(' '));
+      pruef('beta.35 (R1): Der Verlaufseintrag der Auswahl ist danach weg', T(`!!(history.state && history.state.gkSamWahl)`) === false);
+      pruef('beta.35 (R1): Die Meldung nennt die Aktion und bietet „Rückgängig“ an',
+        q('#sam-rueck-leiste').hidden === false && q('#sam-rueck-text').textContent === '2 Pflanzen: Gießen einen Tag später' && q('#sam-rueck-knoepfe').hidden === false, q('#sam-rueck-text').textContent);
+      q('#sam-rueck').click();
+      pruef('beta.35 (R1): „Rückgängig“ stellt beide Pflanzen genau wieder her', stand('G1') === v1 && stand('G2') === v2 && rest('G1') === 0 && rest('G2') === -5, stand('G1'));
+      pruef('beta.35 (R1): Danach ist die Meldung weg', q('#sam-rueck-leiste').hidden === true);
+      /* Gegossen aus der Leiste */
+      waehle(['G3']);
+      q('#sam-wahl-giessen').click(); await warte(250);
+      pruef('beta.35 (R2): „Gegossen“ trägt heute ein und meldet es', T(`S.water.G3.indexOf('${heute}') !== -1`) === true && q('#sam-rueck-text').textContent === 'Eine Pflanze gegossen', q('#sam-rueck-text').textContent);
+      q('#sam-rueck').click();
+      pruef('beta.35 (R2): „Rückgängig“ nimmt den Gießeintrag wieder weg, das alte Datum bleibt', stand('G3') === v3 && T(`JSON.stringify(S.water.G3)`) === JSON.stringify([plus(-5)]), T(`JSON.stringify(S.water.G3)`));
+      /* Verschieben */
+      waehle(['G1', 'G2', 'G3']);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      q('#sam-akt-inhalt [data-sak="raum"]').click();
+      pruef('beta.35 (R3): „Verschieben“ zeigt die Räume als Knopfliste', qa('#sam-akt-inhalt [data-sak-raum]').map(b => b.getAttribute('data-sak-raum')).join() === 'rG1,rG2');
+      q('#sam-akt-inhalt [data-sak-raum="rG2"]').click();
+      pruef('beta.35 (R3): Danach die Stellplätze des Raums, zuerst „Ohne Stellplatz“',
+        qa('#sam-akt-inhalt [data-sak-platz]').map(b => b.getAttribute('data-sak-platz')).join() === ',Boden,Fensterbank,Regal,Tisch,Hängend', qa('#sam-akt-inhalt [data-sak-platz]').map(b => b.getAttribute('data-sak-platz')).join());
+      q('#sam-akt-inhalt [data-sak-platz="Fensterbank"]').click(); await warte(450);
+      const ort = id => T(`${P(id)}.raum + '/' + ${P(id)}.stellplatz`);
+      pruef('beta.35 (R3): Alle drei stehen im neuen Raum am neuen Stellplatz', ort('G1') === 'rG2/Fensterbank' && ort('G2') === 'rG2/Fensterbank' && ort('G3') === 'rG2/Fensterbank', [ort('G1'), ort('G2'), ort('G3')].join(' '));
+      pruef('beta.35 (R3): Die Meldung nennt Raum und Stellplatz', q('#sam-rueck-text').textContent === '3 Pflanzen nach G3 Bad · Fensterbank verschoben', q('#sam-rueck-text').textContent);
+      pruef('beta.35 (R3): Gegenprobe: eine nicht gewählte Pflanze bleibt stehen', ort('G5') === 'rG1/Tisch');
+      q('#sam-rueck').click();
+      pruef('beta.35 (R3): „Rückgängig“ stellt jede an ihren eigenen alten Platz', ort('G1') === 'rG1/Regal' && ort('G2') === 'rG1/G3 Vitrine' && ort('G3') === 'rG2/', [ort('G1'), ort('G2'), ort('G3')].join(' '));
+      /* Tag setzen: Schnellknopf */
+      const qTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'quarantaene'; }) || {}).id || ''`);
+      const kTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'kuerzer'; }) || {}).id || ''`);
+      const lTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'laenger'; }) || {}).id || ''`);
+      T(`(function(){ S.tagEin.G5 = [{e:'e-q5', t:'${qTag}', von:'${plus(-3)}', bis:'${plus(18)}', ende:null, notiz:''}]; sichern(); return 1; })()`);
+      const v5q = stand('G5');
+      waehle(['G1', 'G2', 'G5']);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      q('#sam-akt-inhalt .sak-schnell [data-sak-tag="' + qTag + '"]').click(); await warte(450);
+      const laeuft = (id, tid) => T(`tagLaufend('${id}').filter(function(x){ return x.t.id === '${tid}'; }).length`);
+      pruef('beta.35 (R4): Der Schnellknopf setzt Quarantäne ohne Rückfrage; wo sie schon läuft, kommt keine zweite',
+        laeuft('G1', qTag) === 1 && laeuft('G2', qTag) === 1 && laeuft('G5', qTag) === 1 && stand('G5') === v5q, [laeuft('G1', qTag), laeuft('G2', qTag), laeuft('G5', qTag)].join(' '));
+      pruef('beta.35 (R4): Die Meldung nennt den Tag und die, bei denen er schon lief', q('#sam-rueck-text').textContent === '2 Pflanzen: „Quarantäne“ gesetzt · bei 1 lief er schon', q('#sam-rueck-text').textContent);
+      pruef('beta.35 (R4): Der Tag steht im Verlauf der Pflanze', T(`(S.ereignisse.G1 || []).some(function(e){ return e.typ === 'tag' && /Quarantäne gesetzt/.test(e.text); })`) === true);
+      q('#sam-rueck').click();
+      pruef('beta.35 (R4): „Rückgängig“ nimmt Tag und Verlaufseintrag wieder weg', stand('G1') === v1 && stand('G2') === v2 && stand('G5') === v5q && laeuft('G1', qTag) === 0, stand('G1'));
+      /* Tag setzen: Gießtag ersetzt den laufenden, mit Hinweis */
+      T(`(function(){ S.tagEin.G1 = [{e:'e-k1', t:'${kTag}', von:'${plus(-4)}', bis:null, ende:null, notiz:'', pz:25}]; sichern(); return 1; })()`);
+      const v1k = stand('G1');
+      waehle(['G1', 'G2']);
+      q('#sam-wahl-mehr').click(); await warte(200);
+      q('#sam-akt-inhalt [data-sak="tags"]').click();
+      q('#sam-akt-inhalt [data-sak-tag="' + lTag + '"]').click();
+      pruef('beta.35 (R5): Läuft schon ein Gießtag, kommt erst der Hinweis mit „Ersetzen“',
+        T(`modalOffen('sam-akt-modal')`) === true && /Bei 1 von 2: Ein anderer Gießtag läuft schon und wird ersetzt\./.test(q('#sam-akt-inhalt .tag-warn').textContent)
+        && (q('#sam-akt-fuss [data-sak="tagja"]') || {}).textContent === 'Ersetzen' && laeuft('G1', lTag) === 0,
+        q('#sam-akt-inhalt') ? q('#sam-akt-inhalt').textContent.replace(/\s+/g, ' ').slice(0, 160) : '');
+      q('#sam-akt-fuss [data-sak="tagja"]').click(); await warte(450);
+      pruef('beta.35 (R5): „Ersetzen“ setzt den neuen Gießtag, der alte ist beendet', laeuft('G1', lTag) === 1 && laeuft('G1', kTag) === 0 && laeuft('G2', lTag) === 1 && T(`S.tagEin.G1[0].ende`) === heute, T(`JSON.stringify(S.tagEin.G1)`));
+      q('#sam-rueck').click();
+      pruef('beta.35 (R5): „Rückgängig“ lässt den alten Gießtag wieder laufen', stand('G1') === v1k && laeuft('G1', kTag) === 1 && laeuft('G2', lTag) === 0, stand('G1'));
+      /* Meldung verschwindet mit der nächsten Auswahl */
+      waehle(['G3']);
+      q('#sam-wahl-giessen').click(); await warte(250);
+      pruef('beta.35 (R6): Nach der Aktion steht die Meldung da', q('#sam-rueck-leiste').hidden === false);
+      waehle(['G1']);
+      pruef('beta.35 (R6): Eine neue Auswahl nimmt die Meldung weg, „Rückgängig“ gibt es dann nicht mehr', q('#sam-rueck-leiste').hidden === true && T(`samRueckgaengig()`) === false && T(`S.water.G3.indexOf('${heute}') !== -1`) === true);
+      T(`samWahlEnde()`); await warte(250);
+      /* Rückgängig fasst gelöschte Pflanzen nicht an */
+      waehle(['G4', 'G5']);
+      q('#sam-wahl-giessen').click(); await warte(250);
+      T(`(function(){ pflanzeEntfernen('G4'); return 1; })()`);
+      q('#sam-rueck').click();
+      pruef('beta.35 (R7): „Rückgängig“ legt für eine inzwischen gelöschte Pflanze nichts wieder an', T(`S.water.G4 === undefined && S.lernen.G4 === undefined`) === true && stand('G5') === v5q, T(`JSON.stringify(S.water.G4 || null)`));
+    } catch(e){
+      pruef('beta.35: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); samRueckWeg(); KALK = null;
+        history.replaceState(null, ''); HEUTE = new Date(${heuteAlt});
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.tagEin = a.tagEin; S.termine = a.termine || [];
+        S.lernen = a.lernen; S.feuchtRueck = a.feuchtRueck; S.raeume = a.raeume; S.histAnsicht = a.histAnsicht;
+        if(a.giess === undefined) delete S.giess; else S.giess = a.giess;
+        S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt35)})`);
     }
   }
 
