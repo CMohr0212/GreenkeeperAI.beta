@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.36', w.__T('FASSUNG') === '4.0-beta.36', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.37', w.__T('FASSUNG') === '4.0-beta.37', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -705,8 +705,8 @@ setTimeout(async () => {
        die Frage nicht, und der Abschnitt fällt ganz weg. */
     pruef('Giftigkeit liegt im Wissen-Reiter, sobald Tiere eingetragen sind',
       w.__T('meineTiere().length')
-        ? !!d.querySelector('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="gift"]')
-        : !d.querySelector('#karte-rumpf [data-kblock="gift"]'));
+        ? /Giftigkeit /.test(d.querySelector('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="steckbrief"]').textContent)
+        : !/Giftigkeit /.test(d.querySelector('#karte-rumpf [data-kpane="steckbrief"]').textContent));
     pruef('Platz trägt die Knopflisten',
       !!d.querySelector('#karte-rumpf [data-kpane="platz"] .platzbox'));
   }
@@ -2277,7 +2277,7 @@ setTimeout(async () => {
       pruef('Eigene und mitgelieferte Pflanze: dieselben Abschnitte', lv === lb, lv + ' | ' + lb);
       /* 4.0-beta.30 (B2, F309): Reiter Verlauf, Platz, Pflegeheft, Steckbrief */
       pruef('Eigene Pflanze hat Steckbrief im Reiter Steckbrief', lv.indexOf('steckbrief:steckbrief') > -1, lv);
-      pruef('Eigene Pflanze hat Giftigkeit im Reiter Steckbrief', lv.indexOf('steckbrief:gift') > -1, lv);
+      pruef('Eigene Pflanze hat Giftigkeit im Reiter Steckbrief', /Giftigkeit /.test((kv.querySelector('[data-kpane="steckbrief"] [data-kblock="steckbrief"]') || {}).textContent || ''), lv);
       pruef('Vier Reiterflächen in jeder Karte',
         [...kv.querySelectorAll('[data-kpane]')].map(x=>x.dataset.kpane).join(',') === 'verlauf,platz,pflegeheft,steckbrief');
       pruef('Im Reiter Platz kein Aufklapper', !kv.querySelector('[data-kpane="platz"] details.acc'));
@@ -2416,17 +2416,17 @@ setTimeout(async () => {
       /* ── Giftigkeit je Tier ── */
       w.__T(`(function(){ S.tiere = {aktiv:true, arten:['katze','hund']}; })()`);
       const kGift = karteAus('A2P');
-      const zeilen = [...kGift.querySelectorAll('[data-kblock="gift"] .gift-zeile')]
-        .map(x=>x.dataset.tier).join(',');
-      pruef('Je eingetragenem Tier eine Zeile', zeilen === 'katze,hund', zeilen);
+      /* beta.37 (B5): Die Giftigkeit steht als Zeile je Tier im Steckbrief */
+      const giftDt = [...kGift.querySelectorAll('[data-kblock="steckbrief"] dt')].filter(x=>/^Giftigkeit /.test(x.textContent));
+      const zeilen = giftDt.map(x=>x.textContent).join(',');
+      pruef('Je eingetragenem Tier eine Zeile', zeilen === 'Giftigkeit Katze,Giftigkeit Hund', zeilen);
       pruef('Jede Zeile trägt eine Einstufung',
-        [...kGift.querySelectorAll('[data-kblock="gift"] .gift-zeile')]
-          .every(x=>!!x.querySelector('.kb-marke')));
+        giftDt.length === 2 && giftDt.every(x=>['giftig', 'nicht giftig', 'nicht geprüft'].indexOf(x.nextElementSibling.textContent) !== -1));
       /* Gegenprobe: ohne Tiere weder Abschnitt noch Warnung. */
       w.__T(`(function(){ S.tiere = {aktiv:false, arten:[]}; })()`);
       const ohneTier = karteAus('A2P');
       pruef('Gegenprobe: ohne Tiere kein Giftabschnitt',
-        !ohneTier.querySelector('[data-kblock="gift"]'));
+        !ohneTier.querySelector('[data-kblock="gift"]') && !/Giftigkeit /.test(ohneTier.textContent));
       const warn = w.__T(`warnungenHTML(allePflanzen().find(x=>x.id==='A2P'))`);
       pruef('Gegenprobe: ohne Tiere keine Katzenwarnung',
         !/Giftig für/.test(warn), warn.slice(0, 160));
@@ -7152,7 +7152,7 @@ setTimeout(async () => {
        der Tags entstehen beim Zeichnen); beta.28: Langzeitdünger und volle Dosis weg, 26;
        beta.33: Planer (vier) und Rundgang (einer) weg, 21; beta.34 (F350): „Pflegehinweise auf den Karten“ weg, 20 */
     pruef('beta.5: Alle 20 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 20, fehlt.join(', ') + ' / ' + SCH.length);
-    pruef('beta.5: Genau diese 20 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 25, quelle.split('type="checkbox" role="switch"').length - 1);
+    pruef('beta.5: Genau diese 20 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 26, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -8994,11 +8994,11 @@ setTimeout(async () => {
       /* seit beta.21: zehn Schalter; „Gießen als Liste“ ist bei Sammler an, bei Entdecker aus */
       /* beta.23: „licht“ ist weg, neun Schalter */
       /* beta.27: „Zustandsfrage beim Gießen“ ist weg, acht Schalter */
-      pruef('beta.18: Sammler schaltet die Schalter aus (beta.21: Liste an; beta.31: Pflegeheft an; beta.34: „hinweise“ weg, sieben)', alle() === '1000010', alle());
+      pruef('beta.18: Sammler schaltet die Schalter aus (beta.21: Liste an; beta.31: Pflegeheft an; beta.34: „hinweise“ weg, sieben)', alle() === '10000100', alle());
       T(`modusSetzen('entdecker'); 1`);
-      pruef('beta.18: Entdecker schaltet die Schalter an (beta.21: Liste aus, Kärtchen an; beta.34: sieben)', alle() === '1111101', alle());
+      pruef('beta.18: Entdecker schaltet die Schalter an (beta.21: Liste aus, Kärtchen an; beta.34: sieben)', alle() === '11111011', alle());
       pruef('beta.18: Katalog hat sieben Schalter (beta.34: „hinweise“ weg) mit eigenem Schalter in der Ansicht',
-        T(`SCHALTER.length`) === 7 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
+        T(`SCHALTER.length`) === 8 && T(`SCHALTER.every(function(s){ var e = document.getElementById(s.id); return e && e.getAttribute('role') === 'switch' && !!e.closest('#schalter-karte'); })`));
       d.getElementById('sch-befunde').click();
       pruef('beta.18: Ein Schalter weicht ab und wird gespeichert', T(`JSON.stringify(S.schalter)`) === '{"befunde":false}' && !T(`schalterAn('befunde')`), T(`JSON.stringify(S.schalter)`));
       const mt = d.getElementById('modus-text').textContent;
@@ -9007,7 +9007,7 @@ setTimeout(async () => {
       pruef('beta.18: Zurück auf die Vorgabe ist keine Abweichung mehr', T(`JSON.stringify(S.schalter)`) === '{}' && d.getElementById('modus-zurueck-box').hidden, T(`JSON.stringify(S.schalter)`));
       d.getElementById('sch-pflege').click(); d.getElementById('sch-symbole').click();
       d.getElementById('modus-zurueck').click();
-      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '1111101' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
+      pruef('beta.18 (F179): Zurücksetzen stellt die Vorgabe wieder her', T(`JSON.stringify(S.schalter)`) === '{}' && alle() === '11111011' && T(`S.modus`) === 'entdecker', T(`JSON.stringify(S.schalter)`));
       d.querySelector('#modus-wahl [data-modus="sammler"]').click();
       pruef('beta.18: Segment Sammler setzt Modus, einfachen Modus und gedrückten Knopf',
         T(`S.modus`) === 'sammler' && T(`!!S.einfach`) && d.body.classList.contains('einfach')
@@ -11529,7 +11529,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.30 B2 (13, beta.31): Pflegeheft zeigt das Register, keine alten Pflegetexte',
         !!heft && heft.querySelectorAll('.heft-kat').length === 7 && !/B2 Schritt eins|B2 Beobachtung/.test(ht), ht.slice(0, 120));
       pruef('beta.30 B2 (13): Steckbrief ohne Pflegetexte, mit Giftigkeit',
-        !!q('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="gift"]') && !/B2 Schritt eins/.test((q('#karte-rumpf [data-kpane="steckbrief"]') || {}).textContent || ''));
+        /Giftigkeit /.test((q('#karte-rumpf [data-kpane="steckbrief"] [data-kblock="steckbrief"]') || {}).textContent || '') && !/B2 Schritt eins/.test((q('#karte-rumpf [data-kpane="steckbrief"]') || {}).textContent || ''));
       await zu();
 
       /* Start mit gefülltem Speicher (T9b) und offener Karte */
@@ -12905,14 +12905,14 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       /* ── V: Vorlagen ── */
       T(`terminFensterAuf(null, '${plus(2)}', null, ['H1'])`); await warte(120);
       pruef('beta.36 (V1): Ein neuer Termin bietet die festen Vorlagen mit Serie an',
-        qa('#termin-inhalt [data-tf-vorlage]').length === 5 && /Neemöl spritzen\s*3× alle 7 Tage/.test(q('#termin-inhalt [data-tf-vorlage="v-neem"]').textContent.replace(/\s+/g, ' ').replace('spritzen', 'spritzen ')),
+        qa('#termin-inhalt [data-tf-vorlage]').length === 4 && /Neemöl sprühen\s*3× alle 7 Tage/.test(q('#termin-inhalt [data-tf-vorlage="v-neem"]').textContent.replace(/\s+/g, ' ').replace('sprühen', 'sprühen ')),
         qa('#termin-inhalt [data-tf-vorlage]').map(b => b.textContent).join('|'));
       q('#termin-inhalt [data-tf-vorlage="v-neem"]').click();
       pruef('beta.36 (V1): Die Vorlage füllt Titel und Serie; Datum und Pflanze bleiben',
-        q('#tf-titel').value === 'Neemöl spritzen' && q('#tf-n').value === '7' && q('#tf-k').value === '3' && q('#tf-datum').value === plus(2) && T(`TF.pflanzen.join()`) === 'H1',
+        q('#tf-titel').value === 'Neemöl sprühen' && q('#tf-n').value === '7' && q('#tf-k').value === '3' && q('#tf-datum').value === plus(2) && T(`TF.pflanzen.join()`) === 'H1',
         q('#tf-titel').value);
       q('#termin-speichern').click(); await warte(250);
-      pruef('beta.36 (V1): Gespeichert wird eine Serie 3× alle 7 Tage', T(`(function(){ var t = S.termine[S.termine.length - 1]; return t.titel + '|' + t.n + '|' + t.k + '|' + t.datum + '|' + t.pflanzen.join(); })()`) === 'Neemöl spritzen|7|3|' + plus(2) + '|H1');
+      pruef('beta.36 (V1): Gespeichert wird eine Serie 3× alle 7 Tage', T(`(function(){ var t = S.termine[S.termine.length - 1]; return t.titel + '|' + t.n + '|' + t.k + '|' + t.datum + '|' + t.pflanzen.join(); })()`) === 'Neemöl sprühen|7|3|' + plus(2) + '|H1');
       T(`terminFensterAuf(null, '${heute}', null, [])`); await warte(120);
       q('#tf-titel').value = 'Kalk abwischen';
       qa('#termin-inhalt [data-tf-wdh]').find(b => b.dataset.tfWdh === 'an').click();
@@ -12920,15 +12920,15 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       q('#termin-inhalt [data-tf="vorlage-merken"]').click();
       pruef('beta.36 (V2): „Als Vorlage merken“ legt eine eigene Vorlage an und zeigt sie',
         T(`S.terminVorlagen.length`) === 1 && T(`S.terminVorlagen[0].titel + '|' + S.terminVorlagen[0].n + '|' + S.terminVorlagen[0].k`) === 'Kalk abwischen|30|4'
-        && qa('#termin-inhalt [data-tf-vorlage]').length === 6 && /gemerkt/.test(q('#termin-inhalt .tf-vorlage-zeile .fhint').textContent), T(`JSON.stringify(S.terminVorlagen)`));
+        && qa('#termin-inhalt [data-tf-vorlage]').length === 5 && /gemerkt/.test(q('#termin-inhalt .tf-vorlage-zeile:not(.tf-vorlage-oben) [role="status"]').textContent), T(`JSON.stringify(S.terminVorlagen)`));
       q('#termin-inhalt [data-tf="vorlage-merken"]').click();
       pruef('beta.36 (V2): Derselbe Titel ersetzt die Vorlage, statt eine zweite anzulegen', T(`S.terminVorlagen.length`) === 1);
       pruef('beta.36 (V2): Die eigene Vorlage lässt sich löschen, die festen nicht', !!q('#termin-inhalt [data-tf="vorlage-weg"]'));
       q('#termin-inhalt [data-tf-vorlage="v-neem"]').click();
-      pruef('beta.36 (V2): Bei einer festen Vorlage gibt es kein „löschen“', !q('#termin-inhalt [data-tf="vorlage-weg"]'));
+      pruef('beta.36 (V2; beta.37): Auch eine feste Vorlage zeigt „ändern“ und „löschen“', !!q('#termin-inhalt [data-tf="vorlage-weg"]') && !!q('#termin-inhalt [data-tf="vorlage-aendern"]'));
       q('#termin-inhalt [data-tf-vorlage="' + T(`S.terminVorlagen[0].id`) + '"]').click();
       q('#termin-inhalt [data-tf="vorlage-weg"]').click();
-      pruef('beta.36 (V2): Nach dem Löschen stehen wieder nur die festen Vorlagen da', T(`S.terminVorlagen.length`) === 0 && qa('#termin-inhalt [data-tf-vorlage]').length === 5);
+      pruef('beta.36 (V2): Nach dem Löschen stehen wieder nur die festen Vorlagen da', T(`S.terminVorlagen.length`) === 0 && qa('#termin-inhalt [data-tf-vorlage]').length === 4);
       await zu();
       T(`terminFensterAuf('tA', null, null)`); await warte(120);
       pruef('beta.36 (V3): Ein vorhandener Termin zeigt keine Vorlagen', qa('#termin-inhalt [data-tf-vorlage]').length === 0 && !!q('#tf-titel'));
@@ -13032,6 +13032,205 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(a.schalter === undefined) delete S.schalter; else S.schalter = a.schalter;
         S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.terminVorlagen = a.terminVorlagen || [];
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt36)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.37: Korrekturen zu P2 (Vorlagen ändern und löschen, Tag als Zeile,
+     Zeitstrahl mit × und eigener Scrollfläche, „Erledigt“ unter „Geplant“) und
+     B5 (Steckbrief als ein Block, Giftigkeit in drei Wörtern, Düngebedarf,
+     Winterruhe, Warnkasten-Schalter, Knopflisten im Bearbeiten-Formular).
+     Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const qa = s => Array.from(d.querySelectorAll(s));
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const quelle37 = () => fs.readFileSync('index.html', 'utf8');
+    const alt37 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, tagEin:S.tagEin, termine:S.termine,
+      lernen:S.lernen, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, ansicht:S.ansicht, gesehen:S.gesehen,
+      tags:S.tags, tagVorgabenAus:S.tagVorgabenAus, terminVorlagen:S.terminVorlagen, terminVorlagenAus:S.terminVorlagenAus,
+      schalter:S.schalter, modus:S.modus, tiere:S.tiere, histAnsicht:S.histAnsicht, kartenTab:S.kartenTab})`);
+    try {
+      await zu();
+      const heute = T(`iso(HEUTE)`);
+      const plus = n => T(`tagPlusTage('${heute}', ${n})`);
+      const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+      const tage = [-40, -30, -22, -15, -9, -6, -3, -1].map(plus);
+      T(`(function(){
+        S.giess = {art:'leitung', haerte:'', saison:false, saisonStaerke:'normal'};
+        S.raeume = [{id:'rJ1', name:'J Zimmer', plaetze:[]}];
+        var p = function(id, name, mehr){ return Object.assign({id:id, eigen:true, name:name, art:'Art ' + id, klasse:'B', topf:'12', log:[], notiz:'',
+          raum:'rJ1', stellplatz:'', intervallEigen:true, intervall:[10, 10]}, mehr || {}); };
+        S.eigene = [p('J1', 'J Alpha'), p('J2', 'J Beta', {duenger:'viel', winterruhe:true, merkmale:'J Merkmal rot', herkunft:'J Herkunft Anden',
+          bedingungen:{'J Luft':'feucht'}, sonne:'hell'}), p('J3', 'J Gamma', {klasse:'S', botanisch:'Dionaea muscipula', duenger:'nie'})];
+        S.water = {J1:${JSON.stringify(tage)}, J2:['${plus(-1)}'], J3:['${plus(-1)}']};
+        S.ereignisse = {J1:[{id:'eJa', datum:'${plus(-4)}', typ:'umgetopft', text:'J eigener Eintrag', bezug:null}]};
+        S.tagEin = {}; S.termine = []; S.lernen = {}; S.feuchtRueck = {}; S.terminVorlagen = []; S.terminVorlagenAus = [];
+        S.tiere = {aktiv:true, arten:['katze']}; S.histAnsicht = 'strahl'; S.kartenTab = 'verlauf';
+        tagVorgabenSichern(true); modusSetzen('entdecker');
+        ansichtZeigen('sammlung'); sichern(); render(); return 1; })()`);
+
+      /* ── V: Vorlagen ändern und löschen ── */
+      T(`terminFensterAuf(null, '${plus(2)}', null, ['J1'])`); await warte(120);
+      const vTitel = () => qa('#termin-inhalt [data-tf-vorlage]').map(b => b.querySelector('b').textContent).join('|');
+      pruef('beta.37 (V): Vier feste Vorlagen, „Neemöl sprühen“ statt „spritzen“, kein „Abduschen“',
+        vTitel() === 'Neemöl sprühen|Auf Schädlinge prüfen|Düngen|Umtopfen', vTitel());
+      pruef('beta.37 (V): Die Vorlagen-Kacheln sind gleich hoch gesetzt', /\.tf-vorlagen\{grid-auto-rows:1fr\}/.test(quelle37()));
+      q('#termin-inhalt [data-tf-vorlage="v-neem"]').click();
+      q('#tf-titel').value = 'Neemöl nebeln'; q('#tf-k').value = '5';
+      q('#termin-inhalt [data-tf="vorlage-aendern"]').click();
+      pruef('beta.37 (V): „Vorlage ändern“ schreibt Titel und Serie in die gewählte feste Vorlage',
+        T(`JSON.stringify(S.terminVorlagen)`) === '[{"id":"v-neem","titel":"Neemöl nebeln","tag":"","n":7,"k":5,"notiz":""}]'
+        && vTitel() === 'Neemöl nebeln|Auf Schädlinge prüfen|Düngen|Umtopfen' && /geändert/.test(q('#termin-inhalt .tf-vorlage-oben [role="status"]').textContent),
+        T(`JSON.stringify(S.terminVorlagen)`) + ' ' + vTitel());
+      q('#tf-titel').value = 'Umtopfen';
+      q('#termin-inhalt [data-tf="vorlage-aendern"]').click();
+      pruef('beta.37 (V): Ein Titel, den schon eine andere Vorlage trägt, wird abgelehnt', T(`S.terminVorlagen[0].titel`) === 'Neemöl nebeln' && !!q('#termin-inhalt .tv-fehler'));
+      q('#termin-inhalt [data-tf-vorlage="v-kontrolle"]').click();
+      q('#termin-inhalt [data-tf="vorlage-weg"]').click();
+      pruef('beta.37 (V): Eine feste Vorlage lässt sich löschen', T(`JSON.stringify(S.terminVorlagenAus)`) === '["v-kontrolle"]' && vTitel() === 'Neemöl nebeln|Düngen|Umtopfen', vTitel());
+      q('#tf-titel').value = 'Düngen';
+      qa('#termin-inhalt [data-tf-wdh]').find(b => b.dataset.tfWdh === 'an').click();
+      q('#tf-n').value = '21'; q('#tf-k').value = '4';
+      q('#termin-inhalt [data-tf="vorlage-merken"]').click();
+      pruef('beta.37 (V): „Als Vorlage merken“ mit dem Titel einer festen Vorlage ersetzt sie, statt sie zu verdoppeln',
+        vTitel() === 'Neemöl nebeln|Düngen|Umtopfen' && T(`(S.terminVorlagen.find(function(v){ return v.id === 'v-duenger'; }) || {}).n`) === 21, vTitel());
+      q('#termin-inhalt [data-tf="vorlagen-zurueck"]') || q('#termin-inhalt [data-tf-vorlage="v-duenger"]').click();
+      pruef('beta.37 (V): „Gelöschte Vorlagen zurückholen“ steht da, wenn keine Vorlage gewählt ist', !!q('#termin-inhalt [data-tf="vorlagen-zurueck"]'));
+      q('#termin-inhalt [data-tf="vorlagen-zurueck"]').click();
+      pruef('beta.37 (V): Danach ist die gelöschte feste Vorlage wieder da', T(`S.terminVorlagenAus.length`) === 0 && vTitel() === 'Neemöl nebeln|Auf Schädlinge prüfen|Düngen|Umtopfen', vTitel());
+
+      /* ── T: Tag als eine Zeile, Liste auf eigener Seite ── */
+      const nTags = T(`tagListe().length`);
+      pruef('beta.37 (T): Im Termin steht der Tag als eine Zeile, nicht als Kachelliste',
+        qa('#termin-inhalt [data-tf-tag]').length === 0 && qa('#termin-inhalt .tf-tag-zeile button').length === 1 && q('#tf-tag-text').textContent === 'Tag wählen', q('#tf-tag-text') && q('#tf-tag-text').textContent);
+      q('#tf-titel').value = 'J Tagtest';
+      q('#termin-inhalt [data-tf="tagwahl"]').click();
+      pruef('beta.37 (T): Ein Tipp öffnet die Seite mit allen Tags und „Kein Tag“; im Fuß steht „Fertig“',
+        nTags > 0 && qa('#termin-inhalt [data-tf-tag]').length === nTags + 1 && !q('#termin-fertig').hidden && q('#termin-speichern').hidden && q('#termin-titel').textContent === 'Tag wählen',
+        qa('#termin-inhalt [data-tf-tag]').length + ' von ' + nTags);
+      const dTag = T(`(tagListe().find(function(t){ return t.vorgabe === 'duenger'; }) || {}).id || ''`);
+      q('#termin-inhalt [data-tf-tag="' + dTag + '"]').click();
+      pruef('beta.37 (T): Ein Tipp auf einen Tag wählt ihn und führt zurück zum Termin; der Titel bleibt',
+        T(`TF.tag`) === dTag && !T(`TF.tagwahl`) && q('#tf-tag-text').textContent === T(`tagDef('${dTag}').name`) && q('#tf-titel').value === 'J Tagtest' && q('#termin-fertig').hidden,
+        T(`TF.tag`) + ' ' + (q('#tf-tag-text') || {}).textContent);
+      q('#termin-inhalt [data-tf="tagwahl"]').click();
+      pruef('beta.37 (T): Zurück aus der Tag-Seite schließt das Blatt nicht', T(`modalZu('termin-modal')`) !== true && T(`modalOffen('termin-modal')`) === true && !T(`TF.tagwahl`) && !!q('#tf-titel'));
+      q('#termin-inhalt [data-tf="tagwahl"]').click();
+      q('#termin-inhalt [data-tf-tag=""]').click();
+      pruef('beta.37 (T): „Kein Tag“ nimmt den Tag wieder weg', T(`TF.tag`) === '' && q('#tf-tag-text').textContent === 'Tag wählen');
+      await zu();
+
+      /* ── Z: Zeitstrahl ── */
+      T(`karteOeffnen('J1')`); await warte(200);
+      const zsZeilen = () => qa('#karte-rumpf .zs .zs-zeile').length;
+      pruef('beta.37 (Z): Der Zeitstrahl zeigt alle Einträge in einer Fläche, ohne „ältere anzeigen“',
+        zsZeilen() === 9 && !q('#karte-rumpf .zs-mehr'), zsZeilen());
+      pruef('beta.37 (Z): Die Fläche ist fünf Zeilen hoch und scrollt in sich',
+        /\.zs\{max-height:calc\(5 \* 42px \+ 34px\);overflow-y:auto;overscroll-behavior:contain/.test(quelle37()));
+      const xw = dat => q('#karte-rumpf .zs [data-do="zs-weg"][data-v="w|' + dat + '"]');
+      pruef('beta.37 (Z, F352): Jeder Gießgang und der eigene Eintrag tragen ein ×', qa('#karte-rumpf .zs [data-do="zs-weg"]').length === 9 && !!xw(tage[7]) && !!q('#karte-rumpf .zs [data-v="e|eJa"]'));
+      xw(tage[7]).click();
+      pruef('beta.37 (Z): Der erste Tipp fragt nur', T(`S.water.J1.length`) === 8 && xw(tage[7]).textContent === 'Löschen?' && qa('#karte-rumpf .zs .zs-weg.frage').length === 1, xw(tage[7]).textContent);
+      xw(tage[7]).click(); await warte(60);
+      pruef('beta.37 (Z): Der zweite Tipp löscht genau diesen Gießgang',
+        T(`JSON.stringify(S.water.J1)`) === JSON.stringify(tage.slice(0, 7)) && zsZeilen() === 8 && T(`S.ereignisse.J1.length`) === 1, T(`JSON.stringify(S.water.J1)`));
+      pruef('beta.37 (Z): Danach zählt der vorige Gießgang als letzter', T(`giessLog('J1')[0]`) === tage[6] && T(`giessStatus(${P('J1')}).rest`) === 7, T(`giessLog('J1')[0] + ' ' + giessStatus(${P('J1')}).rest`));
+      q('#karte-rumpf .zs [data-v="e|eJa"]').click(); q('#karte-rumpf .zs [data-v="e|eJa"]').click(); await warte(60);
+      pruef('beta.37 (Z): Der eigene Eintrag lässt sich genauso löschen', T(`(S.ereignisse.J1 || []).length`) === 0 && T(`S.water.J1.length`) === 7 && zsZeilen() === 7);
+      pruef('beta.37 (Z): Ein unbekannter Eintrag löscht nichts', T(`verlaufEintragWeg('J1', 'w|1999-01-01')`) === false && T(`verlaufEintragWeg('J1', 'e|gibtsnicht')`) === false
+        && T(`verlaufEintragWeg('J1', 'x|${tage[0]}')`) === false && T(`S.water.J1.length`) === 7);
+      T(`(function(){ S.termine = [terminSauber({id:'tJ', titel:'J Termin', pflanzen:['J1'], datum:'${plus(1)}', k:1})]; terminErledigtUm('tJ', '${plus(1)}'); return 1; })()`);
+      const eTermin = T(`(S.ereignisse.J1 || []).filter(function(e){ return e.typ === 'termin'; })[0].id`);
+      pruef('beta.37 (Z): Der Eintrag eines abgehakten Termins lässt sich nicht einzeln löschen',
+        T(`verlaufEintragWeg('J1', 'e|${eTermin}')`) === false && T(`S.ereignisse.J1.length`) === 1
+        && T(`zeitstrahlEintraege(${P('J1')}).filter(function(x){ return x.weg === 'e|${eTermin}'; }).length`) === 0);
+      T(`terminErledigtUm('tJ', '${plus(1)}')`);
+
+      /* ── G: „Erledigt“ unter „Geplant“ (F353) ── */
+      T(`render()`); await warte(60);
+      const gErl = () => q('#karte-rumpf .gpl [data-do="termin-erl"]');
+      pruef('beta.37 (G, F353): Ein offener Termin unter „Geplant“ trägt „Erledigt“', !!gErl() && gErl().dataset.v === 'tJ|' + plus(1), gErl() && gErl().dataset.v);
+      gErl().click(); await warte(60);
+      pruef('beta.37 (G): Der Tipp hakt den Termin ab, schreibt den Verlaufseintrag und nimmt ihn aus „Geplant“',
+        T(`JSON.stringify(S.termine[0].erl)`) === JSON.stringify([plus(1)]) && T(`S.ereignisse.J1.filter(function(e){ return e.typ === 'termin' && e.text === 'J Termin'; }).length`) === 1 && !gErl(),
+        T(`JSON.stringify(S.termine[0].erl)`));
+      await zu();
+
+      /* ── B5: Giftigkeit in drei Wörtern ── */
+      const soll = {keine:'nicht giftig', leicht:'giftig', mittel:'giftig', schwer:'giftig', unklar:'nicht geprüft'};
+      Object.keys(soll).forEach(st => {
+        pruef('beta.37 (B5): Stufe „' + st + '“ heißt „' + soll[st] + '“ (Wort, Tabelle und Steckbrief)',
+          T(`giftWort('${st}')`) === soll[st] && T(`GIFT_STUFEN.${st}.wort`) === soll[st]
+          && T(`(function(){ var p = ${P('J2')}; p.gift = {tiere:{katze:'${st}', hund:'${st}', nager:'${st}', vogel:'${st}'}, grund:'', quelle:'nutzer', status:'fest', datum:'${heute}'};
+               return steckbriefDaten(p).daten['Giftigkeit Katze']; })()`) === soll[st],
+          T(`giftWort('${st}') + '|' + GIFT_STUFEN.${st}.wort + '|' + steckbriefDaten(${P('J2')}).daten['Giftigkeit Katze']`));
+      });
+      pruef('beta.37 (B5): Eine unbekannte Stufe ist nie „nicht giftig“', T(`giftWort('quatsch')`) === 'nicht geprüft' && T(`giftWort(undefined)`) === 'nicht geprüft' && T(`giftWort('')`) === 'nicht geprüft');
+      pruef('beta.37 (B5): Kein Wort der Tabelle außer „keine“ lautet „nicht giftig“',
+        T(`Object.keys(GIFT_STUFEN).filter(function(k){ return GIFT_STUFEN[k].wort === 'nicht giftig'; }).join()`) === 'keine');
+
+      /* ── B5: Steckbrief als ein Block ── */
+      const sb = JSON.parse(T(`JSON.stringify(steckbriefDaten(${P('J2')}).daten)`));
+      pruef('beta.37 (B5): Der Steckbrief nennt Düngebedarf, Winterruhe, Merkmale, Herkunft und Lebensumstände als Zeilen',
+        sb['Düngebedarf'] === 'hoch' && sb['Winterruhe'] === 'ja' && sb['Merkmale'] === 'J Merkmal rot' && sb['Herkunft'] === 'J Herkunft Anden' && sb['J Luft'] === 'feucht'
+        && sb['Art'] === 'Art J2' && sb['Licht'] === 'Hell', JSON.stringify(sb));
+      pruef('beta.37 (B5): Ohne Angabe heißt die Winterruhe „nein“; ein Text „keine“ zählt nicht als ja',
+        T(`steckbriefDaten(${P('J1')}).daten['Winterruhe']`) === 'nein' && T(`winterruheFakt({winterruhe:'keine'})`) === false && T(`winterruheFakt({winterruhe:'ja, kühl stellen'})`) === true);
+      pruef('beta.37 (B5): Düngebedarf hat vier Stufen ohne Langtext',
+        T(`['nie','sparsam','normal','viel'].map(function(k){ return DUENGER[k].text; }).join()`) === 'nein,wenig,mittel,hoch' && T(`Object.keys(DUENGER).every(function(k){ return !('lang' in DUENGER[k]); })`) === true
+        && /Dünger hoch/.test(T(`icoDuenger(${P('J2')})`)));
+      T(`(function(){ S.kartenTab = 'steckbrief'; karteOeffnen('J2'); return 1; })()`); await warte(200);
+      const pane = q('#karte-rumpf [data-kpane="steckbrief"]');
+      pruef('beta.37 (B5): In der Karte steht ein einziger Block; die Blöcke Merkmale, Herkunft und Giftigkeit sind weg',
+        !!pane && pane.querySelectorAll('.kblock').length === 1 && !!pane.querySelector('[data-kblock="steckbrief"]') && /J Merkmal rot/.test(pane.textContent) && /Giftigkeit Katze/.test(pane.textContent)
+        && !q('#karte-rumpf [data-kblock="gift"]') && !q('#karte-rumpf [data-kblock="merkmale"]') && !q('#karte-rumpf [data-kblock="herkunft"]') && T(`typeof kGiftHTML`) === 'undefined',
+        pane ? qa('#karte-rumpf [data-kpane="steckbrief"] .kblock').map(x => x.dataset.kblock).join() : 'kein Reiter');
+      await zu();
+
+      /* ── B5: Warnkasten mit eigenem Schalter ── */
+      const warnDa = () => T(`(function(){ var p = ${P('J3')}, wt = warnungenHTML(p); return [wt.length > 20, kartenDetailHTML(p).indexOf(wt) !== -1].join(); })()`);
+      pruef('beta.37 (B5): Entdecker zeigt den Warnkasten', T(`schalterAn('warn')`) === true && warnDa() === 'true,true', warnDa());
+      T(`modusSetzen('sammler'); 1`);
+      pruef('beta.37 (B5): Sammler blendet den Warnkasten aus', T(`schalterAn('warn')`) === false && warnDa() === 'true,false', warnDa());
+      T(`modusSetzen('entdecker'); 1`);
+
+      /* ── B5: Knopflisten im Bearbeiten-Formular ── */
+      const form = d.createElement('div');
+      form.innerHTML = T(`bearbeitenInnenHTML(${P('J2')})`);
+      d.body.appendChild(form);
+      try {
+        const sels = Array.from(form.querySelectorAll('select'));
+        pruef('beta.37 (B5): Das Bearbeiten-Formular zeigt keine Systemliste mehr; vier Felder sind Knopflisten',
+          sels.length === 4 && sels.every(x => x.hidden && !!x.closest('.bearb-feld')) && sels.map(x => x.dataset.e).join() === 'klasse,sonne,giftig,giessart'
+          && form.querySelectorAll('.bearb-feld [data-bk]').length >= 4 + 4 + 3, sels.map(x => x.dataset.e + ':' + x.hidden).join());
+        const kl = form.querySelector('select[data-e="klasse"]');
+        const kn = kl.closest('.bearb-feld').querySelector('[data-bk="S"]');
+        pruef('beta.37 (B5): Der Knopf des gespeicherten Werts ist gedrückt', kl.value === 'B' && kl.closest('.bearb-feld').querySelector('[aria-pressed="true"]').dataset.bk === 'B');
+        kn.click();
+        pruef('beta.37 (B5): Ein Tipp auf einen Knopf schreibt in das versteckte Feld',
+          kl.value === 'S' && kn.getAttribute('aria-pressed') === 'true' && kl.closest('.bearb-feld').querySelectorAll('[aria-pressed="true"]').length === 1, kl.value);
+        const gf = form.querySelector('select[data-e="giftig"]');
+        pruef('beta.37 (B5): „Für Katzen“ bietet nicht geprüft, nicht giftig, giftig',
+          Array.from(gf.closest('.bearb-feld').querySelectorAll('[data-bk]')).map(b => b.dataset.bk + ':' + b.textContent).join() === 'unbekannt:Nicht geprüft,nein:Nicht giftig,ja:Giftig');
+      } finally { form.remove(); }
+    } catch (e) {
+      pruef('beta.37: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); KALK = null; ZS_FRAGE = '';
+        history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.tagEin = a.tagEin; S.termine = a.termine || [];
+        S.lernen = a.lernen; S.feuchtRueck = a.feuchtRueck; S.raeume = a.raeume; S.gesehen = a.gesehen;
+        if(a.giess === undefined) delete S.giess; else S.giess = a.giess;
+        if(a.modus === undefined) delete S.modus; else S.modus = a.modus;
+        if(a.schalter === undefined) delete S.schalter; else S.schalter = a.schalter;
+        if(a.tiere === undefined) delete S.tiere; else S.tiere = a.tiere;
+        if(a.histAnsicht === undefined) delete S.histAnsicht; else S.histAnsicht = a.histAnsicht;
+        if(a.kartenTab === undefined) delete S.kartenTab; else S.kartenTab = a.kartenTab;
+        S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.terminVorlagen = a.terminVorlagen || []; S.terminVorlagenAus = a.terminVorlagenAus || [];
+        if(typeof schalterAnwenden === 'function') schalterAnwenden();
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt37)})`);
     }
   }
 

@@ -4212,6 +4212,22 @@ html[data-design] .tf-vorlage-zeile .fhint{margin:0}
 html[data-design] .gm-terminfrage .gm-termin + .gm-termin{margin-top:10px}
 html[data-design] .gm-termin .gm-ue-pfl-t{flex:1 1 auto;min-width:0}
 html[data-design] .gm-termin button[aria-pressed="true"]{font-weight:600}
+/* ── 4.0-beta.37 (Korrekturen P2, B5) ── */
+html[data-design] .tf-vorlagen{grid-auto-rows:1fr}
+html[data-design] .tf-vorlagen .as-knopf{height:100%}
+html[data-design] .tf-vorlage-oben{margin:8px 0 12px}
+html[data-design] .tf-tagwahl .as-knoepfe{grid-auto-rows:1fr}
+html[data-design] .zs{max-height:calc(5 * 42px + 34px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+html[data-design] .zs .zs-zeile{min-height:42px;box-sizing:border-box;align-items:center;padding:3px 0}
+html[data-design] .zs .zs-t, html[data-design] .gpl .zs-t{flex:1 1 auto;min-width:0}
+html[data-design] .zs button.zs-weg{flex:0 0 auto;min-width:40px;min-height:36px;margin:0;padding:0 6px;border:0;border-radius:var(--r-klein);
+  background:none;color:var(--schrift-2);font:inherit;font-size:1.3rem;line-height:1;cursor:pointer}
+html[data-design] .zs button.zs-weg.frage{font-size:var(--t-s);font-weight:600;color:var(--terra);padding:0 10px}
+html[data-design] .gpl .zs-zeile{align-items:center}
+html[data-design] .gpl button.gpl-erl{flex:0 0 auto;min-height:36px;margin:0;padding:0 12px;border:1.5px solid var(--linie);border-radius:var(--r-klein);
+  background:none;color:var(--schrift);font:inherit;font-size:var(--t-s);font-weight:600;cursor:pointer}
+html[data-design] .bearb-feld select[hidden]{display:none}
+html[data-design] .bearb-feld .fhint{display:block;margin-top:6px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -4771,11 +4787,11 @@ const GIFT_ARTEN = {
 
 /* Stufen und wie ernst sie zu nehmen sind. */
 const GIFT_STUFEN = {
-  keine:  {rang:0, wort:'unbedenklich',   ton:'ok'},
-  leicht: {rang:1, wort:'leicht giftig',  ton:'mild'},
+  keine:  {rang:0, wort:'nicht giftig',   ton:'ok'},
+  leicht: {rang:1, wort:'giftig',         ton:'mild'},
   mittel: {rang:2, wort:'giftig',         ton:'warn'},
-  schwer: {rang:3, wort:'stark giftig',   ton:'schwer'},
-  unklar: {rang:1, wort:'ungeprüft',      ton:'unklar'}
+  schwer: {rang:3, wort:'giftig',         ton:'schwer'},
+  unklar: {rang:1, wort:'nicht geprüft',  ton:'unklar'}
 };
 
 /* ══════════════════ Giftbewertung ══════════════════
@@ -9202,6 +9218,25 @@ function aenderungSetzen(id, felder, herkunft, erzwungen){
   sichern();
 }
 
+/* 4.0-beta.37 (B5): Knopfliste statt Systemliste. Das Auswahlfeld bleibt
+   versteckt im Formular und ist die Wahrheit; Speichern liest es wie
+   bisher über data-e. `wahl` sind [Wert, Kopf, Zusatz]. */
+function bearbKnopfFeld(p, feld, titel, wahl, jetzt, attr, unten){
+  return `<div class="bearb-feld fspan"${attr ? ' ' + attr : ''}><span class="lab">${esc(titel)}</span>
+      <select data-e="${feld}" data-p="${p.id}" hidden aria-hidden="true" tabindex="-1">${
+        wahl.map(w=>`<option value="${esc(w[0])}"${jetzt===w[0]?' selected':''}>${esc(w[1])}</option>`).join('')}</select>
+      <div class="al-knoepfe bearb-knoepfe" role="group" aria-label="${esc(titel)}">${
+        wahl.map(w=>`<button type="button" class="al-knopf" data-bk="${esc(w[0])}" aria-pressed="${jetzt===w[0]?'true':'false'}"><b>${esc(w[1])}</b>${w[2]?`<i>${esc(w[2])}</i>`:''}</button>`).join('')}</div>
+      ${unten || ''}</div>`;
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-bk]'); if(!b) return;
+  const feld = b.closest('.bearb-feld'), sel = feld ? feld.querySelector('select[data-e]') : null;
+  if(!sel) return;
+  sel.value = b.dataset.bk;
+  feld.querySelectorAll('[data-bk]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  sel.dispatchEvent(new Event('change', {bubbles:true}));
+});
 function bearbeitenInnenHTML(p){
   const gEig = giftVon(p);
   const gift = (gEig.quelle === 'nutzer' && gEig.status === 'fest')
@@ -9214,17 +9249,11 @@ function bearbeitenInnenHTML(p){
       <label><span class="lab">Sorte</span><input data-e="sorte" data-p="${p.id}" value="${esc(p.sorte||'')}" placeholder="z. B. Thai Constellation">
         ${p.sortenmerkmale?`<span class="fhint">Die KI hat gesehen: ${esc(p.sortenmerkmale)}</span>`:''}</label>
       <label><span class="lab">Typ</span><input data-e="typ" data-p="${p.id}" value="${esc(p.typ||'')}"></label>
-      <label><span class="lab">Gießklasse</span><select data-e="klasse" data-p="${p.id}">
-        ${Object.keys(KLASSEN).map(k=>`<option value="${k}"${p.klasse===k?' selected':''}>${k} — ${esc(KLASSEN[k].name)}</option>`).join('')}</select></label>
-      <label><span class="lab">Licht</span><select data-e="sonne" data-p="${p.id}">
-        ${Object.keys(SONNE).map(k=>`<option value="${k}"${p.sonne===k?' selected':''}>${esc(SONNE[k].text)}</option>`).join('')}</select></label>
-      <label><span class="lab">Für Katzen</span><select data-e="giftig" data-p="${p.id}">
-        <option value="unbekannt"${gift==='unbekannt'?' selected':''}>ungeprüft</option>
-        <option value="nein"${gift==='nein'?' selected':''}>unbedenklich</option>
-        <option value="ja"${gift==='ja'?' selected':''}>giftig</option></select></label>
-      <label data-schalter="giessart"><span class="lab">Gießart</span><select data-e="giessart" data-p="${p.id}">
-        ${Object.keys(GIESSARTEN).map(k=>`<option value="${k}"${giessartVon(p)===k?' selected':''}>${esc(GIESSARTEN[k].name)}</option>`).join('')}</select>
-        <span class="fhint">${esc(giessartText(p))}</span></label>
+      ${bearbKnopfFeld(p, 'klasse', 'Gießklasse', Object.keys(KLASSEN).map(k=>[k, k, KLASSEN[k].name]), p.klasse)}
+      ${bearbKnopfFeld(p, 'sonne', 'Licht', Object.keys(SONNE).map(k=>[k, SONNE[k].text, '']), p.sonne)}
+      ${bearbKnopfFeld(p, 'giftig', 'Für Katzen', [['unbekannt', 'Nicht geprüft', ''], ['nein', 'Nicht giftig', ''], ['ja', 'Giftig', '']], gift)}
+      ${bearbKnopfFeld(p, 'giessart', 'Gießart', Object.keys(GIESSARTEN).map(k=>[k, GIESSARTEN[k].name, '']), giessartVon(p),
+        'data-schalter="giessart"', `<span class="fhint">${esc(giessartText(p))}</span>`)}
       <label class="fspan"><span class="lab">Wichtig zu wissen</span>
         <textarea data-e="wichtig" data-p="${p.id}" rows="2" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie">${esc(p.wichtig||'')}</textarea>
         <span class="fhint">Pflegehinweise, die über Leben und Tod entscheiden und die man nicht von selbst weiß. Erscheinen auf der Karte und werden auf den Urlaubszettel übernommen.</span></label>
@@ -10423,6 +10452,8 @@ function pflanzeEntfernen(id){
         <input type="checkbox" role="switch" id="sch-giessart"> <span class="lab" style="display:inline">Gießart von Hand festlegen</span></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-symbole"> <span class="lab" style="display:inline">Symbolzeile in der Karte</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="sch-warn"> <span class="lab" style="display:inline">Warnkasten in der Karte</span></label>
       <!-- 4.0-beta.21 (Plan M2a/M2b): Schalter für den Gießmodus -->
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-gliste"> <span class="lab" style="display:inline">Gießen als Liste</span></label>
@@ -11056,9 +11087,9 @@ function pflanzeEntfernen(id){
           <div class="al-feld">
             <span class="lab">Für Katzen</span>
             <select id="f-giftig" hidden>
-              <option value="unbekannt">Noch nicht geprüft</option>
+              <option value="unbekannt">Nicht geprüft</option>
               <option value="ja">Giftig</option>
-              <option value="nein">Unbedenklich</option>
+              <option value="nein">Nicht giftig</option>
             </select>
             <div class="al-knoepfe" id="f-giftig-knoepfe"></div>
           </div>
@@ -11350,7 +11381,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.36';
+const FASSUNG = '4.0-beta.37';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -11605,7 +11636,7 @@ const LEERSTAND = () => ({
   /* 4.0-beta.34: Termine des Kalenders und die gewählte Ansicht */
   termine:[], kalAnsicht:null,
   /* 4.0-beta.36 (P2): eigene Terminvorlagen */
-  terminVorlagen:[],
+  terminVorlagen:[], terminVorlagenAus:[],
   /* Sicherung vor der Bereinigung (3.31.0): für welche Fassung die
      Bereinigung erledigt ist, und die höchste je vergebene Nummer. */
   bereinigtFassung:null, idHoch:null
@@ -12286,10 +12317,10 @@ const SONNE = {
   schatten:{ico:SVG.schatten, text:'Schatten', lang:'Kommt mit wenig Licht aus: Nordfenster, Raumtiefe, Ecke ohne Sonne. Direkte Sonne verbrennt die Blätter.'}
 };
 const DUENGER = {
-  nie:{n:0, text:'Nie düngen', lang:'Düngen schadet oder tötet. Gilt für Karnivoren.'},
-  sparsam:{n:1, text:'Sparsam', lang:'Ein- bis zweimal pro Saison, halbe Dosis.'},
-  normal:{n:2, text:'Normal', lang:'Alle 2–4 Wochen in der Wachstumszeit, halbe Dosis.'},
-  viel:{n:3, text:'Starkzehrer', lang:'Wöchentlich in der Wachstumszeit.'}
+  nie:{n:0, text:'nein'},
+  sparsam:{n:1, text:'wenig'},
+  normal:{n:2, text:'mittel'},
+  viel:{n:3, text:'hoch'}
 };
 function icoSonne(p){ const s = SONNE[p.sonne]||SONNE.hell; return `<span class="ico" title="${esc(s.lang)}">${s.ico}${esc(s.text)}</span>`; }
 function icoWasser(p){
@@ -12300,10 +12331,10 @@ function icoWasser(p){
 function icoKatze(p){
   /* Dieselbe Auskunft wie Filter, Warnkasten und Urlaubszettel. */
   const g = istGiftig(p, 'katze');
-  if(g === null) return `<span class="ico" title="Noch nicht geprüft">${SVG.katzeGift}ungeprüft</span>`;
+  if(g === null) return `<span class="ico" title="Für Katzen nicht geprüft">${SVG.katzeGift}nicht geprüft</span>`;
   return g
     ? `<span class="ico warn" title="Giftig für Katzen">${SVG.katzeGift}giftig</span>`
-    : `<span class="ico good" title="Für Katzen unbedenklich">${SVG.katzeOk}sicher</span>`;
+    : `<span class="ico good" title="Für Katzen nicht giftig">${SVG.katzeOk}nicht giftig</span>`;
 }
 function icoFrost(p){
   if(p.frostMin==null) return '';
@@ -12313,7 +12344,7 @@ function icoFrost(p){
 }
 function icoDuenger(p){
   const d = DUENGER[p.duenger]; if(!d) return '';
-  return `<span class="ico${d.n===0?' warn':''}" title="${esc(d.lang)}">${SVG.duenger}${esc(d.text)}</span>`;
+  return `<span class="ico${d.n===0?' warn':''}" title="Düngebedarf: ${esc(d.text)}">${SVG.duenger}Dünger ${esc(d.text)}</span>`;
 }
 function iconRow(p){ return `<span class="icons">${icoSonne(p)}${icoWasser(p)}${icoKatze(p)}${icoFrost(p)}${icoDuenger(p)}</span>`; }
 
@@ -12341,7 +12372,7 @@ function iconRow(p){ return `<span class="icons">${icoSonne(p)}${icoWasser(p)}${
      <div class="legend-grp"><h5>Temperatur & Nährstoffe</h5>
       ${reihe(SVG.frost,'min 10°','Nicht frosthart, ab dieser Temperatur ins Haus.')}
       ${reihe(SVG.frost,'Kältephase','Braucht im Winter aktiv Kälte, sonst geht sie ein.')}
-      ${reihe(SVG.duenger,'Düngerstufe','Von "nie" über "sparsam" und "normal" bis "Starkzehrer".')}
+      ${reihe(SVG.duenger,'Düngebedarf','Vier Stufen: nein, wenig, mittel, hoch.')}
      </div>`;
   const l = $('#legend'), h = $('#legend-head');
   h.onclick = ()=>{ const zu = l.classList.toggle('closed'); h.setAttribute('aria-expanded', String(!zu)); };
@@ -12789,13 +12820,13 @@ function zsDatumIso(text){
 function zeitstrahlEintraege(p){
   const raus = [];
   (typeof giessTermine === 'function' ? giessTermine(p.id) : []).forEach(d=>{
-    if(d) raus.push({datum:d, ton:'wasser', name:'Gegossen', text:''});
+    if(d) raus.push({datum:d, ton:'wasser', name:'Gegossen', text:'', weg:'w|' + d});
   });
   (typeof ereignisse === 'function' ? ereignisse(p.id) : []).forEach(e=>{
     if(!e || !e.datum || e.typ === 'foto') return;
     if(typeof terminEintragDoppelt === 'function' && terminEintragDoppelt(e, p.id)) return;
     const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ, ton:'info'};
-    raus.push({datum:e.datum, ton:a.ton || 'info', name:a.name, text:e.text || ''});
+    raus.push({datum:e.datum, ton:a.ton || 'info', name:a.name, text:e.text || '', weg:(e.id && !e.termin) ? 'e|' + e.id : ''});
   });
   (typeof fotosVon === 'function' ? fotosVon(p.id) : []).forEach(f=>{
     if(!f || !f.datum) return;
@@ -12812,6 +12843,30 @@ function zeitstrahlEintraege(p){
   if(typeof kalZeitstrahlFuer === 'function') kalZeitstrahlFuer(p).forEach(x => raus.push(x));
   return raus.sort((a,b)=>b.datum.localeCompare(a.datum));
 }
+/* 4.0-beta.37 (F352): Ein Gießgang oder ein eigener Eintrag lässt sich
+   im Zeitstrahl einzeln löschen: erster Tipp fragt, zweiter löscht.
+   Einträge aus einem abgehakten Termin nimmt nur der Haken zurück. */
+var ZS_FRAGE = '';
+function verlaufEintragWeg(pid, marke){
+  const m = String(marke || ''), i = m.indexOf('|');
+  if(i < 1) return false;
+  const art = m.slice(0, i), wert = m.slice(i + 1);
+  if(art === 'w'){
+    const liste = giessTermine(pid).slice(), k = liste.indexOf(wert);
+    if(k === -1) return false;
+    liste.splice(k, 1);
+    if(!S.water) S.water = {};
+    S.water[pid] = liste;
+  } else if(art === 'e'){
+    const liste = (S.ereignisse || {})[pid];
+    if(!Array.isArray(liste)) return false;
+    const k = liste.findIndex(e => e && e.id === wert && !e.termin);
+    if(k === -1) return false;
+    liste.splice(k, 1);
+  } else return false;
+  sichern();
+  return true;
+}
 function zeitstrahlHTML(p){
   const alle = zeitstrahlEintraege(p);
   if(!alle.length) return '<p class="kb-leer">Noch nichts eingetragen — hier sammelt sich, was mit der Pflanze passiert ist.</p>';
@@ -12820,7 +12875,10 @@ function zeitstrahlHTML(p){
   const zeile = e => `<li class="zs-zeile"><span class="zs-punkt" data-ton="${e.ton}" aria-hidden="true"></span>
     <span class="zs-d">${esc(tag(e.datum))}</span>
     <span class="zs-t">${esc(e.name)}${e.text ? ' · ' + esc(e.text) : ''}${
-      e.foto ? ` <button type="button" class="kid-link" data-do="foto-band" data-p="${p.id}">ansehen</button>` : ''}</span></li>`;
+      e.foto ? ` <button type="button" class="kid-link" data-do="foto-band" data-p="${p.id}">ansehen</button>` : ''}</span>${
+      e.weg ? (ZS_FRAGE === p.id + '|' + e.weg
+        ? `<button type="button" class="zs-weg frage" data-do="zs-weg" data-p="${esc(p.id)}" data-v="${esc(e.weg)}">Löschen?</button>`
+        : `<button type="button" class="zs-weg" data-do="zs-weg" data-p="${esc(p.id)}" data-v="${esc(e.weg)}" aria-label="${esc(e.name + ' vom ' + tag(e.datum) + ' löschen')}">×</button>`) : ''}</li>`;
   const bloecke = liste => {
     let raus = '', letzter = '';
     liste.forEach(e=>{
@@ -12834,9 +12892,8 @@ function zeitstrahlHTML(p){
     });
     return raus + (letzter ? '</ul>' : '');
   };
-  const oben = alle.slice(0, 25), rest = alle.slice(25);
-  return `<div class="zs">${bloecke(oben)}${rest.length
-    ? `<details class="zs-mehr"><summary>${rest.length} ältere anzeigen</summary>${bloecke(rest)}</details>` : ''}</div>`;
+  /* 4.0-beta.37: Der Zeitstrahl ist fünf Zeilen hoch und scrollt in sich. */
+  return `<div class="zs" tabindex="0" role="group" aria-label="Zeitstrahl">${bloecke(alle)}</div>`;
 }
 
 /* ══════════════════ Fotos ══════════════════ */
@@ -14185,6 +14242,18 @@ function herkunftZeileHTML(p){
     + (hand.length ? '<span><b>Von dir</b> ' + esc(hand.join(', ')) + '</span>' : '')
     + '</p>';
 }
+/* Drei Wörter für die Giftigkeit: giftig, nicht giftig, nicht geprüft.
+   Eine unbekannte Stufe ist nie eine Entwarnung. */
+function giftWort(stufe){
+  if(stufe === 'keine') return 'nicht giftig';
+  if(stufe === 'leicht' || stufe === 'mittel' || stufe === 'schwer') return 'giftig';
+  return 'nicht geprüft';
+}
+function winterruheFakt(p){
+  const w = p ? p.winterruhe : null;
+  if(typeof w === 'string') return !!w.trim() && !/^(nein|keine?|false|0|-)/i.test(w.trim());
+  return !!w;
+}
 function steckbriefDaten(p){
   const stamm = (p.stamm && typeof p.stamm === 'object') ? Object.assign({}, p.stamm) : {};
   const b = (typeof bibVon === 'function') ? bibVon(p) : null;
@@ -14221,7 +14290,24 @@ function steckbriefDaten(p){
   /* Die Gießklasse hat jede Pflanze. Sie allein macht noch keinen
      Steckbrief; sonst käme „Angaben ergänzen“ nie mehr. */
   const sonstWas = Object.keys(kopf).length || Object.keys(stamm).length || Object.keys(dazu).length;
-  if(sonstWas && p.klasse && KLASSEN[p.klasse] && !hat(/gie(ß|ss)/i)) dazu['Gießklasse'] = p.klasse + ' · ' + KLASSEN[p.klasse].name;
+  /* 4.0-beta.37 (B5): Der Steckbrief ist ein Block aus Fakten: dazu
+     Düngebedarf, Winterruhe, Giftigkeit je eigenem Tier, Merkmale,
+     Herkunft und Lebensumstände als Zeilen. */
+  const fakten = {};
+  if(wert(p.merkmale)) fakten['Merkmale'] = wert(p.merkmale);
+  if(wert(p.herkunft)) fakten['Herkunft'] = wert(p.herkunft);
+  if(p.bedingungen && typeof p.bedingungen === 'object')
+    Object.keys(p.bedingungen).forEach(k => { if(wert(k) && wert(p.bedingungen[k])) fakten[k] = wert(p.bedingungen[k]); });
+  const da = sonstWas || Object.keys(fakten).length;
+  if(da && p.klasse && KLASSEN[p.klasse] && !hat(/gie(ß|ss)/i)) dazu['Gießklasse'] = p.klasse + ' · ' + KLASSEN[p.klasse].name;
+  if(da){
+    if(DUENGER[p.duenger] && !hat(/d(ü|ue)ng/i)) dazu['Düngebedarf'] = DUENGER[p.duenger].text;
+    if(!hat(/winterruhe/i)) dazu['Winterruhe'] = winterruheFakt(p) ? 'ja' : 'nein';
+    (typeof meineTiere === 'function' ? meineTiere() : []).forEach(t => {
+      dazu['Giftigkeit ' + (TIERARTEN[t] ? TIERARTEN[t].name : t)] = giftWort(giftFuer(p, t).stufe);
+    });
+  }
+  Object.keys(fakten).forEach(k => { if(!(k in kopf) && !(k in stamm) && !(k in dazu)) dazu[k] = fakten[k]; });
   return {daten: Object.assign(kopf, stamm, dazu), ausBib:false, vorschlag:vorschlag};
 }
 
@@ -14407,6 +14493,7 @@ document.addEventListener('click', e=>{
   if(art === 'hist-um'){
     e.stopPropagation();
     S.histAnsicht = b.dataset.v === 'strahl' ? 'strahl' : 'kalender';
+    ZS_FRAGE = '';
     sichern(); render();
     return;
   }
@@ -14419,6 +14506,30 @@ document.addEventListener('click', e=>{
     if(!p || typeof kalkSchritt !== 'function') return;
     kalkSchritt(p, art === 'kalk-tag' ? 'tag' : b.dataset.v, b.dataset.v);
     box.outerHTML = kalKarteHTML(p);
+    return;
+  }
+  if(art === 'zs-weg'){
+    e.stopPropagation();
+    const box = b.closest('.zs'), pid = b.dataset.p, marke = b.dataset.v;
+    const p = allePflanzen().find(x => x.id === pid);
+    if(!box || !p) return;
+    const oben = box.scrollTop, halter = box.parentNode;
+    if(ZS_FRAGE !== pid + '|' + marke){
+      ZS_FRAGE = pid + '|' + marke;
+      box.outerHTML = zeitstrahlHTML(p);
+    } else {
+      ZS_FRAGE = '';
+      verlaufEintragWeg(pid, marke);
+      render();
+    }
+    const neu = (halter && halter.isConnected ? halter.querySelector('.zs') : null) || document.querySelector('#karte-rumpf .zs');
+    if(neu) neu.scrollTop = oben;
+    return;
+  }
+  if(art === 'termin-erl'){
+    e.stopPropagation();
+    const teile = String(b.dataset.v || '').split('|');
+    if(typeof terminErledigtUm === 'function' && teile.length === 2){ terminErledigtUm(teile[0], teile[1]); render(); }
     return;
   }
   if(art === 'termin-neu'){
@@ -15004,26 +15115,6 @@ function heftKiTun(tun){
   return false;
 }
 
-/* Giftigkeit für jedes eingetragene Tier. Ohne Tiere kein Abschnitt —
-   dann interessiert die Frage nicht (Chris, 11.09.). */
-function kGiftHTML(p){
-  const tiere = (typeof meineTiere === 'function') ? meineTiere() : [];
-  if(!tiere.length) return '';
-  const gruende = [];
-  const zeilen = tiere.map(t=>{
-    const g = giftFuer(p, t);
-    const st = GIFT_STUFEN[g.stufe] || GIFT_STUFEN.unklar;
-    const ton = g.stufe === 'keine' ? 'sicher' : g.stufe === 'unklar' ? 'unklar' : 'gift';
-    const grund = (t === 'katze' && p.katzentext && g.quelle !== 'nutzer') ? p.katzentext : g.grund;
-    if(grund && gruende.indexOf(grund) === -1) gruende.push(grund);
-    const name = TIERARTEN[t] ? TIERARTEN[t].name : t;
-    return `<div class="gift-zeile" data-tier="${esc(t)}"><b>${esc(name)}</b><span class="kb-marke ${ton}">${esc(st.wort)}</span></div>`;
-  }).join('');
-  const warum = gruende.length
-    ? `<details class="kb-auf"><summary>Warum</summary>${gruende.map(x=>`<p>${esc(x)}</p>`).join('')}</details>` : '';
-  return kblock('gift', 'Giftigkeit', `<div class="kb-stapel">${zeilen}</div>${warum}`);
-}
-
 /* Der Inhalt einer aufgeklappten Karte. Steht in einer eigenen
    Funktion, weil er erst gebaut wird, wenn jemand die Karte öffnet —
    zugeklappt lag er vorher in jeder einzelnen Karte im Markup und
@@ -15042,19 +15133,15 @@ function kartenDetailHTML(p){
   /* 4.0-beta.31 (B4a): Pflegeschritte, Winterruhe-Text, „Wenn etwas
      nicht stimmt“, Beobachtungen und „Was das für die Haltung heißt“
      sind entfernt; das Pflegeheft (heftHTML) ersetzt sie. */
-  const lebens = dl(p.bedingungen);
   const sb = steckbriefDaten(p);
   const steckbrief = dl(sb.daten)
     + (sb.vorschlag && sb.vorschlag.length ? '<div class="kb-bibvorschlag"><p class="kb-quelle">Vorschlag aus der Artenbibliothek</p>'
         + sb.vorschlag.map(v => '<div class="kb-bibzeile"><span><b>' + esc(v.lab) + '</b> ' + esc(v.text) + '</span>'
           + '<button type="button" class="linkbtn" data-do="bib-nimm" data-p="' + esc(p.id) + '" data-f="' + v.feld + '">Übernehmen</button></div>').join('')
         + '</div>' : '')
-    + herkunftZeileHTML(p)
-    + (lebens ? `<h4>Lebensumstände</h4>${lebens}` : '');
-  const herkunft = p.herkunft ? `<p>${esc(p.herkunft)}</p>` : '';
+    + herkunftZeileHTML(p);
   const nBef = notizTrennen(p.notiz).befunde.length;
-  const gift = kGiftHTML(p);
-  const wissenLeer = ![steckbrief, p.merkmale || '', herkunft, gift].some(x=>x && String(x).trim());
+  const wissenLeer = !String(steckbrief || '').trim();
   /* 4.0-beta.30 (B2): Reiter Verlauf, Platz, Pflegeheft, Steckbrief (F309).
      Jeder Reiter steht immer da; ohne Inhalt sagt er das. Der Steckbrief
      zeigt bis B5 den vorhandenen Steckbrief. 4.0-beta.31 (B4a): Das
@@ -15070,7 +15157,7 @@ function kartenDetailHTML(p){
       ${kartenKopfHTML(p)}
       ${hinweis}
       ${typeof anzuchtMutterHTML === 'function' ? anzuchtMutterHTML(p) : ''}
-      ${warnungenHTML(p)}
+      ${schalterAn('warn') ? warnungenHTML(p) : ''}
       ${tagKarteHTML(p)}
       ${notizKarteHTML(p)}
       ${kartenReiter(p.id, [
@@ -15084,10 +15171,7 @@ function kartenDetailHTML(p){
         {key:'steckbrief', titel:'Steckbrief', inhalt:
           (wissenLeer ? `<div class="kblock" data-kblock="wissen-leer"><p class="kb-leer">Zu dieser Art ist noch nichts hinterlegt.</p>
             <div class="kb-aktionen"><button type="button" class="kb-zweit" data-do="bearb-auf" data-p="${p.id}">Angaben ergänzen</button></div></div>` : '')
-          + kblock('steckbrief', 'Steckbrief', steckbrief)
-          + kblock('merkmale', 'Merkmale', p.merkmale ? `<p>${esc(p.merkmale)}</p>` : '')
-          + kblock('herkunft', 'Herkunft', herkunft)
-          + gift}
+          + kblock('steckbrief', 'Steckbrief', steckbrief)}
       ])}
     </div>`;
 }
@@ -17675,7 +17759,7 @@ modalAnmelden('kal-modal', {groesse:'voll', schleier:false,
 /* 4.0-beta.35: Steht die Pflanzenauswahl offen, führt Zurück erst zum Termin. */
 modalAnmelden('termin-modal', {el:'termin-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
   darfZu: ()=>{
-    if(TF && TF.waehlen){ tfAuswahlZu(); return false; }
+    if(TF && (TF.waehlen || TF.tagwahl)){ tfAuswahlZu(); return false; }
     return true;
   },
   nachZu: ()=>{ TF = null; }});
@@ -17791,10 +17875,9 @@ function terminErledigtUm(tid, d){
    Pflanzen bleiben, wie sie sind. Feste Vorlagen stehen im Code, eigene
    in S.terminVorlagen. */
 const TERMIN_VORLAGEN = [
-  {id:'v-neem',      titel:'Neemöl spritzen',       n:7,  k:3},
+  {id:'v-neem',      titel:'Neemöl sprühen',        n:7,  k:3},
   {id:'v-kontrolle', titel:'Auf Schädlinge prüfen', n:7,  k:4},
   {id:'v-duenger',   titel:'Düngen',                n:14, k:6, vorgabe:'duenger'},
-  {id:'v-abduschen', titel:'Abduschen',             n:30, k:3},
   {id:'v-umtopfen',  titel:'Umtopfen',              n:1,  k:1}
 ];
 const TERMIN_VORLAGEN_MAX = 12;
@@ -17802,39 +17885,76 @@ function terminSerieText(n, k){
   if(!(k > 1)) return 'einmalig';
   return k + '× ' + (n === 1 ? 'täglich' : 'alle ' + n + ' Tage');
 }
+/* 4.0-beta.37: Jede Vorlage lässt sich ändern und löschen, auch eine
+   feste. Eine geänderte feste Vorlage steht mit ihrer Kennung in
+   S.terminVorlagen, eine gelöschte in S.terminVorlagenAus. */
+function terminVorlageFest(id){ return TERMIN_VORLAGEN.some(v => v.id === id); }
 function terminVorlagenEigen(){
   return (Array.isArray(S.terminVorlagen) ? S.terminVorlagen : []).filter(v => v && v.id && v.titel);
 }
+function terminVorlagenAus(){
+  return (Array.isArray(S.terminVorlagenAus) ? S.terminVorlagenAus : []).filter(id => terminVorlageFest(id));
+}
 function terminVorlagen(){
-  return TERMIN_VORLAGEN.map(v => {
+  const eigen = terminVorlagenEigen(), aus = terminVorlagenAus();
+  return TERMIN_VORLAGEN.filter(v => aus.indexOf(v.id) === -1).map(v => {
+    const e = eigen.find(x => x.id === v.id);
+    if(e) return e;
     const tg = v.vorgabe ? tagListe().find(t => t.vorgabe === v.vorgabe) : null;
     return {id:v.id, titel:v.titel, n:v.n, k:v.k, tag:tg ? tg.id : '', notiz:'', fest:true};
-  }).concat(terminVorlagenEigen());
+  }).concat(eigen.filter(e => !terminVorlageFest(e.id)));
 }
-function terminVorlageMerken(d){
+function terminVorlageAus(d){
   const tg = d.tag && tagDef(d.tag) ? d.tag : '';
   const name = String(d.titel || '').trim().slice(0, TERMIN_TITEL_MAX) || (tg ? tagDef(tg).name : '');
   if(!name) return {fehler:'Gib der Vorlage erst einen Titel oder wähle einen Tag.'};
   const k = d.wdh ? Math.max(2, Math.min(TERMIN_ANZAHL_MAX, Math.round(Number(d.k) || 2))) : 1;
   const n = k > 1 ? Math.max(1, Math.min(TERMIN_ABSTAND_MAX, Math.round(Number(d.n) || 1))) : 1;
+  return {v:{id:'', titel:name, tag:tg, n:n, k:k, notiz:String(d.notiz || '').trim().slice(0, TERMIN_NOTIZ_MAX)}};
+}
+function terminVorlageAblegen(v){
   if(!Array.isArray(S.terminVorlagen)) S.terminVorlagen = [];
-  const v = {id:'', titel:name, tag:tg, n:n, k:k, notiz:String(d.notiz || '').trim().slice(0, TERMIN_NOTIZ_MAX)};
-  const alt = S.terminVorlagen.find(x => x && String(x.titel || '').toLowerCase() === name.toLowerCase());
-  if(alt){ v.id = alt.id; S.terminVorlagen[S.terminVorlagen.indexOf(alt)] = v; }
+  const i = S.terminVorlagen.findIndex(x => x && x.id === v.id);
+  if(i === -1) S.terminVorlagen.push(v); else S.terminVorlagen[i] = v;
+  sichern();
+}
+function terminVorlageMerken(d){
+  const r = terminVorlageAus(d);
+  if(r.fehler) return r;
+  const v = r.v;
+  const alt = terminVorlagen().find(x => String(x.titel || '').toLowerCase() === v.titel.toLowerCase());
+  if(alt) v.id = alt.id;
   else {
-    if(terminVorlagenEigen().length >= TERMIN_VORLAGEN_MAX)
+    if(terminVorlagenEigen().filter(x => !terminVorlageFest(x.id)).length >= TERMIN_VORLAGEN_MAX)
       return {fehler:'Mehr als ' + TERMIN_VORLAGEN_MAX + ' eigene Vorlagen gehen nicht. Lösche erst eine.'};
     v.id = 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-    S.terminVorlagen.push(v);
   }
-  sichern();
+  terminVorlageAblegen(v);
   return {v:v, ersetzt:!!alt};
 }
+/* Schreibt die Angaben des Terminblatts in die Vorlage mit dieser Kennung. */
+function terminVorlageAendern(id, d){
+  if(!terminVorlagen().some(x => x.id === id)) return {fehler:'Diese Vorlage gibt es nicht mehr.'};
+  const r = terminVorlageAus(d);
+  if(r.fehler) return r;
+  if(terminVorlagen().some(x => x.id !== id && String(x.titel || '').toLowerCase() === r.v.titel.toLowerCase()))
+    return {fehler:'Diesen Titel trägt schon eine andere Vorlage.'};
+  r.v.id = id;
+  terminVorlageAblegen(r.v);
+  return {v:r.v};
+}
 function terminVorlageLoeschen(id){
-  const vor = terminVorlagenEigen().length;
+  if(!terminVorlagen().some(x => x.id === id)) return false;
   S.terminVorlagen = terminVorlagenEigen().filter(v => v.id !== id);
-  if(S.terminVorlagen.length !== vor) sichern();
-  return S.terminVorlagen.length !== vor;
+  if(terminVorlageFest(id)) S.terminVorlagenAus = terminVorlagenAus().concat([id]);
+  sichern();
+  return true;
+}
+function terminVorlagenZurueck(){
+  if(!terminVorlagenAus().length) return false;
+  S.terminVorlagenAus = [];
+  sichern();
+  return true;
 }
 function terminLoeschen(tid){
   const vor = (S.termine || []).length;
@@ -18071,7 +18191,7 @@ function terminFensterAuf(tid, datum, ausloeser, pflanzen, vor){
        wdh:t.k > 1, n:t.k > 1 ? t.n : 7, k:t.k > 1 ? t.k : 3, notiz:t.notiz || '', waehlen:false, suche:'', fehler:'', frage:false}
     : {id:null, titel:'', tag:'', pflanzen:(Array.isArray(pflanzen) ? pflanzen : []).filter(Boolean), datum:datum || iso(HEUTE),
        wdh:false, n:7, k:3, notiz:'', waehlen:false, suche:'', fehler:'', frage:false};
-  TF.vorlage = ''; TF.vmeld = '';
+  TF.vorlage = ''; TF.vmeld = ''; TF.vmeldOben = ''; TF.tagwahl = false;
   /* 4.0-beta.36 (P2): Doktor, Umtopfen und Anzucht füllen einen neuen
      Termin vor; gespeichert wird erst mit „Speichern“. */
   if(!t && vor && typeof vor === 'object'){
@@ -18118,16 +18238,18 @@ function tfGitterZeichnen(){
 /* Aus der Auswahl zurück zum Termin; die Zeile „Pflanzen“ bleibt im Blick. */
 function tfAuswahlZu(){
   if(!TF) return;
-  TF.waehlen = false; TF.suche = '';
+  const tagSeite = !!TF.tagwahl;
+  TF.waehlen = false; TF.tagwahl = false; TF.suche = '';
   terminFensterZeichnen();
-  const z = document.querySelector('#termin-inhalt .tf-pfl-zeile');
+  const z = document.querySelector('#termin-inhalt ' + (tagSeite ? '.tf-tag-zeile' : '.tf-pfl-zeile'));
   if(z && typeof z.scrollIntoView === 'function'){ try{ z.scrollIntoView({block:'center'}); }catch(e){} }
 }
 function tfFussZeichnen(){
   const v = id => document.getElementById(id);
-  if(v('termin-abbrechen')) v('termin-abbrechen').hidden = !!TF.waehlen;
-  if(v('termin-speichern')) v('termin-speichern').hidden = !!TF.waehlen;
-  if(v('termin-fertig')) v('termin-fertig').hidden = !TF.waehlen;
+  const seite = !!(TF.waehlen || TF.tagwahl);
+  if(v('termin-abbrechen')) v('termin-abbrechen').hidden = seite;
+  if(v('termin-speichern')) v('termin-speichern').hidden = seite;
+  if(v('termin-fertig')) v('termin-fertig').hidden = !seite;
 }
 function tfPflanzenZeile(){
   const da = {}; allePflanzen().forEach(p => { da[p.id] = p; });
@@ -18142,6 +18264,13 @@ function tfPflanzenZeile(){
   return `<div class="wahl-liste tf-pfl-zeile"><button type="button" data-tf="waehlen">
       ${bilder ? `<span class="tf-pfl-bilder" aria-hidden="true">${bilder}</span>` : ''}
       <span class="wl-txt"><b id="tf-pfl-text">${esc(gew.length ? tfPflanzenZusammen() : 'Pflanzen wählen')}</b><i>${esc(unter)}</i></span>
+      <span class="tf-pfl-pfeil" aria-hidden="true">›</span></button></div>`;
+}
+function tfTagZeile(){
+  const tg = TF.tag && tagDef(TF.tag) ? tagDef(TF.tag) : null;
+  return `<div class="wahl-liste tf-tag-zeile"><button type="button" data-tf="tagwahl">
+      <span class="wl-txt"><b id="tf-tag-text">${esc(tg ? tg.name : 'Tag wählen')}</b><i>${
+        tg ? 'Wird beim Abhaken gesetzt.' : 'Ohne Tag bleibt es ein reiner Termin.'}</i></span>
       <span class="tf-pfl-pfeil" aria-hidden="true">›</span></button></div>`;
 }
 function terminFensterZeichnen(){
@@ -18165,16 +18294,30 @@ function terminFensterZeichnen(){
     box.scrollTop = 0;
     return;
   }
+  /* 4.0-beta.37: Der Tag ist eine Zeile; die Liste steht auf einer
+     eigenen Seite im selben Blatt. */
+  if(TF.tagwahl){
+    if(titelEl) titelEl.textContent = 'Tag wählen';
+    box.innerHTML = `<div class="tf-tagwahl"><div class="as-knoepfe" role="group" aria-label="Tag">${
+      tagListe().map(t => tvKnopf('data-tf-tag', t.id, t.name, TF.tag === t.id)).join('')}${
+      tvKnopf('data-tf-tag', '', 'Kein Tag', !TF.tag)}</div></div>`;
+    box.scrollTop = 0;
+    return;
+  }
   if(titelEl) titelEl.textContent = TF.id ? 'Termin' : 'Neuer Termin';
-  const tags = tagListe().map(t => tvKnopf('data-tf-tag', t.id, t.name, TF.tag === t.id)).join('');
   /* 4.0-beta.36 (P2): Vorlagen nur beim neuen Termin */
-  const vEigen = TF.vorlage ? terminVorlagenEigen().find(v => v.id === TF.vorlage) : null;
+  const vGew = TF.vorlage ? terminVorlagen().find(v => v.id === TF.vorlage) : null;
+  const vAus = terminVorlagenAus().length;
   const vorlagen = TF.id ? '' : `<p class="ein-abschnitt">Vorlage (wahlweise)</p>
     <div class="as-knoepfe tf-vorlagen" role="group" aria-label="Vorlage">${terminVorlagen().map(v =>
       `<button type="button" class="as-knopf" data-tf-vorlage="${esc(v.id)}" aria-pressed="${TF.vorlage === v.id}"><b>${esc(v.titel)}</b><i>${esc(terminSerieText(v.n, v.k))}</i></button>`).join('')}</div>
-    ${vEigen ? `<p class="tf-vorlage-zeile"><button type="button" class="mehr-dazu" data-tf="vorlage-weg">Vorlage „${esc(vEigen.titel)}“ löschen</button></p>` : ''}`;
+    ${vGew ? `<p class="tf-vorlage-zeile tf-vorlage-oben"><button type="button" class="mehr-dazu" data-tf="vorlage-aendern">Vorlage ändern</button>
+      <button type="button" class="mehr-dazu" data-tf="vorlage-weg">Vorlage löschen</button>
+      <span class="fhint"${TF.vmeldOben ? ' role="status"' : ''}>${esc(TF.vmeldOben || 'Ändern: Felder unten anpassen, dann „Vorlage ändern“.')}</span></p>`
+      : (TF.vmeldOben || vAus ? `<p class="tf-vorlage-zeile tf-vorlage-oben">${TF.vmeldOben ? `<span class="fhint" role="status">${esc(TF.vmeldOben)}</span>` : ''}${
+          vAus ? '<button type="button" class="mehr-dazu" data-tf="vorlagen-zurueck">Gelöschte Vorlagen zurückholen</button>' : ''}</p>` : '')}`;
   box.innerHTML = `${vorlagen}<label class="fspan"><span class="lab">Titel</span>
-      <input type="text" id="tf-titel" maxlength="${TERMIN_TITEL_MAX}" value="${esc(TF.titel)}" placeholder="z. B. Neemöl spritzen" autocomplete="off"></label>
+      <input type="text" id="tf-titel" maxlength="${TERMIN_TITEL_MAX}" value="${esc(TF.titel)}" placeholder="z. B. Neemöl sprühen" autocomplete="off"></label>
     <p class="ein-abschnitt">Datum</p>
     <div class="segment" role="group" aria-label="Datum">
       <button type="button" data-tf-datum="${h}" aria-pressed="${TF.datum === h}">Heute</button>
@@ -18191,7 +18334,7 @@ function terminFensterZeichnen(){
         <input type="number" id="tf-k" min="2" max="${TERMIN_ANZAHL_MAX}" inputmode="numeric" value="${TF.k}"></label>
       <p class="fhint" id="tf-vorschau">${esc(terminVorschauText())}</p>` : ''}
     <p class="ein-abschnitt">Tag (wahlweise)</p>
-    ${tags ? `<div class="as-knoepfe" role="group" aria-label="Tag">${tags}</div>`
+    ${tagListe().length ? tfTagZeile()
            : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>'}
     <p class="ein-abschnitt">Pflanzen (wahlweise)</p>
     ${tfPflanzenZeile()}
@@ -18440,7 +18583,8 @@ function geplantHTML(p){
     <span class="zs-d">${esc(tag(e.datum))}</span>
     <span class="zs-t">${e.tid
       ? `<button type="button" class="kid-link" data-do="termin-auf" data-v="${esc(e.tid)}">${esc(e.titel)}</button>${e.text ? ' · ' + esc(e.text) : ''}`
-      : esc(e.titel)}</span></li>`;
+      : esc(e.titel)}</span>${e.tid
+      ? `<button type="button" class="gpl-erl" data-do="termin-erl" data-v="${esc(e.tid + '|' + e.datum)}" aria-label="${esc(e.titel + ' am ' + tag(e.datum) + ' erledigt')}">Erledigt</button>` : ''}</li>`;
   return `<div class="gpl">${oben.length ? `<ul class="zs-liste">${oben.map(zeile).join('')}</ul>` : '<p class="kb-leer">Nichts geplant.</p>'}
     ${alle.length > 3 ? `<p class="fhint">${alle.length - 3} ${alle.length - 3 === 1 ? 'weiterer' : 'weitere'} im Kalender.</p>` : ''}
     <div class="kb-aktionen"><button type="button" class="kb-zweit" data-do="termin-neu" data-p="${esc(p.id)}">+ Termin</button></div></div>`;
@@ -18457,7 +18601,7 @@ document.addEventListener('click', e => {
   if(t.closest('#hinweis-zu')){ modalZu('hinweis-modal'); return; }
   if(t.closest('#termin-abbrechen')){ modalZu('termin-modal'); return; }
   if(t.closest('#termin-fertig')){ tfAuswahlZu(); return; }
-  if(t.closest('#termin-speichern')){ if(TF) TF.waehlen = false; terminSpeichern(); return; }
+  if(t.closest('#termin-speichern')){ if(TF){ TF.waehlen = false; TF.tagwahl = false; } terminSpeichern(); return; }
   const hg = t.closest('[data-hinweis-gesehen]');
   if(hg){
     tagGesehen(hg.dataset.p, hg.dataset.e);
@@ -18494,7 +18638,7 @@ document.addEventListener('click', e => {
   const wd = t.closest('[data-tf-wdh]');
   if(wd){ terminFensterLesen(); TF.wdh = wd.dataset.tfWdh === 'an'; TF.fehler = ''; terminFensterZeichnen(); return; }
   const tt = t.closest('[data-tf-tag]');
-  if(tt){ terminFensterLesen(); TF.tag = TF.tag === tt.dataset.tfTag ? '' : tt.dataset.tfTag; TF.fehler = ''; terminFensterZeichnen(); return; }
+  if(tt){ TF.tag = tt.dataset.tfTag && tagDef(tt.dataset.tfTag) ? tt.dataset.tfTag : ''; TF.fehler = ''; tfAuswahlZu(); return; }
   const vg = t.closest('[data-tf-vorlage]');
   if(vg){
     terminFensterLesen();
@@ -18505,7 +18649,7 @@ document.addEventListener('click', e => {
       TF.wdh = v.k > 1; if(v.k > 1){ TF.n = v.n; TF.k = v.k; }
       if(v.notiz) TF.notiz = v.notiz;
     }
-    TF.fehler = ''; TF.vmeld = ''; TF.frage = false;
+    TF.fehler = ''; TF.vmeld = ''; TF.vmeldOben = ''; TF.frage = false;
     terminFensterZeichnen(); return;
   }
   const pf = t.closest('[data-tf-pfl]');
@@ -18518,6 +18662,19 @@ document.addEventListener('click', e => {
   }
   const aktion = t.closest('[data-tf]');
   if(!aktion) return;
+  if(aktion.dataset.tf === 'tagwahl'){ terminFensterLesen(); TF.tagwahl = true; TF.fehler = ''; terminFensterZeichnen(); return; }
+  if(aktion.dataset.tf === 'vorlage-aendern'){
+    terminFensterLesen();
+    const r = terminVorlageAendern(TF.vorlage, TF);
+    TF.fehler = r.fehler || ''; TF.vmeld = '';
+    TF.vmeldOben = r.fehler ? '' : 'Vorlage „' + r.v.titel + '“ geändert.';
+    terminFensterZeichnen(); return;
+  }
+  if(aktion.dataset.tf === 'vorlagen-zurueck'){
+    terminFensterLesen();
+    terminVorlagenZurueck(); TF.vmeld = ''; TF.vmeldOben = '';
+    terminFensterZeichnen(); return;
+  }
   if(aktion.dataset.tf === 'waehlen'){ terminFensterLesen(); TF.waehlen = true; TF.suche = ''; TF.fehler = ''; terminFensterZeichnen(); return; }
   if(aktion.dataset.tf === 'alle'){
     tfSuchListe().forEach(p => { if(TF.pflanzen.indexOf(p.id) === -1) TF.pflanzen.push(p.id); });
@@ -18528,13 +18685,14 @@ document.addEventListener('click', e => {
     terminFensterLesen();
     const r = terminVorlageMerken(TF);
     TF.fehler = r.fehler || '';
+    TF.vmeldOben = '';
     TF.vmeld = r.fehler ? '' : (r.ersetzt ? 'Vorlage „' + r.v.titel + '“ aktualisiert.' : 'Vorlage „' + r.v.titel + '“ gemerkt.');
     if(r.v) TF.vorlage = r.v.id;
     terminFensterZeichnen(); return;
   }
   if(aktion.dataset.tf === 'vorlage-weg'){
     terminFensterLesen();
-    terminVorlageLoeschen(TF.vorlage); TF.vorlage = ''; TF.vmeld = 'Vorlage gelöscht.';
+    terminVorlageLoeschen(TF.vorlage); TF.vorlage = ''; TF.vmeld = ''; TF.vmeldOben = 'Vorlage gelöscht.';
     terminFensterZeichnen(); return;
   }
   if(aktion.dataset.tf === 'loeschen'){
@@ -19187,7 +19345,7 @@ function awKastenZeichnen(kasten, pflege, liste){
     const frost = b.frost == null ? 'winterhart' : (b.frost <= 0 ? 'hält bis ' + b.frost + ' °C' : 'nicht unter ' + b.frost + ' °C');
     html = alZeile('Gießklasse', klText(b.klasse)) + alZeile('Licht', soText(b.licht))
       + alZeile('Typ', b.typ || '') + alZeile('Frostgrenze', frost)
-      + alZeile('Dünger', DUENGER[b.duenger] ? DUENGER[b.duenger].text : '')
+      + alZeile('Düngebedarf', DUENGER[b.duenger] ? DUENGER[b.duenger].text : '')
       + alZeile('Für Katzen', alGiftText()) + alZeile('Familie', b.fam || '');
   } else {
     ['klasse','sonne'].forEach(feld => {
@@ -21959,7 +22117,7 @@ function artWaehlen(bot){
   const frost = a.frost==null ? 'winterhart' : (a.frost<=0 ? 'hält bis '+a.frost+' °C' : 'nicht unter '+a.frost+' °C');
   $('#bib-gewaehlt').innerHTML = `
     <h4>${esc(a.de)} <span style="font-weight:400;font-size:.85rem">· ${esc(a.bot)}</span></h4>
-    <p>${esc(a.fam)} · Gießklasse ${a.klasse} · ${esc(SONNE[a.licht].text)} · ${esc(DUENGER[a.duenger].text)} · ${esc(frost)}</p>
+    <p>${esc(a.fam)} · Gießklasse ${a.klasse} · ${esc(SONNE[a.licht].text)} · Düngebedarf ${esc(DUENGER[a.duenger].text)} · ${esc(frost)}</p>
     ${eigen?`<p><b>Erkennst du an:</b> ${esc(eigen)}</p>`:''}
     ${verw.length?`<div class="verw"><p><b>Verwechslungsgefahr.</b> Falls es doch eine davon ist, hier wechseln:</p>
       ${verw.map(v=>`<button class="linkbtn" type="button" data-bib="${esc(v.bot)}">${esc(v.art?v.art.de:v.bot)} — ${esc(v.merkmal)}</button>`).join('')}</div>`:''}`;
@@ -25854,7 +26012,9 @@ var SCHALTER = [
   {k:'symbole',    id:'sch-symbole',    vor:{sammler:false, entdecker:true}},
   /* 4.0-beta.21 (Plan M2a/M2b): Gießen als Liste, Kärtchen und Zustandsfrage im Gießmodus */
   {k:'gliste',     id:'sch-gliste',     vor:{sammler:true,  entdecker:false}},
-  {k:'gmwie',      id:'sch-gmwie',      vor:{sammler:false, entdecker:true}}
+  {k:'gmwie',      id:'sch-gmwie',      vor:{sammler:false, entdecker:true}},
+  /* 4.0-beta.37 (B5): Warnkasten über den Reitern der Karte */
+  {k:'warn',       id:'sch-warn',       vor:{sammler:false, entdecker:true}}
 ];
 function modusVon(){
   return MODI[S.modus] ? S.modus : (S.einfach ? 'sammler' : 'entdecker');
