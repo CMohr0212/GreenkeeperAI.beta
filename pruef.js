@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.32', w.__T('FASSUNG') === '4.0-beta.32', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.33', w.__T('FASSUNG') === '4.0-beta.33', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -192,8 +192,6 @@ setTimeout(async () => {
   pruef('Botanisch · Sammlung hell', tf() === '#F1F4ED', tf());
   w.__T("ansichtZeigen('mehr')");
   pruef('Botanisch · Mehr hell', tf() === '#F1F4ED', tf());
-  w.__T("ansichtZeigen('werkzeuge')");
-  pruef('Botanisch · Werkzeuge hell', tf() === '#F1F4ED', tf());
   pruef('Botanisch springt nicht mehr zwischen den Reitern',
     tf() === '#F1F4ED');
   d.querySelector('[data-design-go="terrarium"]').click();
@@ -208,7 +206,7 @@ setTimeout(async () => {
 
   ['botanisch', 'klartext', 'terrarium'].forEach(des => {
     d.querySelector(`[data-design-go="${des}"]`).click();
-    ['heute', 'sammlung', 'werkzeuge', 'mehr'].forEach(a => {
+    ['heute', 'sammlung', 'botaniker', 'mehr'].forEach(a => {
       const vorher = fehler.length;
       try { w.__T(`ansichtZeigen('${a}')`); } catch (e) { fehler.push(des + '/' + a + ': ' + e.message); }
       pruef(des + ' · ' + a, fehler.length === vorher);
@@ -242,8 +240,8 @@ setTimeout(async () => {
   });
   d.querySelector('[data-design-go="botanisch"]').click();
 
-  const ids = ['giessmodus','rundgang','foto-modal','gift-modal','neu-modal','lightbox','urlaub-blatt','willkommen'];
-  pruef('acht Fenster angemeldet',
+  const ids = ['giessmodus','foto-modal','gift-modal','neu-modal','lightbox','urlaub-blatt','willkommen'];
+  pruef('sieben Fenster angemeldet',
     ids.every(i => w.__T('MODAL')[i]), ids.filter(i=>!w.__T('MODAL')[i]).join(','));
 
   /* Beim Start steht der Willkommensschirm offen — erst wegräumen. */
@@ -324,34 +322,17 @@ setTimeout(async () => {
   await tick();
 
   /* Abschnittsfenster */
-  /* beta.23 (G1a, F212): „grundriss“ ist weg, „raeume“ in den Einstellungen neu */
-  const keys = ['doktor','giessplan','substrat','vermehren','stammbaum','raeume',
-                'sicherung','urlaub','tiere','rundgang','ansicht','tour','rueck','install','melde','patch'];
-  pruef('16 Abschnitte auffindbar',
+  /* 4.0-beta.33: Gießplan-Werkzeug und Rundgang sind weg; die Werkzeuge
+     haben kein Kachelgitter mehr, ihre Abschnitte sind nur noch Lager. */
+  const keys = ['doktor','substrat','vermehren','stammbaum','raeume',
+                'sicherung','urlaub','tiere','ansicht','tour','rueck','install','melde','patch'];
+  pruef('14 Abschnitte auffindbar',
     keys.every(k => w.__T(`!!sekAbschnitt('${k}')`)),
     keys.filter(k => !w.__T(`!!sekAbschnitt('${k}')`)).join(','));
-
-  pruef('Kachelgitter gebaut',
-    d.querySelectorAll('.kachelgitter section[data-wz]').length === 5,
-    String(d.querySelectorAll('.kachelgitter section[data-wz]').length));
-  /* Der Gießplan hat seine Heimat im Gießcenter und darum keine
-     eigene Kachel mehr — erreichbar bleibt er trotzdem. */
-  pruef('Gießplan hat keine Kachel',
-    !d.querySelector('.kachelgitter section[data-wz="giessplan"]'));
-  pruef('Sein Abschnitt bleibt im Dokument',
-    !!d.querySelector('section[data-wz="giessplan"]'));
-  pruef('und ist weiter aufrufbar', !!w.__T("!!sekAbschnitt('giessplan')"));
-  pruef('Das Gießcenter führt hin',
-    !!d.querySelector('#mh-in-giess [data-wz-go="giessplan"]'));
-  /* Die Marke `ans-erste` nimmt der ersten Sektion einer Ansicht die
-     Überschriftslinie — und gibt ihr dabei einen Außenrand. Auf einem
-     gestreckten Gitterfeld kostet der genau diese Höhe: die erste
-     Kachel stand 6 px tiefer und war 6 px flacher als die anderen. */
-  w.__T("ansichtZeigen('werkzeuge')");
-  pruef('Keine Werkzeugkachel gilt als erste Sektion',
-    !d.querySelector('.kachelgitter .ans-erste'),
-    (d.querySelector('.kachelgitter .ans-erste') || {}).id || '');
-  w.__T("ansichtZeigen('heute')");
+  pruef('Kein Kachelgitter mehr', !d.querySelector('.kachelgitter') && !d.querySelector('[data-ans="werkzeuge"]'));
+  pruef('Gießplan-Werkzeug und Rundgang haben keinen Abschnitt mehr',
+    !w.__T("!!sekAbschnitt('giessplan')") && !w.__T("!!sekAbschnitt('rundgang')")
+    && !d.querySelector('#mh-in-giess [data-wz-go]'));
 
   let kaputt = [];
   for (const k of keys) {
@@ -367,7 +348,7 @@ setTimeout(async () => {
       if (!sec.querySelector('.wz-in')) kaputt.push(k + '(verloren)');
     } catch (e) { kaputt.push(k + ': ' + e.message); }
   }
-  pruef('alle 17 öffnen und hängen zurück', kaputt.length === 0, kaputt.join(' | '));
+  pruef('alle 14 öffnen und hängen zurück', kaputt.length === 0, kaputt.join(' | '));
 
   /* Der Inhalt darf beim Öffnen nicht neu gebaut werden. */
   w.__T("sektionOeffnen('melde')");
@@ -507,7 +488,8 @@ setTimeout(async () => {
 
   /* Wetter */
   w.__T("S.wetter = null; grundwerteErgaenzen();");
-  pruef('ohne Ort keine Zeile', w.__T('wetterZeileHTML()') === '');
+  /* 4.0-beta.33: ohne Ort steht „Ort festlegen“ da, abgefragt wird trotzdem nichts */
+  pruef('ohne Ort steht „Ort festlegen“ in der Zeile', /Ort festlegen/.test(w.__T('wetterZeileHTML()')) && !/°C/.test(w.__T('wetterZeileHTML()')), w.__T('wetterZeileHTML()'));
   const vorher = w.__abrufe.length;
   w.__T("render()");
   pruef('ohne Ort kein Abruf', w.__abrufe.length === vorher);
@@ -602,7 +584,7 @@ setTimeout(async () => {
   /* Ort entfernen */
   w.__T('wetterOrtLoeschen()');
   pruef('Ort entfernt', w.__T('!S.wetter.ort && !S.wetter.lat && !S.wetter.daten'));
-  pruef('Zeile wieder aus', w.__T('wetterZeileHTML()') === '');
+  pruef('Zeile sagt wieder „Ort festlegen“', /Ort festlegen/.test(w.__T('wetterZeileHTML()')) && !/Leipzig/.test(w.__T('wetterZeileHTML()')));
 
   pruef('Wetterabschnitt öffnet', w.__T("sektionOeffnen('wetter')") === true);
   await zu('sek-modal');
@@ -1119,11 +1101,6 @@ setTimeout(async () => {
     let t = '';
     Array.prototype.forEach.call(document.querySelectorAll('style'), s=>{ t += s.textContent; });
     return t; })()`);
-  pruef('Kästchen aus der Tap-Regel ausgenommen',
-    tickRegel.indexOf('button:not(.linkbtn):not(.tick-btn)') !== -1);
-  pruef('Kästchen quadratisch', /\.tick-btn\{[^}]*width:22px;height:22px/.test(tickRegel));
-  pruef('Kästchen mit Trefffläche', tickRegel.indexOf('.tick-btn::before') !== -1);
-  pruef('Klartext größer', tickRegel.indexOf('html[data-design="klartext"] .tick-btn{width:26px') !== -1);
   pruef('Tour liegt über den Fenstern',
     tickRegel.indexOf('#tour{position:fixed;inset:0;z-index:300') !== -1);
 
@@ -1211,7 +1188,7 @@ setTimeout(async () => {
      unbenutzbar, und keine der 610 Pruefungen schlug an \u2014 jsdom
      rechnet kein Layout, aber die Kaskade rechnet es sehr wohl. */
   {
-    const overlays = ['willkommen','tour','giessmodus','rundgang','urlaub-blatt',
+    const overlays = ['willkommen','tour','giessmodus','urlaub-blatt',
                       'karte-modal','sek-modal','lightbox','foto-modal',
                       'gift-modal','neu-modal'];
     ['botanisch','klartext','terrarium'].forEach(dz => {
@@ -1248,7 +1225,7 @@ setTimeout(async () => {
      das sich nicht mehr oeffnet, ein Reiter ohne Inhalt, eine Tour,
      die sich selbst abbricht. */
   {
-    for(const a of ['heute','sammlung','werkzeuge','mehr']){
+    for(const a of ['heute','sammlung','botaniker','mehr']){
       w.__T(`ansichtZeigen('${a}')`);
       await tick();
       pruef('Reiter ' + a + ' erreichbar', d.body.dataset.ansicht === a,
@@ -1260,7 +1237,7 @@ setTimeout(async () => {
 
     const abschnitte = [...d.querySelectorAll('section[data-wz],section[data-mh]')]
       .map(x => x.dataset.wz || x.dataset.mh);
-    pruef('Alle Abschnitte gefunden', abschnitte.length >= 25, String(abschnitte.length));
+    pruef('Alle Abschnitte gefunden', abschnitte.length >= 23, String(abschnitte.length));
     const stumm = [], leer = [], klemmt = [];
     for(const k of abschnitte){
       const auf = w.__T(`sektionOeffnen('${k}')`);
@@ -1359,8 +1336,8 @@ setTimeout(async () => {
     pruef('Kein Deckel bleibt liegen', !w.__T('tourLauf'));
 
     /* Nach der Tour muss alles weiter bedienbar sein */
-    w.__T("ansichtZeigen('werkzeuge')"); await tick();
-    pruef('Reiter nach der Tour erreichbar', d.body.dataset.ansicht === 'werkzeuge');
+    w.__T("ansichtZeigen('mehr')"); await tick();
+    pruef('Reiter nach der Tour erreichbar', d.body.dataset.ansicht === 'mehr');
     pruef('Fenster nach der Tour bedienbar', w.__T("sektionOeffnen('doktor')") === true);
     w.__T("modalZu('sek-modal')"); await tick();
     w.__T("ansichtZeigen('heute')"); await tick();
@@ -1498,1291 +1475,10 @@ setTimeout(async () => {
       !w.__T("allePflanzen().some(x=>x.id==='SW0')"));
   }
 
-  /* ══ Grundriss ═════════════════════════════════════════════════
-     Drei Fehler auf einmal: der Planer sprang immer in den Editor
-     zurueck, im Vollbild kam man nicht mehr ganz heraus, und jede
-     Kantenbreite wurde auf 50 gedeckelt. */
-  {
-    /* Der Planer beginnt in der Raumliste, auch nach einem Besuch
-       im Editor. */
-    /* beta.23 (G1a, F212): Der Planer ist nicht mehr erreichbar. Die
-       Tests darunter prüfen seinen Code, bis Baustein I ihn löscht. */
-    pruef('Der Planer ist nicht mehr erreichbar (beta.23)', w.__T("sektionOeffnen('grundriss')") === false);
-    pruef('Die Raumliste ist sichtbar',
-      d.getElementById('gr-liste').hidden === false);
-
-    /* ── Die Raumansicht ──────────────────────────────────────
-       Vorher fuehrte die Raumkarte nur in den Editor: wer nachsehen
-       wollte, wo etwas steht, landete zwischen Zeichenwerkzeugen und
-       verschob aus Versehen Moebel. */
-    pruef('Jede Raumkarte bietet Ansehen an',
-      d.querySelectorAll('#gr-karten [data-raum-sehen]').length
-        === w.__T('raeume().length'),
-      String(d.querySelectorAll('#gr-karten [data-raum-sehen]').length));
-    pruef('und Bearbeiten daneben',
-      d.querySelectorAll('#gr-karten [data-raum-auf]').length
-        === w.__T('raeume().length'));
-    const rid = w.__T('raeume()[0].id');
-    w.__T(`grAnsehen('${rid}')`);
-    await tick();
-    pruef('Ansehen \u00f6ffnet die Ansicht', w.__T('grStufe') === 'ansicht',
-      String(w.__T('grStufe')));
-    pruef('Die Ansicht ist sichtbar', d.getElementById('gr-ansicht').hidden === false);
-    pruef('Der Editor bleibt zu', d.getElementById('gr-editor').hidden === true);
-    pruef('Die Ansicht zeichnet den Raum',
-      !!d.querySelector('#gra-flaeche svg.plan-svg'));
-    pruef('Der Lichtschieber steht in der Ansicht',
-      !!d.getElementById('gra-monat') && !!d.getElementById('gra-zeit'));
-    pruef('Von der Ansicht geht es ins Bearbeiten',
-      !!d.getElementById('btn-gra-bearbeiten'));
-    d.getElementById('btn-gra-bearbeiten').click();
-    pruef('und der Editor geht auf', w.__T('grStufe') === 'editor',
-      String(w.__T('grStufe')));
-    w.__T("grStufe = 'liste'; planRender()");
-
-    /* Pflanzen auf demselben Moebel stehen ausgerichtet, nicht kreuz
-       und quer uebereinander. Der Pruefstand hat weder Moebel noch
-       Pflanzen im Raum — beides wird hier gestellt. */
-    {
-      const r0 = w.__T('raeume()[0]');
-      const rid0 = w.__T('raeume()[0].id');
-      w.__T(`(function(){
-        const r = raeume()[0];
-        r.moebel = [{id:'mtest', typ:'regal', name:'Pr\u00fcfregal',
-                     b:120, t:40, h:80, katze:true, x:20, y:20}];
-        delete r.roh;
-      })()`);
-      /* Der Pruefstand hat an dieser Stelle erst eine Pflanze —
-         zwei weitere kommen dazu, damit sich ueberhaupt etwas
-         ueberdecken kann. */
-      w.__T(`(function(){
-        S.eigene = S.eigene || [];
-        ['prA','prB'].forEach(function(id){
-          if(!S.eigene.some(function(p){ return p.id === id; }))
-            S.eigene.push({id:id, name:'Pr\u00fcfling ' + id, art:'Monstera',
-              klasse:'mittel', angelegt:new Date().toISOString()});
-        });
-        sichern();
-      })()`);
-      const ids = w.__T('allePflanzen().slice(0,3).map(p=>p.id)');
-      /* Alle drei auf denselben Punkt: genau der Fall, der vorher drei
-         Marken uebereinanderlegte. */
-      ids.forEach(id => w.__T(`pflanzeSetzen('${id}', '${rid0}', 40, 30)`));
-      pruef('Drei Pflanzen stehen auf dem M\u00f6bel',
-        w.__T(`pflanzenIm('${rid0}').length`) >= 3,
-        String(w.__T(`pflanzenIm('${rid0}').length`)));
-      const pos = JSON.parse(w.__T('JSON.stringify(markenPositionen(raeume()[0]))'));
-      const genutzt = ids.map(id => pos[id]).filter(Boolean);
-      pruef('Jede Pflanze auf dem M\u00f6bel bekommt einen Platz',
-        genutzt.length === ids.length, genutzt.length + '/' + ids.length);
-      pruef('Keine zwei Marken liegen aufeinander',
-        new Set(genutzt.map(o => o.x + ':' + o.y)).size === genutzt.length,
-        JSON.stringify(genutzt));
-      pruef('Alle stehen innerhalb des M\u00f6bels',
-        genutzt.every(o => o.x >= 20 && o.x <= 140 && o.y >= 20 && o.y <= 60),
-        JSON.stringify(genutzt));
-      /* Ein langes schmales Regal ergibt eine Reihe, keine Traube. */
-      pruef('Auf einem langen Regal stehen sie in einer Reihe',
-        new Set(genutzt.map(o => o.y)).size === 1, JSON.stringify(genutzt.map(o=>o.y)));
-
-      /* Wer auf dem Boden steht, bleibt, wo er steht. */
-      const frei = ids[0];
-      w.__T(`pflanzeSetzen('${frei}', '${rid0}', 200, 200)`);
-      const pos2 = JSON.parse(w.__T('JSON.stringify(markenPositionen(raeume()[0]))'));
-      const echt = JSON.parse(w.__T(`JSON.stringify(pflanzenOrt('${frei}'))`));
-      pruef('Bodenpflanzen bleiben an ihrem Ort',
-        !!pos2[frei] && pos2[frei].x === echt.x && pos2[frei].y === echt.y,
-        JSON.stringify(pos2[frei]) + ' statt ' + JSON.stringify(echt));
-    }
-
-    /* ── Etagen ──────────────────────────────────────────────
-       Ein Regal ist nicht eine Flaeche in einer Hoehe, sondern
-       mehrere. Alte Raeume haben kein `etagen`-Feld und muessen sich
-       trotzdem genau wie vorher verhalten. */
-    {
-      const rid0 = w.__T('raeume()[0].id');
-      pruef('Ein M\u00f6bel ohne Etagenfeld hat einen Boden in seiner H\u00f6he',
-        JSON.stringify(w.__T("etagenVon({h:80})")) === '[80]',
-        JSON.stringify(w.__T("etagenVon({h:80})")));
-      pruef('Ohne Etagenangabe gilt der oberste Boden',
-        w.__T("etageVon({h:150, etagen:[40,80,120,150]}, null)") === 3,
-        String(w.__T("etageVon({h:150, etagen:[40,80,120,150]}, null)")));
-      pruef('Eine zu hohe Etagennummer f\u00e4llt auf den obersten Boden',
-        w.__T("etageVon({h:150, etagen:[40,80]}, {etage:7})") === 1);
-      const vert = w.__T('JSON.stringify(etagenVerteilen(150, 4))');
-      pruef('Vier B\u00f6den verteilen sich gleichm\u00e4\u00dfig \u00fcber die H\u00f6he',
-        vert === '[40,75,115,150]', vert);
-      pruef('Ein Regal bekommt beim Einsetzen vier B\u00f6den',
-        w.__T('MOEBEL_ARTEN.regal.boeden') === 4,
-        String(w.__T('MOEBEL_ARTEN.regal.boeden')));
-
-      /* Das Pruefregal aus dem Block darueber bekommt Boeden. */
-      w.__T(`(function(){
-        const r = raeume()[0];
-        const m = r.moebel.find(function(x){ return x.id === 'mtest'; });
-        m.etagen = etagenVerteilen(m.h, 4);
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        sichern();
-      })()`);
-      const et = w.__T("JSON.stringify(raeume()[0].moebel[0].etagen)");
-      pruef('Das Pr\u00fcfregal hat jetzt vier B\u00f6den', et === '[20,40,60,80]', et);
-
-      /* Ein Boden verschattet den darunter. Gemessen wird an einem
-         Punkt mitten unter dem Regal, einmal mit und einmal ohne die
-         Boeden darueber. */
-      const untenMit = w.__T(`(function(){
-        const r = raeume()[0];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        return sonnenstundenRaum(r, 80, 40, 20, 6);
-      })()`);
-      const untenOhne = w.__T(`(function(){
-        const r = raeume()[0];
-        const m = r.moebel[0], alt = m.etagen;
-        m.etagen = [20];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        const v = sonnenstundenRaum(r, 80, 40, 20, 6);
-        m.etagen = alt;
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        return v;
-      })()`);
-      pruef('Ein Boden nimmt dem darunter Sonne weg',
-        untenMit < untenOhne, untenMit + ' statt weniger als ' + untenOhne);
-      pruef('Der oberste Boden verliert dadurch nichts',
-        w.__T('(function(){ const r=raeume()[0]; SONNE_CACHE={}; SONNE_CACHE_SIG=\'\'; '
-          + 'return sonnenstundenRaum(r, 80, 40, 80, 6); })()') > untenMit);
-
-      /* Der Sonnen-Cache kannte Moebel nicht. Nach dem Ziehen eines
-         Bretts lieferte er weiter die alten Stunden. */
-      const sig1 = w.__T('raumSignatur(raeume()[0])');
-      w.__T("raeume()[0].moebel[0].etagen = [25,45,65,85]");
-      const sig2 = w.__T('raumSignatur(raeume()[0])');
-      pruef('Der Sonnen-Cache merkt, wenn ein Boden wandert',
-        sig1 !== sig2, 'Signatur unver\u00e4ndert');
-      w.__T("raeume()[0].moebel[0].etagen = [20,40,60,80]");
-
-      /* Der Ort merkt sich die Etage, und ein Umzug verliert sie
-         nicht — solange das neue Moebel sie hat. */
-      const pid = w.__T('allePflanzen()[0].id');
-      w.__T(`pflanzeSetzen('${pid}', '${rid0}', 40, 30, 1)`);
-      pruef('Ein Platz merkt sich seinen Boden',
-        w.__T(`(pflanzenOrt('${pid}')||{}).etage`) === 1,
-        String(w.__T(`(pflanzenOrt('${pid}')||{}).etage`)));
-      w.__T(`pflanzeSetzen('${pid}', '${rid0}', 45, 32)`);
-      pruef('Verschieben im Grundriss beh\u00e4lt den Boden',
-        w.__T(`(pflanzenOrt('${pid}')||{}).etage`) === 1,
-        String(w.__T(`(pflanzenOrt('${pid}')||{}).etage`)));
-      pruef('Das Urteil rechnet mit der H\u00f6he dieses Bodens',
-        w.__T(`platzUrteil(raeume()[0], 45, 32, 6, 1).hoehe`) === 40,
-        String(w.__T(`platzUrteil(raeume()[0], 45, 32, 6, 1).hoehe`)));
-      pruef('und ohne Angabe mit dem obersten',
-        w.__T(`platzUrteil(raeume()[0], 45, 32, 6).hoehe`) === 80,
-        String(w.__T(`platzUrteil(raeume()[0], 45, 32, 6).hoehe`)));
-
-      /* Weniger Boeden: wer oben stand, faellt nicht ins Leere.
-         Die Pflanze muss dafuer vorher auf einem Boden stehen, den es
-         danach wirklich nicht mehr gibt — sonst ist die Pruefung schon
-         erfuellt, bevor die Funktion irgendetwas tut. */
-      w.__T(`pflanzeSetzen('${pid}', '${rid0}', 45, 32, 3)`);
-      pruef('Die Pflanze steht auf dem obersten von vier B\u00f6den',
-        w.__T(`(pflanzenOrt('${pid}')||{}).etage`) === 3,
-        String(w.__T(`(pflanzenOrt('${pid}')||{}).etage`)));
-      w.__T(`(function(){
-        const r = raeume()[0], m = r.moebel[0];
-        m.etagen = [40, 80];
-        moebelEtagenPruefen(r, m);
-      })()`);
-      pruef('Weniger B\u00f6den setzen die Pflanze auf den obersten',
-        w.__T(`(pflanzenOrt('${pid}')||{}).etage`) === 1,
-        String(w.__T(`(pflanzenOrt('${pid}')||{}).etage`)));
-      w.__T("raeume()[0].moebel[0].etagen = [20,40,60,80]");
-    }
-
-    /* ── Kanten nach innen ──────────────────────────────────────
-       Eine Tuer zum Flur ist keine Lichtquelle wie ein Fenster:
-       dahinter liegt ein Raum. Direkte Sonne endet dort, Streulicht
-       kommt gedaempft durch. */
-    {
-      const rid0 = w.__T('raeume()[0].id');
-      pruef('Es gibt eine T\u00fcr nach innen',
-        w.__T('!!KANTEN_ART.innentuer') === true);
-      pruef('und einen Durchgang nach innen',
-        w.__T('!!KANTEN_ART.durchgang') === true);
-      pruef('Beide sind als innen gekennzeichnet',
-        w.__T('KANTEN_ART.innentuer.innen === true && KANTEN_ART.durchgang.innen === true'));
-      pruef('Eine Kante nach aussen ist es nicht',
-        w.__T('!KANTEN_ART.fenster.innen && !KANTEN_ART.offen.innen'));
-
-      const ik = w.__T('aussenKanten(raeume()[0]).filter(k=>k.k==="o").map(k=>k.id)[0]');
-      pruef('Eine Kante zum Pr\u00fcfen ist da', !!ik, String(ik));
-
-      /* Dieselbe Kante zweimal: einmal offen, einmal nach innen. Der
-         Messpunkt liegt in genau der Kachel, zu der die Kante gehoert,
-         und die Sonne steht senkrecht darueber hinaus — sonst misst
-         man eine Wand woanders. */
-      const messen = art => w.__T(`(function(){
-        const r = raeume().find(function(x){ return x.id === '${rid0}'; });
-        r.kanten['${ik}'] = '${art}';
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        const t = '${ik}'.split(':')[1].split(',');
-        const px = (+t[0] + 0.5) * KACHEL, py = (+t[1] + 0.5) * KACHEL;
-        return JSON.stringify({
-          sonne: sonnigImRaum(r, px, py, 100, {az: r.drehung, hoehe: 60}),
-          hell: helligkeit(r, px, py, 100)
-        });
-      })()`);
-
-      const offen = JSON.parse(messen('offen'));
-      const innen = JSON.parse(messen('durchgang'));
-
-      pruef('Durch einen Durchgang nach innen f\u00e4llt keine Sonne',
-        innen.sonne === false, JSON.stringify(innen));
-      pruef('Durch dieselbe Kante als „offen\u201c schon',
-        offen.sonne === true, JSON.stringify(offen));
-      pruef('Streulicht kommt trotzdem an',
-        innen.hell > 0, String(innen.hell));
-      pruef('aber deutlich weniger als von aussen',
-        innen.hell < offen.hell * 0.9,
-        innen.hell.toFixed(1) + ' gegen ' + offen.hell.toFixed(1));
-
-      /* Auch die Tuer nach innen sperrt die Sonne aus — nicht nur der
-         Durchgang, sonst haenge die Pruefung an einer einzigen Art. */
-      const tuer = JSON.parse(messen('innentuer'));
-      pruef('Eine T\u00fcr nach innen sperrt die Sonne genauso aus',
-        tuer.sonne === false, JSON.stringify(tuer));
-
-      w.__T(`(function(){
-        const r = raeume().find(function(x){ return x.id === '${rid0}'; });
-        delete r.kanten['${ik}'];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      })()`);
-    }
-
-    /* ── Die Ansicht „von vorne" ist wieder draussen ──────────── */
-    {
-      pruef('Das Fenster f\u00fcr die Frontansicht ist weg',
-        !d.getElementById('mf-modal'));
-      pruef('Der Weg dorthin aus dem M\u00f6belformular ebenfalls',
-        !d.getElementById('btn-mb-front'));
-    }
-
-    /* ── Der Maßstab der Grundhelligkeit ──────────────────
-       Bis 3.2.9 lag der Faktor bei 10000 und die oberste Schwelle bei
-       45 — jeder Punkt in jedem Raum mit einer Öffnung war Stufe 4.
-       Diese vier Fälle sind die Eichung. Fällt einer, stimmt der
-       Maßstab nicht mehr. */
-    {
-      const stufen = art => w.__T(`(function(){
-        const kacheln = {};
-        for(let y=0;y<8;y++) for(let x=0;x<6;x++) kacheln[x+','+y] = 1;
-        const r = {id:'refhell', sp:6, re:8, kacheln, drehung:180, dach:true,
-          deckeH:250, moebel:[],
-          kanten:{'o:1,0':'${art}','o:2,0':'${art}','o:3,0':'${art}'}};
-        return JSON.stringify([
-          helligkeitStufe(helligkeit(r, 125, 25, 0)),
-          helligkeitStufe(helligkeit(r, 125, 175, 0)),
-          helligkeitStufe(helligkeit(r, 125, 325, 0))
-        ]);
-      })()`);
-
-      const f = JSON.parse(stufen('fenster'));
-      pruef('Direkt am Fenster ist es sehr hell', f[0] === 4, JSON.stringify(f));
-      pruef('Anderthalb Meter tiefer noch hell', f[1] === 3, JSON.stringify(f));
-      pruef('Drei Meter tief im Raum ist es dunkel', f[2] === 1, JSON.stringify(f));
-      pruef('Die Helligkeit nimmt nach hinten wirklich ab',
-        f[0] > f[1] && f[1] > f[2], JSON.stringify(f));
-
-      const t = JSON.parse(stufen('innentuer'));
-      pruef('Ein Raum, der nur eine T\u00fcr nach innen hat, ist hinten sehr dunkel',
-        t[2] === 0, JSON.stringify(t));
-
-      pruef('Der Faktor steht als eigene Gr\u00f6\u00dfe da',
-        w.__T('HELL_FAKTOR') === 50, String(w.__T('HELL_FAKTOR')));
-    }
-
-    /* ── Der Raum wächst mit ──────────────────────────
-       Anbauen nach links ergibt negative Kachelnummern. Sie dürfen
-       den Zug überleben, aber nicht das Loslassen. */
-    {
-      const rid0 = w.__T('raeume()[0].id');
-      w.__T(`(function(){
-        const r = raeume()[0];
-        r.kacheln = {}; r.sp = 2; r.re = 2;
-        for(let y=0;y<2;y++) for(let x=0;x<2;x++) r.kacheln[x+','+y] = 1;
-        r.kanten = {'o:0,0':'fenster'};
-        r.kantenMass = {'o:0,0':{b:70}};
-        r.moebel = [{id:'wtest', name:'Regal', typ:'regal', x:0, y:0,
-                     b:50, t:50, h:150, etagen:[150]}];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      })()`);
-      const pidW = w.__T('allePflanzen()[0].id');
-      w.__T(`pflanzeSetzen('${pidW}', '${rid0}', 25, 25)`);
-
-      w.__T("malt = {an:true}; kachelMalen(raeume()[0], -1, 0)");
-      pruef('W\u00e4hrend des Zuges darf eine Kachel negativ hei\u00dfen',
-        w.__T("!!raeume()[0].kacheln['-1,0']") === true);
-
-      w.__T('raumZuschneiden(raeume()[0]); malt = null');
-      pruef('Nach dem Loslassen f\u00e4ngt der Raum wieder bei null an',
-        w.__T("!!raeume()[0].kacheln['0,0']") === true
-        && w.__T("!!raeume()[0].kacheln['-1,0']") === false);
-      pruef('Der Raum ist eine Spalte breiter geworden',
-        w.__T('raeume()[0].sp') === 3, String(w.__T('raeume()[0].sp')));
-      pruef('Die Wand ist mitgewandert',
-        w.__T("!!raeume()[0].kanten['o:1,0']") === true,
-        JSON.stringify(w.__T('JSON.stringify(raeume()[0].kanten)')));
-      pruef('Ihre eigenen Ma\u00dfe ebenfalls',
-        w.__T("(raeume()[0].kantenMass['o:1,0']||{}).b") === 70);
-      pruef('Das M\u00f6bel ist mitgewandert',
-        w.__T("raeume()[0].moebel[0].x") === 50,
-        String(w.__T("raeume()[0].moebel[0].x")));
-      pruef('Die Pflanze auch',
-        w.__T(`(pflanzenOrt('${pidW}')||{}).x`) === 75,
-        String(w.__T(`(pflanzenOrt('${pidW}')||{}).x`)));
-
-      /* Wegnehmen schneidet die Grenzen wieder zurück. */
-      w.__T(`(function(){
-        const r = raeume()[0];
-        malt = {an:false};
-        kachelMalen(r, 0, 0); kachelMalen(r, 0, 1);
-        raumZuschneiden(r); malt = null;
-      })()`);
-      pruef('Wegnehmen schneidet den Raum wieder zu',
-        w.__T('raeume()[0].sp') === 2, String(w.__T('raeume()[0].sp')));
-
-      /* Die letzte Kachel bleibt, sonst gäbe es nichts mehr zum Tippen. */
-      w.__T(`(function(){
-        const r = raeume()[0];
-        r.kacheln = {'0,0':1}; r.sp = 1; r.re = 1;
-        malt = {an:false}; kachelMalen(r, 0, 0); malt = null;
-      })()`);
-      pruef('Die letzte Kachel l\u00e4sst sich nicht wegnehmen',
-        w.__T('Object.keys(raeume()[0].kacheln).length') === 1);
-
-      /* Ausgangslage für alles Weitere wiederherstellen. */
-      w.__T(`(function(){
-        const r = raeume()[0];
-        r.kacheln = {}; r.sp = 6; r.re = 3;
-        for(let y=0;y<3;y++) for(let x=0;x<6;x++) r.kacheln[x+','+y] = 1;
-        r.kanten = {}; r.kantenMass = {}; r.moebel = [];
-        for(let x=0;x<6;x++) r.kanten['u:'+x+',2'] = 'bruestung';
-        r.kanten['o:2,0'] = 'tuer';
-        r.kanten['o:3,0'] = 'fenster';
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        sichern();
-      })()`);
-      w.__T(`pflanzeSetzen('${pidW}', '${rid0}', 40, 30)`);
-      pruef('Der Pr\u00fcfraum steht wieder', w.__T('raeume()[0].sp') === 6);
-
-      /* Der Rand zum Anbauen ist kein Schmuck: ohne ihn gibt es
-         ausserhalb der Grenzen nichts, was der Finger treffen kann. */
-      const merkM = w.__T('pModus');
-      w.__T("pModus = 'kacheln'; planRender()");
-      pruef('Im Fl\u00e4chenmodus liegt ein Rand zum Anbauen',
-        !!d.querySelector('#plan-svg [data-kx="-1"]'));
-      w.__T("pModus = 'pflanzen'; planRender()");
-      pruef('In den anderen Werkzeugen nicht',
-        !d.querySelector('#plan-svg [data-kx="-1"]'));
-      w.__T(`pModus = '${merkM}'; planRender()`);
-    }
-
-    /* ── Was vor der Öffnung steht ─────────────────────
-       Ein Balkon vor dem Fenster nimmt die flache Sonne weg und lässt
-       die hohe durch. Genau das ist der Unterschied zu einer Wand. */
-    {
-      const rid0 = w.__T('raeume()[0].id');
-      const ik = w.__T('aussenKanten(raeume()[0]).filter(k=>k.k==="o").map(k=>k.id)[0]');
-      const messen = (vt, vh, hoehe) => w.__T(`(function(){
-        const r = raeume().find(function(x){ return x.id === '${rid0}'; });
-        r.kanten['${ik}'] = 'offen';
-        kantenMassSetzen(r, '${ik}', {vorTiefe:${vt}, vorHoehe:${vh}});
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        const t = '${ik}'.split(':')[1].split(',');
-        const px = (+t[0] + 0.5) * KACHEL, py = (+t[1] + 0.5) * KACHEL;
-        return sonnigImRaum(r, px, py, 100, {az: r.drehung, hoehe: ${hoehe}});
-      })()`);
-
-      pruef('Ohne Vorbau kommt die flache Sonne herein',
-        messen(0, 0, 20) === true);
-      pruef('Ein Balkon davor h\u00e4lt sie ab',
-        messen(300, 400, 20) === false);
-      pruef('Die hohe Sonne kommt \u00fcber denselben Balkon hinweg',
-        messen(300, 400, 60) === true);
-      pruef('Eine Tiefe ohne H\u00f6he \u00e4ndert nichts',
-        messen(300, 0, 20) === true);
-
-      w.__T(`(function(){
-        const r = raeume().find(function(x){ return x.id === '${rid0}'; });
-        delete r.kanten['${ik}'];
-        kantenMassSetzen(r, '${ik}', {});
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      })()`);
-    }
-
-    /* ── Maße als Blatt statt prompt() ────────────────── */
-    {
-      pruef('Es gibt ein Blatt f\u00fcr die Kantenma\u00dfe',
-        !!d.getElementById('km-modal'));
-      const kid2 = w.__T('aussenKanten(raum()).filter(k=>k.k==="o").map(k=>k.id)[0]');
-      w.__T(`raum().kanten['${kid2}'] = 'fenster'`);
-      w.__T(`kantenMassFragen(raum(), '${kid2}')`);
-      await tick();
-      pruef('Ein zweiter Tipp auf eine Kante \u00f6ffnet es',
-        w.__T("modalOffen('km-modal')") === true);
-      pruef('Die H\u00f6hen stehen schon drin',
-        +d.getElementById('km-sockel').value === 90,
-        d.getElementById('km-sockel').value);
-      pruef('Und die Felder f\u00fcr den Vorbau auch',
-        !!d.getElementById('km-vt') && !!d.getElementById('km-vh'));
-      d.getElementById('km-vt').value = '150';
-      d.getElementById('km-vh').value = '250';
-      w.__T('kmSpeichern()');
-      await tick();
-      pruef('\u00dcbernehmen schreibt den Vorbau weg',
-        w.__T(`kantenMass(raum(), '${kid2}').vorTiefe`) === 150,
-        String(w.__T(`kantenMass(raum(), '${kid2}').vorTiefe`)));
-      pruef('und schlie\u00dft das Blatt',
-        w.__T("modalOffen('km-modal')") === false);
-      w.__T(`kantenMassSetzen(raum(), '${kid2}', {})`);
-    }
-
-    /* ── Raumeinstellungen im Vollbild ────────────────── */
-    {
-      pruef('Die Vollbildleiste hat ein Werkzeug f\u00fcr den Raum',
-        !!d.getElementById('btn-vb-raum'));
-      const merk = w.__T('pModus');
-      w.__T("vollbild = true; pModus = 'raum'; schubladeFuellen()");
-      pruef('Die Drehung ist im Vollbild erreichbar',
-        !!d.getElementById('vb-r-drehung'));
-      pruef('Der offene Himmel auch',
-        !!d.getElementById('vb-r-dach'));
-      const vor = w.__T('raum().drehung');
-      const feld = d.getElementById('vb-r-drehung');
-      feld.value = String((vor + 90) % 360);
-      feld.dispatchEvent(new w.Event('input', {bubbles:true}));
-      pruef('Der Schieber dreht den Raum wirklich',
-        w.__T('raum().drehung') === (vor + 90) % 360,
-        String(w.__T('raum().drehung')));
-      w.__T(`raum().drehung = ${vor}`);
-      w.__T(`vollbild = false; pModus = '${merk}'; schubladeFuellen()`);
-    }
-
-    /* ── Auch eine Wand hat eine Breite ────────────────
-       Bis 3.3.0 liess sich nur ein Fenster oder eine Tuer bemassen.
-       Wer ein 130er Fenster setzt, muss der Wand daneben aber sagen
-       koennen, wie lang sie ist. */
-    {
-      const wid = w.__T('aussenKanten(raum()).filter(k=>k.k==="o").map(k=>k.id)[2]');
-      w.__T(`delete raum().kanten['${wid}']; pKanteArt = 'wand'`);
-      /* Der Weg dorthin fuehrt ueber das Tippen im Grundriss, nicht
-         ueber den direkten Aufruf — genau dort war die Wand gesperrt. */
-      w.__T("pModus = 'kanten'; planRender()");
-      w.__T(`planTipp({target: document.querySelector('#plan-svg [data-kante="${wid}"]')})`);
-      await tick();
-      pruef('Ein zweiter Tipp auf eine Wand \u00f6ffnet das Ma\u00dfblatt',
-        w.__T("modalOffen('km-modal')") === true);
-      pruef('Unterkante und Oberkante bleiben dabei weg',
-        d.getElementById('km-sockel').closest('.km-oeffnung').hidden === true);
-      d.getElementById('km-b').value = '150';
-      w.__T('kmSpeichern()');
-      await tick();
-      pruef('Eine Wandbreite l\u00e4sst sich eintragen',
-        Math.round(w.__T(`kantenBreite(raum(), '${wid}')`)) === 150,
-        String(w.__T(`kantenBreite(raum(), '${wid}')`)));
-      w.__T(`kantenMassSetzen(raum(), '${wid}', {})`);
-
-      /* Bei einer Oeffnung stehen die Felder wieder da. */
-      w.__T(`raum().kanten['${wid}'] = 'fenster'`);
-      w.__T(`kantenMassFragen(raum(), '${wid}')`);
-      await tick();
-      pruef('Bei einem Fenster stehen sie wieder da',
-        d.getElementById('km-sockel').closest('.km-oeffnung').hidden === false);
-      w.__T("modalZu('km-modal')");
-      w.__T(`delete raum().kanten['${wid}']; kantenMassSetzen(raum(), '${wid}', {})`);
-      await tick();
-    }
-
-    /* ── Der Ausschnitt füllt seine Fläche ───────────────
-       Bis 3.3.1 hatte der Ausschnitt immer das Verhältnis des Raums.
-       Auf einer breiten Fläche blieb ein hoher Raum in der Höhe
-       gefangen und ließ links und rechts alles leer. */
-    {
-      const feld = d.getElementById('plan-flaeche');
-      /* jsdom misst nichts von selbst — die Fläche wird gestellt. */
-      const stellen = (br, ho) => {
-        Object.defineProperty(feld, 'clientWidth',  {value:br, configurable:true});
-        Object.defineProperty(feld, 'clientHeight', {value:ho, configurable:true});
-      };
-      const verh = () => {
-        const m = w.__T('JSON.stringify(planMasse())');
-        const o = JSON.parse(m);
-        return o.vW / o.vH;
-      };
-
-      stellen(800, 400);
-      pruef('Auf einer breiten Fl\u00e4che wird der Ausschnitt breit',
-        Math.abs(verh() - 2) < 0.01, verh().toFixed(3));
-      stellen(400, 800);
-      pruef('Auf einer hohen Fl\u00e4che wird er hoch',
-        Math.abs(verh() - 0.5) < 0.01, verh().toFixed(3));
-
-      /* Der Raum muss immer vollständig darin liegen — aufgefüllt
-         wird nur, wo Platz übrig ist, nie beschnitten. */
-      stellen(800, 400);
-      const m2 = JSON.parse(w.__T('JSON.stringify(planMasse())'));
-      pruef('Der Raum passt in beide Richtungen hinein',
-        m2.vW >= m2.W - 0.01 && m2.vH >= m2.H - 0.01,
-        m2.vW.toFixed(1) + '\u00d7' + m2.vH.toFixed(1) + ' gegen '
-        + m2.W.toFixed(1) + '\u00d7' + m2.H.toFixed(1));
-
-      /* Ohne gemessene Fläche fällt es auf das Verhältnis des Raums
-         zurück, statt durch null zu teilen. */
-      stellen(0, 0);
-      const m3 = JSON.parse(w.__T('JSON.stringify(planMasse())'));
-      pruef('Ohne gemessene Fl\u00e4che gilt das Verh\u00e4ltnis des Raums',
-        Math.abs(m3.vW / m3.vH - m3.W / m3.H) < 0.01);
-
-      stellen(800, 400);
-      pruef('Das kleinste Zoom ist jetzt eins',
-        w.__T('zoomMinimum()') === 1, String(w.__T('zoomMinimum()')));
-      w.__T('pZoom = 1; pPanX = 0; pPanY = 0; grenzenPruefen()');
-      pruef('Bei Zoom eins gibt es nichts zu verschieben',
-        w.__T('pPanX') === 0 && w.__T('pPanY') === 0);
-    }
-
-    /* ── Ein Fenster liegt vorn ──────────────────────
-       Erst lag das Maßblatt unter der Vollbildbühne (80), dann unter
-       dem Sektionsfenster (120), aus dem es geoeffnet wird. Beide Male
-       war es unsichtbar, nahm aber Eingaben an: die Tastatur ging auf,
-       im Nichts wurde Text markiert. Ein Fenster gehoert vor alles
-       ausser die Tour. */
-    {
-      const zahl = muster => {
-        const t = html.match(muster);
-        return t ? parseInt(t[1], 10) : null;
-      };
-      const modal = zahl(/\.modal\{[^}]*z-index:(\d+)/);
-      const sekm  = zahl(/\.sekm\{[^}]*z-index:(\d+)/);
-      const wk    = zahl(/\.wk\{[^}]*z-index:(\d+)/);
-      const tour  = zahl(/#tour\{[^}]*z-index:(\d+)/);
-      pruef('Alle Schichten sind auffindbar',
-        modal && sekm && wk && tour,
-        JSON.stringify({modal, sekm, wk, tour}));
-      pruef('Ein Fenster liegt \u00fcber dem Sektionsfenster', modal > sekm,
-        modal + ' gegen ' + sekm);
-      pruef('und \u00fcber der Werkzeugansicht', modal > wk, modal + ' gegen ' + wk);
-      pruef('Die Tour liegt weiter dar\u00fcber', tour > modal, tour + ' gegen ' + modal);
-      pruef('Die Sonderregel f\u00fcrs Vollbild wird nicht mehr gebraucht',
-        html.indexOf('body.vollbild .modal') === -1);
-    }
-
-    /* ── Verschieben im Vollbild ────────────────────
-       Der Grundriss liess sich nur zwischen zwei Punkten bewegen: die
-       Mittelstellung des Ausschnitts wurde als Verschiebung mitgezaehlt
-       und die Grenze lag trotzdem bei null. */
-    {
-      const feld = d.getElementById('plan-flaeche');
-      const stellen = (br, ho) => {
-        Object.defineProperty(feld, 'clientWidth',  {value:br, configurable:true});
-        Object.defineProperty(feld, 'clientHeight', {value:ho, configurable:true});
-      };
-      stellen(400, 800);
-      w.__T('pZoom = 3; pPanX = 0; pPanY = 0');
-      const M = JSON.parse(w.__T('JSON.stringify(planMasse())'));
-      /* Welche Richtung eingeengt ist, haengt davon ab, wie Raum und
-         Flaeche zueinander stehen. Geprueft wird die, in der es
-         ueberhaupt etwas zu verschieben gibt. */
-      const engX = M.vW < M.W;
-      const achse = engX ? 'pPanX' : 'pPanY';
-      const spanne = engX ? (M.W - M.vW) : (M.H - M.vH);
-      pruef('Bei dreifachem Zoom ist der Ausschnitt in einer Richtung kleiner',
-        spanne > 1, achse + ': ' + spanne.toFixed(1));
-
-      /* Bis ans Ende und wieder zurueck. */
-      w.__T(achse + ' = 99999; grenzenPruefen()');
-      const weit = w.__T(achse);
-      pruef('Verschieben reicht bis an den Rand des Raums',
-        Math.abs(weit - spanne) < 0.5,
-        weit.toFixed(1) + ' gegen ' + spanne.toFixed(1));
-      pruef('und das ist eine echte Strecke, kein Punkt', weit > 1, String(weit));
-      w.__T(achse + ' = -99999; grenzenPruefen()');
-      pruef('Am anderen Ende ist bei null Schluss',
-        w.__T(achse) === 0, String(w.__T(achse)));
-      /* Die freie Richtung bleibt stehen. */
-      w.__T((engX ? 'pPanY' : 'pPanX') + ' = 500; grenzenPruefen()');
-      pruef('Wo alles ins Bild passt, wird nicht verschoben',
-        w.__T(engX ? 'pPanY' : 'pPanX') === 0);
-      w.__T((engX ? 'pPanY' : 'pPanX') + ' = -500; grenzenPruefen()');
-      pruef('Auch nicht in die andere Richtung',
-        w.__T(engX ? 'pPanY' : 'pPanX') === 0,
-        String(w.__T(engX ? 'pPanY' : 'pPanX')));
-
-      /* Und der Raum steht in dieser Richtung mittig. Genau das ging
-         beim Zoomen verloren: der Ausgangspunkt rechnete mit dem
-         verkleinerten Raum statt mit dem ganzen, und der Grundriss
-         wanderte mit jeder Stufe weiter zur Seite. */
-      w.__T('pPanX = 0; pPanY = 0');
-      const M2 = JSON.parse(w.__T('JSON.stringify(planMasse())'));
-      const freiVoll = engX ? (M2.vH >= M2.H) : (M2.vW >= M2.W);
-      const mitteInhalt = engX
-        ? (-M2.rand - M2.R + M2.H/2) : (-M2.rand - M2.R + M2.W/2);
-      const mitteBild = engX ? (M2.y0 + M2.vH/2) : (M2.x0 + M2.vW/2);
-      pruef('In der freien Richtung ist reichlich Platz', freiVoll);
-      pruef('Der Raum steht dort mittig',
-        Math.abs(mitteInhalt - mitteBild) < 0.5,
-        mitteInhalt.toFixed(1) + ' gegen ' + mitteBild.toFixed(1));
-
-      /* Passt alles ins Bild, gibt es nichts zu verschieben. */
-      w.__T('pZoom = 1; pPanX = 0; pPanY = 0; pPanX = 500; grenzenPruefen()');
-      pruef('Bei Zoom eins bleibt der Ausschnitt stehen',
-        w.__T('pPanX') === 0, String(w.__T('pPanX')));
-      w.__T('pZoom = 1; pPanX = 0; pPanY = 0');
-      stellen(800, 400);
-    }
-
-    /* ── Wenn Marken einander verdecken ────────────────
-       Vier Pflanzen auf einem Fensterbrett ergaben einen Klumpen aus
-       Kreisen und einen Brei aus Namen. */
-    {
-      /* Zusammenfassen statt auseinanderschieben ─ auch aus dem
-         Sonderfall heraus, dass alle auf demselben Punkt liegen. */
-      const roh = w.__T(`JSON.stringify(markenBuendel(
-        {a:{x:100,y:100}, b:{x:100,y:100}, c:{x:104,y:100}, d:{x:400,y:400}}, 30))`);
-      const gr = JSON.parse(roh);
-      const von = id => gr.find(g=>g.ids.indexOf(id) >= 0);
-      pruef('Drei nahe Marken werden ein B\u00fcndel',
-        von('a').ids.length === 3, JSON.stringify(gr.map(g=>g.ids)));
-      pruef('Wer weit weg steht, bleibt f\u00fcr sich',
-        von('d').ids.length === 1, JSON.stringify(von('d').ids));
-      pruef('Es bleiben genau zwei B\u00fcndel', gr.length === 2, String(gr.length));
-      /* Das Buendel steht dort, wo die Pflanzen stehen ─ nicht daneben.
-         Genau das war der Fehler des Auseinanderschiebens. */
-      pruef('Das B\u00fcndel steht bei seinen Pflanzen',
-        Math.abs(von('a').x - 101.33) < 0.1 && Math.abs(von('a').y - 100) < 0.1,
-        von('a').x + ',' + von('a').y);
-      /* Der Schluessel haengt an den Mitgliedern, nicht an der
-         Reihenfolge ─ sonst klappte das offene Buendel bei jedem
-         Neuzeichnen zu. */
-      const roh2 = w.__T(`JSON.stringify(markenBuendel(
-        {c:{x:104,y:100}, b:{x:100,y:100}, a:{x:100,y:100}, d:{x:400,y:400}}, 30))`);
-      pruef('Dieselbe Lage ergibt denselben Schl\u00fcssel',
-        JSON.parse(roh2).map(g=>g.key).join() === gr.map(g=>g.key).join(),
-        JSON.parse(roh2).map(g=>g.key).join());
-
-      /* Und die Beschriftung: eng ist eng. */
-      const gedraengt = JSON.parse(w.__T(`JSON.stringify(markenGedraengt(
-        {a:{x:0,y:0}, b:{x:20,y:0}, c:{x:500,y:500}}, 58))`));
-      pruef('Nahe Nachbarn gelten als gedr\u00e4ngt',
-        gedraengt.a === true && gedraengt.b === true, JSON.stringify(gedraengt));
-      pruef('Wer allein steht, nicht',
-        !gedraengt.c, JSON.stringify(gedraengt));
-
-      /* Im Bild: der Name fällt weg, der Kreis bleibt. */
-      const rid = w.__T('raum().id');
-      const zwei = w.__T('allePflanzen().slice(0,2).map(function(p){ return p.id; })');
-      w.__T(`pflanzeSetzen('${zwei[0]}', '${rid}', 100, 100)`);
-      w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 104, 100)`);
-      /* Gepr\u00fcft wird die Zeichnung selbst. Der Umweg \u00fcber das
-         Dokument taugt hier nicht: ob der Grundriss gerade im
-         Dokument steht, h\u00e4ngt davon ab, welches Werkzeugfenster
-         offen ist \u2014 und jsdom findet SVG-Elemente ohnehin nicht \u00fcber
-         Klassenselektoren. */
-      w.__T("grStufe = 'editor'; pGewaehlt = null");
-      const bild = w.__T('grundrissSVG()');
-      const zaehl = (t, m) => (t.split(m).length - 1);
-      pruef('Beide Marken werden gezeichnet',
-        zaehl(bild, 'data-pfl=') >= 2, String(zaehl(bild, 'data-pfl=')));
-      pruef('Ihre Namen nicht \u2014 sie l\u00e4gen \u00fcbereinander',
-        zaehl(bild, 'class="p-lab"') < zaehl(bild, 'data-pfl='),
-        zaehl(bild, 'class="p-lab"') + ' Namen bei '
-        + zaehl(bild, 'data-pfl=') + ' Marken');
-
-      /* Eine Pflanze weit ab beh\u00e4lt ihren Namen. */
-      w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 250, 100)`);
-      const weit = w.__T('grundrissSVG()');
-      pruef('Wer allein steht, wird beschriftet',
-        zaehl(weit, 'class="p-lab"') > zaehl(bild, 'class="p-lab"'),
-        zaehl(weit, 'class="p-lab"') + ' gegen ' + zaehl(bild, 'class="p-lab"'));
-
-      /* In der Ansicht werden Marken, die aufeinander liegen, zu einem
-         B\u00fcndel. Gepr\u00fcft wird am fertigen Bild, nicht an der
-         Funktion \u2014 sonst bliebe ein fehlender Aufruf unbemerkt. */
-      {
-        const stelleVon = (t, id) => {
-          const tr = new RegExp('data-pfl="' + id + '"[\\s\\S]{0,120}?translate\\(([-0-9.]+),([-0-9.]+)\\)');
-          const m = t.match(tr);
-          return m ? {x:+m[1], y:+m[2]} : null;
-        };
-        w.__T("raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-        w.__T(`pflanzeSetzen('${zwei[0]}', '${rid}', 120, 60)`);
-        w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 120, 60)`);
-        w.__T("grStufe = 'ansicht'; pGewaehlt = null; pBuendel = null");
-        const bildA = w.__T('grundrissSVG()');
-        const zaehlA = (t, m) => (t.split(m).length - 1);
-        const drin = (t, id) => t.indexOf('data-pfl="' + id + '"') >= 0;
-        pruef('In der Ansicht stehen die zwei als ein B\u00fcndel',
-          zaehlA(bildA, 'data-buendel=') === 1
-          && !drin(bildA, zwei[0]) && !drin(bildA, zwei[1]),
-          zaehlA(bildA, 'data-buendel=') + ' B\u00fcndel');
-        pruef('Es tr\u00e4gt die Zahl zwei',
-          /class="b-zahl"[^>]*>2</.test(bildA));
-        /* Und es steht dort, wo die Pflanzen stehen. Das
-           Auseinanderschieben setzte Marken neben den Raum. */
-        const bm = bildA.match(/data-buendel="[^"]*"[\s\S]{0,120}?translate\(([-0-9.]+),([-0-9.]+)\)/);
-        pruef('Das B\u00fcndel steht am Ort der Pflanzen',
-          bm && Math.abs(+bm[1] - 120) < 0.5 && Math.abs(+bm[2] - 60) < 0.5,
-          bm ? bm[1] + ',' + bm[2] : '—');
-
-        /* Angetippt f\u00e4hrt es die Namen aus \u2014 zwei Zeilen, jede
-           mit ihrer Pflanze daran. */
-        const key = bildA.match(/data-buendel="([^"]*)"/)[1];
-        w.__T(`pBuendel = '${key}'`);
-        const bildAuf = w.__T('grundrissSVG()');
-        pruef('Aufgeklappt stehen beide Namen in der Liste',
-          drin(bildAuf, zwei[0]) && drin(bildAuf, zwei[1]),
-          String(zaehlA(bildAuf, 'class="b-lab"')));
-        pruef('Zugeklappt wieder nicht',
-          zaehlA(bildA, 'class="b-lab"') === 0);
-        w.__T('pBuendel = null');
-
-        /* Viele auf einem Punkt: die Zahl im Kreis und die Zeilen der
-           Liste muessen dasselbe sagen. */
-        {
-          const viele = w.__T('allePflanzen().map(function(p){return p.id;})').slice(0, 7);
-          viele.forEach(id=> w.__T(`pflanzeSetzen('${id}', '${rid}', 120, 60)`));
-          w.__T("grStufe = 'ansicht'; pGewaehlt = null; pBuendel = null");
-          const bv = w.__T('grundrissSVG()');
-          const zahl7 = (bv.match(/class="b-zahl"[^>]*>(\d+)</) || [])[1];
-          const key7 = (bv.match(/data-buendel="([^"]*)"/) || [])[1];
-          w.__T(`pBuendel = '${key7}'`);
-          const auf7 = w.__T('grundrissSVG()');
-          const zeilen7 = (auf7.match(/class="buendel-zeile"/g) || []).length;
-          pruef('Die Zahl im Kreis nennt alle',
-            +zahl7 === viele.length, zahl7 + ' bei ' + viele.length + ' Pflanzen');
-          pruef('Und die Liste zeigt genauso viele',
-            zeilen7 === +zahl7, zeilen7 + ' Zeilen bei ' + zahl7);
-          /* Auf einem M\u00f6bel verteilt `markenPositionen` sie zuerst.
-             Genau so steht es beim Nutzer: sieben auf einem Brett. */
-          w.__T(`raum().moebel = [{id:'brett', name:'Brett', typ:'regal',
-            x:100, y:40, b:120, t:30, h:95}];
-            SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-          viele.forEach(id=> w.__T(`pflanzeSetzen('${id}', '${rid}', 130, 55)`));
-          w.__T('pBuendel = null');
-          const bMo = w.__T('grundrissSVG()');
-          const zMo = (bMo.match(/class="b-zahl"[^>]*>(\d+)</g) || [])
-            .map(t=>+t.replace(/[^0-9]/g, ''));
-          const eMo = (bMo.match(/data-pfl="/g) || []).length;
-          pruef('Auf einem M\u00f6bel geht keine Pflanze verloren',
-            zMo.reduce((a,b)=>a+b, 0) + eMo === viele.length,
-            zMo.join('+') + ' geb\u00fcndelt, ' + eMo + ' einzeln, '
-            + viele.length + ' Pflanzen');
-          const kMo = (bMo.match(/data-buendel="([^"]*)"/) || [])[1];
-          if(kMo){
-            w.__T(`pBuendel = '${kMo}'`);
-            const aMo = w.__T('grundrissSVG()');
-            const zahlMo = +(aMo.match(/data-buendel="[^"]*"[\s\S]{0,200}?class="b-zahl"[^>]*>(\d+)</) || [])[1];
-            const zeilenMo = (aMo.match(/class="buendel-zeile"/g) || []).length;
-            pruef('Die Zahl auf dem M\u00f6bel stimmt mit der Liste \u00fcberein',
-              zeilenMo === zahlMo, zeilenMo + ' Zeilen bei ' + zahlMo);
-            w.__T('pBuendel = null');
-          }
-          w.__T("raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-          viele.forEach(id=> w.__T(`pflanzeSetzen('${id}', '${rid}', 120, 60)`));
-          w.__T(`pBuendel = '${key7}'`);
-
-          /* Und die Liste muss ins Bild passen. Ein B\u00fcndel oben in
-             der Ecke schob sie \u00fcber den oberen Rand: der Kreis sagte
-             sieben, sichtbar waren sechs \u2014 das SVG schneidet an
-             seiner viewBox ab.
-
-             Der Modus geh\u00f6rt dazu: nur im Kachelmodus liegt ein Ring
-             leerer Kacheln um den Raum, der einen \u00fcberstehenden
-             Kasten auffinge. In der Ansicht gibt es ihn nicht. */
-          w.__T("pModus = 'pflanzen'");
-          const kasten = auf7.match(
-            /class="buendel-liste"[\s\S]{0,120}?x="([-0-9.]+)" y="([-0-9.]+)" width="([-0-9.]+)" height="([-0-9.]+)"/);
-          const vb = (auf7.match(/viewBox="([-0-9.]+) ([-0-9.]+) ([-0-9.]+) ([-0-9.]+)"/) || [])
-            .slice(1).map(Number);
-          const passt = kasten && vb.length === 4
-            && +kasten[1] >= vb[0] && +kasten[2] >= vb[1]
-            && +kasten[1] + +kasten[3] <= vb[0] + vb[2]
-            && +kasten[2] + +kasten[4] <= vb[1] + vb[3];
-          pruef('Die Liste liegt ganz im Bild', !!passt,
-            kasten ? kasten.slice(1).join(',') + ' in ' + vb.join(',') : '—');
-
-          /* Gegenprobe am oberen Rand: das B\u00fcndel wandert dorthin,
-             wo der Fehler auftrat. */
-          viele.forEach(id=> w.__T(`pflanzeSetzen('${id}', '${rid}', 130, 10)`));
-          /* Der Ausschnitt wird nach unten geschoben, wie beim Schieben
-             im Vollbild \u2014 dann steht das B\u00fcndel dicht am oberen
-             Rand und die Liste muss ausweichen. */
-          w.__T('pPanY = 55');
-          const oben = w.__T('grundrissSVG()');
-          const kOben = oben.match(
-            /class="buendel-liste"[\s\S]{0,120}?x="([-0-9.]+)" y="([-0-9.]+)" width="([-0-9.]+)" height="([-0-9.]+)"/);
-          const vbO = (oben.match(/viewBox="([-0-9.]+) ([-0-9.]+) ([-0-9.]+) ([-0-9.]+)"/) || [])
-            .slice(1).map(Number);
-          pruef('Auch oben in der Ecke',
-            kOben && +kOben[2] >= vbO[1]
-            && +kOben[2] + +kOben[4] <= vbO[1] + vbO[3],
-            kOben ? kOben[2] + '+' + kOben[4] + ' in ' + vbO[1] + '+' + vbO[3] : '—');
-
-          /* Die beiden aus der Nachbarpr\u00fcfung geh\u00f6ren zur\u00fcck an
-             ihren Punkt, die \u00fcbrigen aus dem Weg. */
-          w.__T('pPanY = 0');
-          w.__T('pBuendel = null');
-          viele.slice(2).forEach((id, i)=>
-            w.__T(`pflanzeSetzen('${id}', '${rid}', ${300 + i*60}, 300)`));
-          w.__T(`pflanzeSetzen('${zwei[0]}', '${rid}', 120, 60)`);
-          w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 120, 60)`);
-        }
-
-        /* Im Editor bleibt die Marke da, wo der Finger sie hingezogen
-           hat \u2014 dort darf nichts von selbst wegrutschen, und
-           geb\u00fcndelt werden darf auch nichts: was man ziehen soll,
-           muss einzeln unter dem Finger liegen. */
-        w.__T("grStufe = 'editor'");
-        const bildE = w.__T('grundrissSVG()');
-        const e0 = stelleVon(bildE, zwei[0]);
-        pruef('Im Editor bleibt sie an ihrem echten Ort',
-          e0 && Math.abs(e0.x - 120) < 0.5 && Math.abs(e0.y - 60) < 0.5,
-          e0 ? e0.x + ',' + e0.y : '—');
-        pruef('Im Editor wird nicht geb\u00fcndelt',
-          bildE.indexOf('data-buendel=') < 0
-          && bildE.indexOf('data-pfl="' + zwei[0] + '"') >= 0
-          && bildE.indexOf('data-pfl="' + zwei[1] + '"') >= 0);
-        w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 104, 100)`);
-        w.__T(`pflanzeSetzen('${zwei[0]}', '${rid}', 100, 100)`);
-      }
-
-      /* Die ausgew\u00e4hlte beh\u00e4lt ihren Namen auch im Gedr\u00e4nge. */
-      w.__T(`pflanzeSetzen('${zwei[1]}', '${rid}', 104, 100)`);
-      w.__T(`pGewaehlt = {typ:'pflanze', id:'${zwei[0]}'}`);
-      const gewBild = w.__T('grundrissSVG()');
-      pruef('Die ausgew\u00e4hlte Pflanze beh\u00e4lt ihren Namen',
-        zaehl(gewBild, 'class="p-lab"') > zaehl(bild, 'class="p-lab"'),
-        zaehl(gewBild, 'class="p-lab"') + ' gegen ' + zaehl(bild, 'class="p-lab"'));
-      w.__T('pGewaehlt = null; planRender()');
-    }
-
-    /* ── Die Marke bleibt unter dem Finger ──────────────
-       Ohne gemerkten Griffpunkt sprang sie beim ersten Millimeter mit
-       ihrem Mittelpunkt unter den Finger. */
-    {
-      pruef('Der Griffpunkt wird beim Aufsetzen gemerkt',
-        html.indexOf('dx: (p && o0) ? p.x - o0.x : 0') !== -1);
-      pruef('und beim Ziehen abgezogen',
-        html.indexOf('Math.min(r.sp*KACHEL, p.x - zieht.dx)') !== -1);
-      pruef('Die Schwelle ist klein genug',
-        html.indexOf('zieht.sy) < 3) return;') !== -1);
-    }
-
-    /* ── Beschriftung der Möbel ────────────────
-       Ein Name, der breiter ist als sein Möbel, lief bis 3.4.2 quer
-       über das Nachbarmöbel: „Wandbrett" lag auf „TV-Sideboard".
-       Jetzt trägt jedes Möbel nur so viel Text, wie es breit ist. */
-    {
-      w.__T(`raum().moebel = [
-        {id:'breit',  name:'Esstisch mit St\u00fchlen', typ:'tisch', x:0, y:0, b:220, t:100, h:75},
-        {id:'schmal', name:'Wandbrett am Fenster',  typ:'regal', x:0, y:250, b:34, t:24, h:120}];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-      w.__T("grStufe = 'editor'; pGewaehlt = null");
-      const bildM = w.__T('grundrissSVG()');
-      /* Der Text steht hinter der Klasse, nicht hinter einer Kennung —
-         also wird er selbst gelesen. */
-      const labels = (bildM.match(/class="m-lab"[^>]*>([^<]*)</g) || [])
-        .map(t=>t.replace(/^[\s\S]*>/, '').replace(/<$/, ''));
-      const hoehen = (bildM.match(/class="m-h"/g) || []).length;
-      pruef('Das breite M\u00f6bel tr\u00e4gt seinen vollen Namen',
-        labels.indexOf('Esstisch mit St\u00fchlen') >= 0, JSON.stringify(labels));
-      const kurzL = labels.filter(t=>t !== 'Esstisch mit St\u00fchlen');
-      pruef('Das schmale bekommt einen gek\u00fcrzten',
-        kurzL.length === 1 && kurzL[0].length < 'Wandbrett am Fenster'.length
-        && kurzL[0].slice(-1) === '\u2026', JSON.stringify(kurzL));
-      pruef('Und der gek\u00fcrzte passt in seine Breite',
-        kurzL.length === 1 && kurzL[0].length <= 8, kurzL[0]);
-      pruef('Nur das breite zeigt seine H\u00f6he',
-        hoehen === 1, String(hoehen));
-
-      /* ── Wer hoeher steht, liegt oben ────────────────
-         Gezeichnet wurde in der Reihenfolge des Eintragens. Ein
-         Wandbrett auf 1,80 m lag damit unter einem Sideboard auf
-         50 cm, wenn es frueher eingetragen war. */
-      {
-        const platz = (t, id) => t.indexOf('data-moebel="' + id + '"');
-        pruef('Das h\u00f6here M\u00f6bel wird zuletzt gezeichnet',
-          platz(bildM, 'schmal') > platz(bildM, 'breit'),
-          platz(bildM, 'schmal') + ' nach ' + platz(bildM, 'breit'));
-        /* Und umgekehrt, damit nicht blosse Eintragsreihenfolge
-           bestanden hat: dasselbe Paar andersherum eingetragen. */
-        w.__T(`raum().moebel = [
-          {id:'hoch',  name:'Wandbrett', typ:'regal', x:0, y:0,   b:120, t:30, h:180},
-          {id:'flach', name:'Sideboard', typ:'kommode', x:0, y:60, b:120, t:40, h:50}];
-          SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-        const bildH = w.__T('grundrissSVG()');
-        pruef('Auch wenn es zuerst eingetragen wurde',
-          bildH.indexOf('data-moebel="hoch"') > bildH.indexOf('data-moebel="flach"'),
-          bildH.indexOf('data-moebel="hoch"') + ' nach '
-          + bildH.indexOf('data-moebel="flach"'));
-        /* Die Liste selbst bleibt in der Reihenfolge des Eintragens \u2014
-           sonst zeigte die Moebelleiste jedes Mal etwas anderes. */
-        pruef('Die Liste wird dabei nicht umsortiert',
-          w.__T("raum().moebel[0].id") === 'hoch', w.__T("raum().moebel[0].id"));
-        w.__T(`raum().moebel = [
-          {id:'breit',  name:'Esstisch mit St\u00fchlen', typ:'tisch', x:0, y:0, b:220, t:100, h:75},
-          {id:'schmal', name:'Wandbrett am Fenster',  typ:'regal', x:0, y:250, b:34, t:24, h:120}];
-          SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-      }
-
-      /* Ein Brett, das f\u00fcr drei Zeichen zu schmal ist, tr\u00e4gt gar
-         nichts — ein einzelner Buchstabe sagt weniger als nichts. */
-      w.__T(`raum().moebel[1].b = 12; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-      const bildW = w.__T('grundrissSVG()');
-      pruef('Ein sehr schmales M\u00f6bel bleibt unbeschriftet',
-        (bildW.match(/class="m-lab"/g) || []).length === 1,
-        String((bildW.match(/class="m-lab"/g) || []).length));
-      w.__T("raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-    }
-
-    /* ── Was nicht zusammenpasst ───────────────
-       Die Giftmeldungen standen einmal je Pflanze mit dem vollen
-       Grundtext; sechs Aronstabgew\u00e4chse ergaben sechsmal denselben
-       Absatz. Und der Frostkasten sammelte aus allen R\u00e4umen \u2014 im
-       Wohnzimmer standen die Balkonpflanzen. */
-    {
-      const rid2 = w.__T('raum().id');
-      const drei = w.__T('allePflanzen().map(function(p){return p.id;})').slice(0, 3);
-      w.__T("raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-      drei.forEach((id, i)=>
-        w.__T(`pflanzeSetzen('${id}', '${rid2}', ${80 + i*70}, 120)`));
-      /* Damit \u00fcberhaupt gewarnt wird, muss ein Tier gehalten werden,
-         die Pflanze giftig sein und der Platz erreichbar. Alle drei
-         werden hier gesetzt \u2014 sonst pr\u00fcft der Block gegen einen
-         leeren Bericht und h\u00e4lt jeden Fehler f\u00fcr richtig. */
-      w.__T("S.tiere = {aktiv:true, arten:['katze']}");
-      w.__T(`(function(){
-        const eigen = ['a','b','c'];
-        ['${drei[0]}', '${drei[1]}', '${drei[2]}'].forEach(function(id, i){
-          const p = allePflanzen().find(function(x){ return x.id === id; });
-          if(!p) return;
-          p.gift = {status:'fest', quelle:'pruefstand', beleg:'-',
-            grund:'Unl\u00f6sliche Calciumoxalat-Nadeln in allen Pflanzenteilen.',
-            tiere:{katze:'giftig'}};
-        });
-      })()`);
-      const gr = JSON.parse(w.__T('JSON.stringify(giftGruppen(raum()))'));
-      const wieOft = t => t.split('Calciumoxalat').length - 1;
-      const html = w.__T('planWarnungen()');
-      if(gr.length){
-        const groesste = gr.slice().sort((a,b)=>b.wer.length - a.wer.length)[0];
-        pruef('Gleiche Gr\u00fcnde stehen in einer Gruppe',
-          gr.every(g=>g.wer.length >= 1), JSON.stringify(gr.map(g=>g.wer.length)));
-        /* Der Grundtext darf h\u00f6chstens einmal je Gruppe vorkommen,
-           nicht einmal je Pflanze. */
-        const grundZahl = gr.filter(g=>g.grund.indexOf('Calciumoxalat') >= 0).length;
-        pruef('Der Grund steht einmal je Gruppe, nicht je Pflanze',
-          wieOft(html) <= grundZahl,
-          wieOft(html) + ' mal im Text, ' + grundZahl + ' Gruppen, '
-          + groesste.wer.length + ' Pflanzen in der gr\u00f6\u00dften');
-        pruef('Der Grund steckt hinter einem Aufklappen',
-          html.indexOf('warn-mehr') >= 0 || wieOft(html) === 0);
-      } else {
-        pruef('Ohne giftige Pflanze gibt es keine Gruppe', gr.length === 0);
-        pruef('und keinen Grundtext im Bericht', wieOft(html) === 0);
-        pruef('Der Bericht bleibt trotzdem eine Zeichenkette', typeof html === 'string');
-      }
-
-      /* Der Frostkasten kennt jetzt einen Raum. Damit er \u00fcberhaupt
-         etwas zeigt, braucht es einen zweiten Raum unter offenem
-         Himmel, eine frostempfindliche Pflanze darin und Herbst. */
-      const zweitR = w.__T(`(function(){
-        const rs = raeume();
-        let z = rs.find(function(x){ return x.id !== '${rid2}'; });
-        if(!z){
-          z = JSON.parse(JSON.stringify(rs[0]));
-          z.id = 'pruef-balkon'; z.name = 'Pr\u00fcfbalkon';
-          S.raeume.push(z);
-        }
-        z.dach = false;
-        return z.id;
-      })()`);
-      /* Es gibt nur wenige Pflanzen im Pr\u00fcfstand \u2014 die letzte der
-         drei zieht auf den Balkon, die Giftpr\u00fcfung oben ist durch. */
-      const frostP = w.__T('allePflanzen().map(function(p){return p.id;})')
-        .filter(id => drei.indexOf(id) < 0)[0] || drei[drei.length - 1];
-      w.__T('pMonat = 10');
-      if(frostP){
-        w.__T(`(function(){
-          const q = (S.eigene || []).find(function(x){ return x.id === '${frostP}'; });
-          if(q) q.frostMin = 10;
-          const p = allePflanzen().find(function(x){ return x.id === '${frostP}'; });
-          if(p) p.frostMin = 10;
-          pflanzeSetzen('${frostP}', '${zweitR}', 60, 60);
-        })()`);
-        w.__T(`SONNE_CACHE = {}; SONNE_CACHE_SIG = ''`);
-        const nurEiner = w.__T(`umzugHTML('${rid2}')`);
-        const alle = w.__T('umzugHTML()');
-        pruef('Der Frostkasten des Nachbarraums taucht dort nicht auf',
-          nurEiner.indexOf(w.__T(`nice(allePflanzen().find(function(x){ return x.id === '${frostP}'; }))`)) < 0,
-          nurEiner.slice(0, 90));
-        pruef('Ohne Raumangabe sammelt er weiterhin alle',
-          alle.length > nurEiner.length,
-          alle.length + ' gegen ' + nurEiner.length);
-      }
-      /* Und im Bericht des Raums steht keine Pflanze aus einem anderen. */
-      const fremd = w.__T(`(function(){
-        const r = raum();
-        const eigen = pflanzenIm(r.id).map(function(p){ return nice(p); });
-        const t = planWarnungen();
-        return allePflanzen().filter(function(p){
-          return eigen.indexOf(nice(p)) < 0
-            && t.indexOf('<b>' + nice(p) + '</b>') >= 0;
-        }).map(function(p){ return nice(p); });
-      })()`);
-      pruef('Keine Pflanze aus einem anderen Raum im Bericht',
-        fremd.length === 0, JSON.stringify(fremd));
-    }
-
-    /* ── Bild oben, Werkzeug darunter ──────────
-       Wer den Raum auf dem Kompass ausrichtete, war zwei Bildschirme
-       von dem Raum entfernt, den er ausrichtete. */
-    {
-      const ed = d.getElementById('gr-editor');
-      const stelle = id => {
-        const el = d.getElementById(id);
-        if(!el) return -1;
-        return Array.prototype.indexOf.call(ed.querySelectorAll('*'), el);
-      };
-      pruef('Das Bild steht vor der Werkzeugleiste',
-        stelle('plan-halter') < stelle('kanten-leiste'),
-        stelle('plan-halter') + ' vor ' + stelle('kanten-leiste'));
-      pruef('und vor dem Lichtfenster',
-        stelle('plan-halter') < stelle('licht-panel'));
-      pruef('und vor den Raumeinstellungen \u2014 dort liegt der Kompass',
-        stelle('plan-halter') < stelle('raum-einrichten'),
-        stelle('plan-halter') + ' vor ' + stelle('raum-einrichten'));
-      pruef('Die Reiter stehen weiterhin ganz oben',
-        stelle('plan-halter') > 0 && ed.querySelector('.gr-tabs') != null);
-
-      /* Die Hinweise klappen. */
-      w.__T("grStufe = 'editor'; pModus = 'pflanzen'; grHinweise = false");
-      w.__T('planRender()');
-      const hin = () => d.getElementById('modus-hinweis').hidden;
-      pruef('Der Bedienhinweis ist zugeklappt', hin() === true, String(hin()));
-      pruef('Der Infotext zeigt ihn dann auch nicht',
-        d.getElementById('p-info').innerHTML.indexOf('Marke antippen') < 0);
-      w.__T("document.getElementById('btn-gr-hinweise').click()");
-      pruef('Ein Tipp klappt ihn auf', hin() === false, String(hin()));
-      pruef('Und der Infotext zeigt ihn mit',
-        d.getElementById('p-info').innerHTML.indexOf('Marke antippen') >= 0);
-      w.__T("document.getElementById('btn-gr-hinweise').click()");
-    }
-
-    /* ── Die Leiste der Ansicht klappt ─────────
-       Der Monatsregler stand zwischen Grundriss und Text im Weg.
-       Zugeklappt muss trotzdem ablesbar bleiben, welches Licht man
-       gerade sieht \u2014 sonst waere die Zeichnung nicht mehr zu deuten. */
-    {
-      w.__T("grStufe = 'ansicht'; pLicht = 'stunden'; pMonat = 9; graLeiste = false");
-      w.__T('grAnsichtZeichnen()');
-      const inh = () => w.__T("document.getElementById('gra-leiste-inhalt').hidden");
-      const stand = () => w.__T("document.getElementById('gra-leiste-stand').textContent");
-      pruef('Zugeklappt sind Wahl und Regler weg', inh() === true, String(inh()));
-      pruef('Der Kopf sagt trotzdem, was zu sehen ist',
-        stand() === 'Sonnenstunden \u00b7 September', stand());
-
-      w.__T("document.getElementById('btn-gra-leiste').click()");
-      pruef('Ein Tipp klappt sie auf', inh() === false, String(inh()));
-      pruef('Und das merkt sich der Zustand', w.__T('graLeiste') === true);
-
-      /* Der Bedienhinweis geh\u00f6rt zur aufgeklappten Leiste. */
-      const mitTipp = w.__T("document.getElementById('gra-info').innerHTML");
-      w.__T("document.getElementById('btn-gra-leiste').click()");
-      const ohneTipp = w.__T("document.getElementById('gra-info').innerHTML");
-      pruef('Aufgeklappt steht der Bedienhinweis da',
-        mitTipp.indexOf('Marke antippen') >= 0);
-      pruef('Zugeklappt nicht mehr',
-        ohneTipp.indexOf('Marke antippen') < 0);
-      pruef('Der Raum mit seinen Ma\u00dfen bleibt in beiden F\u00e4llen',
-        ohneTipp.indexOf('geschlossen') >= 0 || ohneTipp.indexOf('offener Himmel') >= 0);
-
-      /* Ein anderer Monat, ein anderer Kopf. */
-      w.__T('pMonat = 1; grAnsichtZeichnen()');
-      pruef('Der Kopf folgt dem Monat',
-        stand() === 'Sonnenstunden \u00b7 Januar', stand());
-      w.__T("pLicht = 'hell'; grAnsichtZeichnen()");
-      pruef('und der Lichtart', stand() === 'Grundhelligkeit', stand());
-      w.__T("pLicht = 'stunden'; pMonat = 9; graLeiste = false; grStufe = 'editor'");
-    }
-
-    /* ── Möbel drehen ──────────────────────────
-       Gedreht wird die Zeichnung, getauscht werden die Maße. Nur so
-       stimmen Schatten und Stellflaeche mit dem Bild ueberein. */
-    {
-      w.__T(`raum().moebel = [{id:'drehtest', name:'Sofa', typ:'sofa',
-        x:0, y:0, b:200, t:90, h:45}]`);
-      const m = () => JSON.parse(w.__T("JSON.stringify(raum().moebel[0])"));
-      pruef('Ein neues M\u00f6bel liegt ungedreht', (m().dreh || 0) === 0);
-
-      w.__T('moebelDrehen(raum().moebel[0])');
-      const eins = m();
-      pruef('Einmal drehen macht 90 Grad', eins.dreh === 90, String(eins.dreh));
-      pruef('Breite und Tiefe tauschen dabei',
-        eins.b === 90 && eins.t === 200, eins.b + '\u00d7' + eins.t);
-
-      w.__T('moebelDrehen(raum().moebel[0]); moebelDrehen(raum().moebel[0])');
-      const drei = m();
-      pruef('Dreimal weiter macht 270', drei.dreh === 270, String(drei.dreh));
-      pruef('und stellt es wieder quer', drei.b === 90 && drei.t === 200,
-        drei.b + '\u00d7' + drei.t);
-
-      w.__T('moebelDrehen(raum().moebel[0])');
-      const rund = m();
-      pruef('Viermal drehen f\u00fchrt zur\u00fcck an den Anfang',
-        (rund.dreh % 360) === 0 && rund.b === 200 && rund.t === 90,
-        rund.dreh + ' / ' + rund.b + '\u00d7' + rund.t);
-
-      /* Die Zeichnung muss die Drehung ebenfalls tragen. */
-      w.__T('moebelDrehen(raum().moebel[0])');
-      const svg = w.__T('moebelForm(raum().moebel[0], "red")');
-      pruef('Die Zeichnung dreht mit', /rotate\(90 /.test(svg), svg.slice(0, 60));
-
-      /* Der Schatten dreht mit, weil er an b und t haengt. */
-      w.__T(`(function(){
-        const r = raum();
-        r.moebel = [{id:'drehtest', name:'Regal', typ:'regal',
-          x:0, y:0, b:300, t:25, h:150}];
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      })()`);
-      const breit = w.__T('!!hoeheAn(raum(), 250, 10)');
-      w.__T('moebelDrehen(raum().moebel[0])');
-      const hoch = w.__T('!!hoeheAn(raum(), 250, 10)');
-      pruef('Vorher tr\u00e4gt es an der weit rechts gelegenen Stelle',
-        breit === true, String(breit));
-      pruef('Nach dem Drehen nicht mehr \u2014 die Ma\u00dfe sind mitgewandert',
-        hoch === false, String(hoch));
-      pruef('Die gedrehte H\u00fclle stimmt',
-        w.__T('raum().moebel[0].b') === 25 && w.__T('raum().moebel[0].t') === 300);
-
-      w.__T("raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-      pruef('Es gibt einen Knopf zum Drehen', !!d.getElementById('btn-mb-dreh'));
-    }
-
-    /* ── Was Licht wegnimmt, trägt nichts ─────────────── */
-    {
-      pruef('Es gibt einen Zaun', !!w.__T('MOEBEL_ARTEN.zaun'));
-      pruef('und ein Ecksofa', !!w.__T('MOEBEL_ARTEN.ecksofa'));
-      pruef('und ein TV-Sideboard', !!w.__T('MOEBEL_ARTEN.sideboard'));
-      pruef('und einen Esstisch mit St\u00fchlen', !!w.__T('MOEBEL_ARTEN.esstisch'));
-      pruef('Zaun, Hecke, Mauer und Baum sperren',
-        w.__T('["zaun","hecke","mauer","baum"].every(function(k){ return MOEBEL_ARTEN[k].sperrt === true; })'));
-      pruef('Ein Regal sperrt nicht',
-        w.__T('!MOEBEL_ARTEN.regal.sperrt'));
-      pruef('Jede Art hat eine Gruppe',
-        w.__T('Object.keys(MOEBEL_ARTEN).every(function(k){ return !!MOEBEL_ARTEN[k].gruppe; })'));
-
-      const rid = w.__T('raum().id');
-      /* Eine Hecke quer vor der offenen Kante, hoch genug, um die
-         flache Sonne abzufangen. */
-      const messen = typ => w.__T(`(function(){
-        const r = raum();
-        r.kanten['o:1,0'] = 'offen';
-        r.moebel = ${typ ? `[{id:'hindernis', name:'St\u00fcck', typ:'${typ}',
-          x:0, y:0, b:r.sp*KACHEL, t:KACHEL, h:200}]` : '[]'};
-        SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-        return JSON.stringify({
-          sonne: sonnigImRaum(r, 75, 130, 0, {az: r.drehung, hoehe: 25}),
-          traegt: !!hoeheAn(r, 75, 25)
-        });
-      })()`);
-      void rid;
-
-      const ohne = JSON.parse(messen(null));
-      const mit  = JSON.parse(messen('hecke'));
-      pruef('Ohne Hecke kommt die flache Sonne durch',
-        ohne.sonne === true, JSON.stringify(ohne));
-      pruef('Eine Hecke davor h\u00e4lt sie ab',
-        mit.sonne === false, JSON.stringify(mit));
-      pruef('Auf der Hecke steht keine Pflanze',
-        mit.traegt === false, JSON.stringify(mit));
-
-      const regal = JSON.parse(messen('regal'));
-      pruef('Ein Regal an derselben Stelle tr\u00e4gt sehr wohl',
-        regal.traegt === true, JSON.stringify(regal));
-
-      w.__T("raum().moebel = []; delete raum().kanten['o:1,0'];"
-        + " SONNE_CACHE = {}; SONNE_CACHE_SIG = ''");
-    }
-
-    /* ── Die Auswahl steht in Gruppen ───────────────── */
-    {
-      /* Geprüft wird, was in der Leiste steht — nicht, was die
-         Funktion zurückgibt. Sonst bliebe die Prüfung grün, auch
-         wenn die Leiste ganz woanders gefüllt wird. */
-      w.__T('planAufbau()');
-      const h = d.getElementById('moebel-leiste').innerHTML;
-      pruef('Die M\u00f6belauswahl in der Leiste ist unterteilt',
-        h.indexOf('mgruppe-titel') !== -1);
-      pruef('Ein Hindernis ist darin als solches gezeichnet',
-        h.indexOf('mchip sperrt') !== -1);
-      pruef('Jede Art taucht darin genau einmal auf',
-        w.__T('Object.keys(MOEBEL_ARTEN).every(function(k){'
-          + ' return (moebelWahlHTML().split(\'data-mneu="\' + k + \'"\').length - 1) === 1; })'));
-    }
-
-    /* ── Kantenbreiten ── */
-    const kid = w.__T('aussenKanten(raum()).filter(k=>k.k==="o").map(k=>k.id)[0]');
-    if(kid){
-      const wand = JSON.parse(w.__T(`JSON.stringify(wandGlieder(raum(),'${kid}'))`));
-      pruef('Eine Wand kennt ihre Glieder', wand.length > 1, String(wand.length));
-      pruef('Alle liegen auf derselben Seite',
-        wand.every(x => x.indexOf('o:') === 0));
-
-      const vorher = JSON.parse(w.__T(`JSON.stringify(wandBreiten(raum(),'${kid}'))`));
-      pruef('Ohne Vorgabe ist jedes Glied eine Kachel',
-        Object.values(vorher.breiten).every(b => b === w.__T('KACHEL')));
-      pruef('Die Wandl\u00e4nge stimmt',
-        vorher.gesamt === wand.length * w.__T('KACHEL'));
-
-      /* Der eigentliche Punkt: 130 cm gehen ueber eine Kachel hinaus. */
-      w.__T(`kantenMassSetzen(raum(),'${kid}',{b:130, sockel:90, oben:220})`);
-      pruef('130 cm werden \u00fcbernommen',
-        w.__T(`kantenBreite(raum(),'${kid}')`) === 130,
-        String(w.__T(`kantenBreite(raum(),'${kid}')`)));
-      pruef('Auch kantenMass meldet 130',
-        w.__T(`kantenMass(raum(),'${kid}').b`) === 130);
-
-      const nachher = JSON.parse(w.__T(`JSON.stringify(wandBreiten(raum(),'${kid}'))`));
-      pruef('Die Wand bleibt gleich lang',
-        Math.abs(nachher.summe - nachher.gesamt) < 0.01,
-        nachher.summe + ' statt ' + nachher.gesamt);
-      pruef('Die Nachbarn geben Platz ab',
-        w.__T(`kantenBreite(raum(),'${wand[1]}')`) < w.__T('KACHEL'),
-        String(w.__T(`kantenBreite(raum(),'${wand[1]}')`)));
-      pruef('Kein Glied verschwindet ganz',
-        Object.values(nachher.breiten).every(b => b >= 5));
-      pruef('Sockel und Oberkante kommen mit',
-        w.__T(`kantenMass(raum(),'${kid}').sockel`) === 90
-        && w.__T(`kantenMass(raum(),'${kid}').oben`) === 220);
-
-      /* Zuruecksetzen stellt das Raster wieder her. */
-      w.__T(`kantenMassSetzen(raum(),'${kid}',{})`);
-      pruef('Zur\u00fccksetzen bringt die Kachel zur\u00fcck',
-        w.__T(`kantenBreite(raum(),'${kid}')`) === w.__T('KACHEL'));
-      pruef('Und die ganze Wand ist wieder gleichm\u00e4\u00dfig',
-        Object.values(JSON.parse(w.__T(`JSON.stringify(wandBreiten(raum(),'${kid}').breiten)`)))
-          .every(b => b === w.__T('KACHEL')));
-    /* ── Auswahlknopf mit Bild, Pflanzen im Vollbild ── */
-    pruef('Der Auswahlknopf kann ein Bild tragen',
-      typeof w.__T('zchipHTML') === 'function');
-    /* Die Schublade kannte den Pflanzenmodus nicht — im Vollbild gab
-       es damit keine Möglichkeit, eine Pflanze zu setzen. Seit 3.3.0
-       steht der Raummodus mit in derselben Liste. */
-    pruef('Die Vollbild-Schublade kennt den Pflanzenmodus',
-      html.indexOf("['moebel','kanten','pflanzen','raum'].includes(pModus)") !== -1);
-    }
-    w.__T("modalZu('sek-modal')");
-    await tick();
-  }
+  /* Der entfernte Planer-Block hat hier die Haustiere eingeschaltet
+     (Katze). Spätere Blöcke prüfen mit diesem Stand weiter, etwa die
+     Giftigkeit im Steckbrief. */
+  w.__T("S.tiere = {aktiv:true, arten:['katze']}");
 
   /* ══ App Tour ══════════════════════════════════════════════════
      Frueher startete auf jedem Reiter und beim ersten Oeffnen jedes
@@ -2790,8 +1486,8 @@ setTimeout(async () => {
      holt — und Kapitel, die nur auf Anforderung laufen. */
   {
     pruef('Die Runde ist ein eigenes Kapitel', !!w.__T('TOUR_KAPITEL.runde'));
-    pruef('Sie hat sieben Schritte',
-      w.__T('TOUR_KAPITEL.runde.schritte().length') === 7,
+    pruef('Sie hat sechs Schritte',
+      w.__T('TOUR_KAPITEL.runde.schritte().length') === 6,
       String(w.__T('TOUR_KAPITEL.runde.schritte().length')));
     pruef('Jeder Schritt hat Titel und Text',
       w.__T(`TOUR_KAPITEL.runde.schritte().every(s=>s.titel && s.text)`));
@@ -2802,14 +1498,12 @@ setTimeout(async () => {
     pruef('Der Sammlungs-Schritt hat einen Ausweichweg',
       /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[2].ziel)')));
     pruef('Der Schlussschritt ebenso',
-      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[6].ziel)')));
+      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[5].ziel)')));
 
     /* Kein Kapitel startet mehr von selbst */
     pruef('Ansichtswechsel l\u00f6st nichts aus',
-      w.__T('tourAnsichtPruefen("werkzeuge")') === undefined
+      w.__T('tourAnsichtPruefen("sammlung")') === undefined
       && !w.__T('!!tourLauf'));
-    w.__T("ansichtZeigen('werkzeuge')"); await tick();
-    pruef('Werkzeuge-Reiter startet keine Tour', !w.__T('!!tourLauf'));
     w.__T("ansichtZeigen('mehr')"); await tick();
     pruef('Mehr-Reiter startet keine Tour', !w.__T('!!tourLauf'));
     pruef('Erstes \u00d6ffnen eines Bereichs auch nicht',
@@ -2839,7 +1533,7 @@ setTimeout(async () => {
     pruef('Willkommen Schritt 5 nennt den R\u00fcckweg',
       hinweisAuf(d.querySelector('[data-wk="5"]')));
     pruef('Der Schlussschritt der Runde nennt ihn',
-      /Einstellungen \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[6].text')));
+      /Einstellungen \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[5].text')));
     pruef('Der \u00dcberspringen-Knopf nennt ihn',
       html.indexOf('Du findest die Runde jederzeit unter Einstellungen \u203a App Tour wieder.') !== -1);
 
@@ -3740,18 +2434,9 @@ setTimeout(async () => {
         !/14 cm/.test(ohneTopf) && /nicht eingetragen/.test(ohneTopf));
 
       /* ── Licht am Platz ── */
-      /* beta.23 (G1a, F212): Licht am Platz gibt es ohne Grundriss nicht mehr. */
-      pruef('Kein Block „Licht am Platz“ im Reiter Standort (beta.23)',
-        !karteAus('A2P').querySelector('[data-kblock="licht"]') && !karteAus('A2P').querySelector('[data-kblock="grundriss"]'));
-      /* Mit Platz: eine Zahl, ein Band, ein Urteil. */
-      const mitPlan = w.__T(`(function(){
-        const p = allePflanzen().find(x=>x.id==='A2P');
-        const alt = S.orte; S.orte = Object.assign({}, alt);
-        const raum = (S.raeume||[])[0];
-        if(!raum) return '';
-        S.orte[p.id] = {raum:raum.id, x:Math.round((raum.b||300)/2), y:Math.round((raum.h||300)/2)};
-        const h = lichtAmPlatzHTML(p); S.orte = alt; return h; })()`);
-      pruef('Auch mit Lage in der Skizze keine Sonnenzahl (beta.23)', !/licht-zahl/.test(mitPlan), mitPlan.slice(0, 200));
+      pruef('Kein Block „Licht am Platz“ im Reiter Standort',
+        !karteAus('A2P').querySelector('[data-kblock="licht"]') && !karteAus('A2P').querySelector('[data-kblock="grundriss"]')
+        && w.__T('typeof lichtAmPlatzHTML') === 'undefined');
 
       /* ── Giftigkeit je Tier ── */
       w.__T(`(function(){ S.tiere = {aktiv:true, arten:['katze','hund']}; })()`);
@@ -4072,10 +2757,11 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Vierzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg; beta.30: „Kartei auffrischen“ weg)', alle.length === 14, String(alle.length));
-    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1); 4.0-beta.30: „Kartei auffrischen“ (B3), 23 Abschnitte */
+    pruef('Dreizehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg; beta.30: „Kartei auffrischen“ weg; beta.33: „Wunschliste“ weg)', alle.length === 13, String(alle.length));
+    /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1); 4.0-beta.30: „Kartei auffrischen“ (B3), 23 Abschnitte;
+       4.0-beta.33: „Wunschliste“ und „Rundgang“ weg, „Gießklassen“ neu, 22 Abschnitte */
     pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 23,
+      d.querySelectorAll('section[data-mh]').length === 22,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
@@ -4084,9 +2770,9 @@ setTimeout(async () => {
       d.querySelector('section[data-mh="kidienst"]').classList.contains('mh-still'));
     pruef('KI-Dienst ist aus den Einstellungen erreichbar',
       !!d.querySelector('#mh-in-einstell [data-mh-go="kidienst"]'));
-    ['wunsch','giess','wetter','bibliothek','sicherung','einstell',
-     'tour','install','patch','rueck','melde','sprot','ansicht','tiere','rundgang'].forEach(k=>{
-      if(k === 'ansicht' || k === 'tiere' || k === 'rundgang') return;
+    ['giess','wetter','bibliothek','sicherung','einstell',
+     'tour','install','patch','rueck','melde','sprot','ansicht','tiere'].forEach(k=>{
+      if(k === 'ansicht' || k === 'tiere') return;
       pruef('Punkt ' + k + ' vorhanden', alle.indexOf(k) !== -1);
     });
     pruef('Vier Gruppen', d.querySelectorAll('.mh-gruppe').length === 4,
@@ -4096,8 +2782,8 @@ setTimeout(async () => {
     pruef('Men\u00fcbeh\u00e4lter h\u00e4ngt an der Mehr-Ansicht',
       (d.querySelector('.mh-menue')||{}).getAttribute
         && d.querySelector('.mh-menue').getAttribute('data-ans') === 'mehr');
-    w.__T("ansichtZeigen('werkzeuge')");
-    pruef('Auf Werkzeuge sind die Gruppen ausgeblendet',
+    w.__T("ansichtZeigen('sammlung')");
+    pruef('Auf der Sammlung sind die Gruppen ausgeblendet',
       d.querySelector('.mh-menue').classList.contains('ans-aus'));
     w.__T("ansichtZeigen('mehr')");
     pruef('Auf Mehr sind sie wieder da',
@@ -4106,9 +2792,9 @@ setTimeout(async () => {
       d.querySelectorAll('.mh-gruppe .mh-abschnitt').length
         === d.querySelectorAll('.mh-gruppe').length);
 
-    /* Ansicht, Haustiere und Rundgang sind aus der Liste heraus —
+    /* Ansicht und Haustiere sind aus der Liste heraus —
        aber nicht verschwunden: sie hängen unter Einstellungen. */
-    ['ansicht','tiere','rundgang'].forEach(k=>{
+    ['ansicht','tiere'].forEach(k=>{
       pruef(k + ' nicht mehr in der Mehr-Liste', alle.indexOf(k) === -1);
       pruef(k + ' über Einstellungen erreichbar',
         !!d.querySelector('#mh-in-einstell [data-mh-go="' + k + '"]'));
@@ -4185,10 +2871,10 @@ setTimeout(async () => {
 
     const wege = [...d.querySelectorAll('#mh-in-giess .ein-zeile')]
       .map(b=>b.dataset.wzGo || b.dataset.mhGo);
-    /* 4.0-beta.28 (G2b-1): Dünger ist weg, vier Wege */
-    pruef('Vier Wege im Gießcenter', wege.length === 4, wege.join(','));
-    pruef('Die vier sind die richtigen',
-      wege.join(',') === 'giessplan,urlaub,wasser,rhythmus', wege.join(','));
+    /* 4.0-beta.33: Das Gießplan-Werkzeug ist weg, drei Wege */
+    pruef('Drei Wege im Gießcenter', wege.length === 3, wege.join(','));
+    pruef('Die drei sind die richtigen',
+      wege.join(',') === 'urlaub,wasser,rhythmus', wege.join(','));
 
     /* Was aus der Mehr-Liste verschwindet, muss anderswo auftauchen —
        sonst ist es weg, ohne dass es jemand merkt. */
@@ -4199,8 +2885,6 @@ setTimeout(async () => {
         !!d.querySelector('#mh-in-giess [data-mh-go="' + k + '"]'));
       pruef(k + ' hat noch seinen Abschnitt', !!w.__T(`!!sekAbschnitt('${k}')`));
     });
-    pruef('Der Gießplan bleibt auch ein Werkzeug',
-      !!w.__T("!!sekAbschnitt('giessplan')"));
     pruef('Urlaubszettel heißt jetzt Vertretungszettel',
       d.querySelector('section[data-mh="urlaub"] .wz-t').textContent.trim() === 'Vertretungszettel');
 
@@ -4398,8 +3082,8 @@ setTimeout(async () => {
     w.__T("sektionOeffnen('umtopfen')");
     await tick();
     pruef('Umtopfen ist ein Werkzeug', !!w.__T("sekAbschnitt('umtopfen')"));
-    pruef('Es hat eine Kachel',
-      !!d.querySelector('.kachelgitter section[data-wz="umtopfen"] .wz-ikon svg'));
+    pruef('Sein Abschnitt ist nur noch Lager, ohne Kachel',
+      !!d.querySelector('section[data-wz="umtopfen"][hidden]') && !d.querySelector('section[data-wz="umtopfen"] .wz-kopf'));
     /* Seit 3.1.0 sechs: die Substratmischung steht zwischen Topf und
        Stecklingen, statt in ein anderes Werkzeug zu verweisen. */
     /* Seit 3.2.4 sind es sieben: Zutatenauswahl und Rechnung standen
@@ -4583,26 +3267,6 @@ setTimeout(async () => {
       .filter(e=>e.typ!=='umgetopft');
       if(S.tagEin) delete S.tagEin['${pid3}']; sichern()`);
 
-    /* Vollbild: Pflanzen setzen und M\u00f6bel wieder verlassen. */
-    w.__T("pModus='pflanzen'; vollbild=true; schubladeFuellen()");
-    const sch = d.getElementById('vb-schublade');
-    pruef('Die Schublade f\u00fchrt auch Pflanzen',
-      sch && sch.hidden === false, sch ? 'hidden='+sch.hidden : 'fehlt');
-    pruef('Sie zeigt Chips oder sagt, dass alles platziert ist',
-      /zchip|Platz/.test(sch.innerHTML));
-    pruef('Chips tragen ein Bild, wenn es eines gibt', w.__T(`(function(){
-      const p = allePflanzen()[0];
-      const h = zchipHTML(p, false, null);
-      return !profilFoto(p.id) || h.indexOf('<img') !== -1; })()`));
-    w.__T("vollbild=false; pModus='pflanzen'; schubladeFuellen()");
-
-    pruef('Das M\u00f6belformular hat oben einen Schlie\u00dfen-Knopf',
-      !!d.getElementById('btn-mb-zu-oben'));
-    w.__T("document.getElementById('moebel-bearb').classList.add('on')");
-    d.getElementById('btn-mb-zu-oben').click();
-    pruef('Er schlie\u00dft das Formular',
-      !d.getElementById('moebel-bearb').classList.contains('on'));
-
     w.__T("modalZu('sek-modal')");
     await tick();
   }
@@ -4615,10 +3279,11 @@ setTimeout(async () => {
     const zweige = [...d.querySelectorAll('#mh-in-bibliothek .ein-zeile')]
       .map(b=>b.dataset.mhGo);
     /* 4.0-beta.28 (G2b-2, F276): „Dünger selbst ansetzen“ ist weg */
-    pruef('Zwei Zweige', zweige.length === 2, zweige.join(','));
-    pruef('Die zwei sind die richtigen',
-      zweige.join(',') === 'bib-arten,bib-wissen', zweige.join(','));
-    ['bib-arten','bib-wissen'].forEach(k=>{
+    /* 4.0-beta.33: die Gießklassen sind dazugekommen */
+    pruef('Drei Zweige', zweige.length === 3, zweige.join(','));
+    pruef('Die drei sind die richtigen',
+      zweige.join(',') === 'bib-arten,bib-wissen,bib-klassen', zweige.join(','));
+    ['bib-arten','bib-wissen','bib-klassen'].forEach(k=>{
       pruef(k + ' nicht in der Mehr-Liste',
         !d.querySelector('.mh-gruppe section[data-mh="' + k + '"]'));
       pruef(k + ' hat noch seinen Abschnitt', !!w.__T(`!!sekAbschnitt('${k}')`));
@@ -4798,7 +3463,7 @@ setTimeout(async () => {
   const setzen = async (a) => { w.__T(`ansichtZeigen('${a}')`); await tick(); return ti.textContent; };
   pruef('Kopf auf Heute', await setzen('heute') === 'Heute');
   pruef('Kopf auf Sammlung', await setzen('sammlung') === 'Sammlung');
-  pruef('Kopf auf Werkzeuge', await setzen('werkzeuge') === 'Werkzeuge');
+  pruef('Kopf auf BOTaniker', await setzen('botaniker') === 'BOTaniker');
   pruef('Kopf auf Einstellungen (beta.3, Zahnrad)', await setzen('mehr') === 'Einstellungen');
   pruef('Etikett bleibt leer', et.textContent === '', et.textContent);
   pruef('leeres Etikett verschwindet', /\.top-etikett:empty\{display:none/.test(stil));
@@ -4833,50 +3498,10 @@ setTimeout(async () => {
     /html\[data-design="botanisch"\] \.haupttat,/.test(stil));
   pruef('kein Gruen mehr unter der Schrift',
     !/body\[data-ansicht="heute"\] \.wrap\{[^}]*--schrift:#F2F7F0/.test(stil.replace(/\n\s*/g,'')));
-  pruef('Kacheln gleich hoch', stil.indexOf('grid-auto-rows:1fr') !== -1);
-  pruef('Aktionswort statt Pfeil', stil.indexOf(".wz-p::after{content:'Öffnen'") !== -1);
 
   /* ══════════ 2.9.12 — Kacheln und Raster ══════════ */
   const stil2 = w.__T(`(function(){ let t=''; Array.prototype.forEach.call(
     document.querySelectorAll('style'), s=>{ t += s.textContent; }); return t; })()`);
-
-  const kacheln = Array.prototype.slice.call(
-    d.querySelectorAll('.kachelgitter section[data-wz]'));
-  pruef('fünf Werkzeugkacheln (beta.23: Grundriss weg)', kacheln.length === 5, String(kacheln.length));
-  pruef('jede Kachel hat ein Symbol',
-    kacheln.every(k => k.querySelector('.wz-ikon svg')),
-    kacheln.filter(k=>!k.querySelector('.wz-ikon svg')).map(k=>k.dataset.wz).join(','));
-  pruef('jede Kachel hat eine Unterzeile',
-    kacheln.every(k => (k.querySelector('.wz-unter') || {}).textContent),
-    kacheln.filter(k=>!k.querySelector('.wz-unter')).map(k=>k.dataset.wz).join(','));
-  pruef('Symbol wird nicht vorgelesen',
-    kacheln.every(k => k.querySelector('.wz-ikon').getAttribute('aria-hidden') === 'true'));
-  pruef('Symbol steht vor dem Namen',
-    kacheln.every(k => {
-      const kopf = k.querySelector('.wz-kopf');
-      return kopf.firstElementChild && kopf.firstElementChild.classList.contains('wz-ikon');
-    }));
-  pruef('Name bleibt lesbarer Text',
-    kacheln.every(k => (k.querySelector('.wz-t') || {}).textContent.trim().length > 2));
-  /* Ein zweiter Aufruf darf nichts verdoppeln. */
-  w.__T('werkzeugKachelnAusstatten()');
-  pruef('kein doppeltes Symbol',
-    kacheln.every(k => k.querySelectorAll('.wz-ikon').length === 1));
-  pruef('kein doppelter Untertitel',
-    kacheln.every(k => k.querySelectorAll('.wz-unter').length === 1));
-  pruef('zwei Spalten', stil2.indexOf('.kachelgitter{display:grid;grid-template-columns:repeat(2,1fr)') !== -1);
-  /* Feste Hoehe gewichen zugunsten einer mitwachsenden: alle sechs
-     Kacheln sind gleich hoch, unabhaengig von der Textlaenge, und
-     die Hoehe folgt der Fensterbreite. */
-  pruef('Kachelhöhe wächst mit dem Schirm',
-    stil2.indexOf('min-height:clamp(150px,42vw,200px)') !== -1);
-  pruef('Kachel hat drei feste Zeilen',
-    /\.kachelgitter \.wz-kopf\{display:grid;\s*grid-template-rows:/.test(stil2.replace(/\n\s*/g,' ')));
-  pruef('Titel bekommt zwei Zeilen Platz',
-    /\.kachelgitter \.wz-t\{[^}]*min-height:calc\(1\.22em \* 2\)/.test(stil2.replace(/\n\s*/g,'')));
-  pruef('Unterzeile bekommt zwei Zeilen Platz',
-    /\.kachelgitter \.wz-unter\{[^}]*min-height:calc\(1\.35em \* 2\)/.test(stil2.replace(/\n\s*/g,'')));
-  pruef('Strich statt Fläche', /\.wz-ikon svg\{[^}]*fill:none/.test(stil2));
 
   pruef('Raster ohne Zeilenabstand',
     /botanisch"\] \.sam-raster \.grid\{[^}]*row-gap:0/.test(stil2));
@@ -4890,11 +3515,6 @@ setTimeout(async () => {
     document.querySelectorAll('style'), s=>{ t += s.textContent; }); return t; })()`);
 
   /* — Kopf ohne Dopplung — */
-  w.__T("ansichtZeigen('werkzeuge')"); await tick();
-  pruef('Werkzeuge doppelt nicht',
-    d.getElementById('kopf-etikett').textContent.toLowerCase()
-      !== d.getElementById('kopf-titel').textContent.toLowerCase(),
-    d.getElementById('kopf-titel').textContent);
   w.__T("ansichtZeigen('sammlung')"); await tick();
   pruef('Kopf nennt nur den Reiter',
     d.getElementById('kopf-titel').textContent === 'Sammlung',
@@ -4917,39 +3537,6 @@ setTimeout(async () => {
     dsn3('botanisch').getPropertyValue('--f-display').indexOf('Newsreader') !== -1);
   d.documentElement.setAttribute('data-design', 'botanisch');
 
-  /* — Werkzeugkacheln — */
-  /* Die Hoehe haengt nicht mehr an einer Kette aus height:100% ueber
-     drei Ebenen. Prozenthoehen brauchen eine aufgeloeste Elternhoehe;
-     bei einem gestreckten Gitterfeld ist die je nach Zeitpunkt noch
-     auto, und dann sackte eine einzelne Kachel auf Inhaltshoehe
-     zusammen und sass durch align-content:center zu hoch. */
-  pruef('Kachelabschnitt streckt sich',
-    /\.kachelgitter section\[data-wz\]\{[^}]*align-self:stretch/.test(stil3));
-  pruef('Kachelknopf streckt sich mit',
-    /\.kachelgitter \.wz-kopfzeile\{[^}]*flex:1 1 auto/.test(stil3)
-    && /\.kachelgitter \.wz-kopf\{[^}]*flex:1 1 auto/.test(stil3));
-  pruef('Keine Prozenthoehen mehr in der Kachelkette',
-    !/\.kachelgitter [^{]*\{[^}]*height:100%/.test(stil3));
-  /* Zweimal habe ich versucht, den Knopf auf Feldhoehe zu zwingen —
-     erst height:100%, dann flex. Beide Male sass eine Kachel schief.
-     Jetzt traegt der Abschnitt das Aussehen: er IST das Gitterfeld
-     und wird von grid-auto-rows:1fr gestreckt. Was der Knopf tut,
-     kann das sichtbare Rechteck nicht mehr veraendern. */
-  pruef('Die Kachel ist der Abschnitt, nicht der Knopf',
-    /\.kachelgitter section\[data-wz\]\{[^}]*border:1px solid/.test(stil3)
-    && /\.kachelgitter section\[data-wz\]\{[^}]*background:var\(--fl-karte\)/.test(stil3));
-  pruef('Der Knopf traegt kein eigenes Aussehen mehr',
-    /\.kachelgitter \.wz-kopf\{[^}]*border:0/.test(stil3)
-    && /\.kachelgitter \.wz-kopf\{[^}]*box-shadow:none/.test(stil3));
-
-  pruef('Das Gitter streckt seine Felder',
-    /\.kachelgitter\{[^}]*align-items:stretch/.test(stil3));
-  /* Vier Zeilen: Symbol, Name, Unterzeile, das Wort „Öffnen“. Mit
-     dreien landete die vierte in einer stillschweigend erzeugten
-     Zeile und der Abstand stimmte nur zufaellig. */
-  pruef('Die Kachel hat eine Zeile je Bestandteil',
-    /grid-template-rows:var\(--wz-ikon-h,46px\) auto auto auto/.test(stil3));
-
   /* — Mehr als Menü — */
   const mh = Array.prototype.slice.call(d.querySelectorAll('section[data-mh]'));
   pruef('Mehr hat Einträge', mh.length >= 10, String(mh.length));
@@ -4962,18 +3549,8 @@ setTimeout(async () => {
   pruef('Klartext behält die großen Zeilen',
     stil3.indexOf('html:not([data-design="klartext"]) section[data-mh] .wz-kopf{') !== -1);
 
-  /* — Wunschliste (4.0-beta.29: Aufgaben sind weg) — */
   pruef('Keine Aufgaben mehr unter Mehr', !d.getElementById('todo-sec'));
-  pruef('Wunschliste steht unter Mehr',
-    d.getElementById('wunsch-sec').dataset.ans === 'mehr'
-    && d.getElementById('wunsch-sec').dataset.mh === 'wunsch');
   w.__T('while(MODAL_STAPEL.length) _modalWeg(modalOben());'); await tick();
-  pruef('Wunschliste öffnet als Fenster', w.__T("sektionOeffnen('wunsch')") === true);
-  pruef('und der Inhalt ist drin', !!d.querySelector('#sekm-rumpf #wunsch'));
-  await zu('sek-modal');
-  w.__T('S.wish = []; sichern(); wunschSichtbarkeit();');
-  pruef('leere Wunschliste bleibt erreichbar',
-    d.getElementById('wunsch-sec').hidden === false);
 
   /* — Heute aufgeräumt — */
   pruef('keine Raumknöpfe mehr auf Heute', !d.getElementById('raumknoepfe'));
@@ -5089,8 +3666,6 @@ setTimeout(async () => {
       .test(stil3.replace(/\n\s*/g, '')));
   pruef('Karte hebt sich vom Grund ab',
     /\.card\{background:var\(--fl-karte\)/.test(stil3));
-  pruef('Kein Pfeil mehr im Wort Oeffnen',
-    /\.kachelgitter \.wz-kopf \.wz-p,/.test(stil3));
   pruef('jeder Zustandston faerbt den Rand',
     (stil3.match(/\.sam-raster \.card\[data-zton="[a-z]+"\]\{--zst:/g) || []).length >= 5);
   /* Der Rand meldet den Zustand, nicht die naechste Aufgabe:
@@ -5177,10 +3752,8 @@ setTimeout(async () => {
     && haupt.querySelector('.ht-pfeil'));
   pruef('Untertitel bleibt ansprechbar', !!d.getElementById('gm-start-sub'));
   const neben = Array.prototype.slice.call(d.querySelectorAll('.nebentaten .nt'));
-  pruef('zwei Nebenknöpfe', neben.length === 2, String(neben.length));
-  pruef('Rundgang ist einer davon',
-    neben.some(b => b.id === 'btn-rundgang'));
-  pruef('Doktor ist der andere',
+  pruef('ein Nebenknopf, kein Rundgang mehr', neben.length === 1 && !d.getElementById('btn-rundgang'), String(neben.length));
+  pruef('Der Nebenknopf ist der Doktor',
     neben.some(b => b.id === 'btn-doktor-heute'));
   pruef('Nebenknöpfe haben Symbole', neben.every(b => b.querySelector('svg')));
   pruef('Symbole werden nicht vorgelesen',
@@ -5267,238 +3840,6 @@ setTimeout(async () => {
     /\.wt-leiste\{[^}]*border:1px solid var\(--linie\)/.test(stil5));
 
 
-  /* ══════════════ Lampen im Grundriss ══════════════
-     Eine Lampe ist ein Moebel, das fuer die Rechnung nicht da ist.
-     Geprueft wird beides: dass sie sich wie ein Moebel eintragen und
-     ziehen laesst, und dass keine einzige Zahl sich aendert, wenn sie
-     dasteht. Der Kegel ist Zeichnung. */
-  const lampSicher = w.__T("JSON.stringify({m: raum().moebel, mod: pModus, an: pLampen})");
-  w.__T("(function(){ raum().moebel = []; pModus = 'moebel'; pLampen = true; sichern(); planAufbau(); planRender(); })()");
-
-  pruef('Eine Lampe ist als Lampe gekennzeichnet',
-    w.__T('istLampe({typ:"deckenlampe"})') === true
-    && w.__T('istLampe({typ:"regal"})') === false);
-  pruef('Eine Lampe sperrt kein Licht',
-    !w.__T('MOEBEL_ARTEN.deckenlampe.sperrt') && !w.__T('MOEBEL_ARTEN.panel.sperrt'));
-  pruef('Die Lampen stehen in einem eigenen Fach der Wahl',
-    w.__T('moebelWahlHTML()').indexOf('data-mneu="deckenlampe"') !== -1
-    && w.__T('moebelWahlHTML()').indexOf('data-mgruppe="licht"') !== -1);
-
-  /* Der Weg des Fingers: erst das Fach aufklappen, dann den Knopf.
-     Ohne den ersten Tipp läge der zweite auf etwas Verdecktem — und
-     die Prüfung wäre grün, obwohl der Finger nicht hinkäme. */
-  const lampFach = d.querySelector('#moebel-leiste [data-mgruppe="licht"]');
-  pruef('Das Fach „Licht" steht in der Leiste', !!lampFach);
-  /* Gefragt ist das Fach, nicht irgendein verdeckter Vorfahr: im
-     Prüfstand steht die ganze Werkzeugseite auf hidden. */
-  const imFach = el => el && el.closest('.mgruppe-inhalt');
-  pruef('Zugeklappt ist die Deckenlampe nicht zu treffen',
-    !!imFach(d.querySelector('#moebel-leiste [data-mneu="deckenlampe"]'))
-    && imFach(d.querySelector('#moebel-leiste [data-mneu="deckenlampe"]')).hidden === true);
-  if(lampFach) lampFach.click();
-  const lampKnopf = d.querySelector('#moebel-leiste [data-mneu="deckenlampe"]');
-  pruef('Aufgeklappt liegt sie frei',
-    !!imFach(lampKnopf) && imFach(lampKnopf).hidden === false);
-  if(lampKnopf) lampKnopf.click();
-  w.__T("(function(){ const m = raum().moebel[0]; if(m){ m.x = 100; m.y = 50; } sichern(); planRender(); })()");
-  pruef('Angetippt steht die Lampe im Raum',
-    w.__T('raum().moebel.length') === 1 && w.__T('raum().moebel[0].typ') === 'deckenlampe');
-  pruef('Sie bringt Reichweite und Schalter mit',
-    w.__T('raum().moebel[0].reich') === 150 && w.__T('raum().moebel[0].an') === true);
-  pruef('Sie hat genau einen Boden',
-    w.__T('etagenVon(raum().moebel[0]).length') === 1,
-    String(w.__T('etagenVon(raum().moebel[0]).length')));
-
-  /* ── Die fuenf Stellen, an denen sie kein Moebel sein darf ── */
-  pruef('Auf einer Lampe steht keine Pflanze',
-    w.__T('hoeheAn(raum(), 110, 60)') === null,
-    JSON.stringify(w.__T('JSON.stringify(hoeheAn(raum(), 110, 60))')));
-  pruef('Die Lampe wird nicht als Stellplatz angeboten',
-    w.__T('stellplaetzeFuer(raum().id).indexOf("Deckenlampe")') === -1);
-  pruef('Ein Regal wird weiter angeboten',
-    w.__T(`(function(){
-      const r = raum();
-      r.moebel.push({id:'mreg', typ:'regal', name:'Prüfregal', b:80, t:35, h:150,
-        etagen: etagenVerteilen(150, 4), x:0, y:0});
-      const ja = stellplaetzeFuer(r.id).indexOf('Prüfregal') !== -1;
-      r.moebel = r.moebel.filter(function(x){ return x.id !== 'mreg'; });
-      return ja;
-    })()`) === true);
-
-  /* Die Sonne darf die Lampe nicht bemerken. Gemessen an einem Punkt
-     unter ihr, einmal mit und einmal ohne. */
-  const sonneMitLampe = w.__T(`(function(){
-    SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-    return sonnenstundenRaum(raum(), 110, 60, 20, 6);
-  })()`);
-  const sonneOhneLampe = w.__T(`(function(){
-    const r = raum(), weg = r.moebel;
-    r.moebel = [];
-    SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-    const v = sonnenstundenRaum(r, 110, 60, 20, 6);
-    r.moebel = weg;
-    SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-    return v;
-  })()`);
-  pruef('Eine Lampe nimmt der Sonne nichts weg',
-    sonneMitLampe === sonneOhneLampe, sonneMitLampe + ' gegen ' + sonneOhneLampe);
-  const lsig1 = w.__T('raumSignatur(raum())');
-  w.__T("(function(){ const m = raum().moebel[0]; m.x = 200; m.reich = 300; })()");
-  const lsig2 = w.__T('raumSignatur(raum())');
-  w.__T("(function(){ const m = raum().moebel[0]; m.x = 100; m.reich = 150; })()");
-  pruef('Eine wandernde Lampe wirft den Sonnen-Cache nicht weg',
-    lsig1 === lsig2, 'Signatur hat sich geändert');
-
-  /* ── Der Kegel ── */
-  const lsvg = w.__T('grundrissSVG()');
-  pruef('Der Kegel wird gezeichnet', lsvg.indexOf('lampenkegel') !== -1);
-  /* Die Reihenfolge allein reicht als Frage nicht: fehlt der Kegel
-     ganz, ist sein Platz -1 und liegt damit vor allem. Er muss also
-     erst da sein und dann vorn stehen. */
-  pruef('Er liegt unter den Möbeln',
-    lsvg.indexOf('lampenkegel') !== -1
-    && lsvg.indexOf('lampenkegel') < lsvg.indexOf('class="moebel'),
-    lsvg.indexOf('lampenkegel') + ' gegen ' + lsvg.indexOf('class="moebel'));
-  /* Beschnitt und Verlauf tragen in jeder Zeichnung eigene Namen —
-     sonst greift der Editor auf den Beschnitt der Ansicht zu, die mit
-     ihrem letzten Inhalt im Dokument stehen bleibt. */
-  const clipName = (lsvg.match(/<clipPath id="(lampen-\d+)-clip">/) || [])[1];
-  pruef('Er wird auf die Fläche beschnitten',
-    !!clipName && lsvg.indexOf('clip-path="url(#' + clipName + '-clip)"') !== -1,
-    String(clipName));
-  pruef('Der Verlauf trägt denselben Namen wie der Beschnitt',
-    !!clipName && lsvg.indexOf('<radialGradient id="' + clipName + '-schein">') !== -1
-    && lsvg.indexOf('fill="url(#' + clipName + '-schein)"') !== -1);
-  pruef('Zwei Zeichnungen teilen sich keinen Namen',
-    (w.__T('grundrissSVG()').match(/<clipPath id="(lampen-\d+)-clip">/) || [])[1] !== clipName);
-  pruef('Eine runde Lampe leuchtet rundum',
-    /<circle class="kegel"/.test(lsvg));
-  const keil0 = w.__T(`kegelSVG({id:'k', typ:'strahler', x:100, y:100, b:25, t:25, dreh:0, reich:100}, 'l', 1)`);
-  const keil180 = w.__T(`kegelSVG({id:'k', typ:'strahler', x:100, y:100, b:25, t:25, dreh:180, reich:100}, 'l', 1)`);
-  pruef('Ein Strahler leuchtet in seine Richtung',
-    keil0.indexOf('194.4') !== -1 && keil180.indexOf('30.6') !== -1,
-    keil0 + ' | ' + keil180);
-  pruef('Gedreht leuchtet er woanders hin', keil0 !== keil180);
-
-  /* ── Die beiden Schalter ── */
-  pruef('Der Hauptschalter steht in der Zeichnung',
-    lsvg.indexOf('data-lampen="1"') !== -1);
-  const lsvgAus = w.__T("(function(){ pLampen = false; const v = grundrissSVG(); pLampen = true; return v; })()");
-  pruef('Hauptschalter aus: kein Kegel',
-    lsvgAus.indexOf('lampenkegel') === -1);
-  pruef('Hauptschalter aus: die Lampe steht trotzdem da',
-    lsvgAus.indexOf('data-moebel="' + w.__T('raum().moebel[0].id') + '"') !== -1
-    && lsvgAus.indexOf('data-lampen="1"') !== -1);
-  const lsvgEinzeln = w.__T(`(function(){
-    const m = raum().moebel[0];
-    m.an = false;
-    const v = grundrissSVG();
-    m.an = true;
-    return v;
-  })()`);
-  pruef('Einzelne Lampe aus: kein Kegel, aber die Lampe bleibt',
-    lsvgEinzeln.indexOf('lampenkegel') === -1
-    && lsvgEinzeln.indexOf('data-moebel="' + w.__T('raum().moebel[0].id') + '"') !== -1);
-
-  /* Ein Tipp auf den Schalter schaltet um, auch im Flächenmodus, und
-     malt dort keine Kachel. */
-  w.__T("(function(){ pModus = 'kacheln'; planRender(); })()");
-  const schalter = d.querySelector('#plan-flaeche [data-lampen]');
-  pruef('Der Schalter liegt im Bild und ist zu treffen', !!schalter);
-  const kachelnVorher = w.__T('Object.keys(raum().kacheln).length');
-  if(schalter) schalter.dispatchEvent(new w.MouseEvent('click', {bubbles:true}));
-  pruef('Der Tipp auf den Schalter macht die Lampen aus',
-    w.__T('pLampen') === false);
-  pruef('und malt dabei keine Kachel',
-    w.__T('Object.keys(raum().kacheln).length') === kachelnVorher);
-  const schalter2 = d.querySelector('#plan-flaeche [data-lampen]');
-  if(schalter2) schalter2.dispatchEvent(new w.MouseEvent('click', {bubbles:true}));
-  pruef('Noch einmal getippt sind sie wieder an', w.__T('pLampen') === true);
-  pruef('Ohne Lampe im Raum gibt es keinen Schalter',
-    w.__T("(function(){ const r = raum(), weg = r.moebel; r.moebel = []; "
-      + "const v = lampenSchalterSVG(r, 1); r.moebel = weg; return v; })()") === '');
-
-  /* ── Das Formular ── */
-  w.__T("(function(){ pModus = 'moebel'; moebelFormular(raum().moebel[0]); })()");
-  pruef('Beim Antippen einer Lampe stehen Reichweite und Schalter da',
-    d.getElementById('mb-reich-feld').hidden === false
-    && d.getElementById('mb-an-feld').hidden === false);
-  pruef('Böden und Katze verschwinden dort',
-    d.getElementById('mb-boeden-feld').hidden === true
-    && d.getElementById('mb-katze-feld').hidden === true);
-  pruef('Der Regler steht auf der Reichweite der Lampe',
-    d.getElementById('mb-reich').value === '150', d.getElementById('mb-reich').value);
-  /* Das Böden-Feld traegt noch den Wert des zuletzt bearbeiteten
-     Moebels. Beim Speichern darf er nicht in die Lampe laufen: mit
-     vier Boeden wuerfe sie Schatten. */
-  d.getElementById('mb-boeden').value = '4';
-  d.getElementById('mb-reich').value = '220';
-  d.getElementById('btn-mb-save').click();
-  pruef('Gespeichert behält die Lampe ihren einen Boden',
-    w.__T('etagenVon(raum().moebel[0]).length') === 1,
-    String(w.__T('etagenVon(raum().moebel[0]).length')));
-  pruef('Die neue Reichweite steht am Möbel',
-    w.__T('raum().moebel[0].reich') === 220, String(w.__T('raum().moebel[0].reich')));
-
-  /* Was hier verändert wurde, wird zurückgesetzt: die Prüfungen
-     danach erben sonst den Zustand. */
-  w.__T("(function(){ const a = " + lampSicher + "; raum().moebel = a.m; pModus = a.mod; pLampen = a.an; "
-    + "SONNE_CACHE = {}; SONNE_CACHE_SIG = ''; sichern(); planAufbau(); planRender(); })()");
-
-
-  /* ── Die letzte Reihe der Möbelwahl ──
-     Die Schublade im Vollbild endet am unteren Rand, die Fußleiste
-     liegt darüber. Beides zusammen heißt: was ganz unten steht, ist
-     verdeckt. Geprüft wird beides — dass die Höhe gemessen wird und
-     dass die Schublade sie auch benutzt. */
-  pruef('Die Schublade hält sich die Fußleiste frei',
-    html.indexOf('.vb-schublade{padding-bottom:calc(var(--vb-fuss-h') !== -1);
-  w.__T('vbFussStellen()');
-  pruef('Die Höhe der Fußleiste steht als Maß bereit',
-    /^\d+px$/.test(w.__T("document.documentElement.style.getPropertyValue('--vb-fuss-h')")),
-    w.__T("document.documentElement.style.getPropertyValue('--vb-fuss-h')"));
-  pruef('Zugeklappt wird kein Platz verschenkt',
-    w.__T(`(function(){
-      const f = document.querySelector('#plan-buehne .vb-fuss');
-      const merk = f ? f.hidden : null;
-      if(f) f.hidden = true;
-      vbFussStellen();
-      const v = document.documentElement.style.getPropertyValue('--vb-fuss-h');
-      if(f) f.hidden = merk;
-      vbFussStellen();
-      return v;
-    })()`) === '0px');
-  pruef('Die Lampen stehen am Ende der Wahl',
-    w.__T('moebelWahlHTML()').indexOf('data-mneu="panel"')
-      > w.__T('moebelWahlHTML()').indexOf('data-mneu="saeule"'));
-
-
-  /* ══════════ Das Möbelfenster steht in der Bühne ══════════
-     Im Vollbild legt sich `#plan-buehne` fest über das ganze Bild.
-     Was draußen liegt, ist dort nicht zu sehen und nicht zu treffen —
-     kein Möbel war zu bearbeiten und keins zu löschen. */
-  pruef('Das Möbelfenster liegt in der Bühne',
-    !!d.getElementById('plan-buehne')
-    && d.getElementById('plan-buehne').contains(d.getElementById('moebel-bearb')));
-  pruef('Seine Knöpfe sind mitgekommen',
-    !!d.getElementById('btn-mb-save') && !!d.getElementById('btn-mb-weg')
-    && !!d.getElementById('btn-mb-dreh') && !!d.getElementById('mb-reich'));
-
-  /* ══════════ Senkrecht wischen gehört der Seite ══════════ */
-  pruef('Die Fläche lässt die Seite scrollen',
-    html.indexOf('#plan-flaeche{border:1px solid var(--line);border-radius:4px;'
-      + 'background:var(--paper);padding:10px;overflow:hidden;touch-action:pan-y}') !== -1);
-  pruef('Was gezogen wird, behält den Finger',
-    html.indexOf('.plan-svg .moebel,.plan-svg .marke,.plan-svg .buendel{touch-action:none}') !== -1);
-  pruef('Im Vollbild führt die App selbst',
-    html.indexOf('body.vollbild #plan-flaeche{touch-action:none}') !== -1);
-  w.__T("(function(){ pModus = 'kacheln'; planRender(); })()");
-  pruef('Im Kachelmodus wird gemalt, nicht gescrollt',
-    d.getElementById('plan-flaeche').classList.contains('malt'));
-  w.__T("(function(){ pModus = 'moebel'; planRender(); })()");
-  pruef('In den anderen Werkzeugen nicht',
-    !d.getElementById('plan-flaeche').classList.contains('malt'));
-
   /* ══════════ Anstau ist kein Rhythmus ══════════
      Klasse S kennt zwei Zustände, nicht zwei Enden einer Kurve.
      Geprüft wird an einer echten Karnivore aus der Bibliothek. */
@@ -5548,324 +3889,6 @@ setTimeout(async () => {
       * (typeof saisonFaktor === 'function' ? saisonFaktor() : 1)))`));
   w.__T("(function(){ const a = " + karSicher + "; S.eigene = a.e; S.lernen = a.z; S.tagEin = a.t; sichern(); })()");
 
-
-  /* ══════════ Akkordeon, Lampenstand, Pflanzenschalter ══════════ */
-  w.__T("(function(){ raum().moebel = []; pModus = 'moebel'; pMWahl = null; pMarken = true; "
-    + "sichern(); planAufbau(); planRender(); })()");
-
-  pruef('Beim Laden ist jedes Fach zu',
-    w.__T("moebelWahlHTML().indexOf('<div class=\"mgruppe-inhalt\" hidden>')") !== -1
-    && w.__T("moebelWahlHTML().indexOf('<div class=\"mgruppe-inhalt\">')") === -1);
-  const fachSitzen = d.querySelector('#moebel-leiste [data-mgruppe="sitzen"]');
-  pruef('Ein Fach lässt sich aufklappen',
-    !!fachSitzen && (fachSitzen.click(), w.__T('pMWahl')) === 'sitzen');
-  pruef('Und es steht dann wirklich offen',
-    imFach(d.querySelector('#moebel-leiste [data-mneu="sofa"]')).hidden === false);
-  /* Immer nur eins: das zweite Fach macht das erste zu. */
-  d.querySelector('#moebel-leiste [data-mgruppe="licht"]').click();
-  pruef('Ein zweites Fach schließt das erste',
-    w.__T('pMWahl') === 'licht'
-    && imFach(d.querySelector('#moebel-leiste [data-mneu="sofa"]')).hidden === true);
-  d.querySelector('#moebel-leiste [data-mgruppe="licht"]').click();
-  pruef('Noch einmal getippt ist es wieder zu', w.__T('pMWahl') === null);
-
-  /* Erst fragen, ob es sie gibt: sonst bricht der ganze Prüfstand mit
-     einem Fehler ab, statt eine Prüfung fallen zu lassen. */
-  pruef('Die Schreibtischlampe steht im Fach Licht',
-    w.__T("JSON.stringify(MOEBEL_ARTEN.tischlampe || null)") !== 'null'
-    && w.__T("(MOEBEL_ARTEN.tischlampe || {}).gruppe") === 'licht'
-    && w.__T("istLampe({typ:'tischlampe'})") === true
-    && w.__T("(MOEBEL_ARTEN.tischlampe || {}).h") === 45);
-
-  /* Eine niedrige Lampe auf einem hohen Möbel. Nach der Höhe sortiert
-     läge sie darunter — unsichtbar und nicht anzutippen. */
-  w.__T(`(function(){
-    const r = raum();
-    r.moebel = [
-      {id:'MTISCH', typ:'schreibtisch', name:'Prüftisch', b:120, t:60, h:75,
-        etagen: etagenVerteilen(75, 1), x:0, y:0},
-      {id:'MLAMP', typ:'tischlampe', name:'Prüflampe', b:20, t:20, h:45,
-        etagen: etagenVerteilen(45, 1), x:20, y:20, reich:60, an:true}
-    ];
-    sichern(); planRender();
-  })()`);
-  const lampStapel = w.__T('grundrissSVG()');
-  pruef('Die Lampe liegt über dem Möbel, auf dem sie steht',
-    lampStapel.indexOf('data-moebel="MLAMP"') > lampStapel.indexOf('data-moebel="MTISCH"'),
-    lampStapel.indexOf('data-moebel="MLAMP"') + ' gegen ' + lampStapel.indexOf('data-moebel="MTISCH"'));
-
-  /* ── Der Pflanzenschalter ── */
-  /* An einem Raum ohne Pflanzen gefragt, nicht am Prüfraum: der trägt
-     aus früheren Prüfungen noch welche. */
-  pruef('Ohne Pflanze im Raum gibt es keinen Pflanzenschalter',
-    w.__T("markenSchalterSVG({id:'raum-den-es-nicht-gibt'}, 1)") === '');
-  w.__T(`(function(){
-    S.eigene.push({id:'MPFL', name:'Prüfmarke', art:'Monstera deliciosa', klasse:'B'});
-    pflanzeSetzen('MPFL', raum().id, 100, 40);
-    sichern(); planRender();
-  })()`);
-  const mitMarke = w.__T('grundrissSVG()');
-  pruef('Mit Pflanze steht der Schalter da',
-    mitMarke.indexOf('data-marken="1"') !== -1);
-  pruef('Und die Marke ist zu sehen',
-    mitMarke.indexOf('data-pfl="MPFL"') !== -1);
-  const schalterM = d.querySelector('#plan-flaeche [data-marken]');
-  pruef('Der Pflanzenschalter liegt im Bild', !!schalterM);
-  if(schalterM) schalterM.dispatchEvent(new w.MouseEvent('click', {bubbles:true}));
-  const ohneMarke = w.__T('grundrissSVG()');
-  pruef('Ausgeschaltet sind die Marken weg',
-    w.__T('pMarken') === false && ohneMarke.indexOf('data-pfl="MPFL"') === -1);
-  pruef('Die Möbel bleiben stehen',
-    ohneMarke.indexOf('data-moebel="MTISCH"') !== -1);
-  pruef('Und die Pflanze steht weiter im Raum',
-    w.__T("pflanzenIm(raum().id).some(function(p){ return p.id === 'MPFL'; })") === true);
-  const schalterM2 = d.querySelector('#plan-flaeche [data-marken]');
-  if(schalterM2) schalterM2.dispatchEvent(new w.MouseEvent('click', {bubbles:true}));
-  pruef('Wieder eingeschaltet sind sie zurück',
-    w.__T('pMarken') === true
-    && w.__T('grundrissSVG()').indexOf('data-pfl="MPFL"') !== -1);
-  /* Gefragt sind die beiden Umhüllenden, nicht jedes translate im
-     Blattwerk der Marke. */
-  /* Ohne Schrägstriche gefragt: `__T` reicht den Text durch `eval`,
-     und ein Muster mit Maskierungen käme dort anders an, als es hier
-     steht. Zerlegen sagt dasselbe und überlebt den Weg. */
-  pruef('Beide Schalter stehen übereinander, nicht ineinander',
-    w.__T(`(function(){
-      const teile = planSchalterSVG(raum(), 1).split('<g transform="translate(');
-      return teile.length === 3
-        && teile[1].split(')')[0] !== teile[2].split(')')[0];
-    })()`) === true);
-
-  w.__T(`(function(){
-    S.eigene = S.eigene.filter(function(x){ return x.id !== 'MPFL'; });
-    if(S.orte) delete S.orte['MPFL'];
-    raum().moebel = []; pMWahl = null; pMarken = true;
-    sichern(); planAufbau(); planRender();
-  })()`);
-
-
-  /* ══════════ Nach dem Größenwechsel neu messen ══════════
-     Der Ausschnitt trägt das Verhältnis der Fläche. Wer aus dem
-     Vollbild kommt, hat noch das Verhältnis des ganzen Bildschirms im
-     Bild — der Grundriss steht dann klein in einem zu hohen Kasten. */
-  w.__T("(function(){ pModus = 'moebel'; planRender(); })()");
-  pruef('Neu messen zeichnet den Grundriss noch einmal',
-    w.__T(`(function(){
-      const f = document.getElementById('plan-flaeche');
-      f.innerHTML = '';
-      planNeuMessen();
-      return f.innerHTML.indexOf('<svg') !== -1;
-    })()`) === true);
-  pruef('Die Fläche hängt am Größenwechsel',
-    html.indexOf('planMessBald = setTimeout(planNeuMessen, 150);') !== -1);
-  pruef('Und am Verlassen des Vollbilds',
-    html.indexOf('    planNeuMessen();\n    if(typeof zoomMinimum ===') !== -1);
-
-
-  /* ══════════ Schieben im Vollbild ══════════
-     Ein Wisch soll dem Finger folgen. Der Umrechnungswert kam vorher
-     aus der Raumbreite in Zentimetern und der Kastenbreite — ohne den
-     Zuschnitt des Ausschnitts und ohne eigenen Wert für die
-     Senkrechte; ein Wisch sprang damit ans Ende des Spielraums. */
-  pruef('Ein Bildpunkt ist so viel wert, wie der Ausschnitt hergibt',
-    w.__T("schubProPunkt({width:800, height:600}, {vW:400, vH:300})") === 0.5,
-    String(w.__T("schubProPunkt({width:800, height:600}, {vW:400, vH:300})")));
-  /* Passt der Ausschnitt nicht genau, gewinnt die kleinere Skala —
-     sonst liefe die Zeichnung in einer Richtung aus dem Bild. */
-  pruef('Bei ungleichem Zuschnitt gewinnt die kleinere Skala',
-    w.__T("schubProPunkt({width:800, height:600}, {vW:400, vH:600})") === 1);
-  pruef('Quer und hoch gilt derselbe Wert',
-    w.__T(`(function(){
-      const M = {vW:400, vH:600}, k = {width:800, height:600};
-      return schubProPunkt(k, M) === schubProPunkt(k, M);
-    })()`) === true);
-  pruef('Ohne Maße wird nicht geschoben',
-    w.__T("schubProPunkt(null, {vW:400, vH:300})") === 0
-    && w.__T("schubProPunkt({width:0, height:0}, {vW:400, vH:300})") === 0);
-  pruef('Der Schub hängt am neuen Wert',
-    html.indexOf('const proPunkt = schubProPunkt(svg.getBoundingClientRect(), M);') !== -1
-    && html.indexOf('pPanY = schiebt.py - (ev.clientY - schiebt.y) * proPunkt;') !== -1);
-
-  /* ══════════ Eine Karte je Tier und Stufe ══════════
-     Drei Kästen untereinander, alle mit „giftig für Katzen“, nur weil
-     die Begründungen verschieden lauteten. */
-  {
-    /* Eigene Pflanzen anlegen statt vorhandene umbiegen: `allePflanzen()`
-       gibt bei jedem Aufruf frische Objekte zurück, ein daran gesetztes
-       Feld wäre beim nächsten Aufruf wieder fort — die Prüfung liefe
-       dann gegen lauter „ungeprüft“ und hielte jeden Fehler für richtig. */
-    w.__T(`(function(){
-      raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      const g = ['Grund A der Prüfung.', 'Grund B der Prüfung.', 'Grund A der Prüfung.'];
-      ['PG1', 'PG2', 'PG3'].forEach(function(id, i){
-        S.eigene.push({id:id, name:'Prüfgift ' + id, art:'Pruefgewaechs pruefensis',
-          klasse:'B', gift:{status:'fest', quelle:'pruefstand', beleg:'-',
-            grund:g[i], tiere:{katze:'mittel'}}});
-      });
-      S.eigene.push({id:'PG4', name:'Prüfgift PG4', art:'Pruefgewaechs pruefensis',
-        klasse:'B', gift:{status:'fest', quelle:'pruefstand', beleg:'-',
-          grund:'Grund C der Prüfung.', tiere:{katze:'schwer'}}});
-      ['PG1', 'PG2', 'PG3', 'PG4'].forEach(function(id, i){
-        pflanzeSetzen(id, raum().id, 60 + i*60, 120);
-      });
-      S.tiere = {aktiv:true, arten:['katze']};
-      sichern();
-    })()`);
-    const grp = JSON.parse(w.__T('JSON.stringify(giftGruppen(raum()))'));
-    const katzeGiftig = grp.filter(g=>g.stufe === 'mittel');
-    pruef('Die Prüfpflanzen stehen giftig im Raum',
-      katzeGiftig.length === 1,
-      JSON.stringify(grp.map(g=>g.stufe + ':' + g.wer.length)));
-    /* Gefragt ist, dass alle drei in einem Kasten landen — nicht, dass
-       sonst niemand darin steht: im Prüfraum stehen aus früheren
-       Blöcken noch andere Pflanzen. */
-    const drin = katzeGiftig.length === 1
-      ? katzeGiftig[0].wer.map(x=>x.name).join('|') : '';
-    pruef('Verschiedene Gründe stehen in einem Kasten',
-      katzeGiftig.length === 1
-      && ['PG1', 'PG2', 'PG3'].every(id=>drin.indexOf('Prüfgift ' + id) !== -1),
-      JSON.stringify(grp.map(g=>g.stufe + ':' + g.wer.length + ':' + (g.gruende||[]).length)));
-    pruef('Eine andere Stufe behält ihren eigenen Kasten',
-      grp.filter(g=>g.stufe === 'schwer').length === 1);
-    pruef('Beide Gründe sind aufgehoben',
-      katzeGiftig.length === 1
-      && katzeGiftig[0].gruende.some(e=>e.grund === 'Grund A der Prüfung.')
-      && katzeGiftig[0].gruende.some(e=>e.grund === 'Grund B der Prüfung.'));
-    const warnHtml = w.__T('planWarnungen()');
-    pruef('Der Bericht zeigt einen Kasten je Stufe',
-      (warnHtml.match(/Pflanzen sind für Katzen giftig/g) || []).length === 1,
-      String((warnHtml.match(/für Katzen/g) || []).length) + ' mal „für Katzen“');
-    pruef('Und nennt hinter dem Aufklappen, wen welcher Grund betrifft',
-      warnHtml.indexOf('Grund A der Prüfung.') !== -1
-      && warnHtml.indexOf('Grund B der Prüfung.') !== -1
-      && warnHtml.indexOf('Prüfgift PG2') !== -1);
-    w.__T(`(function(){
-      S.eigene = S.eigene.filter(function(p){ return String(p.id).slice(0,2) !== 'PG'; });
-      ['PG1','PG2','PG3','PG4'].forEach(function(id){ if(S.orte) delete S.orte[id]; });
-      raum().moebel = []; SONNE_CACHE = {}; SONNE_CACHE_SIG = '';
-      sichern();
-    })()`);
-  }
-
-
-  /* ══════════ Schieben nach dem Zoom ══════════
-     Beim Schieben wird bei jeder Bewegung neu gezeichnet. Das SVG
-     unter dem Finger verschwindet dabei, der Browser meldet
-     `pointerleave` — und der Zug war nach einer einzigen Meldung zu
-     Ende. Dazu hing das Schieben am Vollbild: wer im Rumpf mit zwei
-     Fingern vergrößerte, kam an den Rest des Grundrisses nicht mehr. */
-  pruef('Bei Zoom 1 gehört der Wisch der Seite',
-    w.__T("(function(){ pZoom = 1; zieht = null; malt = null; return darfSchieben(); })()") === false);
-  pruef('Vergrößert wird geschoben, auch außerhalb des Vollbilds',
-    w.__T("(function(){ vollbild = false; pZoom = 2; return darfSchieben(); })()") === true);
-  pruef('Wer etwas zieht, schiebt nicht nebenbei',
-    w.__T("(function(){ zieht = {typ:'moebel'}; const v = darfSchieben(); zieht = null; return v; })()") === false
-    && w.__T("(function(){ malt = {an:true}; const v = darfSchieben(); malt = null; return v; })()") === false);
-  pruef('Die Fläche nimmt den Wisch, sobald es etwas zu schieben gibt',
-    w.__T("(function(){ pZoom = 2; planRender(); return document.getElementById('plan-flaeche').classList.contains('geschoben'); })()") === true
-    && w.__T("(function(){ pZoom = 1; planRender(); return document.getElementById('plan-flaeche').classList.contains('geschoben'); })()") === false);
-  pruef('Und gibt den Wisch bei Zoom 1 wieder her',
-    html.indexOf('#plan-flaeche.malt,#plan-flaeche.geschoben{touch-action:none}') !== -1);
-  /* Ein verlassener Rand beendet den Schub nicht — sonst reicht ein
-     Neuzeichnen unter dem Finger, um den Zug abzuwürgen. */
-  pruef('Der Rand beendet den Schub nicht',
-    w.__T(`(function(){
-      zeiger.clear(); schiebt = {x:0, y:0, px:0, py:0};
-      zeigerWeg({pointerId:1, type:'pointerleave'});
-      const bleibt = !!schiebt;
-      zeigerWeg({pointerId:1, type:'pointerup'});
-      const weg = !schiebt;
-      return bleibt && weg;
-    })()`) === true);
-  pruef('Der Finger wird für den Schub festgehalten',
-    html.indexOf('flaeche2.setPointerCapture(ev.pointerId);') !== -1);
-
-  /* ══════════ Der Weg des Fingers ══════════
-     Die Prüfungen oben fragen die inneren Funktionen. Am Gerät ging
-     trotzdem nichts: geprüft wurde nie die Geste, sondern nur, was
-     eine Geste ausrechnet. Hier läuft der Finger selbst. */
-  {
-    const feld = d.getElementById('plan-flaeche');
-    Object.defineProperty(feld, 'clientWidth',  {value:360, configurable:true});
-    Object.defineProperty(feld, 'clientHeight', {value:480, configurable:true});
-    /* Auf die Fläche selbst, nicht auf `#plan-svg`: die Zeichnung steht
-       je nach offenem Werkzeugfenster auch anderswo im Dokument, und
-       ein Ereignis dort erreicht die Fläche nie. */
-    const ziel = () => feld.querySelector('svg') || feld;
-    const finger = (typ, x, y, id, erster) => {
-      const ev = new w.Event(typ, {bubbles:true, cancelable:true});
-      ev.pointerId = id; ev.clientX = x; ev.clientY = y;
-      ev.isPrimary = erster !== false; ev.pointerType = 'touch';
-      ziel().dispatchEvent(ev);
-    };
-    const anfang = () => w.__T(`(function(){
-      zeiger.clear(); schiebt = null; kneifStart = null; zieht = null; malt = null;
-      pModus = 'moebel'; pZoom = 1; pPanX = 0; pPanY = 0; planRender();
-    })()`);
-
-    /* Der übliche Griff: kneifen, einen Finger heben, mit dem anderen
-       weiterziehen. Ein zweites `pointerdown` kommt dabei nie — wer
-       den Schub nur beim Aufsetzen beginnen lässt, beginnt ihn nie. */
-    anfang();
-    finger('pointerdown', 150, 200, 1, true);
-    finger('pointerdown', 250, 300, 2, false);
-    finger('pointermove', 120, 170, 1, true);
-    finger('pointermove', 280, 330, 2, false);
-    const gezoomt = w.__T('pZoom');
-    pruef('Zwei Finger vergrößern die Zeichnung', gezoomt > 1, String(gezoomt));
-    finger('pointerup', 280, 330, 2, false);
-    const vorher = w.__T('pPanX');
-    finger('pointermove', 60, 170, 1, true);
-    finger('pointermove', 20, 170, 1, true);
-    pruef('Der liegengebliebene Finger schiebt weiter',
-      w.__T('pPanX') !== vorher,
-      'pPanX ' + vorher + ' → ' + w.__T('pPanX'));
-    finger('pointerup', 20, 170, 1, true);
-    pruef('Und lässt beim Hochgehen nichts zurück',
-      w.__T('schiebt') === null && w.__T('zeiger.size') === 0);
-
-    /* Ein `pointerup`, das die Fläche nie erreicht — neben der
-       Zeichnung losgelassen, oder am Fang eines Elements hängen
-       geblieben, das inzwischen neu gezeichnet wurde. Der Eintrag
-       blieb liegen, die nächste einzelne Berührung galt als zweiter
-       Finger, und geschoben wurde nie wieder. */
-    anfang();
-    w.__T("pZoom = 2; planRender();");
-    finger('pointerdown', 150, 200, 5, true);
-    w.__T("schiebt = null;");   /* Finger weg, ohne dass die Fläche es sieht */
-    pruef('Der verwaiste Eintrag liegt noch',
-      w.__T('zeiger.size') === 1, String(w.__T('zeiger.size')));
-    finger('pointerdown', 150, 200, 6, true);
-    const v2 = w.__T('pPanX');
-    finger('pointermove', 100, 200, 6, true);
-    pruef('Ein neuer erster Finger räumt den verwaisten Eintrag weg',
-      w.__T('zeiger.size') === 1 && w.__T('pPanX') !== v2,
-      'zeiger ' + w.__T('zeiger.size') + ', pPanX ' + v2 + ' → ' + w.__T('pPanX'));
-    finger('pointerup', 100, 200, 6, true);
-
-    /* Loslassen neben der Zeichnung muss ankommen. */
-    anfang();
-    w.__T("pZoom = 2; planRender();");
-    finger('pointerdown', 150, 200, 8, true);
-    const auf = new w.Event('pointerup', {bubbles:true, cancelable:true});
-    auf.pointerId = 8; auf.clientX = 0; auf.clientY = 0; auf.isPrimary = true;
-    d.body.dispatchEvent(auf);
-    pruef('Ein Loslassen neben der Fläche beendet den Zug',
-      w.__T('zeiger.size') === 0 && w.__T('schiebt') === null,
-      'zeiger ' + w.__T('zeiger.size') + ', schiebt ' + JSON.stringify(w.__T('schiebt')));
-
-    /* Bei Zoom 1 gehört der Wisch weiter der Seite — auch auf dem
-       Weg über die Bewegung. */
-    anfang();
-    finger('pointerdown', 150, 200, 9, true);
-    finger('pointermove', 100, 200, 9, true);
-    pruef('Bei Zoom 1 beginnt auch die Bewegung keinen Schub',
-      w.__T('schiebt') === null && w.__T('pPanX') === 0);
-    finger('pointerup', 100, 200, 9, true);
-    anfang();
-  }
-
-  w.__T("(function(){ pZoom = 1; pPanX = 0; pPanY = 0; planRender(); })()");
 
   /* ══════════ Gießgruppen ══════════
      Die Klasse sagt, wie oft gegossen wird. Die Gruppe sagt, wohin es
@@ -6963,10 +4986,6 @@ setTimeout(async () => {
       /Thai Constellation/.test(String(so(`kartenKopfHTML(p)`))));
     pruef('Die Pflanzenwahl zeigt die Sorte',
       /Thai Constellation/.test(String(so(`pwahlKachel(p, 'data-pw', '', '')`))));
-    pruef('Die Karte im Grundriss zeigt die Sorte',
-      /Thai Constellation/.test(String(so(`(function(){
-        try { return planKarteHTML(p); } catch(e){ return 'FEHLER ' + e.message; }
-      })()`))));
     pruef('Ohne Sorte steht keine leere Klammer in der Kachel',
       !/''/.test(String(w.__T(`(function(){
         const p = allePflanzen().find(x=>x.id==='SO1');
@@ -8871,16 +6890,13 @@ setTimeout(async () => {
     const zahnrad = d.getElementById('kopf-zahnrad');
     pruef('beta.3: Im Kopf steht das Zahnrad', !!zahnrad && zahnrad.dataset.ansGo === 'mehr');
     T(`ansichtZeigen('heute')`);
-    pruef('beta.3: Auf Heute kein Umschalter und keine Eingabe', d.getElementById('zr-umschalter').hidden === true && d.getElementById('bot-eingabe').hidden === true);
+    pruef('beta.3: Auf Heute keine Eingabe; den Umschalter gibt es nicht mehr (beta.33)', !d.getElementById('zr-umschalter') && d.getElementById('bot-eingabe').hidden === true);
     if(zahnrad) zahnrad.click();
-    pruef('beta.3: Das Zahnrad öffnet die Einstellungen mit Umschalter', T('S.ansicht') === 'mehr' && d.getElementById('kopf-titel').textContent === 'Einstellungen'
-      && d.getElementById('zr-umschalter').hidden === false, T('S.ansicht') + ' ' + d.getElementById('kopf-titel').textContent);
-    d.querySelector('#zr-umschalter [data-ans-go="werkzeuge"]').click();
-    pruef('beta.3: Der Umschalter führt zu den Werkzeugen', T('S.ansicht') === 'werkzeuge' && d.getElementById('zr-umschalter').hidden === false
-      && d.querySelector('#zr-umschalter [data-ans-go="werkzeuge"]').classList.contains('on'));
+    pruef('beta.3: Das Zahnrad öffnet die Einstellungen', T('S.ansicht') === 'mehr' && d.getElementById('kopf-titel').textContent === 'Einstellungen',
+      T('S.ansicht') + ' ' + d.getElementById('kopf-titel').textContent);
     d.querySelector('#tabs [data-ans-go="botaniker"]').click();
-    pruef('beta.3: Auf dem BOTaniker steht die Eingabe, kein Umschalter', T('S.ansicht') === 'botaniker' && d.getElementById('bot-eingabe').hidden === false
-      && d.getElementById('zr-umschalter').hidden === true && d.getElementById('kopf-titel').textContent === 'BOTaniker');
+    pruef('beta.3: Auf dem BOTaniker steht die Eingabe', T('S.ansicht') === 'botaniker' && d.getElementById('bot-eingabe').hidden === false
+      && d.getElementById('kopf-titel').textContent === 'BOTaniker');
     pruef('beta.3: Der BOTaniker-Bereich ist sichtbar', !d.getElementById('bot-sec').classList.contains('ans-aus'));
 
     /* C: Start */
@@ -9104,9 +7120,9 @@ setTimeout(async () => {
     const haupt = abschnitt('/* Haupt */'), neben = abschnitt('/* Neben */'), gefahr = abschnitt('/* Gefahr */');
     const fehltIn = (teil, liste) => liste.filter(k => teil.indexOf(k) === -1);
     const H = ['button.haupt', '.tools button.haupt', '.as-fuss button.haupt', '.al-fuss button.haupt', '.ut-fuss button.haupt',
-      '.gr-karte-tools button.haupt', '.km-anstoss-taten button.haupt', '.addbar button.haupt', '.wk-haupt', '.km-haupt', '.gm-fuss .gm-ja'];
-    const N = ['.tools button', '.addbar button', '.kb-zweit', '.as-fuss button', '.al-fuss button', '.ut-fuss button',
-      '.gr-karte-tools button', '.gr-zurueck button', '.km-anstoss-taten button', '.km-neben button', '.dokwahl-gewaehlt button',
+      '.km-anstoss-taten button.haupt', '.wk-haupt', '.km-haupt', '.gm-fuss .gm-ja'];
+    const N = ['.tools button', '.kb-zweit', '.as-fuss button', '.al-fuss button', '.ut-fuss button',
+      '.km-anstoss-taten button', '.km-neben button', '.dokwahl-gewaehlt button',
       '.gm-fuss button', '.gm-zfrage-btns button', '.sich-hinweis button', '.wt-zeile button', '.kimodell button', '.takt-pm'];
     const G = ['button.loeschen', '.tools button.loeschen'];
     pruef('beta.4: Hauptknöpfe stehen in der Regel Haupt', fehltIn(haupt, H).length === 0, fehltIn(haupt, H).join(', '));
@@ -9157,9 +7173,9 @@ setTimeout(async () => {
 
     /* Schalter: 21 Häkchen der Einstellungen, als Schalter gekennzeichnet; seit beta.11 23 (Gießmodus: Sammelkarten) */
     /* 4.0-beta.28 (G2b-1): 'ut-langzeit' und 'ck-vollstaerke' sind weg */
-    const SCH = ['ut-hat-stecklinge','mb-katze','mb-an','r-dach','ck-saison',
-      'url-nummern','url-ohneplan','url-ohnebilder','rg-saison','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
-      'tour-aus','ru-technik','vb-r-dach','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
+    const SCH = ['ut-hat-stecklinge','ck-saison',
+      'url-nummern','url-ohneplan','url-ohnebilder','ans-hinweise','ck-wetterzeile','ck-kennzahlen',
+      'tour-aus','ru-technik','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
       'sch-pflege','sch-befunde','sch-abstammung','sch-giessart',
       /* seit beta.30 (B2): „Wachstum“ weg, „Symbolzeile“ dazu */
@@ -9169,9 +7185,10 @@ setTimeout(async () => {
     const fehlt = SCH.filter(id => quelle.split('type="checkbox" role="switch" id="' + id + '"').length !== 2);
     /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter;
        beta.27: Winterpause und Zustandsfrage weg, 28 im Markup (die Schalter
-       der Tags entstehen beim Zeichnen); beta.28: Langzeitdünger und volle Dosis weg, 26 */
-    pruef('beta.5: Alle 26 Einstellungs-Häkchen sind Schalter', fehlt.length === 0, fehlt.join(', '));
-    pruef('beta.5: Genau diese 26 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 31, quelle.split('type="checkbox" role="switch"').length - 1);
+       der Tags entstehen beim Zeichnen); beta.28: Langzeitdünger und volle Dosis weg, 26;
+       beta.33: Planer (vier) und Rundgang (einer) weg, 21 */
+    pruef('beta.5: Alle 21 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 21, fehlt.join(', ') + ' / ' + SCH.length);
+    pruef('beta.5: Genau diese 21 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 26, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
@@ -9366,7 +7383,7 @@ setTimeout(async () => {
       !!azu && azu.classList.contains('erkl') && vornVon(azu) === 'Glas, Schale oder Topf.' && /^Bei Wasser steht der Wechsel/.test(restVon(azu) || ''), azu && azu.textContent.slice(0, 40));
     T("azZeigen({art:'liste'})");
 
-    /* Gießplan: Blöcke statt Tabellen */
+    /* Gießklassen (seit beta.33 in der Bibliothek): Blöcke statt Tabellen */
     T('planTabellen()');
     const kl = [...d.querySelectorAll('#klassen > .gp-k')];
     const kk = T('Object.keys(KLASSEN)');
@@ -9374,8 +7391,7 @@ setTimeout(async () => {
       const dd = b.querySelectorAll('.gp-werte dd');
       return dd.length === 2 && dd[0].textContent === T('KLASSEN[' + JSON.stringify(kk[i]) + '].sommer') && dd[1].textContent === T('KLASSEN[' + JSON.stringify(kk[i]) + '].winter');
     });
-    pruef('beta.7: Gießplan zeigt Klassen als Blöcke mit Sommer und Winter', !q('#wz-in-giessplan table') && werteOk, kl.length + ' / ' + kk.length);
-    pruef('beta.7: Gießplan zeigt jeden Jahreszeiten-Alarm als Block', d.querySelectorAll('#alarme > .gp-a').length === T('ALARME.length') && d.querySelectorAll('#alarme > .gp-a .gp-txt').length === T('ALARME.length'));
+    pruef('beta.7: Gießklassen stehen als Blöcke mit Sommer und Winter da', !q('#mh-in-bib-klassen table') && !!q('#mh-in-bib-klassen #klassen') && werteOk, kl.length + ' / ' + kk.length);
 
     /* Nachschlagen */
     const bibL = d.getElementById('bib-such') && d.getElementById('bib-such').closest('label');
@@ -9483,7 +7499,6 @@ setTimeout(async () => {
       T("erklSatzEnde('Wasser · ohne Bereich · seit 6. Okt.')") === -1 && T("erklSatzEnde('Am 6. Mai war es. Danach nicht.')") === 'Am 6. Mai war es.'.length,
       T("erklSatzEnde('Am 6. Mai war es. Danach nicht.')"));
     pruef('beta.8: Anzucht: Rücklink in Schriftfarbe, Datum ohne Monospace', hat(/html\[data-design\] \.az-zurueck\{color:var\(--schrift\)\}/) && hat(/html\[data-design\] \.az-verlauf span\{font-family:var\(--f-body\)\}/));
-    pruef('beta.8: Gießplan: erste Säule so breit wie „heute“', hat(/\.gp-tag:first-child\{flex:0 0 auto;min-width:max\(32px, max-content\)/));
     pruef('beta.8: Sicherung: „Erinnern nach“ in eigener Zeile', hat(/#sicher-takt > \.lab:first-child\{flex:1 1 100%/));
 
     /* Nach dem Anlegen: Karte erst, wenn das Formular zu ist (sonst schloss das verspätete Zurück die Karte) */
@@ -11778,7 +9793,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     const d = w.document;
     const klick = sel => { const el = d.querySelector(sel); if(el) el.click(); return !!el; };
     const warte = ms => new Promise(r => setTimeout(r, ms));
-    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, feuchtRueck:S.feuchtRueck, orte:S.orte, samStufe:S.samStufe,
+    const LAGER = `{eigene:S.eigene, water:S.water, raeume:S.raeume, feuchtRueck:S.feuchtRueck, samStufe:S.samStufe,
       samAnsicht:S.samAnsicht, design:S.design, gruppierung:S.gruppierung, ansicht:S.ansicht}`;
     const alt23 = T(`JSON.stringify(${LAGER})`);
     const heute = () => T('iso(HEUTE)');
@@ -11804,7 +9819,6 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         ];
         S.water = {Q1:[vor(20)], Q2:[vor(20)], Q3:[vor(20)], Q4:[vor(20), iso(HEUTE)], Q5:[vor(20)]};
         S.feuchtRueck = {Q1:{zahl:2, zuletzt:vor(3)}, Q2:{zahl:1, zuletzt:vor(3)}, Q3:{zahl:1, zuletzt:vor(3)}};
-        S.orte = {Q1:{raum:k, x:40, y:40}};
         S.gruppierung = 'keine';
         designSetzen('botanisch');
         ansichtZeigen('sammlung');
@@ -11982,14 +9996,10 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
 
       /* ── 12: Grundrissplaner entfernt, Raum und Stellplatz bleiben ── */
       pruef('beta.23 (G1a): Kein Werkzeug „Räume und Grundriss“ mehr', !d.querySelector('section[data-wz="grundriss"]')
-        && Array.prototype.every.call(d.querySelectorAll('[data-wz-go="grundriss"]'), b => !!b.closest('#zonen-sec[hidden]')));
+        && !d.querySelector('[data-wz-go="grundriss"]') && !d.getElementById('zonen-sec'));
       pruef('beta.23 (G1a): Grundriss ist keine Ansicht mehr', T(`WERKZEUGE.indexOf('grundriss')`) === -1 && T(`sektionOeffnen('grundriss')`) === false);
-      pruef('beta.23 (G1a): Planer-Markup ist versteckt und keiner Ansicht zugeordnet', (() => { const z = d.getElementById('zonen-sec'); return !!z && z.hidden && !z.dataset.ans; })());
-      T(`window.__ort23 = 0; window.__ortAlt23 = pflanzenOrt; pflanzenOrt = function(id){ __ort23++; return __ortAlt23(id); }`);
-      const sst = T(`standortStunden(S.eigene.find(function(p){ return p.id === 'Q1'; }))`);
-      const sli = T(`standortLicht(${JSON.stringify(K)}, 'Fensterbank')`);
-      pruef('beta.23 (G1a): Keine Lichtrechnung mehr, auch mit gespeicherter Lage', sst === null && sli === null && T('__ort23') === 0, T('__ort23'));
-      T(`pflanzenOrt = __ortAlt23`);
+      pruef('beta.23 (G1a): Keine Lichtrechnung und kein Planer mehr im Code (beta.33)',
+        T(`typeof standortStunden + typeof standortLicht + typeof pflanzenOrt + typeof planRender + typeof raeume`) === 'undefined'.repeat(5));
       T(`karteOeffnen('Q1')`);
       const rumpf = d.getElementById('karte-rumpf');
       pruef('beta.23 (G1a): Karte zeigt keinen Block „Licht am Platz“ und keinen Grundriss',
@@ -11998,7 +10008,6 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.23 (G1a): Karte zeigt weiter Raum und Stellplatz', !!rumpf && !!rumpf.querySelector('[data-lage-k="raum"]') && !!rumpf.querySelector('[data-lage-k="platz"]'));
       T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`);
       pruef('beta.23 (G1a): Raum und Stellplatz der Pflanzen unverändert', T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'Q1'; }); return p.raum + '|' + p.stellplatz; })()`) === K + '|Fensterbank');
-      pruef('beta.23 (G1a): Lagedaten der Skizze bleiben gespeichert (nichts still gelöscht)', T(`!!(S.orte && S.orte.Q1 && S.orte.Q1.x === 40)`) === true);
       pruef('beta.23 (G1a): Schalter „Licht am Platz“ ist weg', !d.getElementById('sch-licht') && T(`SCHALTER.some(function(s){ return s.k === 'licht'; })`) === false);
       pruef('beta.23 (G1a): Tour hat kein Kapitel zum Grundriss', T(`!TOUR_KAPITEL.grundriss && !TOUR_KAPITEL.plan`) === true);
       pruef('beta.23 (G1a): BOTaniker bietet für „Standort“ kein Werkzeug mehr an', T(`BOT_ABSICHTEN.find(function(a){ return a.key === 'standort'; }).werkzeug`) === undefined);
@@ -12086,7 +10095,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       ['prompt', 'confirm', 'alert'].forEach(f => { w[f] = altDlg[f]; });
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
         if(typeof samWahlEnde === 'function') samWahlEnde();
-        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.feuchtRueck = a.feuchtRueck; S.orte = a.orte;
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.feuchtRueck = a.feuchtRueck;
         if(a.samStufe === undefined) delete S.samStufe; else S.samStufe = a.samStufe;
         if(a.samAnsicht === undefined) delete S.samAnsicht; else S.samAnsicht = a.samAnsicht;
         S.gruppierung = a.gruppierung; designSetzen(a.design || 'botanisch'); ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt23)})`);
@@ -12300,7 +10309,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       lernen:S.lernen, tagEin:S.tagEin, feuchtRueck:S.feuchtRueck, giess:S.giess, profil:S.profil, ansicht:S.ansicht}`;
     const alt25 = T(`JSON.stringify(${LAGER})`);
     T(`window.__a25 = {groesseKB:groesseKB, fotoSchreiben:fotoSchreiben, dokAufbau:dokAufbau, verAufbau:verAufbau,
-      planRender:planRender, bibExaktSuchen:bibExaktSuchen, gross:FOTO_GROSS, bereit:FOTOS_BEREIT,
+      bibExaktSuchen:bibExaktSuchen, gross:FOTO_GROSS, bereit:FOTOS_BEREIT,
       setItem:Storage.prototype.setItem, cou:URL.createObjectURL, rou:URL.revokeObjectURL}; 1`);
     try {
       T(`(function(){
@@ -12311,7 +10320,6 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         groesseKB = function(o){ if(o === S.fotos) __z25.g++; return __a25.groesseKB(o); };
         dokAufbau = function(){ __z25.dok++; return __a25.dokAufbau.apply(this, arguments); };
         verAufbau = function(){ __z25.ver++; return __a25.verAufbau.apply(this, arguments); };
-        planRender = function(){ __z25.plan++; return __a25.planRender.apply(this, arguments); };
         bibExaktSuchen = function(){ __z25.bib++; return __a25.bibExaktSuchen.apply(this, arguments); };
         S.raeume = [];
         var k = raumAnlegen('Prüf-Flur B25'), u = raumAnlegen('Prüf-Bad B25');
@@ -12441,8 +10449,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       await warte(250);
 
       /* ── 10: kein Planer in render() ── */
-      T(`__z25.plan = 0; render()`);
-      pruef('beta.25 (10): render() ruft planRender nicht', T('__z25.plan') === 0, T('__z25.plan'));
+      pruef('beta.25 (10): Es gibt keinen Planer mehr, den render() rufen könnte', T('typeof planRender') === 'undefined');
 
       /* ── 11: Blob-URL in Sammlung und Gießliste ── */
       T(`(function(){
@@ -12473,7 +10480,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         history.replaceState(null, '');
         Storage.prototype.setItem = __a25.setItem; groesseKB = __a25.groesseKB; fotoSchreiben = __a25.fotoSchreiben;
-        dokAufbau = __a25.dokAufbau; verAufbau = __a25.verAufbau; planRender = __a25.planRender; bibExaktSuchen = __a25.bibExaktSuchen;
+        dokAufbau = __a25.dokAufbau; verAufbau = __a25.verAufbau; bibExaktSuchen = __a25.bibExaktSuchen;
         URL.createObjectURL = __a25.cou; URL.revokeObjectURL = __a25.rou; FOTO_URL = null;
         FOTO_GROSS = __a25.gross; FOTOS_BEREIT = __a25.bereit;
         gmListeAktiv = false; gmTeil = null;
@@ -13225,12 +11232,12 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
   /* ══ 4.0-beta.29: Etappe B1 — Aufgaben raus (F279). Die Aufgabenliste
      verschwindet aus Karte, Mehr, Heute-Zahl, Doktor, KI-Doktor, Ableger
      und Stammbaum; alte Aufgabendaten werden beim Laden und Einlesen
-     gelöscht. Die Wunschliste bleibt. Legt alles selbst an und stellt
+     gelöscht. Legt alles selbst an und stellt
      den Stand der Hauptseite am Ende zurück. ══ */
   {
     const T = c => w.__T(c);
     const warte = ms => new Promise(r => setTimeout(r, ms));
-    const LAGER29 = `{eigene:S.eigene, water:S.water, wish:S.wish, giess:S.giess, raeume:S.raeume, ansicht:S.ansicht, samStufe:S.samStufe, acc:S.acc}`;
+    const LAGER29 = `{eigene:S.eigene, water:S.water, giess:S.giess, raeume:S.raeume, ansicht:S.ansicht, samStufe:S.samStufe, acc:S.acc}`;
     const alt29 = T(`JSON.stringify(${LAGER29})`);
     const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
     let w29 = null;
@@ -13266,7 +11273,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.29 B1 (3): kein Abschnitt „Aufgaben“ unter Mehr', !d.getElementById('todo-sec') && !d.getElementById('alltodo')
         && !d.querySelector('[data-mh="aufgaben"]') && !d.querySelector('[data-mh-go="aufgaben"]'));
       pruef('beta.29 B1 (3): Gruppe „Sammlung“ ohne Punkt „aufgaben“',
-        T(`JSON.stringify(MH_GRUPPEN[0].punkte)`) === '["raeume","tags","wunsch"]', T(`JSON.stringify(MH_GRUPPEN[0].punkte)`));
+        T(`JSON.stringify(MH_GRUPPEN[0].punkte)`) === '["raeume","tags"]', T(`JSON.stringify(MH_GRUPPEN[0].punkte)`));
 
       /* (4) Zahl am Reiter Heute ohne Aufgaben: P2 fällig, dazu alte Aufgaben im Speicher */
       T(`(function(){ S.added = {P1:[{id:'x1', text:'Alte Aufgabe'}], P2:[{id:'x2', text:'Noch eine'}]}; S.tasks = {}; zaehlerAktualisieren(); return 1; })()`);
@@ -13291,26 +11298,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         /ziel\.innerHTML = topfHTML\(topf\) \+ massnahmenListeHTML\(liste\);/.test(html) && html.indexOf('data-mnwahl') === -1);
       pruef('beta.29 B1 (7): Ableger legt keine Aufgaben an', html.indexOf('Die zwei wichtigsten Schritte gleich als Aufgaben') === -1);
 
-      /* (9) und (11) Wunschliste: Hinzufügen, Abhaken, Löschen, ohne Auswahlliste */
-      T(`(function(){ S.wish = []; sichern(); render(); return 1; })()`);
-      pruef('beta.29 B1 (9): Wunschliste öffnet als Fenster', T("sektionOeffnen('wunsch')") === true);
-      await warte(150);
-      const wb = () => d.querySelector('#sekm-rumpf #wunsch') || d.getElementById('wunsch');
-      pruef('beta.29 B1 (11): keine Auswahlliste des Systems in der Wunschliste, kein „Wann“',
-        !!wb() && !wb().querySelector('select') && html.indexOf('add-wann') === -1);
-      const inp29 = wb() && wb().querySelector('.addbar input');
-      if(inp29){ inp29.value = 'Monstera Thai'; wb().querySelector('[data-do="add"]').click(); }
-      await warte(80);
-      pruef('beta.29 B1 (9): Wunsch hinzugefügt', T(`S.wish.length === 1 && S.wish[0].text === 'Monstera Thai' && S.wish[0].done === false`) === true,
-        T('JSON.stringify(S.wish)'));
-      const li29 = () => wb() && wb().querySelector('li.task');
-      if(li29()) li29().querySelector('[data-do="toggle"]').click();
-      await warte(80);
-      pruef('beta.29 B1 (9): Wunsch abgehakt', T(`S.wish[0] && S.wish[0].done === true`) === true);
-      if(li29()) li29().querySelector('[data-do="del"]').click();
-      await warte(80);
-      pruef('beta.29 B1 (9): Wunsch gelöscht', T(`S.wish.length`) === 0);
-      await zu();
+      /* (9) und (11): Die Wunschliste ist mit beta.33 entfernt. */
+      pruef('beta.29 B1 (11): keine Auswahlliste „Wann“ mehr', html.indexOf('add-wann') === -1);
 
       /* (8) Start mit alten Aufgabendaten in einer zweiten Seite */
       const roh29 = T(`(function(){
@@ -13357,7 +11346,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       try { if(w29) w29.close(); } catch(e){}
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         history.replaceState(null, '');
-        S.eigene = a.eigene; S.water = a.water; S.wish = a.wish; S.giess = a.giess; S.raeume = a.raeume; S.samStufe = a.samStufe; S.acc = a.acc;
+        S.eigene = a.eigene; S.water = a.water; S.giess = a.giess; S.raeume = a.raeume; S.samStufe = a.samStufe; S.acc = a.acc;
         delete S.tasks; delete S.added; delete S.deleted;
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt29)})`);
     }
@@ -13373,7 +11362,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     /* Sicher auswerten: im alten Stand fehlende Namen brechen den Block nicht ab */
     const TS = c => { try { return w.__T(c); } catch(e){ return 'FEHLER: ' + (e && e.message); } };
     const warte = ms => new Promise(r => setTimeout(r, ms));
-    const LAGER30 = `{eigene:S.eigene, water:S.water, lernen:S.lernen, tagEin:S.tagEin, ereignisse:S.ereignisse, giess:S.giess, raeume:S.raeume, tiere:S.tiere, blatt:S.blatt, modus:S.modus, schalter:S.schalter, kartenTab:S.kartenTab, ansicht:S.ansicht}`;
+    const LAGER30 = `{eigene:S.eigene, water:S.water, lernen:S.lernen, tagEin:S.tagEin, ereignisse:S.ereignisse, giess:S.giess, raeume:S.raeume, tiere:S.tiere, modus:S.modus, schalter:S.schalter, kartenTab:S.kartenTab, ansicht:S.ansicht}`;
     const alt30 = T(`JSON.stringify(${LAGER30})`);
     const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
     const q = s => d.querySelector(s);
@@ -13558,12 +11547,13 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         TS(`allePflanzen().find(function(x){ return x.id === 'B2A'; }).raum`) === '');
       pruef('beta.30 B2 (10): Topf und Substrat stehen im Reiter Platz', !!q('#karte-rumpf [data-kpane="platz"] [data-kblock="topf"]'));
 
-      /* (11) Wachstum weg, Rundgang zählt weiter */
+      /* (11) Wachstum weg; seit beta.33 auch der Blattzähler des Rundgangs */
       pruef('beta.30 B2 (11): kein Wachstum in Karte und Code, kein Schalter „Wachstum“',
         !q('#karte-rumpf .wachstum') && !q('#karte-rumpf [data-blatt]') && !d.getElementById('sch-wachstum')
         && html.indexOf('function wachstumHTML(') === -1 && TS(`SCHALTER.some(function(s){ return s.k === 'wachstum'; })`) === false);
-      TS(`(function(){ if(S.blatt) delete S.blatt.B2A; ereignisDazu('B2A', 'blatt', ''); return 1; })()`);
-      pruef('beta.30 B2 (11): ein neues Blatt aus dem Rundgang zählt weiter', TS(`blattLog('B2A').length`) === 1);
+      TS(`(function(){ ereignisDazu('B2A', 'blatt', ''); return 1; })()`);
+      pruef('beta.30 B2 (11): ein Blatt-Ereignis steht im Verlauf, gezählt wird nichts mehr',
+        TS(`(S.ereignisse.B2A || []).filter(function(e){ return e.typ === 'blatt'; }).length`) === 1 && TS(`typeof blattLog`) === 'undefined' && TS(`'blatt' in S`) === false);
 
       /* (12) keine Tiere-Zeile, die Tierdaten bleiben */
       TS(`(function(){ S.tiere = {aktiv:true, arten:['katze']}; var p = S.eigene.find(function(x){ return x.id === 'B2A'; }); p.raum = raumListe()[0].id; p.stellplatz = 'Boden'; sichern(); render(); return 1; })()`);
@@ -13605,7 +11595,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
         history.replaceState(null, '');
         S.eigene = a.eigene; S.water = a.water; S.lernen = a.lernen; S.tagEin = a.tagEin; S.ereignisse = a.ereignisse; S.giess = a.giess;
-        S.raeume = a.raeume; S.tiere = a.tiere; S.blatt = a.blatt; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab;
+        S.raeume = a.raeume; S.tiere = a.tiere; S.modus = a.modus; S.schalter = a.schalter; S.kartenTab = a.kartenTab;
         if(typeof schalterAnwenden === 'function') schalterAnwenden();
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt30)})`);
     }
@@ -14104,6 +12094,251 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(a.kiStufe === undefined) delete S.kiStufe; else S.kiStufe = a.kiStufe;
         if(typeof schalterAnwenden === 'function') schalterAnwenden();
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt32)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.33: Etappe 1 — Aufräumen (H + I-a). Rundgang, Werkzeuge-Reiter,
+     Gießplan-Werkzeug, Wunschliste und Grundrissplaner sind entfernt; ihre
+     Daten werden beim Laden gelöscht. Räume und Stellplätze bleiben, wie sie
+     waren. Der Vertretungszettel zählt nach Raum und Stellplatz. Heute zählt
+     keine Pflanzen in der Gießpause. Legt alles selbst an und stellt den
+     Stand am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const LAGER33 = `{eigene:S.eigene, water:S.water, raeume:S.raeume, tagEin:S.tagEin, ereignisse:S.ereignisse, feuchtRueck:S.feuchtRueck,
+      lernen:S.lernen, giess:S.giess, wetter:S.wetter, heuteWetter:S.heuteWetter, ansicht:S.ansicht, anzucht:S.anzucht}`;
+    const alt33 = T(`JSON.stringify(${LAGER33})`);
+    /* Ein Stand, wie ihn beta.32 gespeichert hat: Raum mit Planer-Feldern,
+       Möbeln und einer Lampe, dazu Rundgang, Blattzähler und Wunschliste. */
+    const ALT33 = `{
+      raeume:[
+        {id:'rE1', name:'E1 Wohnzimmer', sp:6, re:4, kacheln:{'0,0':1,'1,0':1}, kanten:{'o:0,0':'fenster'}, kantenMass:{'o:0,0':{breite:80}},
+         drehung:180, dach:true, deckeH:250, notiz:'alt', roh:true, echtB:3.2, echtT:2.1,
+         moebel:[{id:'m1', typ:'regal', name:'E1 Prüfregal', x:0, y:0, b:100, t:40, h:120},
+                 {id:'m2', typ:'stehlampe', name:'E1 Stehlampe', x:120, y:0, b:40, t:40, h:170},
+                 {id:'m3', typ:'tisch', name:'Tisch', x:200, y:0, b:80, t:80, h:75},
+                 {id:'m4', typ:'sideboard', name:'E1 Prüfregal', x:0, y:100, b:120, t:40, h:80}],
+         plaetze:['E1 Hocker', 'E1 Prüfregal'], plaetzeAus:['Boden']},
+        {id:'rE2', name:'E1 Bad', sp:4, re:3, kacheln:{}, kanten:{}, drehung:90, dach:true, deckeH:250, moebel:[], notiz:''}
+      ],
+      eigene:[
+        {id:'E1A', eigen:true, name:'E1 mit Raum', art:'Art E1A', klasse:'B', raum:'rE1', stellplatz:'E1 Prüfregal', topf:'12', log:[], notiz:''},
+        {id:'E1B', eigen:true, name:'E1 nur Planer', art:'Art E1B', klasse:'B', topf:'12', log:[], notiz:''},
+        {id:'E1C', eigen:true, name:'E1 anderer Raum', art:'Art E1C', klasse:'B', raum:'rE2', stellplatz:'Boden', topf:'12', log:[], notiz:''},
+        {id:'E1D', eigen:true, name:'E1 ohne alles', art:'Art E1D', klasse:'B', topf:'12', log:[], notiz:''}
+      ],
+      water:{}, tagEin:{}, feuchtRueck:{},
+      orte:{E1A:{raum:'rE1', x:40, y:20, etage:1}, E1B:{raum:'rE1', x:140, y:20}, E1C:{raum:'rE1', x:10, y:10}, E1X:{raum:'rWeg', x:1, y:1}},
+      balkon:{ort:'Europe/Berlin', richtung:180}, raumAktiv:'rE1', grundrissWunsch:true,
+      rundgang:{stufe:'bestand', rhythmus:14, max:10, zaehler:7},
+      blatt:{E1A:['2026-10-01','2026-10-20']},
+      wish:[{id:'w1', text:'E1 Wunsch', done:false}],
+      sammlungOffen:'wunsch'
+    }`;
+    const WEG33 = ['rundgang','blatt','wish','sammlungOffen','orte','balkon','raumAktiv','grundrissWunsch'];
+    const lage33 = `S.eigene.map(function(p){ return p.id + ':' + (p.raum || '') + ':' + (p.stellplatz || ''); }).join('|')`;
+    const PLAETZE33 = JSON.stringify(['Fensterbank','Regal','Tisch','Hängend','E1 Prüfregal','E1 Hocker']);
+    let w33 = null;
+    try {
+      await zu();
+
+      /* ── (1) Die Daten der entfernten Teile sind nach dem Laden weg ── */
+      T(`(function(){ Object.assign(S, ${ALT33}); grundwerteErgaenzen(); return 1; })()`);
+      const noch = WEG33.filter(k => T(`'${k}' in S`) === true);
+      pruef('beta.33 (1): Rundgang-, Blatt-, Wunsch- und Planer-Daten sind nach dem Laden gelöscht', noch.length === 0, noch.join(','));
+      const r1 = JSON.parse(T(`JSON.stringify(S.raeume[0])`));
+      pruef('beta.33 (1): Der Raum behält Kennung und Name, dazu nur seine Stellplätze',
+        r1.id === 'rE1' && r1.name === 'E1 Wohnzimmer' && Object.keys(r1).sort().join(',') === 'id,name,plaetze,plaetzeAus', Object.keys(r1).sort().join(','));
+      pruef('beta.33 (1): Ein Raum ohne eigene Stellplätze bleibt stehen, ohne Planer-Felder',
+        T(`JSON.stringify(S.raeume[1])`) === '{"id":"rE2","name":"E1 Bad","plaetze":[]}', T(`JSON.stringify(S.raeume[1])`));
+
+      /* ── (2) Räume und Stellplätze sind dieselben wie vorher ── */
+      pruef('beta.33 (2): Stellplätze des Raums wie vor dem Umbau, in derselben Reihenfolge; die Lampe war nie einer',
+        T(`JSON.stringify(stellplaetzeFuer('rE1'))`) === PLAETZE33, T(`JSON.stringify(stellplaetzeFuer('rE1'))`));
+      pruef('beta.33 (2): Raum und Stellplatz jeder Pflanze bleiben; ein Raum, der nur im Planer stand, wird übernommen',
+        T(lage33) === 'E1A:rE1:E1 Prüfregal|E1B:rE1:|E1C:rE2:Boden|E1D::', T(lage33));
+      const einmal = T(`JSON.stringify({r:S.raeume, e:S.eigene})`);
+      T(`grundwerteErgaenzen(); 1`);
+      pruef('beta.33 (1): Ein zweiter Lauf ändert nichts mehr', T(`JSON.stringify({r:S.raeume, e:S.eigene})`) === einmal);
+      pruef('beta.33 (1): Die Sicherung enthält nichts davon',
+        !/"(rundgang|blatt|wish|sammlungOffen|orte|balkon|raumAktiv|grundrissWunsch|moebel|kacheln|kanten|deckeH)":/.test(T(`sicherungInhalt()`)));
+      pruef('beta.33 (2): Die Raumverwaltung kommt ohne Planer aus',
+        T(`typeof raeume + typeof neuerRaum + typeof pflanzeSetzen + typeof istLampe + typeof hoeheAn`) === 'undefined'.repeat(5));
+      pruef('beta.33 (2): Ein früherer Möbel-Platz lässt sich umbenennen, die Pflanze zieht mit',
+        T(`rvPlatzUmbenennen('rE1', 'E1 Prüfregal', 'E1 Regal neu')`) === ''
+        && T(`S.eigene.find(function(p){ return p.id === 'E1A'; }).stellplatz`) === 'E1 Regal neu'
+        && T(`JSON.stringify(stellplaetzeFuer('rE1'))`) === JSON.stringify(['Fensterbank','Regal','Tisch','Hängend','E1 Hocker','E1 Regal neu']),
+        T(`JSON.stringify(stellplaetzeFuer('rE1'))`));
+      pruef('beta.33 (2): Ein Stellplatz lässt sich löschen, die Pflanze verliert nur ihn',
+        T(`rvPlatzLoeschen('rE1', 'E1 Regal neu')`) === '' && T(`stellplaetzeFuer('rE1').indexOf('E1 Regal neu')`) === -1
+        && T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'E1A'; }); return (p.raum || '') + '|' + (p.stellplatz || ''); })()`) === 'rE1|');
+      const neuId = T(`raumAnlegen('E1 Flur')`);
+      pruef('beta.33 (2): Ein neuer Raum ist ein schlanker Eintrag ohne Planer-Felder, Dubletten gibt es nicht',
+        Object.keys(JSON.parse(T(`JSON.stringify(S.raeume.find(function(x){ return x.id === ${JSON.stringify(neuId)}; }))`))).join(',') === 'id,name,plaetze'
+        && T(`raumAnlegen('e1 flur')`) === neuId && T(`S.raeume.length`) === 3, T(`JSON.stringify(S.raeume)`));
+      pruef('beta.33 (2): Raum löschen nimmt seinen Pflanzen Raum und Stellplatz',
+        T(`rvRaumLoeschen('rE2')`) === '' && T(`(function(){ var p = S.eigene.find(function(p){ return p.id === 'E1C'; }); return (p.raum || '') + '|' + (p.stellplatz || ''); })()`) === '|'
+        && T(`S.raeume.map(function(r){ return r.id; }).join(',')`) === 'rE1,' + neuId);
+      pruef('beta.33 (2): Der letzte Raum bleibt stehen',
+        T(`rvRaumLoeschen(${JSON.stringify(neuId)})`) === '' && T(`rvRaumLoeschen('rE1')`) === 'Der letzte Raum bleibt stehen.' && T(`S.raeume.length`) === 1);
+      pruef('beta.33 (2): Ohne Räume legt das Laden wieder einen an',
+        T(`(function(){ S.raeume = []; grundwerteErgaenzen(); return JSON.stringify(S.raeume); })()`) === '[{"id":"r0balkon","name":"Balkon","plaetze":[]}]', T(`JSON.stringify(S.raeume)`));
+      T(`sektionOeffnen('raeume')`); await warte(120);
+      pruef('beta.33 (2): Die Raumliste in den Einstellungen zeichnet', !!q('#sekm-rumpf #rv-inhalt .rv-zeile') && /Balkon/.test(q('#sekm-rumpf #rv-inhalt').textContent));
+      await zu();
+
+      /* ── (1) Start mit dem alten Speicher in einer zweiten Seite ── */
+      const roh33 = T(`(function(){
+        var s = JSON.parse(localStorage.getItem(KEY)) || {};
+        Object.assign(s, ${ALT33});
+        s.ansicht = 'werkzeuge';
+        return JSON.stringify(s); })()`);
+      const f33 = [];
+      const dom33 = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.localStorage.setItem('gk-beta', roh33);
+        w2.addEventListener('error', e => f33.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(700);
+      w33 = dom33.window;
+      const T33 = c => w33.__T(c);
+      pruef('beta.33 (1): Start mit dem alten Speicher ohne Laufzeitfehler', f33.length === 0, f33.join(' | ').slice(0, 300));
+      pruef('beta.33 (1): Die gespeicherte Ansicht „werkzeuge“ führt auf Heute', T33(`S.ansicht`) === 'heute' && w33.document.body.dataset.ansicht === 'heute', T33(`S.ansicht`));
+      const noch2 = WEG33.filter(k => T33(`'${k}' in S`) === true);
+      pruef('beta.33 (1): Nach dem Start sind die alten Daten gelöscht', noch2.length === 0, noch2.join(','));
+      pruef('beta.33 (2): Nach dem Start stehen Räume, Stellplätze und Pflanzen wie vorher da',
+        T33(`JSON.stringify(stellplaetzeFuer('rE1'))`) === PLAETZE33 && T33(lage33) === 'E1A:rE1:E1 Prüfregal|E1B:rE1:|E1C:rE2:Boden|E1D::'
+        && T33(`S.raeume.map(function(r){ return r.id + ':' + r.name; }).join('|')`) === 'rE1:E1 Wohnzimmer|rE2:E1 Bad',
+        T33(`JSON.stringify(stellplaetzeFuer('rE1'))`) + ' ' + T33(lage33));
+      const karten33 = [].map.call(w33.document.querySelectorAll('#out .card'), c => c.dataset.karte).sort().join(',');
+      pruef('beta.33 (1): Alle vier Pflanzen stehen in der Sammlung', karten33 === 'E1A,E1B,E1C,E1D', karten33);
+      T33(`sichern()`);
+      pruef('beta.33 (1): Der Speicher ist danach frei von den alten Feldern',
+        !/"(rundgang|blatt|wish|sammlungOffen|orte|balkon|raumAktiv|grundrissWunsch|moebel|kacheln|kanten|deckeH)":/.test(w33.localStorage.getItem('gk-beta') || ''));
+      try { w33.close(); } catch(e){} w33 = null;
+      /* Einlesen einer alten Sicherung über den echten Weg (Datei wählen) */
+      const sich33 = JSON.stringify(Object.assign({__app:'greenkeeperai', __fassung:'4.0-beta.32'}, JSON.parse(roh33), {ansicht:'heute'}));
+      const inp33 = d.getElementById('import-file');
+      Object.defineProperty(inp33, 'files', {value:[new w.File([sich33], 'pflanzen-sicherung.json', {type:'application/json'})], configurable:true});
+      inp33.onchange(); await warte(400);
+      const noch3 = WEG33.filter(k => T(`'${k}' in S`) === true);
+      pruef('beta.33 (1): Eine eingelesene alte Sicherung verliert dieselben Felder, Räume und Stellplätze bleiben',
+        noch3.length === 0 && T(`JSON.stringify(stellplaetzeFuer('rE1'))`) === PLAETZE33 && T(lage33) === 'E1A:rE1:E1 Prüfregal|E1B:rE1:|E1C:rE2:Boden|E1D::',
+        noch3.join(',') + ' ' + T(`JSON.stringify(stellplaetzeFuer('rE1'))`) + ' ' + T(lage33));
+      await zu();
+
+      /* ── (3) Heute zählt keine Pflanzen in der Gießpause ── */
+      T(`(function(){
+        var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        var pf = function(id, o){ return Object.assign({id:id, eigen:true, name:'E1 ' + id, art:'Art ' + id, klasse:'B', topf:'12', log:[], notiz:''}, o); };
+        S.raeume = [{id:'rH1', name:'E1 Küche', plaetze:[]}];
+        S.eigene = [pf('H1', {raum:'rH1', stellplatz:'Regal'}), pf('H2', {raum:'rH1', stellplatz:'Boden'}),
+                    pf('H3', {raum:'rH1', stellplatz:'Boden'}), pf('H4', {})];
+        S.water = {H1:[vor(40)], H2:[vor(40)], H3:[vor(40)], H4:[vor(40)]};
+        S.feuchtRueck = {}; S.tagEin = {}; S.lernen = {}; S.anzucht = null;
+        giessEinst().tageModus = 'faellig';
+        tagVorgabenSichern(false);
+        tagSetzen('H2', 'tv-pause'); tagSetzen('H3', 'tv-pause');
+        sichern(); ansichtZeigen('heute'); render();
+        return 1; })()`);
+      pruef('beta.33 (3): Testdaten: zwei Pflanzen in der Gießpause, zwei überfällig',
+        T(`['H1','H2','H3','H4'].map(function(id){ return giessStatus(allePflanzen().find(function(p){ return p.id === id; })).stand; }).join(',')`) === 'over,stopp,stopp,over',
+        T(`['H1','H2','H3','H4'].map(function(id){ return giessStatus(allePflanzen().find(function(p){ return p.id === id; })).stand; }).join(',')`));
+      pruef('beta.33 (3): „Heute dran“ zählt nur die zwei fälligen, nicht die pausierten',
+        T(`heuteDran().map(function(p){ return p.id; }).sort().join(',')`) === 'H1,H4' && T(`heuteLageText()`) === '2 Pflanzen sind heute dran.', T(`heuteLageText()`));
+      T(`gmKnopfAktualisieren(); ansichtZeigen('heute')`);
+      pruef('beta.33 (3): Der Gießknopf und die Kopfzeile auf Heute nennen zwei, nicht vier',
+        q('#gm-start-sub').textContent === '2 Pflanzen warten' && q('#kopf-lage').textContent === '2 Pflanzen sind heute dran.',
+        q('#gm-start-sub').textContent + ' / ' + q('#kopf-lage').textContent);
+      pruef('beta.33 (3): Die Gießliste selbst bleibt unverändert', T(`giessListe().map(function(p){ return p.id; }).sort().join(',')`) === 'H1,H2,H3,H4');
+      T(`(function(){ S.water.H1 = [iso(HEUTE)]; S.water.H4 = [iso(HEUTE)]; sichern(); render(); ansichtZeigen('heute'); return 1; })()`);
+      pruef('beta.33 (3): Sind nur noch pausierte Pflanzen übrig, ist auf Heute nichts fällig',
+        T(`heuteDran().length`) === 0 && /^Heute ist nichts fällig\./.test(T(`heuteLageText()`)) && q('#gm-start-sub').textContent === 'nichts fällig'
+        && q('#btn-giessmodus').classList.contains('leer'), T(`heuteLageText()`) + ' / ' + q('#gm-start-sub').textContent);
+      pruef('beta.33 (3): Kein Zähler „in der Gießpause“ mehr', T(`'pause' in heuteZahlen()`) === false);
+
+      /* ── Vertretungszettel: Raumliste statt Zeichnung, pausierte bleiben „nicht gießen“ ── */
+      T(`(function(){ var vor = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        S.water.H1 = [vor(40)]; S.water.H4 = [vor(40)]; sichern(); return 1; })()`);
+      const zettel = JSON.parse(T(`(function(){
+        var pl = ubPlan(iso(HEUTE), ubTagPlus(iso(HEUTE), 30), 0);
+        var h = ubBlattHTML(pl, {wer:'', ohnePlan:false, ohneBilder:true, nummern:true});
+        return JSON.stringify({g:pl.giessen.map(function(e){ return e.p.id + ':' + e.nr + ':' + (e.raum ? e.raum.id : ''); }).join('|'),
+          p:pl.pause.map(function(e){ return e.p.id + ':' + e.nr; }).join('|'), r:pl.raeume.map(function(r){ return r.id; }).join('|'), h:h}); })()`));
+      pruef('beta.33: Zettel: Nummern folgen Raum und Stellplatz, eine Pflanze ohne Raum steht hinten',
+        zettel.g === 'H1:3:rH1|H4:4:' && zettel.r === 'rH1', zettel.g + ' / ' + zettel.r);
+      pruef('beta.33: Zettel: pausierte Pflanzen stehen weiter unter „nicht gießen“',
+        zettel.p === 'H2:1|H3:2' && /Diese bitte nicht gießen/.test(zettel.h), zettel.p);
+      pruef('beta.33: Zettel: Raumliste mit Nummer und Stellplatz, keine Zeichnung, „Ohne Raum“ für den Rest',
+        zettel.h.indexOf('<svg') === -1 && /<h3>E1 Küche<\/h3>/.test(zettel.h) && /<span class="ub-lnr">3<\/span>E1 H1 — Regal<\/li>/.test(zettel.h)
+        && /<b>Ohne Raum:<\/b> E1 H4/.test(zettel.h) && T(`typeof ubRaumSVG`) === 'undefined', zettel.h.slice(0, 200));
+
+      /* ── (4) Werkzeuge sind Fenster, kein Reiter ── */
+      T(`ansichtZeigen('sammlung')`); T(`ansichtZeigen('doktor')`); await warte(150);
+      pruef('beta.33 (4): ansichtZeigen(„doktor“) öffnet das Fenster über der Sammlung',
+        T(`S.ansicht`) === 'sammlung' && d.body.dataset.ansicht === 'sammlung' && T(`!!(_sekOffen && _sekOffen.key === 'doktor') && modalOffen('sek-modal')`) === true);
+      await zu();
+      T(`ansichtZeigen('werkzeuge')`);
+      pruef('beta.33 (4): „werkzeuge“ ist keine Ansicht mehr, das Zahnrad hat keinen Umschalter',
+        T(`ANSICHTEN.indexOf('werkzeuge')`) === -1 && T(`S.ansicht`) === 'heute' && !d.getElementById('zr-umschalter') && !q('[data-ans-go="werkzeuge"]'));
+      const stumm33 = [];
+      for(const k of ['doktor','umtopfen','substrat','vermehren','stammbaum']){
+        const auf = T(`sektionOeffnen('${k}')`); await warte(120);
+        if(auf !== true || !q('#sekm-rumpf .wz-in') || !q('#sekm-titel').textContent.trim() || q(`section[data-wz="${k}"]`).hidden !== true) stumm33.push(k);
+        await zu();
+      }
+      pruef('beta.33 (4): Alle fünf Werkzeuge öffnen als Fenster mit Titel, ihr Lager bleibt unsichtbar', stumm33.length === 0, stumm33.join(','));
+      pruef('beta.33 (4): Tippwort „Stammbaum“ im BOTaniker erkennt das Werkzeug, „Steckling“ bleibt Vermehren',
+        T(`botErkennen('Zeig mir den Stammbaum').absicht`) === 'stammbaum' && T(`botAbsicht('stammbaum').werkzeug`) === 'stammbaum'
+        && T(`botErkennen('Von welcher Mutterpflanze stammt sie ab?').absicht`) === 'stammbaum' && T(`botErkennen('Wie ziehe ich einen Steckling?').absicht`) === 'vermehren');
+      T(`botAktion('stammbaum')`); await warte(150);
+      pruef('beta.33 (4): Die Aktion öffnet den Stammbaum', T(`!!(_sekOffen && _sekOffen.key === 'stammbaum') && modalOffen('sek-modal')`) === true);
+      await zu();
+
+      /* ── (5) Gießplan-Werkzeug weg, Gießklassen in der Bibliothek ── */
+      pruef('beta.33 (5): kein Gießplan-Werkzeug und keine Jahreszeiten-Alarme mehr; giessplanDaten bleibt',
+        !q('section[data-wz="giessplan"]') && !d.getElementById('gp-grafik') && !d.getElementById('alarme')
+        && T(`typeof giessplanZeichnen + typeof ALARME`) === 'undefinedundefined' && T(`typeof giessplanDaten`) === 'function'
+        && T(`giessplanDaten(28).tage.length`) === 28);
+      pruef('beta.33 (5): Die Bibliothek führt zu den Gießklassen', !!q('#mh-in-bibliothek [data-mh-go="bib-klassen"]') && T(`sektionOeffnen('bib-klassen')`) === true);
+      await warte(120);
+      pruef('beta.33 (5): Dort stehen die vier Klassen', d.querySelectorAll('#sekm-rumpf #klassen > .gp-k').length === 4, String(d.querySelectorAll('#sekm-rumpf #klassen > .gp-k').length));
+      await zu();
+
+      /* ── (6) Wunschliste und Rundgang sind aus der Oberfläche ── */
+      pruef('beta.33 (6): keine Wunschliste, kein Rundgang, kein Planer in Markup und Code',
+        !d.getElementById('wunsch-sec') && !d.getElementById('rundgang') && !d.getElementById('btn-rundgang') && !d.getElementById('rg-einst') && !d.getElementById('zonen-sec')
+        && html.indexOf('wunsch-zutat') === -1 && T(`typeof rgStarten + typeof taskBlockHTML + typeof grundrissSVG + typeof blattLog`) === 'undefined'.repeat(4));
+
+      /* ── (7) Wetter: Ort als eigene Zeile, „Ort festlegen“ auf Heute ── */
+      T(`(function(){ S.wetter = {ort:null, lat:null, lon:null, stand:null, daten:null}; S.heuteWetter = true; ansichtZeigen('heute'); render(); return 1; })()`);
+      const wl = q('#heute-status #wt-leiste');
+      pruef('beta.33 (7): Ohne Ort zeigt Heute „Ort festlegen“', !!wl && /Ort festlegen/.test(wl.textContent), wl ? wl.textContent : 'fehlt');
+      if(wl) wl.click();
+      await warte(150);
+      pruef('beta.33 (7): Ein Tipp darauf öffnet das Wetter', T(`!!(_sekOffen && _sekOffen.key === 'wetter')`) === true && !!q('#sekm-rumpf #wt-ort'));
+      await zu();
+      T(`(function(){ S.heuteWetter = false; render(); return 1; })()`);
+      pruef('beta.33 (7): Mit abgeschalteter Wetterzeile steht nichts da', !q('#heute-status #wt-leiste'));
+      T(`(function(){ S.heuteWetter = true; render(); sektionOeffnen('einstell'); return 1; })()`); await warte(120);
+      pruef('beta.33 (7): Einstellungen haben unter „Wetter“ die Zeile „Ort“',
+        !!q('#sekm-rumpf [data-mh-go="wetter"] #ein-u-wetter') && q('#ein-u-wetter').textContent === 'Noch kein Ort festgelegt', (q('#ein-u-wetter') || {}).textContent);
+      T(`(function(){ S.wetter.ort = 'Leipzig'; wetterOrtZeile(); return 1; })()`);
+      pruef('beta.33 (7): Die Zeile nennt den gesetzten Ort', q('#ein-u-wetter').textContent === 'Leipzig');
+      pruef('beta.33 (7): „Auf der Heute-Seite“ nennt keine „Gesundheit“ mehr', !/Gesundheit/.test(q('#mh-in-einstell').textContent) && /Gießtreue und Zuwachs/.test(q('#mh-in-einstell').textContent));
+      await zu();
+    } catch(e){
+      pruef('beta.33: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if(w33) w33.close(); } catch(e){}
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, '');
+        S.eigene = a.eigene; S.water = a.water; S.raeume = a.raeume; S.tagEin = a.tagEin; S.ereignisse = a.ereignisse; S.feuchtRueck = a.feuchtRueck;
+        S.lernen = a.lernen; S.giess = a.giess; S.wetter = a.wetter; S.heuteWetter = a.heuteWetter;
+        if(a.anzucht === undefined) delete S.anzucht; else S.anzucht = a.anzucht;
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt33)})`);
     }
   }
 
