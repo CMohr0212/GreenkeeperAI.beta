@@ -4228,6 +4228,25 @@ html[data-design] .gpl button.gpl-erl{flex:0 0 auto;min-height:36px;margin:0;pad
   background:none;color:var(--schrift);font:inherit;font-size:var(--t-s);font-weight:600;cursor:pointer}
 html[data-design] .bearb-feld select[hidden]{display:none}
 html[data-design] .bearb-feld .fhint{display:block;margin-top:6px}
+/* ── 4.0-beta.38 (Tags als Markierung, Tag-Liste, Kalender der Karte) ── */
+html[data-design] :is(#termin-modal, #sam-akt-modal) .tag-wahl{border:0;border-radius:0;background:none}
+html[data-design] :is(#termin-modal, #sam-akt-modal) .tag-wahl > button .wl-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+html[data-design] :is(#termin-modal, #sam-akt-modal) .tag-wahl > button .wl-txt i{font-style:normal;font-size:var(--t-xs);color:var(--schrift-2)}
+html[data-design] .tag-wahl > button[aria-pressed="true"] .wl-txt b::after{content:" ✓";color:var(--fl-akzent)}
+html[data-design] .tag-punkt.leer{background:transparent;border:1.5px solid var(--schrift-2);box-sizing:border-box}
+html[data-design] .tag-wahl-fuss{margin-top:16px}
+html[data-design] .tv-gast .tv-liste{margin-bottom:4px}
+html[data-design] .kalk-dzeile{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 4px}
+html[data-design] #karte-rumpf .kalk .kalk-dzeile p.kal-dkopf{margin:0;flex:1 1 auto;min-width:0}
+html[data-design] .kalk-dzeile + .kal-zeile{border-top:0}
+html[data-design] .kalk-neu{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:var(--tap);height:var(--tap);margin:0;padding:0;
+  border:1.5px solid var(--linie);border-radius:50%;background:var(--fl-karte);color:var(--fl-akzent);cursor:pointer}
+html[data-design] .kalk-neu svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html[data-design] .kalk .kal-zeile{align-items:center}
+html[data-design] .kalk button.zs-weg{flex:0 0 auto;min-width:40px;min-height:36px;margin:0;padding:0 6px;border:0;border-radius:var(--r-klein);
+  background:none;color:var(--schrift-2);font:inherit;font-size:1.3rem;line-height:1;cursor:pointer}
+html[data-design] .kalk button.zs-weg.frage{font-size:var(--t-s);font-weight:600;color:var(--terra);padding:0 10px}
+html[data-design] .knotiz-taten > .knotiz-leeren.frage{color:var(--terra);font-weight:600}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -6006,6 +6025,10 @@ function bibVon(p){
      S.tagEin     je Pflanze die Einträge {e, t, von, bis, ende,
                   notiz, pz, er, hinweis, giessNotiz}
      S.lernen     das Gelernte je Pflanze (vorher in S.zustand)
+   4.0-beta.38: Dritte Art „marke“ neben „einmalig“ und „zeitraum“.
+   Eine Markierung bleibt, bis man sie entfernt: ohne Datum, ohne
+   Wirkung, ohne Eintrag in Verlauf und Kalender. Sie steht in der
+   Tag-Zeile der Karte und im Filter der Sammlung.
    ══════════════════════════════════════════════════════════════ */
 /* Wirkungen mit fester Farbe. Jede bildet ihre eigene Gruppe (F262).
    Höchstens eine Gießwirkung je Tag (F270). */
@@ -6040,8 +6063,9 @@ var TAG_VORGABEN = [
 
 function tagNeuId(vor){ return (vor || 't') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function tagSauber(t){
-  const art = t.art === 'einmalig' ? 'einmalig' : 'zeitraum';
-  const giess = TAG_GIESS[t.giess] ? t.giess : null;
+  const art = t.art === 'einmalig' ? 'einmalig' : t.art === 'marke' ? 'marke' : 'zeitraum';
+  const marke = art === 'marke';
+  const giess = !marke && TAG_GIESS[t.giess] ? t.giess : null;
   const zahl = (v, lo, hi) => { const n = Math.round(Number(v) || 0); return Math.max(lo, Math.min(hi, n)); };
   return {
     id: t.id || tagNeuId('t'),
@@ -6049,11 +6073,11 @@ function tagSauber(t){
     art,
     giess,
     pz: giess === 'kuerzer' ? zahl(t.pz || 25, 5, 90) : giess === 'laenger' ? zahl(t.pz || 25, 5, 300) : 0,
-    duengSperre: !!t.duengSperre, duenger: !!t.duenger, schaedling: !!t.schaedling,
+    duengSperre: !marke && !!t.duengSperre, duenger: !marke && !!t.duenger, schaedling: !marke && !!t.schaedling,
     dauer: art === 'zeitraum' ? zahl(t.dauer, 0, 730) : 0,
     erinnern: art === 'zeitraum' && !!t.erinnern,
     gruppe: t.gruppe || null,
-    abstand: zahl(t.abstand, 0, 730),
+    abstand: marke ? 0 : zahl(t.abstand, 0, 730),
     nichtMit: Array.isArray(t.nichtMit) ? t.nichtMit.filter(Boolean) : [],
     hinweis: String(t.hinweis || '').slice(0, TAG_NOTIZ_MAX),
     fest: !!t.fest,
@@ -6118,6 +6142,8 @@ function tagEintraege(pid){ return (S.tagEin && S.tagEin[pid]) || []; }
    gilt auch dann, wenn tagAblauf es noch nicht eingetragen hat. */
 function tagLaeuft(e){
   const t = tagDef(e.t);
+  /* 4.0-beta.38: Eine Markierung gilt, bis sie entfernt wird. */
+  if(t && t.art === 'marke') return !e.ende;
   if(!t || t.art !== 'zeitraum' || e.ende) return false;
   const h = tagHeuteIso();
   if(e.von > h) return false;
@@ -6215,6 +6241,16 @@ function tagSetzen(pid, tid, opt, ersetzen){
   const von = opt.von || tagHeuteIso();
   if(!S.tagEin) S.tagEin = {};
   const liste = S.tagEin[pid] = S.tagEin[pid] || [];
+  /* 4.0-beta.38: Eine Markierung trägt die Pflanze höchstens einmal;
+     sie schreibt nichts in den Verlauf. */
+  if(t.art === 'marke'){
+    const da = liste.find(x => x.t === tid && !x.ende);
+    if(da) return da;
+    const m = {e:tagNeuId('e'), t:tid, von, notiz:String(opt.notiz || '').slice(0, TAG_NOTIZ_MAX)};
+    liste.push(m);
+    if(typeof sichern === 'function') sichern();
+    return m;
+  }
   if(t.giess && t.art === 'zeitraum'){
     tagLaufend(pid).filter(x => x.t.giess).forEach(x => {
       if(!ersetzen) return;
@@ -6253,7 +6289,7 @@ function tagEntfernen(pid, eid){
   const t = tagDef(e.t);
   S.tagEin[pid] = tagEintraege(pid).filter(x => x.e !== eid);
   if(!S.tagEin[pid].length) delete S.tagEin[pid];
-  tagVerlauf(pid, (t ? t.name : 'Tag') + ' entfernt');
+  if(!t || t.art !== 'marke') tagVerlauf(pid, (t ? t.name : 'Tag') + ' entfernt');
   sichern();
   return true;
 }
@@ -6274,7 +6310,7 @@ function tagEintragAendern(pid, eid, von, notiz){
     const n = String(notiz).slice(0, TAG_NOTIZ_MAX);
     if(n !== (e.notiz || '')){
       e.notiz = n;
-      if(n) tagVerlauf(pid, (t ? t.name : 'Tag') + ' · Notiz: ' + n);
+      if(n && !(t && t.art === 'marke')) tagVerlauf(pid, (t ? t.name : 'Tag') + ' · Notiz: ' + n);
       geaendert = true;
     }
   }
@@ -6350,9 +6386,25 @@ function tagSpeichern(daten){
   if(alt && tagListe().some(t => t.id !== alt.id && t.name.toLowerCase() === neu.name.toLowerCase()))
     return {fehler:'Einen Tag mit diesem Namen gibt es schon.'};
   if(!Array.isArray(S.tags)) S.tags = [];
+  if(alt && alt.art !== 'marke' && neu.art === 'marke') tagZuMarke(alt);
   if(alt) S.tags[S.tags.indexOf(alt)] = neu; else S.tags.push(neu);
   sichern();
   return {tag:neu};
+}
+/* 4.0-beta.38: Wird aus einem Tag eine Markierung, bleibt je Pflanze ein
+   Eintrag: bei „einmalig“ der jüngste, bei „Zeitraum“ der laufende. Was
+   schon im Verlauf steht, bleibt dort stehen. */
+function tagZuMarke(alt){
+  Object.keys(S.tagEin || {}).forEach(pid => {
+    const eigene = tagEintraege(pid).filter(e => e.t === alt.id);
+    if(!eigene.length) return;
+    const bleibt = alt.art === 'einmalig'
+      ? eigene.slice().sort((a, b) => String(b.von).localeCompare(String(a.von)))[0]
+      : eigene.find(tagLaeuft);
+    S.tagEin[pid] = tagEintraege(pid).filter(e => e.t !== alt.id || e === bleibt);
+    if(bleibt){ bleibt.ende = null; delete bleibt.bis; delete bleibt.er; delete bleibt.pz; bleibt.hinweis = false; bleibt.giessNotiz = false; }
+    if(!S.tagEin[pid].length) delete S.tagEin[pid];
+  });
 }
 function tagGruppeSpeichern(id, name, farbe){
   name = String(name || '').trim().slice(0, 30);
@@ -9000,7 +9052,7 @@ function notizFeldSpeichern(box){
   return true;
 }
 document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-do="notiz-bearb"],[data-do="notiz-ganz"],[data-do="notiz-fertig"]'); if(!b) return;
+  const b = e.target.closest('[data-do="notiz-bearb"],[data-do="notiz-ganz"],[data-do="notiz-fertig"],[data-do="notiz-leer"]'); if(!b) return;
   e.stopPropagation();
   const box = b.closest('.knotiz'); if(!box) return;
   if(b.dataset.do === 'notiz-ganz'){
@@ -9010,13 +9062,27 @@ document.addEventListener('click', e=>{
     return;
   }
   if(b.dataset.do === 'notiz-fertig'){ notizFeldSpeichern(box); return; }
+  /* 4.0-beta.38: „Alles löschen“ leert die eigene Notiz; erster Tipp
+     fragt, zweiter löscht. Die Befunde des Doktors bleiben. */
+  if(b.dataset.do === 'notiz-leer'){
+    if(!b.dataset.frage){ b.dataset.frage = '1'; b.textContent = 'Wirklich löschen?'; b.classList.add('frage'); return; }
+    const feld = box.querySelector('.knotiz-feld');
+    if(feld) feld.value = '';
+    notizFeldSpeichern(box);
+    return;
+  }
   const p = allePflanzen().find(x=>x.id === b.dataset.p); if(!p) return;
   box.classList.add('bearb-an');
   box.innerHTML = `<label class="lab" for="knotiz-feld">Notiz</label>
     <textarea id="knotiz-feld" class="knotiz-feld" rows="5" data-p="${esc(p.id)}">${esc(notizTrennen(p.notiz).eigen)}</textarea>
-    <div class="knotiz-taten"><button type="button" class="kb-zweit" data-do="notiz-fertig">Fertig</button></div>`;
+    <div class="knotiz-taten"><button type="button" class="kb-link knotiz-leeren" data-do="notiz-leer">Alles löschen</button><button type="button" class="kb-zweit" data-do="notiz-fertig">Fertig</button></div>`;
   const f = box.querySelector('.knotiz-feld');
   if(f) try{ f.focus(); }catch(x){}
+});
+/* Der Tipp auf „Alles löschen“ nimmt dem Textfeld nicht den Fokus; sonst
+   speichert und schließt das Verlassen des Felds, bevor der Tipp ankommt. */
+document.addEventListener('mousedown', e=>{
+  if(e.target && e.target.closest && e.target.closest('[data-do="notiz-leer"]')) e.preventDefault();
 });
 document.addEventListener('focusout', e=>{
   const f = e.target && e.target.closest ? e.target.closest('.knotiz-feld') : null; if(!f) return;
@@ -9587,7 +9653,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tags" aria-expanded="false" aria-label="Wozu sind Tags da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tags" hidden>
-      <p class="wz-hilfe" hidden>Ein Tag markiert eine Pflanze mit Datum, zum Beispiel „Gießpause“ oder „Dünger“. Hier legst du Tags und eigene Gruppen an, änderst und löschst sie. Gesetzt wird ein Tag in der Pflanzenkarte.</p>
+      <p class="wz-hilfe" hidden>Ein Tag markiert eine Pflanze: dauerhaft als Markierung, etwa „Karnivoren“, oder mit Datum, etwa „Gießpause“ oder „Dünger“. Hier legst du Tags und eigene Gruppen an, änderst und löschst sie. Gesetzt wird ein Tag in der Pflanzenkarte.</p>
       <div id="tv-inhalt"></div>
     </div>
   </section>
@@ -11381,7 +11447,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.37';
+const FASSUNG = '4.0-beta.38';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13367,12 +13433,31 @@ document.addEventListener('click', e => {
    ══════════════════════════════════════════════════════════════ */
 function tagPunktHTML(farbe){ return '<span class="tag-punkt" aria-hidden="true" style="background:' + esc(farbe) + '"></span>'; }
 function tagArtText(t){
+  if(t.art === 'marke') return 'Markierung · bleibt, bis du sie entfernst';
   const w = tagWirkungen(t).map(k => k === 'kuerzer' || k === 'laenger'
     ? tagWirkName(k) + ' ' + t.pz + ' %' : tagWirkName(k));
   const teile = [t.art === 'einmalig' ? 'einmalig' : (t.dauer ? 'Zeitraum, ' + t.dauer + ' Tage' : 'Zeitraum')];
   return teile.concat(w.length ? w : ['ohne Wirkung']).join(' · ') + (t.fest ? ' · fest' : '');
 }
 /* Die Tags nach Heimatgruppe, eigene Gruppen zuerst, dann die Wirkungen */
+/* 4.0-beta.38: die eine Tag-Liste für Karte, Termin und Sammelaktion:
+   nach Gruppen, mit Farbpunkt und Art. `gewaehlt` markiert eine Zeile,
+   `mitKein` stellt „Kein Tag“ voran. */
+function tagWahlHTML(attr, gewaehlt, mitKein){
+  const gruppen = tagNachGruppe(tagListe());
+  const an = id => gewaehlt === undefined ? '' : ' aria-pressed="' + (gewaehlt === id ? 'true' : 'false') + '"';
+  const zeile = (id, punkt, name, unter) => `<button type="button" ${attr}="${esc(id)}"${an(id)}>${punkt}<span class="wl-txt"><b>${esc(name)}</b><i>${esc(unter)}</i></span></button>`;
+  return (mitKein ? `<div class="wahl-liste tag-wahl" role="group" aria-label="Kein Tag">${
+      zeile('', '<span class="tag-punkt leer" aria-hidden="true"></span>', 'Kein Tag', 'Es bleibt ein reiner Termin.')}</div>` : '')
+    + gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
+        <div class="wahl-liste tag-wahl" role="group" aria-label="${esc(gr.h.name)}">${gr.tags.map(t =>
+          zeile(t.id, tagPunktHTML(gr.h.farbe), t.name, tagArtText(t))).join('')}</div>`).join('')
+    + (gruppen.length ? '' : '<p class="fhint">Noch keine Tags. Lege unten den ersten an.</p>');
+}
+function tagWahlFussHTML(attr, neu, verwalten){
+  return `<div class="gm-zfrage-btns tag-wahl-fuss"><button type="button" ${attr}="${neu}">+ Neuer Tag</button>`
+    + `<button type="button" ${attr}="${verwalten}">Tags bearbeiten</button></div>`;
+}
 function tagNachGruppe(liste){
   const reihe = tagGruppen().map(g => 'g:' + g.id)
     .concat(Object.keys(TAG_GIESS).map(k => 'w:' + k), Object.keys(TAG_SCHALTER).map(k => 'w:' + k), ['w:ohne']);
@@ -13392,9 +13477,9 @@ function tagKarteHTML(p){
   const lauf = tagLaufend(p);
   const chips = lauf.map(x => {
     const h = tagHeimat(x.t);
-    const zeit = x.e.bis ? 'bis ' + tagDatumKurz(x.e.bis) : 'seit ' + tagDatumKurz(x.e.von);
+    const zeit = x.t.art === 'marke' ? '' : (x.e.bis ? 'bis ' + tagDatumKurz(x.e.bis) : 'seit ' + tagDatumKurz(x.e.von));
     return `<button type="button" class="tag-chip" data-tag-e="${esc(x.e.e)}" data-p="${esc(p.id)}" style="--tagf:${esc(h.farbe)}">`
-      + `${tagPunktHTML(h.farbe)}<span>${esc(x.t.name)}</span><small>${esc(zeit)}</small></button>`;
+      + `${tagPunktHTML(h.farbe)}<span>${esc(x.t.name)}</span>${zeit ? `<small>${esc(zeit)}</small>` : ''}</button>`;
   }).join('');
   /* 4.0-beta.30 (B2): eine schmale Zeile, Chips seitlich wischbar; die
      Gießwirkung steht unter der Gießzeile im Kopf. */
@@ -13410,7 +13495,7 @@ var TAGF = null;
 function tagFensterAuf(pid, eid, ausloeser){
   const p = allePflanzen().find(x => x.id === pid); if(!p) return false;
   TAGF = {pid, eid:eid || null, tid:null, von:tagHeuteIso(), notiz:'', dauer:null, pz:null, er:null,
-          warn:[], bestaetigt:false, entfernenFrage:false};
+          warn:[], bestaetigt:false, entfernenFrage:false, verwalt:false};
   if(eid){
     const e = tagEintragVon(pid, eid); if(!e) return false;
     TAGF.tid = e.t; TAGF.von = e.von; TAGF.notiz = e.notiz || '';
@@ -13433,6 +13518,13 @@ function tagFensterZeichnen(){
   if(!box || !TAGF) return;
   const p = allePflanzen().find(x => x.id === TAGF.pid);
   if(!p){ box.innerHTML = ''; return; }
+  /* 4.0-beta.38: Tags anlegen und bearbeiten, ohne das Fenster zu verlassen */
+  if(TAGF.verwalt){
+    if(titel) titel.textContent = 'Tags';
+    box.innerHTML = '<div class="tv-gast" data-tv-gast></div>';
+    tvZeichnen();
+    return;
+  }
   const h = tagHeuteIso(), g = tagPlusTage(h, -1);
   const datumHTML = `<span class="lab">Datum</span>
     <div class="segment tag-datum" role="group" aria-label="Datum">
@@ -13450,12 +13542,14 @@ function tagFensterZeichnen(){
     if(titel) titel.textContent = t.name;
     const hm = tagHeimat(t);
     const lauf = tagLaeuft(e);
-    box.innerHTML = `<p class="tag-gewaehlt">${tagPunktHTML(hm.farbe)}<span><b>${esc(nice(p))}</b><i>${esc(t.art === 'zeitraum'
+    const mk = t.art === 'marke';
+    box.innerHTML = `<p class="tag-gewaehlt">${tagPunktHTML(hm.farbe)}<span><b>${esc(nice(p))}</b><i>${esc(mk ? 'Markierung'
+        : t.art === 'zeitraum'
         ? (lauf ? (e.bis ? 'läuft bis ' + tagDatumKurz(e.bis) : 'läuft ohne Ende') : 'beendet am ' + tagDatumKurz(e.ende || e.bis))
         : 'einmalig')}</i></span></p>
-      ${datumHTML}${notizHTML}
+      ${mk ? '' : datumHTML}${notizHTML}
       <div class="gm-zfrage-btns tag-fuss"><button type="button" class="haupt" data-tagf="speichern">Speichern</button></div>
-      ${lauf ? '<div class="gm-zfrage-btns tag-fuss"><button type="button" data-tagf="beenden">Beenden</button></div>' : ''}
+      ${lauf && !mk ? '<div class="gm-zfrage-btns tag-fuss"><button type="button" data-tagf="beenden">Beenden</button></div>' : ''}
       <div class="tools tag-weg"><button type="button" class="loeschen" data-tagf="entfernen">${TAGF.entfernenFrage
         ? 'Wirklich entfernen?' : 'Entfernen'}</button></div>`;
     return;
@@ -13463,12 +13557,8 @@ function tagFensterZeichnen(){
 
   if(titel) titel.textContent = 'Tag setzen';
   if(!TAGF.tid){
-    const gruppen = tagNachGruppe(tagListe());
     box.innerHTML = `<p class="tag-unter">Für <b>${esc(nice(p))}</b></p>`
-      + (gruppen.length ? gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
-        <div class="wahl-liste tag-wahl" role="group" aria-label="${esc(gr.h.name)}">${gr.tags.map(t =>
-          `<button type="button" data-tagw="${esc(t.id)}">${tagPunktHTML(gr.h.farbe)}<span class="wl-txt"><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span></button>`).join('')}</div>`).join('')
-        : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>');
+      + tagWahlHTML('data-tagw') + tagWahlFussHTML('data-tagf', 'neu', 'verwalten');
     return;
   }
   const t = tagDef(TAGF.tid);
@@ -13493,7 +13583,7 @@ function tagFensterZeichnen(){
   box.innerHTML = `<button type="button" class="mehr-dazu tag-zurueck" data-tagf="zurueck">‹ Anderer Tag</button>
     <p class="tag-gewaehlt">${tagPunktHTML(hm.farbe)}<span><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span></p>
     ${t.hinweis ? `<p class="fhint tag-vhinweis">${esc(t.hinweis)}</p>` : ''}
-    ${datumHTML}${zeitFelder}${prozentFeld}${notizHTML}${warn}
+    ${t.art === 'marke' ? '' : datumHTML}${zeitFelder}${prozentFeld}${notizHTML}${warn}
     <div class="gm-zfrage-btns tag-fuss"><button type="button" data-tagf="abbrechen">Abbrechen</button>
       <button type="button" class="haupt" data-tagf="setzen">${knopf}</button></div>`;
 }
@@ -13541,15 +13631,36 @@ document.addEventListener('click', e => {
   if(e.target.closest('#tag-zu')){ modalZu('tag-fenster'); return; }
   if(!TAGF || !e.target.closest('#tag-fenster')) return;
   const w = e.target.closest('[data-tagw]');
-  if(w){ TAGF.tid = w.dataset.tagw; TAGF.warn = []; TAGF.bestaetigt = false; TAGF.dauer = null; TAGF.pz = null; TAGF.er = null; tagFensterZeichnen(); return; }
+  if(w){
+    /* 4.0-beta.38: Trägt die Pflanze die Markierung schon, öffnet ihr Eintrag. */
+    const wt = tagDef(w.dataset.tagw);
+    const da = wt && wt.art === 'marke' ? tagEintraege(TAGF.pid).find(x => x.t === wt.id && !x.ende) : null;
+    if(da){ TAGF.eid = da.e; TAGF.tid = da.t; TAGF.von = da.von; TAGF.notiz = da.notiz || ''; TAGF.entfernenFrage = false; tagFensterZeichnen(); return; }
+    TAGF.tid = w.dataset.tagw; TAGF.warn = []; TAGF.bestaetigt = false; TAGF.dauer = null; TAGF.pz = null; TAGF.er = null; tagFensterZeichnen(); return; }
   const von = e.target.closest('[data-tagf-von]');
   if(von){ tagFensterLesen(); TAGF.von = von.dataset.tagfVon; TAGF.warn = []; TAGF.bestaetigt = false; tagFensterZeichnen(); return; }
   const b = e.target.closest('[data-tagf]'); if(!b) return;
   const a = b.dataset.tagf;
   if(a === 'zurueck'){ tagFensterLesen(); TAGF.tid = null; TAGF.warn = []; TAGF.bestaetigt = false; tagFensterZeichnen(); return; }
+  if(a === 'neu' || a === 'verwalten'){
+    TAGF.verwalt = true;
+    tvGastAuf(a === 'neu' ? 'neu' : 'liste', tag => {
+      if(!TAGF) return;
+      TAGF.verwalt = false;
+      if(tag){ TAGF.tid = tag.id; TAGF.warn = []; TAGF.bestaetigt = false; TAGF.dauer = null; TAGF.pz = null; TAGF.er = null; }
+      tagFensterZeichnen();
+    });
+    tagFensterZeichnen();
+    return;
+  }
   if(a === 'abbrechen'){ modalZu('tag-fenster'); return; }
   if(a === 'setzen'){ tagFensterSetzen(); return; }
-  if(a === 'speichern'){ tagFensterLesen(); tagEintragAendern(TAGF.pid, TAGF.eid, TAGF.von, TAGF.notiz); modalZu('tag-fenster'); tagNachAenderung(); return; }
+  if(a === 'speichern'){
+    tagFensterLesen();
+    const se = tagEintragVon(TAGF.pid, TAGF.eid), st = se ? tagDef(se.t) : null;
+    tagEintragAendern(TAGF.pid, TAGF.eid, st && st.art === 'marke' ? null : TAGF.von, TAGF.notiz);
+    modalZu('tag-fenster'); tagNachAenderung(); return;
+  }
   if(a === 'beenden'){ tagBeenden(TAGF.pid, TAGF.eid); modalZu('tag-fenster'); tagNachAenderung(); return; }
   if(a === 'entfernen'){
     if(!TAGF.entfernenFrage){ TAGF.entfernenFrage = true; tagFensterZeichnen(); return; }
@@ -13562,8 +13673,36 @@ document.addEventListener('click', e => {
 });
 
 /* ── Einstellungen → Tags ─────────────────────────────────── */
-var TV = {edit:null, gedit:null, f:null, fehler:'', loeschFrage:false};
-function tvLeer(){ return {name:'', art:'zeitraum', giess:null, pz:25, duengSperre:false, duenger:false, schaedling:false,
+var TV = {edit:null, gedit:null, f:null, fehler:'', loeschFrage:false, gast:null};
+/* 4.0-beta.38: Dieselbe Verwaltung läuft als Gast im Fenster „Tag
+   setzen“, im Terminblatt und im Blatt der Sammelaktionen. Das Blatt
+   legt einen Kasten [data-tv-gast] hin; `fertig(tag)` führt zurück,
+   mit dem neuen Tag oder mit null. Modus „neu“ öffnet gleich das
+   Formular, „liste“ die ganze Verwaltung. */
+function tvBox(){
+  if(TV.gast) return document.querySelector('[data-tv-gast]');
+  return document.getElementById('tv-inhalt');
+}
+function tvGastAuf(modus, fertig){
+  TV.gast = {modus:modus === 'neu' ? 'neu' : 'liste', fertig:typeof fertig === 'function' ? fertig : function(){}};
+  TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false;
+  if(TV.gast.modus === 'neu'){ TV.edit = 'neu'; TV.f = tvLeer(); }
+}
+function tvGastWeg(){
+  if(!TV.gast) return false;
+  TV.gast = null;
+  TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false;
+  tvZeichnen();
+  return true;
+}
+function tvGastZu(tag){
+  const g = TV.gast;
+  if(!g) return;
+  tvGastWeg();
+  g.fertig(tag || null);
+}
+/* 4.0-beta.38: Ein neuer Tag ist zuerst eine Markierung. */
+function tvLeer(){ return {name:'', art:'marke', giess:null, pz:25, duengSperre:false, duenger:false, schaedling:false,
   dauer:0, erinnern:false, gruppe:null, abstand:0, nichtMit:[], hinweis:'', fest:false}; }
 function tvFormLesen(){
   const v = id => document.getElementById(id);
@@ -13580,7 +13719,8 @@ function tvKnopf(attr, wert, name, an, aus){
   return `<button type="button" class="as-knopf" ${attr}="${esc(wert)}" aria-pressed="${an ? 'true' : 'false'}"${aus ? ' disabled' : ''}><b>${esc(name)}</b></button>`;
 }
 function tvZeichnen(){
-  const box = document.getElementById('tv-inhalt'); if(!box) return;
+  const box = tvBox(); if(!box) return;
+  const gastNeu = !!(TV.gast && TV.gast.modus === 'neu');
   const fehler = TV.fehler ? `<p class="tv-fehler" role="alert">${esc(TV.fehler)}</p>` : '';
   if(TV.gedit){
     const g = TV.gedit === 'neu' ? null : tagGruppe(TV.gedit);
@@ -13602,27 +13742,28 @@ function tvZeichnen(){
     const fest = !!f.fest;
     const andere = tagListe().filter(t => t.id !== TV.edit);
     const zr = f.art === 'zeitraum';
-    box.innerHTML = `<button type="button" class="mehr-dazu" data-tv="zurueck">‹ Alle Tags</button>
+    const mk = f.art === 'marke';
+    box.innerHTML = `<button type="button" class="mehr-dazu" data-tv="zurueck">${gastNeu ? '‹ Zurück' : '‹ Alle Tags'}</button>
       <p class="ein-abschnitt">${TV.edit === 'neu' ? 'Neuer Tag' : 'Tag bearbeiten'}</p>
       ${fest ? '<p class="fhint">Winterruhe ist fest: Name und Wirkung bleiben. Dauer und Prozent stellst du hier vor oder je Pflanze beim Setzen ein.</p>' : ''}
       <label class="fspan"><span class="lab">Name</span><input type="text" id="tv-name" maxlength="40" value="${esc(f.name)}"${fest ? ' disabled' : ''}></label>
       <span class="lab">Art</span>
-      <div class="as-knoepfe" role="group" aria-label="Art">${tvKnopf('data-tv-art', 'einmalig', 'Einmalig', !zr, fest)}${tvKnopf('data-tv-art', 'zeitraum', 'Zeitraum', zr, fest)}</div>
-      <p class="fhint">Einmalig: an einem Tag passiert. Zeitraum: gilt eine Weile.</p>
+      <div class="as-knoepfe" role="group" aria-label="Art">${tvKnopf('data-tv-art', 'marke', 'Markierung', mk, fest)}${tvKnopf('data-tv-art', 'einmalig', 'Einmalig', !zr && !mk, fest)}${tvKnopf('data-tv-art', 'zeitraum', 'Zeitraum', zr, fest)}</div>
+      <p class="fhint">Markierung: bleibt an der Pflanze, bis du sie entfernst, zum Suchen und Filtern. Einmalig: an einem Tag passiert. Zeitraum: gilt eine Weile.</p>
       ${zr ? `<span class="lab">Gießen</span>
       <div class="as-knoepfe" role="group" aria-label="Gießen">${tvKnopf('data-tv-giess', '', 'Keine', !f.giess, fest)}${Object.keys(TAG_GIESS).map(k =>
         tvKnopf('data-tv-giess', k, TAG_GIESS[k].name, f.giess === k, fest)).join('')}</div>
       ${f.giess === 'kuerzer' || f.giess === 'laenger' ? `<label class="fspan zeile"><span class="lab">Prozent</span><input type="number" id="tv-pz" min="5" max="${f.giess === 'kuerzer' ? 90 : 300}" step="5" inputmode="numeric" value="${f.pz}"></label>` : ''}
       <label class="check"><input type="checkbox" role="switch" id="tv-duengSperre"${f.duengSperre ? ' checked' : ''}> <span class="lab">Düngen sperren</span></label>` : ''}
-      <label class="check"><input type="checkbox" role="switch" id="tv-duenger"${f.duenger ? ' checked' : ''}> <span class="lab">Dünger</span></label>
-      <label class="check"><input type="checkbox" role="switch" id="tv-schaedling"${f.schaedling ? ' checked' : ''}> <span class="lab">Schädlingsbekämpfung</span></label>
+      ${mk ? '' : `<label class="check"><input type="checkbox" role="switch" id="tv-duenger"${f.duenger ? ' checked' : ''}> <span class="lab">Dünger</span></label>
+      <label class="check"><input type="checkbox" role="switch" id="tv-schaedling"${f.schaedling ? ' checked' : ''}> <span class="lab">Schädlingsbekämpfung</span></label>`}
       ${zr ? `<label class="fspan zeile"><span class="lab">Dauer in Tagen</span><input type="number" id="tv-dauer" min="0" max="730" inputmode="numeric" value="${f.dauer}"></label>
       <p class="fhint">0 heißt: läuft, bis du „Beenden“ tippst.</p>
       <label class="check"><input type="checkbox" role="switch" id="tv-erinnern"${f.erinnern ? ' checked' : ''}> <span class="lab">Erinnerung bei Ende</span></label>` : ''}
       <span class="lab">Gruppe</span>
       <div class="as-knoepfe" role="group" aria-label="Gruppe">${tvKnopf('data-tv-gruppe', '', 'Keine', !f.gruppe)}${tagGruppen().map(g =>
         tvKnopf('data-tv-gruppe', g.id, g.name, f.gruppe === g.id)).join('')}</div>
-      <label class="fspan zeile"><span class="lab">Frühestens wieder nach … Tagen</span><input type="number" id="tv-abstand" min="0" max="730" inputmode="numeric" value="${f.abstand}"></label>
+      ${mk ? '' : `<label class="fspan zeile"><span class="lab">Frühestens wieder nach … Tagen</span><input type="number" id="tv-abstand" min="0" max="730" inputmode="numeric" value="${f.abstand}"></label>`}
       ${andere.length ? `<span class="lab">Nicht zusammen mit</span>
       <div class="as-knoepfe" role="group" aria-label="Nicht zusammen mit">${andere.map(t =>
         tvKnopf('data-tv-nicht', t.id, t.name, f.nichtMit.indexOf(t.id) !== -1)).join('')}</div>` : ''}
@@ -13634,7 +13775,7 @@ function tvZeichnen(){
     return;
   }
   const gruppen = tagNachGruppe(tagListe());
-  box.innerHTML = `${gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
+  box.innerHTML = `${TV.gast ? '<button type="button" class="mehr-dazu tag-zurueck" data-tv="zurueck">‹ Zurück</button>' : ''}${gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
     <div class="ein-karte tv-liste">${gr.tags.map(t => `<button type="button" class="tv-zeile" data-tv-edit="${esc(t.id)}">${tagPunktHTML(gr.h.farbe)}
       <span class="wl-txt"><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span><span class="wz-p" aria-hidden="true">›</span></button>`).join('')}</div>`).join('')}
     <div class="gm-zfrage-btns"><button type="button" class="haupt" data-tv="neu">+ Neuer Tag</button></div>
@@ -13647,14 +13788,16 @@ function tvZeichnen(){
     ${fehler}`;
 }
 document.addEventListener('click', e => {
-  if(!e.target.closest || !e.target.closest('#tv-inhalt')) return;
+  if(!e.target.closest || !e.target.closest('#tv-inhalt, [data-tv-gast]')) return;
   const ed = e.target.closest('[data-tv-edit]');
   if(ed){ const t = tagDef(ed.dataset.tvEdit); if(!t) return;
     TV.edit = t.id; TV.f = JSON.parse(JSON.stringify(t)); TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
   const ge = e.target.closest('[data-tv-gedit]');
   if(ge){ TV.gedit = ge.dataset.tvGedit; TV.gname = null; TV.gfarbe = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
   const art = e.target.closest('[data-tv-art]');
-  if(art && !art.disabled){ tvFormLesen(); TV.f.art = art.dataset.tvArt; if(TV.f.art === 'einmalig'){ TV.f.giess = null; TV.f.duengSperre = false; } tvZeichnen(); return; }
+  if(art && !art.disabled){ tvFormLesen(); TV.f.art = art.dataset.tvArt; if(TV.f.art !== 'zeitraum'){ TV.f.giess = null; TV.f.duengSperre = false; }
+    if(TV.f.art === 'marke'){ TV.f.duenger = false; TV.f.schaedling = false; TV.f.dauer = 0; TV.f.erinnern = false; TV.f.abstand = 0; }
+    tvZeichnen(); return; }
   const gi = e.target.closest('[data-tv-giess]');
   if(gi && !gi.disabled){ tvFormLesen(); TV.f.giess = gi.dataset.tvGiess || null; if(TV.f.giess && !TV.f.pz) TV.f.pz = 25; tvZeichnen(); return; }
   const gr = e.target.closest('[data-tv-gruppe]');
@@ -13666,7 +13809,9 @@ document.addEventListener('click', e => {
   if(fa){ tvFormLesen(); TV.gfarbe = fa.dataset.tvFarbe; tvZeichnen(); return; }
   const b = e.target.closest('[data-tv]'); if(!b) return;
   const a = b.dataset.tv;
-  if(a === 'zurueck'){ TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
+  if(a === 'zurueck'){
+    if(TV.gast && (TV.gast.modus === 'neu' || (!TV.edit && !TV.gedit))){ tvGastZu(null); return; }
+    TV.edit = null; TV.gedit = null; TV.f = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
   if(a === 'neu'){ TV.edit = 'neu'; TV.f = tvLeer(); TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
   if(a === 'gneu'){ TV.gedit = 'neu'; TV.gname = null; TV.gfarbe = null; TV.fehler = ''; TV.loeschFrage = false; tvZeichnen(); return; }
   if(a === 'speichern'){
@@ -13675,6 +13820,7 @@ document.addEventListener('click', e => {
     const daten = Object.assign({}, TV.f); if(TV.edit === 'neu') delete daten.id;
     const r = tagSpeichern(daten);
     if(r.fehler){ TV.fehler = r.fehler; tvZeichnen(); return; }
+    if(TV.gast && TV.gast.modus === 'neu'){ tagNachAenderung(); tvGastZu(r.tag); return; }
     TV.edit = null; TV.f = null; TV.fehler = ''; tvZeichnen(); tagNachAenderung(); return;
   }
   if(a === 'loeschen'){
@@ -13744,7 +13890,7 @@ function tagFilterKnoepfeZeichnen(){
     filterTags.forEach(id => { const t = tagDef(id); if(t && liste.indexOf(t) === -1) liste.push(t); });
     tb.innerHTML = liste.length ? tagNachGruppe(liste).map(gr => '<p class="tag-fgruppe">' + esc(gr.h.name) + '</p>'
       + '<div class="as-knoepfe">' + gr.tags.map(t => knopf('data-ftag', t.id, t.name, filterTags.has(t.id))).join('') + '</div>').join('')
-      : '<p class="fhint">Gerade trägt keine Pflanze einen laufenden Tag.</p>';
+      : '<p class="fhint">Gerade trägt keine Pflanze einen Tag.</p>';
   }
   const wb = document.getElementById('filter-wirk');
   if(wb) wb.innerHTML = Object.keys(TAG_GIESS).concat(Object.keys(TAG_SCHALTER)).map(k =>
@@ -14505,7 +14651,23 @@ document.addEventListener('click', e=>{
     const p = box ? allePflanzen().find(x => x.id === box.dataset.kalk) : null;
     if(!p || typeof kalkSchritt !== 'function') return;
     kalkSchritt(p, art === 'kalk-tag' ? 'tag' : b.dataset.v, b.dataset.v);
+    KALK_FRAGE = '';
     box.outerHTML = kalKarteHTML(p);
+    return;
+  }
+  if(art === 'kalk-weg'){
+    e.stopPropagation();
+    const box = b.closest('.kalk'), pid = b.dataset.p, marke = b.dataset.v;
+    const p = allePflanzen().find(x => x.id === pid);
+    if(!box || !p) return;
+    if(KALK_FRAGE !== pid + '|' + marke){
+      KALK_FRAGE = pid + '|' + marke;
+      box.outerHTML = kalKarteHTML(p);
+    } else {
+      KALK_FRAGE = '';
+      verlaufEintragWeg(pid, marke);
+      render();
+    }
     return;
   }
   if(art === 'zs-weg'){
@@ -17697,7 +17859,11 @@ modalAnmelden('gm-wie', {groesse:'blatt', schleier:true});
 modalAnmelden('mix-add', {groesse:'blatt', schleier:true});
 /* 4.0-beta.27 (G2a+c) */
 modalAnmelden('tag-fenster', {groesse:'blatt', schleier:true, fokusOhneScroll:true,
-  nachZu(){ TAGF = null; }});
+  darfZu(){
+    if(TAGF && TAGF.verwalt){ tvGastZu(null); return false; }
+    return true;
+  },
+  nachZu(){ TAGF = null; if(typeof tvGastWeg === 'function') tvGastWeg(); }});
 
 modalAnmelden('foto-modal', {
   groesse:'blatt',
@@ -17759,10 +17925,11 @@ modalAnmelden('kal-modal', {groesse:'voll', schleier:false,
 /* 4.0-beta.35: Steht die Pflanzenauswahl offen, führt Zurück erst zum Termin. */
 modalAnmelden('termin-modal', {el:'termin-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
   darfZu: ()=>{
+    if(TF && TF.tagedit){ tvGastZu(null); return false; }
     if(TF && (TF.waehlen || TF.tagwahl)){ tfAuswahlZu(); return false; }
     return true;
   },
-  nachZu: ()=>{ TF = null; }});
+  nachZu: ()=>{ TF = null; if(typeof tvGastWeg === 'function') tvGastWeg(); }});
 modalAnmelden('hinweis-modal', {el:'hinweis-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true});
 
 /* ── Daten ───────────────────────────────────────────────────── */
@@ -18191,7 +18358,7 @@ function terminFensterAuf(tid, datum, ausloeser, pflanzen, vor){
        wdh:t.k > 1, n:t.k > 1 ? t.n : 7, k:t.k > 1 ? t.k : 3, notiz:t.notiz || '', waehlen:false, suche:'', fehler:'', frage:false}
     : {id:null, titel:'', tag:'', pflanzen:(Array.isArray(pflanzen) ? pflanzen : []).filter(Boolean), datum:datum || iso(HEUTE),
        wdh:false, n:7, k:3, notiz:'', waehlen:false, suche:'', fehler:'', frage:false};
-  TF.vorlage = ''; TF.vmeld = ''; TF.vmeldOben = ''; TF.tagwahl = false;
+  TF.vorlage = ''; TF.vmeld = ''; TF.vmeldOben = ''; TF.tagwahl = false; TF.tagedit = false;
   /* 4.0-beta.36 (P2): Doktor, Umtopfen und Anzucht füllen einen neuen
      Termin vor; gespeichert wird erst mit „Speichern“. */
   if(!t && vor && typeof vor === 'object'){
@@ -18246,10 +18413,10 @@ function tfAuswahlZu(){
 }
 function tfFussZeichnen(){
   const v = id => document.getElementById(id);
-  const seite = !!(TF.waehlen || TF.tagwahl);
-  if(v('termin-abbrechen')) v('termin-abbrechen').hidden = seite;
-  if(v('termin-speichern')) v('termin-speichern').hidden = seite;
-  if(v('termin-fertig')) v('termin-fertig').hidden = !seite;
+  const seite = !!(TF.waehlen || TF.tagwahl), edit = !!TF.tagedit;
+  if(v('termin-abbrechen')) v('termin-abbrechen').hidden = seite || edit;
+  if(v('termin-speichern')) v('termin-speichern').hidden = seite || edit;
+  if(v('termin-fertig')) v('termin-fertig').hidden = !seite || edit;
 }
 function tfPflanzenZeile(){
   const da = {}; allePflanzen().forEach(p => { da[p.id] = p; });
@@ -18296,11 +18463,19 @@ function terminFensterZeichnen(){
   }
   /* 4.0-beta.37: Der Tag ist eine Zeile; die Liste steht auf einer
      eigenen Seite im selben Blatt. */
+  /* 4.0-beta.38: Die Seite zeigt die Tag-Liste wie die Karte, nach
+     Gruppen und mit Farbpunkt; darunter „Neuer Tag“ und „Tags bearbeiten“. */
+  if(TF.tagedit){
+    if(titelEl) titelEl.textContent = 'Tags';
+    box.innerHTML = '<div class="tv-gast" data-tv-gast></div>';
+    tvZeichnen();
+    box.scrollTop = 0;
+    return;
+  }
   if(TF.tagwahl){
     if(titelEl) titelEl.textContent = 'Tag wählen';
-    box.innerHTML = `<div class="tf-tagwahl"><div class="as-knoepfe" role="group" aria-label="Tag">${
-      tagListe().map(t => tvKnopf('data-tf-tag', t.id, t.name, TF.tag === t.id)).join('')}${
-      tvKnopf('data-tf-tag', '', 'Kein Tag', !TF.tag)}</div></div>`;
+    box.innerHTML = `<div class="tf-tagwahl">${tagWahlHTML('data-tf-tag', TF.tag || '', true)}${
+      tagWahlFussHTML('data-tf', 'tag-neu', 'tag-verwalten')}</div>`;
     box.scrollTop = 0;
     return;
   }
@@ -18334,8 +18509,7 @@ function terminFensterZeichnen(){
         <input type="number" id="tf-k" min="2" max="${TERMIN_ANZAHL_MAX}" inputmode="numeric" value="${TF.k}"></label>
       <p class="fhint" id="tf-vorschau">${esc(terminVorschauText())}</p>` : ''}
     <p class="ein-abschnitt">Tag (wahlweise)</p>
-    ${tagListe().length ? tfTagZeile()
-           : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>'}
+    ${tfTagZeile()}
     <p class="ein-abschnitt">Pflanzen (wahlweise)</p>
     ${tfPflanzenZeile()}
     <label class="fspan tag-notizfeld"><span class="lab">Notiz</span>
@@ -18480,6 +18654,10 @@ function kalZeitstrahlFuer(p){
    Karte offen ist. Arten: t Termin, w nächstes Gießen, g gegossen,
    e Eintrag oder Tag. */
 var KALK = null;     /* {pid, tag} */
+/* 4.0-beta.38: Ein Gießgang oder ein eigener Eintrag lässt sich auch in
+   der Tagesliste des Kalenders löschen, wie im Zeitstrahl: erster Tipp
+   fragt, zweiter löscht. */
+var KALK_FRAGE = '';
 function kalkStand(p){
   if(!KALK || KALK.pid !== p.id) KALK = {pid:p.id, tag:iso(HEUTE)};
   return KALK;
@@ -18514,13 +18692,13 @@ function kalkEintraege(p){
       text:st.rest < 0 ? 'seit ' + (n === 1 ? 'einem Tag' : n + ' Tagen') : (st.spaeter ? 'verschoben' : 'geplant')});
   }
   giessTermine(p.id).forEach(d => {
-    if(typeof d === 'string' && d <= h) raus.push({datum:d, art:'g', rang:2, titel:'Gegossen', text:''});
+    if(typeof d === 'string' && d <= h) raus.push({datum:d, art:'g', rang:2, titel:'Gegossen', text:'', weg:'w|' + d});
   });
   ((S.ereignisse || {})[p.id] || []).forEach(e => {
     if(!e || !e.datum || e.typ === 'gesehen' || terminEintragDoppelt(e, p.id)) return;
     const a = EREIGNIS_ARTEN[e.typ] || {name:e.typ};
     raus.push({datum:e.datum, art:'e', rang:3, titel:e.typ === 'tag' ? (e.text || a.name) : a.name,
-      text:e.typ === 'tag' ? '' : (e.text || '')});
+      text:e.typ === 'tag' ? '' : (e.text || ''), weg:(e.id && !e.termin) ? 'e|' + e.id : ''});
   });
   tagEintraege(p.id).forEach(e => {
     const t = tagDef(e.t); if(!t) return;
@@ -18554,7 +18732,14 @@ function kalKarteHTML(p){
   const zeile = e => e.art === 't'
     ? `<div class="kal-zeile kal-termin${e.erl ? ' erl' : ''}${e.ueber ? ' ueber' : ''}"><span class="kal-pt kal-pt-t" aria-hidden="true"></span>
         <button type="button" class="kal-txt" data-do="termin-auf" data-v="${esc(e.tid)}"><b>${esc(e.titel)}</b>${e.text ? `<i>${esc(e.text)}</i>` : ''}</button></div>`
-    : kalTextZeile(e.art, e.titel, e.text);
+    : (e.weg ? `<div class="kal-zeile"><span class="kal-pt kal-pt-${e.art}" aria-hidden="true"></span>
+        <span class="kal-txt"><b>${esc(e.titel)}</b>${e.text ? `<i>${esc(e.text)}</i>` : ''}</span>${
+        KALK_FRAGE === p.id + '|' + e.weg
+          ? `<button type="button" class="zs-weg frage" data-do="kalk-weg" data-p="${esc(p.id)}" data-v="${esc(e.weg)}">Löschen?</button>`
+          : `<button type="button" class="zs-weg" data-do="kalk-weg" data-p="${esc(p.id)}" data-v="${esc(e.weg)}" aria-label="${esc(e.titel + ' löschen')}">×</button>`}</div>`
+      : kalTextZeile(e.art, e.titel, e.text));
+  const neuKnopf = k.tag >= h ? `<button type="button" class="kalk-neu" data-do="termin-neu" data-p="${esc(p.id)}" data-v="${k.tag}" aria-label="Termin an diesem Tag anlegen" title="Termin anlegen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.5v5M9.5 15h5"/></svg></button>` : '';
   return `<div class="kalk" data-kalk="${esc(p.id)}">
     <div class="kal-nav">
       <button type="button" data-do="kalk-nav" data-v="zurueck" aria-label="Vorheriger Monat">‹</button>
@@ -18563,9 +18748,8 @@ function kalKarteHTML(p){
       <button type="button" data-do="kalk-nav" data-v="heute">Heute</button></div>
     <div class="kal-monat"><div class="kal-kopfzeile" aria-hidden="true">${kopf}</div>
       <div class="kal-raster" role="group" aria-label="Monat">${zellen}</div></div>
-    <div class="kal-liste"><p class="kal-dkopf">${esc(kalDatumLang(k.tag))}${k.tag === h ? ' · heute' : ''}</p>
-      ${tag.length ? tag.map(zeile).join('') : '<p class="kal-leer">Nichts eingetragen.</p>'}
-      ${k.tag >= h ? `<div class="kb-aktionen"><button type="button" class="kb-link" data-do="termin-neu" data-p="${esc(p.id)}" data-v="${k.tag}">+ Termin an diesem Tag</button></div>` : ''}</div>
+    <div class="kal-liste"><div class="kalk-dzeile"><p class="kal-dkopf">${esc(kalDatumLang(k.tag))}${k.tag === h ? ' · heute' : ''}</p>${neuKnopf}</div>
+      ${tag.length ? tag.map(zeile).join('') : '<p class="kal-leer">Nichts eingetragen.</p>'}</div>
     <div class="kalk-legende" aria-hidden="true"><span><i class="kal-p kal-p-w"></i>gegossen</span><span><i class="kal-p kal-p-w vor"></i>Gießen geplant</span><span><i class="kal-p kal-p-t"></i>Termin</span><span><i class="kal-p kal-p-e"></i>Eintrag</span></div>
   </div>`;
 }
@@ -18663,6 +18847,17 @@ document.addEventListener('click', e => {
   const aktion = t.closest('[data-tf]');
   if(!aktion) return;
   if(aktion.dataset.tf === 'tagwahl'){ terminFensterLesen(); TF.tagwahl = true; TF.fehler = ''; terminFensterZeichnen(); return; }
+  if(aktion.dataset.tf === 'tag-neu' || aktion.dataset.tf === 'tag-verwalten'){
+    TF.tagedit = true;
+    tvGastAuf(aktion.dataset.tf === 'tag-neu' ? 'neu' : 'liste', tag => {
+      if(!TF) return;
+      TF.tagedit = false;
+      if(tag){ TF.tag = tag.id; TF.fehler = ''; tfAuswahlZu(); }
+      else terminFensterZeichnen();
+    });
+    terminFensterZeichnen();
+    return;
+  }
   if(aktion.dataset.tf === 'vorlage-aendern'){
     terminFensterLesen();
     const r = terminVorlageAendern(TF.vorlage, TF);
@@ -18728,7 +18923,11 @@ var SAM_RUECK_MS = 15000;
 var SAM_SCHNELL = ['quarantaene', 'kuerzer', 'laenger'];
 var SAM_STAND_FAECHER = ['water', 'lernen', 'tagEin', 'feuchtRueck', 'ereignisse'];
 modalAnmelden('sam-akt-modal', {el:'sam-akt-huelle', groesse:'blatt', schleier:true, fokusOhneScroll:true,
-  nachZu: ()=>{ SAK = null; }});
+  darfZu: ()=>{
+    if(SAK && SAK.seite === 'tagedit'){ tvGastZu(null); return false; }
+    return true;
+  },
+  nachZu: ()=>{ SAK = null; if(typeof tvGastWeg === 'function') tvGastWeg(); }});
 
 function samZahlText(n){ return n === 1 ? 'Eine Pflanze' : n + ' Pflanzen'; }
 function samPflanze(id){ return allePflanzen().find(p => p.id === id) || null; }
@@ -18917,11 +19116,10 @@ function samAktionenZeichnen(){
         sakZeile('data-sak-platz', '', 'Ohne Stellplatz', 'Nur der Raum wird gesetzt')
         + stellplaetzeFuer(SAK.raum).map(x => sakZeile('data-sak-platz', x, x, '')).join('')}</div>`;
   } else if(SAK.seite === 'tags'){
-    const gruppen = tagNachGruppe(tagListe());
-    h = zurueck + (gruppen.length ? gruppen.map(gr => `<p class="ein-abschnitt">${esc(gr.h.name)}</p>
-        <div class="wahl-liste tag-wahl" role="group" aria-label="${esc(gr.h.name)}">${gr.tags.map(t =>
-          `<button type="button" data-sak-tag="${esc(t.id)}">${tagPunktHTML(gr.h.farbe)}<span class="wl-txt"><b>${esc(t.name)}</b><i>${esc(tagArtText(t))}</i></span></button>`).join('')}</div>`).join('')
-      : '<p class="fhint">Noch keine Tags. Lege sie unter Einstellungen → Tags an.</p>');
+    h = zurueck + tagWahlHTML('data-sak-tag') + tagWahlFussHTML('data-sak', 'tag-neu', 'tag-verwalten');
+  } else if(SAK.seite === 'tagedit'){
+    h = '<div class="tv-gast" data-tv-gast></div>';
+    f = '';
   } else if(SAK.seite === 'tagfrage'){
     const t = tagDef(SAK.tid);
     const hm = t ? tagHeimat(t) : null;
@@ -18945,6 +19143,7 @@ function samAktionenZeichnen(){
   }
   box.innerHTML = h;
   if(fuss) fuss.innerHTML = f;
+  if(SAK.seite === 'tagedit') tvZeichnen();
 }
 /* 4.0-beta.36 (P2): Sammelanlage. Die Auswahl endet, das Terminblatt
    öffnet mit den Gewählten; angelegt wird erst mit „Speichern“. */
@@ -19009,6 +19208,16 @@ document.addEventListener('click', e => {
   if(was === 'zu'){ modalZu('sam-akt-modal'); return; }
   if(was === 'tags' || was === 'raum'){ SAK.seite = was; samAktionenZeichnen(); return; }
   if(was === 'tagja'){ sakTagTun(); return; }
+  if(was === 'tag-neu' || was === 'tag-verwalten'){
+    SAK.seite = 'tagedit';
+    tvGastAuf(was === 'tag-neu' ? 'neu' : 'liste', () => {
+      if(!SAK) return;
+      SAK.seite = 'tags';
+      samAktionenZeichnen();
+    });
+    samAktionenZeichnen();
+    return;
+  }
   if(was === 'termin'){ sakTermin(); return; }
   if(was === 'zurueck'){
     SAK.seite = SAK.seite === 'platz' ? 'raum' : (SAK.seite === 'tagfrage' && SAK.vor === 'tags' ? 'tags' : 'start');
@@ -21899,6 +22108,9 @@ function botAktion(key, pid){
   if(key === 'frage'){
     BOT.direkt = true;
     const feld = document.getElementById('bot-text');
+    /* 4.0-beta.38: Steht die Frage schon im Feld oder hängt ein Foto an,
+       geht sie mit diesem Tipp direkt an die KI. */
+    if((feld && feld.value.trim()) || KI_BILDER.bot.length) return botSenden();
     if(feld){ feld.placeholder = 'Deine Frage an die KI …'; feld.focus(); }
     return;
   }
@@ -21907,7 +22119,15 @@ function botAktion(key, pid){
     return;
   }
   if(key === 'problem' && pid && typeof dokPflanzeSetzen === 'function') dokPflanzeSetzen(pid);
-  if(a && a.werkzeug) return sektionOeffnen(a.werkzeug);
+  /* 4.0-beta.38: Die erkannte Pflanze bleibt im Umtopfen und im
+     Substratrechner vorgewählt. */
+  const da = pid && allePflanzen().some(x => x.id === pid);
+  if(key === 'umtopfen' && da) UT.pflanze = pid;
+  if(a && a.werkzeug){
+    const auf = sektionOeffnen(a.werkzeug);
+    if(auf && da && key === 'substrat' && typeof subPflanzeSetzen === 'function') subPflanzeSetzen(pid);
+    return auf;
+  }
   if(a && a.mehr) return sektionOeffnen(a.mehr);
 }
 function botNeu(){

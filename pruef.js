@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.37', w.__T('FASSUNG') === '4.0-beta.37', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.38', w.__T('FASSUNG') === '4.0-beta.38', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -10902,6 +10902,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.27 (15): keine Systemliste unter „Mehr → Tags“ (Formular)', !d.querySelector('#tv-inhalt select'));
       kl('#tv-inhalt [data-tv="zurueck"]');
       kl('#tv-inhalt [data-tv="neu"]');
+      /* beta.38: ein neuer Tag ist zuerst eine Markierung; die Gießwirkung gibt es beim Zeitraum */
+      kl('#tv-inhalt [data-tv-art="zeitraum"]');
       d.getElementById('tv-name').value = 'Neu T27';
       kl('#tv-inhalt [data-tv-giess="kuerzer"]');
       kl('#tv-inhalt [data-tv="speichern"]');
@@ -13231,6 +13233,251 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         S.tags = a.tags; S.tagVorgabenAus = a.tagVorgabenAus; S.terminVorlagen = a.terminVorlagen || []; S.terminVorlagenAus = a.terminVorlagenAus || [];
         if(typeof schalterAnwenden === 'function') schalterAnwenden();
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt37)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.38: Tags als Markierung (dauerhaft, ohne Verlauf), dieselbe
+     Tag-Liste in Karte, Termin und Sammelaktion mit „Neuer Tag“ und „Tags
+     bearbeiten“, × in der Tagesliste des Kartenkalenders, Symbol statt
+     „+ Termin an diesem Tag“, „Alles löschen“ in der Notiz, BOTaniker:
+     Frage direkt an die KI, Pflanze bleibt im Umtopfen vorgewählt.
+     Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const qa = s => Array.from(d.querySelectorAll(s));
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const alt38 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, tagEin:S.tagEin, termine:S.termine,
+      lernen:S.lernen, feuchtRueck:S.feuchtRueck, raeume:S.raeume, giess:S.giess, ansicht:S.ansicht, gesehen:S.gesehen,
+      tags:S.tags, tagGruppen:S.tagGruppen, tagVorgabenAus:S.tagVorgabenAus, umtopfPlan:S.umtopfPlan,
+      schalter:S.schalter, modus:S.modus, histAnsicht:S.histAnsicht, kartenTab:S.kartenTab})`);
+    try {
+      await zu();
+      const heute = T(`iso(HEUTE)`);
+      const plus = n => T(`tagPlusTage('${heute}', ${n})`);
+      const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+      T(`(function(){
+        S.raeume = [{id:'rK1', name:'K Zimmer', plaetze:[]}];
+        var p = function(id, name, mehr){ return Object.assign({id:id, eigen:true, name:name, art:'Art ' + id, klasse:'B', topf:'12', log:[], notiz:'',
+          raum:'rK1', stellplatz:'', intervallEigen:true, intervall:[10, 10]}, mehr || {}); };
+        S.eigene = [p('K1', 'K Alpha', {notiz:'K Notiz steht hier.'}), p('K2', 'K Beta')];
+        S.water = {K1:['${plus(-5)}', '${heute}'], K2:['${plus(-1)}']};
+        S.ereignisse = {K1:[{id:'eKa', datum:'${heute}', typ:'umgetopft', text:'K eigener Eintrag', bezug:null},
+                            {id:'eKb', datum:'${heute}', typ:'termin', text:'K aus Termin', bezug:null, termin:'tX|${heute}'}]};
+        S.tagEin = {}; S.termine = []; S.lernen = {}; S.feuchtRueck = {}; S.tagGruppen = []; S.umtopfPlan = {K1:{datum:'${heute}'}};
+        S.histAnsicht = 'kalender'; S.kartenTab = 'verlauf';
+        S.tags = []; tagVorgabenSichern(true); modusSetzen('entdecker');
+        ansichtZeigen('sammlung'); sichern(); render(); return 1; })()`);
+
+      /* ── M: Markierung ── */
+      pruef('beta.38 (M): Ein neuer Tag ist zuerst eine Markierung', T(`tvLeer().art`) === 'marke');
+      T(`sektionOeffnen('tags')`); await warte(120);
+      q('#tv-inhalt [data-tv="neu"]').click();
+      pruef('beta.38 (M): Das Formular bietet Markierung, Einmalig und Zeitraum; Markierung ist gedrückt',
+        qa('#tv-inhalt [data-tv-art]').map(b => b.dataset.tvArt + ':' + b.getAttribute('aria-pressed')).join() === 'marke:true,einmalig:false,zeitraum:false');
+      pruef('beta.38 (M): Eine Markierung zeigt keine Wirkungen, keine Dauer und keinen Mindestabstand',
+        !q('#tv-inhalt [data-tv-giess]') && !q('#tv-duenger') && !q('#tv-schaedling') && !q('#tv-dauer') && !q('#tv-abstand') && !!q('#tv-inhalt [data-tv-gruppe]'));
+      q('#tv-name').value = 'K Karnivoren';
+      q('#tv-inhalt [data-tv="speichern"]').click();
+      const mk = T(`(tagListe().find(function(t){ return t.name === 'K Karnivoren'; }) || {}).id || ''`);
+      pruef('beta.38 (M): Ohne Gruppe und ohne Wirkung gespeichert, als Markierung',
+        !!mk && T(`JSON.stringify((function(t){ return [t.art, t.giess, t.duenger, t.gruppe, t.dauer]; })(tagDef('${mk}')))`) === '["marke",null,false,null,0]');
+      await zu();
+      const nE = () => T(`((S.ereignisse || {}).K1 || []).length`);
+      const vorE = nE();
+      T(`tagSetzen('K1', '${mk}')`);
+      pruef('beta.38 (M): Die gesetzte Markierung läuft und schreibt nichts in den Verlauf',
+        T(`tagLaufend('K1').some(function(x){ return x.t.id === '${mk}'; })`) === true && nE() === vorE, String(nE()));
+      T(`tagSetzen('K1', '${mk}')`);
+      pruef('beta.38 (M): Ein zweites Setzen verdoppelt sie nicht', T(`tagEintraege('K1').filter(function(e){ return e.t === '${mk}'; }).length`) === 1);
+      pruef('beta.38 (M): Sie steht nicht im Kalender der Karte', T(`kalkEintraege(${P('K1')}).some(function(e){ return /K Karnivoren/.test(e.titel); })`) === false);
+      T(`karteOeffnen('K1')`); await warte(200);
+      const chip = () => q('#karte-rumpf .tagk .tag-chip');
+      pruef('beta.38 (M): Die Tag-Zeile der Karte zeigt die Markierung, ohne Datum',
+        !!chip() && /K Karnivoren/.test(chip().textContent) && !chip().querySelector('small') && !q('#karte-rumpf .tagk .tag-leer'), chip() ? chip().textContent : 'kein Chip');
+      pruef('beta.38 (M): Der Filter der Sammlung kennt sie; nur die markierte Pflanze passt',
+        T(`(function(){ filterTags.clear(); var da = tagGetragen().some(function(t){ return t.id === '${mk}'; }); filterTags.add('${mk}');
+          var r = da && tagFilterPasst(${P('K1')}) && !tagFilterPasst(${P('K2')}); filterTags.clear(); return r; })()`) === true);
+      T(`tagFilterKnoepfeZeichnen()`);
+      pruef('beta.38 (M): Im Filterblatt steht sie unter „Tags“', !!q('#filter-tags [data-ftag="' + mk + '"]'), (q('#filter-tags') || {}).textContent);
+      chip().click(); await warte(200);
+      pruef('beta.38 (M): Der Eintrag einer Markierung hat kein Datum und kein „Beenden“, aber „Entfernen“',
+        T(`modalOffen('tag-fenster')`) === true && !q('#tagf-datum') && !q('#tag-inhalt [data-tagf="beenden"]') && !!q('#tag-inhalt [data-tagf="entfernen"]') && !!q('#tagf-notiz'));
+      q('#tag-inhalt [data-tagf="entfernen"]').click();
+      q('#tag-inhalt [data-tagf="entfernen"]').click(); await warte(200);
+      pruef('beta.38 (M): „Entfernen“ nimmt sie weg, ohne Verlaufseintrag',
+        T(`tagEintraege('K1').length`) === 0 && nE() === vorE && !!q('#karte-rumpf .tagk .tag-leer'));
+      /* Umstellen eines benutzten Tags auf Markierung */
+      T(`(function(){
+        var a = tagSpeichern({name:'K Einmal', art:'einmalig'}).tag;
+        tagSetzen('K1', a.id, {von:'${plus(-3)}'}); tagSetzen('K1', a.id, {von:'${plus(-2)}'}); tagSetzen('K1', a.id, {von:'${plus(-1)}'});
+        var z = tagSpeichern({name:'K Zeit', art:'zeitraum', dauer:0}).tag;
+        tagSetzen('K1', z.id, {von:'${plus(-9)}'}); tagBeenden('K1', tagEintraege('K1').filter(function(e){ return e.t === z.id; })[0].e);
+        tagSetzen('K2', z.id, {von:'${plus(-2)}'});
+        window.__k38 = {a:a.id, z:z.id}; return 1; })()`);
+      pruef('beta.38 (M) Gegenprobe: Ein einmaliger Tag ohne Wirkung läuft nicht und steht nicht in der Tag-Zeile',
+        T(`tagLaufend('K1').some(function(x){ return x.t.id === window.__k38.a; })`) === false);
+      T(`(function(){ tagSpeichern(Object.assign({}, tagDef(window.__k38.a), {art:'marke'})); tagSpeichern(Object.assign({}, tagDef(window.__k38.z), {art:'marke'})); return 1; })()`);
+      pruef('beta.38 (M): Aus „einmalig“ wird Markierung: je Pflanze bleibt ein Eintrag, der jüngste, und er läuft',
+        T(`(function(){ var l = tagEintraege('K1').filter(function(e){ return e.t === window.__k38.a; });
+          return l.length === 1 && l[0].von === '${plus(-1)}' && tagLaeuft(l[0]); })()`) === true);
+      pruef('beta.38 (M): Aus „Zeitraum“ wird Markierung: ein beendeter Eintrag lebt nicht wieder auf, ein laufender bleibt',
+        T(`tagEintraege('K1').some(function(e){ return e.t === window.__k38.z; })`) === false
+        && T(`tagLaufend('K2').some(function(x){ return x.t.id === window.__k38.z; })`) === true);
+
+      /* ── W: Fenster „Tag setzen“ mit „Neuer Tag“ und „Tags bearbeiten“ ── */
+      T(`tagFensterAuf('K1')`); await warte(200);
+      pruef('beta.38 (W): Unter der Tag-Liste stehen „Neuer Tag“ und „Tags bearbeiten“',
+        !!q('#tag-inhalt [data-tagf="neu"]') && !!q('#tag-inhalt [data-tagf="verwalten"]') && qa('#tag-inhalt [data-tagw]').length === T(`tagListe().length`));
+      q('#tag-inhalt [data-tagf="neu"]').click();
+      pruef('beta.38 (W): „Neuer Tag“ öffnet das Formular im selben Fenster',
+        T(`modalOffen('tag-fenster')`) === true && !!q('#tag-inhalt [data-tv-gast] #tv-name') && !q('#tag-inhalt [data-tagw]') && !q('#tv-inhalt #tv-name'));
+      pruef('beta.38 (W): Zurück schließt dabei nicht das Fenster, sondern führt zur Liste',
+        T(`modalZu('tag-fenster')`) !== true && T(`modalOffen('tag-fenster')`) === true && !!q('#tag-inhalt [data-tagw]') && T(`TV.gast`) === null);
+      q('#tag-inhalt [data-tagf="neu"]').click();
+      q('#tv-name').value = 'K Frisch';
+      q('#tag-inhalt [data-tv="speichern"]').click();
+      const fr = T(`(tagListe().find(function(t){ return t.name === 'K Frisch'; }) || {}).id || ''`);
+      pruef('beta.38 (W): Nach dem Speichern ist der neue Tag gewählt und setzbar',
+        !!fr && T(`TAGF && TAGF.tid`) === fr && T(`TAGF.verwalt`) === false && !!q('#tag-inhalt [data-tagf="setzen"]') && !q('#tagf-datum') && T(`TV.gast`) === null);
+      q('#tag-inhalt [data-tagf="setzen"]').click(); await warte(200);
+      pruef('beta.38 (W): „Setzen“ markiert die Pflanze', T(`tagLaufend('K1').some(function(x){ return x.t.id === '${fr}'; })`) === true && T(`modalOffen('tag-fenster')`) === false);
+      T(`tagFensterAuf('K1')`); await warte(200);
+      q('#tag-inhalt [data-tagw="' + fr + '"]').click();
+      pruef('beta.38 (W): Ein Tipp auf eine schon gesetzte Markierung öffnet ihren Eintrag', T(`!!TAGF.eid`) === true && !!q('#tag-inhalt [data-tagf="entfernen"]'));
+      await zu();
+      T(`tagFensterAuf('K1')`); await warte(200);
+      q('#tag-inhalt [data-tagf="verwalten"]').click();
+      pruef('beta.38 (W): „Tags bearbeiten“ zeigt die ganze Verwaltung im Fenster',
+        qa('#tag-inhalt [data-tv-gast] [data-tv-edit]').length === T(`tagListe().length`) && !!q('#tag-inhalt [data-tv="neu"]') && !!q('#tag-inhalt [data-tv="zurueck"]'));
+      q('#tag-inhalt [data-tv-edit="' + fr + '"]').click();
+      q('#tv-name').value = 'K Frisch 2';
+      q('#tag-inhalt [data-tv="speichern"]').click();
+      pruef('beta.38 (W): Ein Tag lässt sich dort umbenennen; danach steht wieder die Verwaltung',
+        T(`tagDef('${fr}').name`) === 'K Frisch 2' && !!q('#tag-inhalt [data-tv-edit="' + fr + '"]'));
+      q('#tag-inhalt [data-tv="zurueck"]').click();
+      pruef('beta.38 (W): „Zurück“ führt zur Tag-Liste mit dem neuen Namen',
+        /K Frisch 2/.test((q('#tag-inhalt [data-tagw="' + fr + '"]') || {}).textContent || '') && T(`TV.gast`) === null);
+      await zu();
+
+      /* ── T: Terminblatt ── */
+      T(`terminFensterAuf(null, '${plus(2)}', null, ['K1'])`); await warte(200);
+      q('#termin-inhalt [data-tf="tagwahl"]').click();
+      const nTags = T(`tagListe().length`);
+      pruef('beta.38 (T): Die Tag-Seite des Termins zeigt die Liste nach Gruppen mit Farbpunkt, keine Kacheln',
+        qa('#termin-inhalt .tf-tagwahl .wahl-liste.tag-wahl [data-tf-tag]').length === nTags + 1 && !q('#termin-inhalt .tf-tagwahl .as-knopf')
+        && qa('#termin-inhalt .tf-tagwahl .ein-abschnitt').length >= 2 && qa('#termin-inhalt .tf-tagwahl .tag-punkt').length === nTags + 1
+        && q('#termin-inhalt [data-tf-tag=""]').getAttribute('aria-pressed') === 'true');
+      pruef('beta.38 (T): Darunter „Neuer Tag“ und „Tags bearbeiten“', !!q('#termin-inhalt [data-tf="tag-neu"]') && !!q('#termin-inhalt [data-tf="tag-verwalten"]'));
+      q('#termin-inhalt [data-tf="tag-neu"]').click();
+      pruef('beta.38 (T): „Neuer Tag“ öffnet das Formular im Blatt; der Fuß des Termins ist weg',
+        !!q('#termin-inhalt [data-tv-gast] #tv-name') && q('#termin-fertig').hidden && q('#termin-speichern').hidden && q('#termin-abbrechen').hidden);
+      q('#tv-name').value = 'K Terminmarke';
+      q('#termin-inhalt [data-tv="speichern"]').click();
+      const tm = T(`(tagListe().find(function(t){ return t.name === 'K Terminmarke'; }) || {}).id || ''`);
+      pruef('beta.38 (T): Der neue Tag ist im Termin gewählt; das Blatt steht wieder auf dem Termin',
+        !!tm && T(`TF.tag`) === tm && !T(`TF.tagwahl`) && !T(`TF.tagedit`) && (q('#tf-tag-text') || {}).textContent === 'K Terminmarke' && !q('#termin-speichern').hidden);
+      q('#termin-inhalt [data-tf="tagwahl"]').click();
+      pruef('beta.38 (T): Der gewählte Tag ist in der Liste markiert', q('#termin-inhalt [data-tf-tag="' + tm + '"]').getAttribute('aria-pressed') === 'true');
+      q('#termin-inhalt [data-tf="tag-verwalten"]').click();
+      pruef('beta.38 (T): Zurück aus „Tags bearbeiten“ führt zur Tag-Seite, nicht aus dem Blatt',
+        T(`modalZu('termin-modal')`) !== true && T(`modalOffen('termin-modal')`) === true && T(`TF.tagwahl`) === true && !T(`TF.tagedit`) && !!q('#termin-inhalt [data-tf-tag]'));
+      pruef('beta.38 (T): Ohne jeden Tag steht die Tag-Zeile trotzdem da',
+        T(`(function(){ var a = S.tags; S.tags = []; TF.tagwahl = false; terminFensterZeichnen(); var r = !!document.querySelector('#termin-inhalt [data-tf="tagwahl"]'); S.tags = a; terminFensterZeichnen(); return r; })()`) === true);
+      await zu();
+
+      /* ── S: Sammelaktion ── */
+      T(`(function(){ samWahlStarten('K1'); samAktionenAuf(null); return 1; })()`); await warte(200);
+      q('#sam-akt-inhalt [data-sak="tags"]').click();
+      pruef('beta.38 (S): Auch die Sammelaktion bietet „Neuer Tag“ und „Tags bearbeiten“',
+        !!q('#sam-akt-inhalt [data-sak="tag-neu"]') && !!q('#sam-akt-inhalt [data-sak="tag-verwalten"]') && qa('#sam-akt-inhalt [data-sak-tag]').length === T(`tagListe().length`));
+      q('#sam-akt-inhalt [data-sak="tag-neu"]').click();
+      q('#tv-name').value = 'K Sammelmarke';
+      q('#sam-akt-inhalt [data-tv="speichern"]').click();
+      const sm = T(`(tagListe().find(function(t){ return t.name === 'K Sammelmarke'; }) || {}).id || ''`);
+      pruef('beta.38 (S): Nach dem Speichern steht die Tag-Liste mit dem neuen Tag; gesetzt ist noch nichts',
+        !!sm && !!q('#sam-akt-inhalt [data-sak-tag="' + sm + '"]') && T(`SAK.seite`) === 'tags' && T(`tagLaufend('K1').some(function(x){ return x.t.id === '${sm}'; })`) === false);
+      await zu();
+
+      /* ── K: Kalender der Karte ── */
+      T(`(function(){ KALK = null; KALK_FRAGE = ''; S.histAnsicht = 'kalender'; S.kartenTab = 'verlauf'; karteOeffnen('K1'); return 1; })()`); await warte(200);
+      const kalk = () => q('#karte-rumpf .kalk');
+      pruef('beta.38 (K): Statt „+ Termin an diesem Tag“ steht ein Symbolknopf in der Tageszeile',
+        !!kalk() && !/Termin an diesem Tag/.test(kalk().textContent) && !!kalk().querySelector('.kalk-dzeile .kalk-neu[data-do="termin-neu"][data-v="' + heute + '"] svg')
+        && !!kalk().querySelector('.kalk-neu').getAttribute('aria-label'));
+      pruef('beta.38 (K): Gießgang und eigener Eintrag tragen ein ×, der Eintrag aus einem Termin nicht',
+        !!kalk().querySelector('[data-do="kalk-weg"][data-v="w|' + heute + '"]') && !!kalk().querySelector('[data-do="kalk-weg"][data-v="e|eKa"]')
+        && !kalk().querySelector('[data-do="kalk-weg"][data-v="e|eKb"]') && /K aus Termin/.test(kalk().textContent));
+      kalk().querySelector('[data-do="kalk-weg"][data-v="e|eKa"]').click(); await warte(60);
+      pruef('beta.38 (K): Der erste Tipp fragt „Löschen?“ und löscht noch nichts',
+        (kalk().querySelector('[data-do="kalk-weg"][data-v="e|eKa"]') || {}).textContent === 'Löschen?' && T(`S.ereignisse.K1.some(function(e){ return e.id === 'eKa'; })`) === true);
+      kalk().querySelector('[data-do="kalk-weg"][data-v="e|eKa"]').click(); await warte(120);
+      pruef('beta.38 (K): Der zweite Tipp löscht den Eintrag; der Kalender bleibt stehen',
+        T(`S.ereignisse.K1.some(function(e){ return e.id === 'eKa'; })`) === false && !!kalk() && !kalk().querySelector('[data-v="e|eKa"]'));
+      kalk().querySelector('[data-do="kalk-weg"][data-v="w|' + heute + '"]').click(); await warte(60);
+      kalk().querySelector('[data-do="kalk-weg"][data-v="w|' + heute + '"]').click(); await warte(120);
+      pruef('beta.38 (K): Auch ein Gießgang lässt sich so löschen', T(`JSON.stringify(S.water.K1)`) === JSON.stringify([plus(-5)]), T(`JSON.stringify(S.water.K1)`));
+      kalk().querySelector('.kalk-neu').click(); await warte(200);
+      pruef('beta.38 (K): Das Symbol öffnet den Termin für diesen Tag und diese Pflanze',
+        T(`modalOffen('termin-modal')`) === true && T(`TF.datum`) === heute && T(`JSON.stringify(TF.pflanzen)`) === '["K1"]');
+      T(`modalZu('termin-modal')`); await warte(200);
+      const gestern = kalk().querySelector('[data-do="kalk-tag"][data-v="' + plus(-1) + '"]');
+      if(gestern){ gestern.click(); await warte(60);
+        pruef('beta.38 (K): Vor heute gibt es kein Symbol für einen neuen Termin', !kalk().querySelector('.kalk-neu')); }
+
+      /* ── N: Notiz ── */
+      q('#karte-rumpf .knotiz [data-do="notiz-bearb"]').click();
+      const leer = () => q('#karte-rumpf .knotiz [data-do="notiz-leer"]');
+      pruef('beta.38 (N): Beim Bearbeiten der Notiz steht „Alles löschen“', !!leer() && leer().textContent === 'Alles löschen');
+      leer().click();
+      pruef('beta.38 (N): Der erste Tipp fragt nach und löscht noch nichts',
+        !!leer() && leer().textContent === 'Wirklich löschen?' && q('#karte-rumpf .knotiz-feld').value === 'K Notiz steht hier.' && T(`${P('K1')}.notiz`) === 'K Notiz steht hier.');
+      leer().click(); await warte(120);
+      pruef('beta.38 (N): Der zweite Tipp leert die Notiz und schließt das Feld',
+        T(`notizTrennen(${P('K1')}.notiz).eigen`) === '' && !q('#karte-rumpf .knotiz-feld') && !!q('#karte-rumpf .knotiz .knotiz-leer'), T(`${P('K1')}.notiz`));
+      await zu();
+
+      /* ── B: BOTaniker ── */
+      T(`(function(){ UT.pflanze = null; ansichtZeigen('botaniker'); botNeu(); return 1; })()`);
+      T(`botAktion('umtopfen', 'K2')`); await warte(200);
+      pruef('beta.38 (B): Aus dem BOTaniker bleibt die erkannte Pflanze im Umtopfen vorgewählt, auch neben einer vorgemerkten',
+        T(`UT.pflanze`) === 'K2' && /K Beta/.test((q('#ut-gewaehlt') || {}).textContent || ''), T(`String(UT.pflanze)`));
+      await zu();
+      T(`(function(){ UT.pflanze = null; botAktion('umtopfen', ''); return 1; })()`); await warte(200);
+      pruef('beta.38 (B) Gegenprobe: Ohne erkannte Pflanze nimmt das Umtopfen die vorgemerkte', T(`UT.pflanze`) === 'K1', T(`String(UT.pflanze)`));
+      await zu();
+      T(`botAktion('substrat', 'K2')`); await warte(200);
+      pruef('beta.38 (B): Auch der Substratrechner übernimmt die Pflanze', T(`subPflanze`) === 'K2', T(`String(subPflanze)`));
+      await zu();
+      T(`(function(){ botNeu(); document.getElementById('bot-text').value = 'Warum wird K Alpha gelb?'; botAktion('frage', ''); return 1; })()`); await warte(300);
+      pruef('beta.38 (B): „Frage stellen“ schickt eine schon getippte Frage direkt an die KI, ohne die Antwort ohne KI',
+        T(`BOT.letzte && BOT.letzte.text`) === 'Warum wird K Alpha gelb?' && T(`BOT.letzte.pid`) === 'K1' && !q('#bot-verlauf .bot-e-lokal')
+        && q('#bot-text').value === '' && T(`BOT.direkt`) === false, (q('#bot-verlauf') || {}).textContent);
+      T(`(function(){ if(typeof kiAbbrechen === 'function') try{ kiAbbrechen(); }catch(e){} return 1; })()`); await warte(200);
+      T(`(function(){ botNeu(); botAktion('frage', ''); return 1; })()`);
+      pruef('beta.38 (B): Bei leerem Feld wartet „Frage stellen“ auf die Frage und schickt sie dann direkt',
+        T(`BOT.direkt`) === true && !q('#bot-verlauf').children.length);
+      T(`botNeu()`);
+    } catch (e) {
+      pruef('beta.38: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); if(SAM_WAHL) samWahlEnde(true); KALK = null; KALK_FRAGE = ''; ZS_FRAGE = '';
+        if(typeof kiAbbrechen === 'function') try{ kiAbbrechen(); }catch(e){}
+        if(typeof tvGastWeg === 'function') tvGastWeg();
+        history.replaceState(null, ''); filterTags.clear(); UT.pflanze = null; delete window.__k38;
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.tagEin = a.tagEin; S.termine = a.termine || [];
+        S.lernen = a.lernen; S.feuchtRueck = a.feuchtRueck; S.raeume = a.raeume; S.gesehen = a.gesehen;
+        if(a.giess === undefined) delete S.giess; else S.giess = a.giess;
+        if(a.modus === undefined) delete S.modus; else S.modus = a.modus;
+        if(a.schalter === undefined) delete S.schalter; else S.schalter = a.schalter;
+        if(a.histAnsicht === undefined) delete S.histAnsicht; else S.histAnsicht = a.histAnsicht;
+        if(a.kartenTab === undefined) delete S.kartenTab; else S.kartenTab = a.kartenTab;
+        if(a.umtopfPlan === undefined) delete S.umtopfPlan; else S.umtopfPlan = a.umtopfPlan;
+        S.tags = a.tags; S.tagGruppen = a.tagGruppen || []; S.tagVorgabenAus = a.tagVorgabenAus;
+        if(typeof schalterAnwenden === 'function') schalterAnwenden();
+        if(typeof botNeu === 'function') botNeu();
+        ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt38)})`);
     }
   }
 
