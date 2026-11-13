@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.41', w.__T('FASSUNG') === '4.0-beta.41', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.42', w.__T('FASSUNG') === '4.0-beta.42', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -5637,19 +5637,80 @@ setTimeout(async () => {
     T("modalZu('giessmodus')");
     await tick();
 
-    /* Bereich mit eigenem Rhythmus */
-    T(`(function(){ var b = azBereichAnlegen({name:'Anzuchthaus', rhythmus:10});
-      var s = azGefaessAnlegen({name:'Schale', medium:'substrat', bereich:b.id, start:${vor(12)}});
-      var w2 = azGefaessAnlegen({name:'Glas 2', medium:'wasser', bereich:b.id, start:${vor(12)}});
+    /* 4.0-beta.42 (Etappe 9): Bereiche werden Stellplätze im ersten Raum.
+       Datenumbau, deshalb mit Gegenprobe; läuft über den Ladeweg. */
+    T(`(function(){ var A = anzuchtDaten();
+      A.bereiche = [{id:'AZB-t', name:'Anzuchtkiste', rhythmus:10, befeuchtet:[${vor(3)}]}];
+      var s = azGefaessAnlegen({name:'Schale', medium:'substrat', start:${vor(12)}});
+      var w2 = azGefaessAnlegen({name:'Glas 2', medium:'wasser', start:${vor(12)}});
+      var o = azGefaessAnlegen({name:'Glas frei', medium:'wasser', start:${vor(12)}});
+      [s, w2, o].forEach(function(g){ delete g.raum; delete g.stellplatz; });
+      s.bereich = 'AZB-t'; s.abstand = 7; s.gewechselt = [${vor(5)}];
+      w2.bereich = 'AZB-t'; w2.abstand = 5;
       azGruppeAnlegen({gefaess:s.id, anzahl:3, methode:'Kopfsteckling', art:'Efeutute'});
       azGruppeAnlegen({gefaess:w2.id, anzahl:2, methode:'Kopfsteckling', art:'Efeutute'});
-      window.__azB = b.id; window.__azS = s.id; window.__azW = w2.id; sichern(); return 1; })()`);
-    const e = JSON.parse(T('JSON.stringify(azEintraege().map(function(x){ return x.typ + ":" + x.ref; }))'));
-    pruef('3.28.0: Das Anzuchthaus steht als ein Eintrag im Gießplan',
-      e.indexOf('bereich:' + T('__azB')) !== -1 && e.indexOf('gefaess:' + T('__azS')) === -1, JSON.stringify(e));
-    pruef('3.28.0: Ein Wasserglas im Anzuchthaus behält seinen Wechsel', e.indexOf('gefaess:' + T('__azW')) !== -1);
-    pruef('3.28.0: Der Bereich hat den Knopf „Befeuchtet“',
-      T(`azEintraege().find(function(x){ return x.ref === __azB; }).tat`) === 'Befeuchtet');
+      window.__azS = s.id; window.__azW = w2.id; window.__azO = o.id;
+      window.__azZahl = A.gefaesse.length + '|' + A.gruppen.length; sichern(); return 1; })()`);
+    T('grundwerteErgaenzen()');
+    const r0 = T('raumListe()[0].id');
+    const gs = JSON.parse(T('JSON.stringify(azGefaess(__azS))'));
+    const gw = JSON.parse(T('JSON.stringify(azGefaess(__azW))'));
+    const go = JSON.parse(T('JSON.stringify(azGefaess(__azO))'));
+    pruef('beta.42 (9): Kein Bereich mehr in den Daten',
+      T('"bereiche" in S.anzucht') === false && !('bereich' in gs) && !('bereich' in gw), JSON.stringify(gs));
+    pruef('beta.42 (9): Gefäße des Bereichs stehen im ersten Raum am Stellplatz gleichen Namens',
+      gs.raum === r0 && gs.stellplatz === 'Anzuchtkiste' && gw.raum === r0 && gw.stellplatz === 'Anzuchtkiste', JSON.stringify([gs.raum, gs.stellplatz, r0]));
+    pruef('beta.42 (9): Der Stellplatz ist im Raum angelegt',
+      T(`stellplaetzeFuer('${r0}').indexOf('Anzuchtkiste') !== -1`) === true);
+    pruef('beta.42 (9): Rhythmus und Befeuchten-Tage des Bereichs gehen aufs Substrat-Gefäß über',
+      gs.abstand === 10 && (gs.gewechselt || []).indexOf(T(vor(3))) !== -1 && (gs.gewechselt || []).indexOf(T(vor(5))) !== -1, JSON.stringify(gs));
+    pruef('beta.42 (9): Das Wasserglas behält seinen Wechsel', gw.abstand === 5, JSON.stringify(gw));
+    pruef('beta.42 (9): Ein Gefäß ohne Bereich bekommt den ersten Raum', go.raum === r0 && go.stellplatz === '', JSON.stringify(go));
+    pruef('beta.42 (9): Kein Gefäß und keine Gruppe geht verloren',
+      T('anzuchtDaten().gefaesse.length + "|" + anzuchtDaten().gruppen.length') === T('__azZahl'));
+    const azVorher = T('JSON.stringify(S.anzucht) + JSON.stringify(S.raeume)');
+    T('grundwerteErgaenzen()');
+    pruef('beta.42 (9): Ein zweiter Lauf ändert nichts', T('JSON.stringify(S.anzucht) + JSON.stringify(S.raeume)') === azVorher);
+    pruef('beta.42 (9): Jedes Gefäß ist ein eigener Eintrag im Gießplan',
+      T('azEintraege().filter(function(x){ return x.ref === __azS || x.ref === __azW; }).length') === 2);
+
+    /* 4.0-beta.42 (Etappe 9): Umschalter, Kacheln, Auswahl, Plus */
+    {
+      const warte = ms => new Promise(r => setTimeout(r, ms));
+      T("ansichtZeigen('sammlung'); samTeilSetzen('anzucht')");
+      await warte(60);
+      pruef('beta.42 (9): Der Umschalter zeigt die Anzucht',
+        d.body.classList.contains('sam-az') && !d.getElementById('az-out').hidden
+        && d.querySelector('#sam-teil [data-samteil="anzucht"]').getAttribute('aria-pressed') === 'true');
+      const kach = d.querySelectorAll('#az-out .az-sam-k').length;
+      pruef('beta.42 (9): Je Gefäß eine Kachel', kach === T('anzuchtDaten().gefaesse.length'), String(kach));
+      pruef('beta.42 (9): Kacheln nach Raum und Stellplatz',
+        !!d.querySelector('#az-out .az-sam-platz') && /Anzuchtkiste/.test(d.getElementById('az-out').textContent));
+      pruef('beta.42 (9): Balken der Bewurzelung bei Stecklingen',
+        !!d.querySelector(`#az-out [data-karte="${T('__azS')}"] .az-sam-balken`));
+      T('samWahlStarten(__azS)');
+      pruef('beta.42 (9): In der Auswahl heißen die Knöpfe „Versorgt“ und „Verschieben“',
+        d.getElementById('sam-wahl-giessen').textContent === 'Versorgt' && d.getElementById('sam-wahl-mehr').textContent === 'Verschieben'
+        && /Gefäß/.test(d.getElementById('sam-wahl-zahl').textContent));
+      const vorV = T('JSON.stringify(azGefaess(__azS).gewechselt)');
+      d.getElementById('sam-wahl-giessen').click();
+      await warte(450);
+      pruef('beta.42 (9): „Versorgt“ trägt den Wechsel ein', T('azGefaess(__azS).gewechselt.indexOf(iso(HEUTE)) !== -1') === true);
+      T('samRueckgaengig()');
+      pruef('beta.42 (9): Rückgängig nimmt ihn zurück', T('JSON.stringify(azGefaess(__azS).gewechselt)') === vorV);
+      const nv = T("(function(){ window.__azSt = samStandNehmen([__azO]); return samVerschieben([__azO], raumListe()[0].id, 'Regal').neu; })()");
+      pruef('beta.42 (9): Verschieben setzt Raum und Stellplatz des Gefäßes', nv === 1 && T('azGefaess(__azO).stellplatz') === 'Regal');
+      T('samStandZurueck(__azSt)');
+      pruef('beta.42 (9): Rückgängig stellt den Ort wieder her', T('azGefaess(__azO).stellplatz') === '');
+      T('azNeuMenueAuf()');
+      await warte(60);
+      pruef('beta.42 (9): Das Plus bietet Stecklinge, Gefäß und Frei eintragen',
+        d.querySelectorAll('#az-neu-inhalt [data-azneu]').length === 3);
+      T("modalZu('az-neu-modal')");
+      await warte(200);
+      T("samTeilSetzen('pflanzen')");
+      pruef('beta.42 (9): Zurück zu den Pflanzen', !d.body.classList.contains('sam-az') && d.getElementById('az-out').hidden);
+    }
 
     /* Entnehmen */
     const rid = T('anzuchtDaten().gruppen[0].id');
@@ -7154,7 +7215,7 @@ setTimeout(async () => {
     /* 4.0-beta.28 (G2b-1): 'ut-langzeit' und 'ck-vollstaerke' sind weg */
     const SCH = ['ut-hat-stecklinge','ck-saison',
       'url-nummern','url-ohneplan','url-ohnebilder','ck-wetterzeile','ck-kennzahlen',
-      'tour-aus','ru-technik','az-f-aus','az-b-an','ck-gm-sammel-u','ck-gm-sammel-az',
+      'tour-aus','ru-technik','az-f-aus','ck-gm-sammel-u','ck-gm-sammel-az',
       /* seit beta.18 (M1a): „Einfacher Modus“ weg, sechs Schalter des Katalogs dazu */
       'sch-pflege','sch-befunde','sch-abstammung','sch-giessart',
       /* seit beta.30 (B2): „Wachstum“ weg, „Symbolzeile“ dazu */
@@ -7165,9 +7226,10 @@ setTimeout(async () => {
     /* beta.23 (G1a): „Licht am Platz in der Karte“ ist weg, 30 Schalter;
        beta.27: Winterpause und Zustandsfrage weg, 28 im Markup (die Schalter
        der Tags entstehen beim Zeichnen); beta.28: Langzeitdünger und volle Dosis weg, 26;
-       beta.33: Planer (vier) und Rundgang (einer) weg, 21; beta.34 (F350): „Pflegehinweise auf den Karten“ weg, 20 */
-    pruef('beta.5: Alle 20 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 20, fehlt.join(', ') + ' / ' + SCH.length);
-    pruef('beta.5: Genau diese 20 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 26, quelle.split('type="checkbox" role="switch"').length - 1);
+       beta.33: Planer (vier) und Rundgang (einer) weg, 21; beta.34 (F350): „Pflegehinweise auf den Karten“ weg, 20;
+       beta.42 (Etappe 9): „Eigener Rhythmus“ der Bereiche weg, 19 */
+    pruef('beta.5: Alle 19 Einstellungs-Häkchen sind Schalter', fehlt.length === 0 && SCH.length === 19, fehlt.join(', ') + ' / ' + SCH.length);
+    pruef('beta.5: Genau diese 19 und die fünf Schalter der Tag-Vorlagen tragen die Kennzeichnung Schalter', quelle.split('type="checkbox" role="switch"').length - 1 === 25, quelle.split('type="checkbox" role="switch"').length - 1);
     const stat = SCH.map(id => d.getElementById(id)).filter(Boolean);
     pruef('beta.5: Schalter bleiben im Code echte Häkchen', stat.length >= 18 && stat.every(e => e.type === 'checkbox'), stat.length);
 
