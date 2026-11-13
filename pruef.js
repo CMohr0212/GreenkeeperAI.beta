@@ -161,6 +161,29 @@ setTimeout(async () => {
     if (!bed) { console.log('  FEHL ' + name + (zusatz ? '  → ' + zusatz : '')); fehler.push(name); }
   };
 
+  /* 4.0-beta.45 (B1): Die App fragt in eigenen Fenstern. Für die alten Blöcke
+     laufen sie über die Attrappen confirm, prompt und alert; der Block beta.45
+     prüft das echte Fenster. */
+  w.__T(`window.__appDialogEcht = appDialog;
+    window.__appDialogTest = function(o){
+      var r;
+      if(o.art === 'frage') r = !!window.confirm(o.text);
+      else if(o.art === 'eingabe') r = window.prompt(o.text, o.wert == null ? '' : o.wert);
+      else if(o.art === 'wahl') r = null;
+      else { window.alert(o.text); r = undefined; }
+      return Promise.resolve(r);
+    };
+    appDialog = window.__appDialogTest; 1`);
+  /* 4.0-beta.45 (B3): Der erste Start legt keinen Raum mehr an (geprüft im Block
+     beta.45 auf eigener Seite). Die alten Blöcke bauen auf dem früheren „Balkon“ auf. */
+  pruef('beta.45 (B3): Die frische Testseite startet ohne Raum', w.__T('S.raeume.length') === 0, w.__T('JSON.stringify(S.raeume)'));
+  w.__T(`window.__gweOhneBalkon = grundwerteErgaenzen;
+    grundwerteErgaenzen = function(){
+      var r = window.__gweOhneBalkon.apply(this, arguments);
+      if(!S.raeume || !S.raeume.length) S.raeume = [{id:'r0balkon', name:'Balkon', plaetze:[]}];
+      return r;
+    };
+    S.raeume = [{id:'r0balkon', name:'Balkon', plaetze:[]}]; sichern(); 1`);
   pruef('Startskript setzt data-design',
     d.documentElement.getAttribute('data-design') === 'botanisch',
     d.documentElement.getAttribute('data-design'));
@@ -169,7 +192,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.44', w.__T('FASSUNG') === '4.0-beta.44', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.45', w.__T('FASSUNG') === '4.0-beta.45', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -7408,7 +7431,7 @@ setTimeout(async () => {
     const felder = ['ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'tour-aus']
       .filter(id => !d.getElementById(id).closest('.ein-karte'));
     pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
-    pruef('beta.6: Ort und Modell stehen als Feld mit Knopf', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select + #btn-ki-modelle'));
+    pruef('beta.6: Ort und Modell stehen als Feld mit Knopf (beta.45: Modell als Knopfliste)', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select[hidden] + .sel-knoepfe + #btn-ki-modelle'));
     pruef('beta.6: „empfohlen“ steht unter dem Modell, nicht zwischen Feld und Knopf', !d.querySelector('#mh-in-kidienst .kimodell .ki-modell-abz') && !!d.querySelector('#mh-in-kidienst .kimodell + .ki-modell-abz'));
     T('tourListeZeichnen()');
     const tz = [...d.querySelectorAll('#tour-liste [data-tourgo]')];
@@ -12270,8 +12293,9 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         && T(`S.raeume.map(function(r){ return r.id; }).join(',')`) === 'rE1,' + neuId);
       pruef('beta.33 (2): Der letzte Raum bleibt stehen',
         T(`rvRaumLoeschen(${JSON.stringify(neuId)})`) === '' && T(`rvRaumLoeschen('rE1')`) === 'Der letzte Raum bleibt stehen.' && T(`S.raeume.length`) === 1);
-      pruef('beta.33 (2): Ohne Räume legt das Laden wieder einen an',
-        T(`(function(){ S.raeume = []; grundwerteErgaenzen(); return JSON.stringify(S.raeume); })()`) === '[{"id":"r0balkon","name":"Balkon","plaetze":[]}]', T(`JSON.stringify(S.raeume)`));
+      pruef('beta.33 (2): Ohne Räume legt das Laden keinen mehr an (beta.45, F385)',
+        T(`(function(){ S.raeume = []; window.__gweOhneBalkon(); return JSON.stringify(S.raeume); })()`) === '[]', T(`JSON.stringify(S.raeume)`));
+      T(`S.raeume = [{id:'r0balkon', name:'Balkon', plaetze:[]}]; sichern(); 1`);
       T(`sektionOeffnen('raeume')`); await warte(120);
       pruef('beta.33 (2): Die Raumliste in den Einstellungen zeichnet', !!q('#sekm-rumpf #rv-inhalt .rv-zeile') && /Balkon/.test(q('#sekm-rumpf #rv-inhalt').textContent));
       await zu();
@@ -13878,6 +13902,204 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     } finally {
       T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.water = a.water; S.fotos = a.fotos; S.lernen = a.lernen; S.ereignisse = a.ereignisse;
         GELERNT_AUF = null; FOTO_KLEIN.frage = false; FOTO_KLEIN.meldung = ''; delete window.__wv40; sichern(); render(); return 1; })(${JSON.stringify(alt40)})`);
+    }
+  }
+
+  /* ── 4.0-beta.45 (Etappe 14, Teil A): Moosstab-Karte ── */
+  {
+    const T = c => w.__T(c);
+    const alt45 = T(`JSON.stringify({eigene:S.eigene, water:S.water, stabLog:S.stabLog, giess:S.giess, tagEin:S.tagEin, lernen:S.lernen, feuchtRueck:S.feuchtRueck})`);
+    try {
+      T(`(function(){
+        var v = function(n){ return iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - n)); };
+        S.giess = {art:'leitung', haerte:'', saison:false, saisonStaerke:'normal'};
+        S.stabLog = {}; S.tagEin = {};
+        var pf = function(id, o){ S.eigene.push(Object.assign({id:id, eigen:true, name:'Moos' + id, art:'Monstera', klasse:'B',
+          sonne:Object.keys(SONNE)[0], intervallEigen:true, intervall:[10, 10]}, o)); };
+        pf('M1', {rankhilfe:'moos', stabTage:3}); S.water.M1 = [v(4)];
+        pf('M2', {rankhilfe:'moos', stabTage:3}); S.water.M2 = [v(12)];
+        pf('M3', {rankhilfe:'moos'}); S.water.M3 = [v(4)];
+        pf('M4', {rankhilfe:'moos', stabTage:3}); S.water.M4 = [v(4)];
+        pf('M5', {rankhilfe:'kokos', stabTage:3}); S.water.M5 = [v(4)];
+        pf('M6', {rankhilfe:'moos', stabTage:3}); S.water.M6 = [v(0), v(5)];
+        tagVorgabenSichern(false); tagSetzen('M4', 'tv-pause');
+        sichern(); return 1; })()`);
+      const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+      const ids = () => T(`moosFaellig().map(function(p){ return p.id; }).filter(function(id){ return /^M\\d$/.test(id); }).sort().join(',')`);
+      pruef('beta.45 (14A): Karte nur für Moosstab mit Rhythmus, ohne Gießtermin heute (auch in der Gießpause, F382)', ids() === 'M1,M4', ids());
+      pruef('beta.45 (14A): Fällige Pflanze behält „+ Moosstab“ an der Weg-Zeile statt einer Karte',
+        T(`heuteDran().some(function(p){ return p.id === 'M2'; })`) === true && /\+ Moosstab/.test(T(`gmWegZeile(${P('M2')}).text`)));
+      pruef('beta.45 (14A): „Bei jedem Gießen“ bekommt keine Karte (F381)', T(`moosHeute(${P('M3')})`) === true && !/M3/.test(ids()));
+      pruef('beta.45 (14A): Heute gegossen heißt keine Karte', T(`moosHeute(${P('M6')})`) === true && !/M6/.test(ids()));
+      T(`gmMit = {}; gmListeBauen(); 1`);
+      const karte = T(`JSON.stringify(gmListe.filter(function(x){ return x && x.moos; }).map(function(x){ return x.eintraege.map(function(e){ return e.ref; }).filter(function(r){ return /^M\\d$/.test(r); }).sort(); }))`);
+      pruef('beta.45 (14A): Gießmodus hat genau eine Sammelkarte „Moosstäbe“ mit M1 und M4', karte === '[["M1","M4"]]', karte);
+      pruef('beta.45 (14A): Moosstäbe zählen nicht als Pflanzen oder Anzucht',
+        T(`gmPflanzenVonListe(gmListe).some(function(p){ return p.id === 'M1'; }) || gmAzAlle().some(function(e){ return e.typ === 'moos'; })`) === false);
+      const gr = T(`JSON.stringify(gmGruppen().filter(function(g){ return g.key === 'moos'; }).map(function(g){ return [g.typ, g.name, g.eintraege.filter(function(z){ return /^M\\d$/.test(z.az.ref); }).length]; }))`);
+      pruef('beta.45 (14A): Gießliste hat die Gruppe „Moosstäbe“', gr === '[["moos","Moosstäbe",2]]', gr);
+      pruef('beta.45 (14A): Heute nennt die Moosstäbe', /Moosstäbe brauchen Wasser|Moosstab braucht Wasser/.test(T(`heuteLageText()`)), T(`heuteLageText()`));
+      T(`(function(){ gmVerlauf = []; gmIndex = gmListe.findIndex(function(x){ return x && x.moos; });
+        var e = gmListe[gmIndex].eintraege.find(function(z){ return z.ref === 'M1'; });
+        gmMeldenAzZeile(e, 'azja', null); gmZaehlen(); return 1; })()`);
+      pruef('beta.45 (14A): „Befeuchtet“ trägt heute in S.stabLog ein und nimmt die Karte weg',
+        T(`(S.stabLog.M1 || []).indexOf(iso(HEUTE)) > -1`) === true && !/M1/.test(ids()) && T(`moosHeute(${P('M1')})`) === false);
+      pruef('beta.45 (14A): Gießen bleibt unberührt, die Abschlusskarte zählt den Moosstab',
+        T(`S.water.M1.length`) === 1 && T(`gmMoosErledigt`) === 1 && T(`gmErledigt`) === 0);
+      T(`(function(){ var e = gmVerlauf.pop(); gmEintragZuruecknehmen(e); gmZaehlen(); return 1; })()`);
+      pruef('beta.45 (14A): Rückgängig nimmt das Befeuchten zurück', T(`S.stabLog.M1 === undefined`) === true && /M1/.test(ids()));
+      T(`(function(){ S.stabLog.M1 = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 1))]; return 1; })()`);
+      pruef('beta.45 (14A): Befeuchten zählt den Rhythmus neu (gestern befeuchtet, alle 3 Tage: heute nicht)', T(`moosHeute(${P('M1')})`) === false);
+      T(`(function(){ S.stabLog.M1 = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 3))]; return 1; })()`);
+      pruef('beta.45 (14A): Nach drei Tagen ist er wieder dran', T(`moosHeute(${P('M1')})`) === true);
+      pruef('beta.45 (14A): Die Sicherung enthält stabLog', /"stabLog"/.test(T(`sicherungInhalt()`)) && /"M1"/.test(T(`JSON.stringify(JSON.parse(sicherungInhalt()).stabLog)`)));
+      T(`(function(){ S.lernen = S.lernen || {}; S.lernen.M1 = {lernFaktor:1.2}; S.feuchtRueck.M1 = {zahl:1}; pflanzeEntfernen('M1'); return 1; })()`);
+      pruef('beta.45 (14A): Löschen räumt stabLog, Gelerntes und Feucht-Rückmeldung',
+        T(`S.stabLog.M1 === undefined && S.lernen.M1 === undefined && S.feuchtRueck.M1 === undefined`) === true);
+    } catch (e) {
+      pruef('beta.45 (14A): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.water = a.water; S.stabLog = a.stabLog || {}; S.giess = a.giess; S.tagEin = a.tagEin;
+        S.lernen = a.lernen; S.feuchtRueck = a.feuchtRueck; gmVerlauf = []; gmListe = []; gmMit = {}; sichern(); render(); return 1; })(${JSON.stringify(alt45)})`);
+    }
+  }
+
+  /* ── 4.0-beta.45 (Etappe 14, B1): App-Fenster statt Browser-Dialogen ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const quelle = fs.readFileSync('index.html', 'utf8');
+    const roh = (quelle.match(/(?<![\w.])(confirm|prompt|alert)\(/g) || []);
+    pruef('beta.45 (B1): Kein Browser-Dialog mehr im Code (confirm, alert, prompt)', roh.length === 0, roh.join(','));
+    const altEig = T(`JSON.stringify(S.eigene)`), altRaeume = T(`JSON.stringify(S.raeume)`);
+    try {
+      T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); appDialog = window.__appDialogEcht; 1`);
+      const kl = sel => { const b = d.querySelector(sel); if (b) b.click(); return !!b; };
+      const h = () => d.getElementById('app-dlg-huelle');
+      T(`window.__dlg = 'x'; appFrage('Wirklich?', {titel:'Test', ja:'Weg', gefahr:true}).then(function(v){ window.__dlg = v; }); 1`);
+      await warte(20);
+      const andere = Array.prototype.filter.call(d.body.children, k => k !== h() && k.tagName !== 'SCRIPT' && k.id !== 'tour');
+      pruef('beta.45 (B1): Die Frage öffnet ein App-Fenster mit Titel und zwei Knöpfen',
+        !!h() && !h().hidden && d.getElementById('app-dlg-titel').textContent === 'Test'
+        && d.querySelectorAll('#app-dlg-fuss button').length === 2 && d.querySelector('#app-dlg-fuss [data-dlg="ja"]').classList.contains('loeschen'));
+      pruef('beta.45 (B1): Alles andere ist stillgelegt', andere.length > 0 && andere.every(k => k.hasAttribute('inert')) && !h().hasAttribute('inert'));
+      kl('#app-dlg-fuss [data-dlg="ja"]'); await warte(20);
+      pruef('beta.45 (B1): „Ja“ liefert true, schließt und gibt frei',
+        T(`window.__dlg`) === true && h().hidden && andere.every(k => !k.hasAttribute('inert')));
+      T(`appEingabe('Name?', {wert:'Alt'}).then(function(v){ window.__dlg = v; }); 1`); await warte(20);
+      d.getElementById('app-dlg-feld').value = 'Neu'; kl('#app-dlg-fuss [data-dlg="ja"]'); await warte(20);
+      pruef('beta.45 (B1): Eingabe liefert den Text', T(`window.__dlg`) === 'Neu');
+      T(`appEingabe('Name?').then(function(v){ window.__dlg = v; }); 1`); await warte(20);
+      kl('#app-dlg-fuss [data-dlg="nein"]'); await warte(20);
+      pruef('beta.45 (B1): Abbrechen liefert null', T(`window.__dlg`) === null);
+      T(`appWahl('Welcher?', [{wert:'a', text:'A'}, {wert:{n:2}, text:'B'}]).then(function(v){ window.__dlg = v; }); 1`); await warte(20);
+      pruef('beta.45 (B1): Die Wahl ist eine Knopfliste', d.querySelectorAll('#app-dlg-rumpf .wahl-liste button').length === 2);
+      kl('#app-dlg-rumpf [data-dlg="w1"]'); await warte(20);
+      pruef('beta.45 (B1): Die Wahl liefert den Wert', T(`JSON.stringify(window.__dlg)`) === '{"n":2}');
+      T(`window.__q = []; appHinweis('Eins').then(function(){ window.__q.push(1); }); appHinweis('Zwei').then(function(){ window.__q.push(2); }); 1`); await warte(20);
+      const t1 = d.getElementById('app-dlg-rumpf').textContent;
+      kl('#app-dlg-fuss [data-dlg="ja"]'); await warte(20);
+      const t2 = d.getElementById('app-dlg-rumpf').textContent;
+      kl('#app-dlg-fuss [data-dlg="ja"]'); await warte(20);
+      pruef('beta.45 (B1): Zwei Hinweise kommen nacheinander', t1 === 'Eins' && t2 === 'Zwei' && T(`window.__q.join()`) === '1,2' && h().hidden);
+      /* Zurück-Taste: schließt nur das App-Fenster, das Fenster darunter bleibt */
+      T(`modalAuf('hinweis-modal'); 1`); await warte(20);
+      T(`appFrage('Zurück?').then(function(v){ window.__dlg = v; }); 1`); await warte(20);
+      w.history.back(); await warte(250);
+      pruef('beta.45 (B1): Zurück-Taste bricht ab, das Fenster darunter bleibt offen',
+        T(`window.__dlg`) === false && h().hidden && T(`modalOffen('hinweis-modal')`) === true);
+      T(`while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); 1`);
+      /* Karte: „+ Neuer Raum“ fragt im App-Fenster */
+      T(`(function(){ S.eigene.push({id:'D45', eigen:true, name:'Dlg45', art:'Efeutute', klasse:'B', sonne:Object.keys(SONNE)[0]}); sichern(); return 1; })()`);
+      const k = d.createElement('button'); k.setAttribute('data-lage-k', 'raum'); k.setAttribute('data-v', '__neu'); k.setAttribute('data-p', 'D45');
+      d.body.appendChild(k); k.click(); await warte(20); k.remove();
+      pruef('beta.45 (B1): „+ Neuer Raum“ in der Karte öffnet die Eingabe', !h().hidden && !!d.getElementById('app-dlg-feld'));
+      d.getElementById('app-dlg-feld').value = 'Dialogzimmer'; kl('#app-dlg-fuss [data-dlg="ja"]'); await warte(30);
+      pruef('beta.45 (B1): Der neue Raum ist angelegt und gesetzt',
+        T(`raumNameVon(allePflanzen().find(function(x){ return x.id === 'D45'; }).raum)`) === 'Dialogzimmer');
+    } catch (e) {
+      pruef('beta.45 (B1): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a, r){ while(APP_DLG.offen) appDlgAntwort('nein'); S.eigene = JSON.parse(a); S.raeume = JSON.parse(r); appDialog = window.__appDialogTest;
+        while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); sichern(); render(); return 1; })(${JSON.stringify(altEig)}, ${JSON.stringify(altRaeume)})`);
+    }
+  }
+
+  /* ── 4.0-beta.45 (Etappe 14, B2): Knopflisten statt Systemlisten ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    try {
+      await warte(30);
+      const offen = [].filter.call(d.querySelectorAll('select'), s => !s.hidden);
+      pruef('beta.45 (B2): Keine sichtbare Systemliste mehr', offen.length === 0, offen.map(s => s.id || s.className).join(','));
+      const kd = d.getElementById('ki-dienst');
+      pruef('beta.45 (B2): KI-Dienst ist eine Knopfliste mit je einem Knopf pro Eintrag',
+        !!kd && kd.hidden && !!kd._selBox && kd._selBox.querySelectorAll('.sel-knopf').length === kd.options.length && kd.options.length > 1);
+      const altD = T(`S.kiDienst || ''`);
+      const zweit = kd.options[1].value;
+      kd._selBox.querySelectorAll('.sel-knopf')[1].click(); await warte(10);
+      pruef('beta.45 (B2): Ein Knopf setzt den Wert und löst „change“ aus', kd.value === zweit && T(`S.kiDienst`) === zweit
+        && kd._selBox.querySelectorAll('.sel-knopf')[1].getAttribute('aria-pressed') === 'true');
+      kd.value = kd.options[0].value;
+      pruef('beta.45 (B2): Ein vom Code gesetzter Wert zieht die Knöpfe nach',
+        kd._selBox.querySelectorAll('.sel-knopf')[0].getAttribute('aria-pressed') === 'true'
+        && kd._selBox.querySelectorAll('.sel-knopf')[1].getAttribute('aria-pressed') === 'false');
+      T(`S.kiDienst = ${JSON.stringify(altD)} || S.kiDienst; sichern(); 1`);
+      const box = d.createElement('div');
+      box.innerHTML = '<select id="t45"><option value="a">A</option><option value="b">B</option></select>';
+      d.body.appendChild(box); await warte(20);
+      const t45 = d.getElementById('t45');
+      const o = d.createElement('option'); o.value = 'c'; o.textContent = 'C'; t45.appendChild(o); await warte(20);
+      t45.disabled = true;
+      pruef('beta.45 (B2): Später eingesetzte Listen werden Knopflisten und ziehen neue Optionen und „disabled“ nach',
+        t45.hidden && t45._selBox.querySelectorAll('.sel-knopf').length === 3 && [].every.call(t45._selBox.querySelectorAll('.sel-knopf'), b => b.disabled));
+      box.remove();
+    } catch (e) {
+      pruef('beta.45 (B2): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    }
+  }
+
+  /* ── 4.0-beta.45 (Etappe 14, B3): erster Start ohne Daten ── */
+  {
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    let w45 = null;
+    try {
+      const f45 = [];
+      const dom45 = new JSDOM(html, Object.assign({}, OPT, { beforeParse(w2){
+        OPT.beforeParse(w2);
+        w2.addEventListener('error', e => f45.push(String(e.error && e.error.stack || e.message)));
+      }}));
+      await warte(2500);
+      w45 = dom45.window;
+      const T45 = c => w45.__T(c);
+      const d45 = w45.document;
+      pruef('beta.45 (B3): Erster Start ohne Pflanzen und ohne vorab angelegten Raum (F385)',
+        T45(`allePflanzen().length`) === 0 && T45(`S.raeume.length`) === 0, T45(`JSON.stringify(S.raeume)`));
+      T45(`(function(){ var w = document.getElementById('willkommen'); if(w) w.hidden = true; return 1; })()`);
+      const zu = () => T45(`while(APP_DLG.offen) appDlgAntwort('nein'); while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); 1`);
+      const geoeffnet = [];
+      for (const v of ['heute', 'sammlung', 'botaniker', 'mehr']) { T45(`ansichtZeigen('${v}'); render(); 1`); await warte(30); geoeffnet.push(v); }
+      pruef('beta.45 (B3): Leere Sammlung zeigt den Leerzustand', T45(`ansichtZeigen('sammlung'); render(); !document.getElementById('empty').hidden`) === true);
+      const ziele = T45(`JSON.stringify(['doktor','umtopfen','substrat','vermehren','stammbaum'].concat(MH_GRUPPEN.reduce(function(a, g){ return a.concat(g.punkte); }, [])))`);
+      for (const k of JSON.parse(ziele)) {
+        try { T45(`sektionOeffnen('${k}'); 1`); geoeffnet.push(k); } catch (e) { f45.push(k + ': ' + String(e && e.message || e)); }
+        await warte(40); zu(); await warte(20);
+      }
+      T45(`gmStarten(); 1`); await warte(20);
+      pruef('beta.45 (B3): Gießmodus ohne Pflanzen meldet sich im App-Fenster',
+        !!d45.getElementById('app-dlg-huelle') && !d45.getElementById('app-dlg-huelle').hidden && /nichts fällig/.test(d45.getElementById('app-dlg-rumpf').textContent));
+      zu();
+      T45(`(function(){ AL_LAGE_NEU = ''; formLageZeichnen(); alLageKnoepfe(); return 1; })()`);
+      const rk = d45.getElementById('f-raum-knoepfe');
+      pruef('beta.45 (B3): Anlegen bietet ohne Räume nur „+ Neuer Raum“',
+        !!rk && rk.querySelectorAll('button').length === 1 && !!rk.querySelector('[data-al-neu="raum"]'));
+      pruef('beta.45 (B3): Jede Ansicht, jedes Werkzeug und jede Einstellungsseite öffnet auf frischer Seite ohne Laufzeitfehler',
+        f45.length === 0 && geoeffnet.length >= 23, geoeffnet.length + ' | ' + f45.join(' | ').slice(0, 400));
+    } catch (e) {
+      pruef('beta.45 (B3): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      try { if (w45) w45.close(); } catch (e) {}
     }
   }
 

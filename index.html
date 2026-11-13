@@ -4334,6 +4334,21 @@ body.erkl-aus [data-erkl]:not(.erkl-bleibt), body.erkl-aus [data-erkl-kurz]:not(
 body.erkl-aus i.erkl-u, body.erkl-aus #sekm-info{display:none!important}
 body.erkl-voll .erkl > .mehr-dazu{display:none!important}
 body.erkl-voll .erkl > .erkl-rest[hidden]{display:inline!important}
+/* 4.0-beta.45 (Etappe 14, B1): App-Fenster statt Browser-Dialogen */
+html[data-design] #app-dlg-huelle{position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;justify-content:center;
+  background:var(--schleier)}
+html[data-design] #app-dlg-huelle > #app-dlg.sekm{position:relative;inset:auto;z-index:auto;width:100%;max-width:640px;
+  max-height:86dvh;border-radius:var(--r-gross) var(--r-gross) 0 0;overflow:hidden;box-shadow:0 -8px 28px rgba(0,0,0,.22)}
+html[data-design] #app-dlg > .sekm-kopf{border-radius:var(--r-gross) var(--r-gross) 0 0}
+html[data-design] #app-dlg > .sekm-rumpf{flex:1 1 auto;min-height:0;overflow:auto;padding-top:10px;padding-bottom:12px}
+html[data-design] #app-dlg-rumpf > p{margin:0 0 10px;line-height:1.45}
+html[data-design] #app-dlg-feld{width:100%;box-sizing:border-box;margin-top:2px}
+html[data-design] .app-dlg-wahl{display:flex;margin-top:4px}
+/* 4.0-beta.45 (Etappe 14, B2): Knopflisten statt Systemlisten */
+html[data-design] .sel-knoepfe{margin-top:2px}
+html[data-design] .feld-knopf:has(> .sel-knoepfe){flex-wrap:wrap;gap:8px}
+html[data-design] .feld-knopf > .sel-knoepfe{flex:1 1 100%}
+html[data-design] .feld-knopf:has(> .sel-knoepfe) > button{border-radius:var(--r-mittel)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -7349,8 +7364,9 @@ function planerDatenWeg(){
     if(o && !p.raum && o.raum && S.raeume.some(r=>r && r.id === o.raum)) p.raum = o.raum;
   });
   delete S.orte; delete S.balkon; delete S.raumAktiv; delete S.grundrissWunsch;
-  /* Einen Raum gibt es immer: der letzte lässt sich nicht löschen. */
-  if(!S.raeume.length) S.raeume = [{id:'r0balkon', name:'Balkon', plaetze:[]}];
+  /* 4.0-beta.45 (Etappe 14, B3, F385): Kein vorab angelegter Raum mehr.
+     Den ersten legt man beim Anlegen mit „+ Neuer Raum“ an; danach bleibt
+     immer einer (der letzte lässt sich nicht löschen). */
 }
 
 /* ── Ort der Gefäße (4.0-beta.42, Etappe 9) ─────────────────────
@@ -9374,11 +9390,36 @@ function moosHeute(p){
   if(!n) return true;
   const heute = iso(HEUTE);
   const tage = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
+  /* 4.0-beta.45 (Etappe 14): Befeuchten ohne Gießen (S.stabLog) zählt
+     immer, auch heute; Gießtage nur, wenn der Rhythmus um war. */
+  const ev = giessLog(p.id).filter(d => d < heute).map(d => [d, 'g'])
+    .concat(stabLogVon(p.id).filter(d => d <= heute).map(d => [d, 's']))
+    .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
   let zuletzt = null;
-  giessLog(p.id).filter(d => d < heute).sort().forEach(d => {
-    if(!zuletzt || tage(zuletzt, d) >= n) zuletzt = d;
-  });
+  ev.forEach(x => { if(x[1] === 's' || !zuletzt || tage(zuletzt, x[0]) >= n) zuletzt = x[0]; });
   return !zuletzt || tage(zuletzt, heute) >= n;
+}
+/* 4.0-beta.45 (Etappe 14): Moosstäbe mit eigenem Rhythmus, deren Pflanze
+   heute nicht gegossen wird (auch in der Gießpause, F382), stehen auf
+   einer eigenen Sammelkarte. „Bei jedem Gießen“ hängt am Gießen (F381). */
+const STAB_LOG_MAX = 20;
+function stabLogVon(id){
+  const l = S.stabLog && S.stabLog[id];
+  return Array.isArray(l) ? l : [];
+}
+function moosBefeuchtet(id){
+  if(!S.stabLog || typeof S.stabLog !== 'object') S.stabLog = {};
+  const h = iso(HEUTE);
+  S.stabLog[id] = stabLogVon(id).filter(d => d !== h).concat([h]).sort().slice(-STAB_LOG_MAX);
+  sichern();
+}
+function moosFaellig(ohne){
+  const h = iso(HEUTE);
+  const weg = {};
+  heuteDran().forEach(p => { weg[p.id] = true; });
+  (ohne || []).forEach(p => { if(p) weg[p.id] = true; });
+  return allePflanzen().filter(p => !weg[p.id] && rankhilfeVon(p) === 'moos' && stabTageVon(p)
+    && giessLog(p.id).indexOf(h) < 0 && moosHeute(p));
 }
 
 const AENDERBAR = ['name','art','botanisch','typ','klasse','sonne','giftig','gift','notiz','frostMin','giessart','wichtig','raum','stellplatz','rankhilfe','stabTage'];
@@ -9685,7 +9726,8 @@ document.addEventListener('click', async e=>{
    Bis 3.30.0 blieben Ereignisse, „gesehen“ und der Umtopfplan liegen. */
 function pflanzeEntfernen(id){
   S.eigene = (S.eigene||[]).filter(x=>x.id!==id);
-  ['water','fotos','zustand','ereignisse','gesehen','umtopfPlan','tagEin']
+  /* 4.0-beta.45: auch Gelerntes, Feucht-Rückmeldungen und Moosstab-Daten */
+  ['water','fotos','zustand','ereignisse','gesehen','umtopfPlan','tagEin','lernen','feuchtRueck','stabLog']
     .forEach(k=>{ if(S[k] && typeof S[k] === 'object') delete S[k][id]; });
   if(typeof terminePflanzeWeg === 'function') terminePflanzeWeg(id);
 }
@@ -11640,6 +11682,184 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hatBilder = typeof BILDER !== 'undefined';
 
+/* ══ 4.0-beta.45 (Etappe 14, B1): App-Fenster statt Browser-Dialogen ══
+   appHinweis(text, o), appFrage(text, o), appEingabe(text, o) und
+   appWahl(text, liste, o) liefern ein Promise (nichts, true/false,
+   Text oder null, gewählter Wert oder null). Das Fenster gehört nicht
+   zur Fensterverwaltung (MODAL): Es baut sich beim ersten Aufruf
+   selbst, liegt über allem außer der Tour, legt alles andere still und
+   gibt danach genau das wieder frei, was es stillgelegt hat. Es legt
+   keinen Verlaufseintrag an; die Zurück-Taste bricht ab und stellt den
+   Eintrag darunter wieder her. Weitere Aufrufe warten in einer Schlange.
+   Optionen: titel, ja, nein, gefahr (roter Knopf), wert, zahl, max. */
+var APP_DLG = {offen:null, schlange:[], zustand:null, inert:[]};
+function appDlgText(t){
+  return String(t == null ? '' : t).split(/\n{2,}/).map(a => '<p>' + esc(a).replace(/\n/g, '<br>') + '</p>').join('');
+}
+function appDlgBau(){
+  let h = document.getElementById('app-dlg-huelle');
+  if(h) return h;
+  h = document.createElement('div');
+  h.id = 'app-dlg-huelle';
+  h.hidden = true;
+  h.innerHTML = '<div id="app-dlg" class="sekm as-fenster" role="alertdialog" aria-modal="true" aria-labelledby="app-dlg-titel">'
+    + '<div class="sekm-kopf"><h2 class="sekm-titel" id="app-dlg-titel" tabindex="-1"></h2></div>'
+    + '<div class="sekm-rumpf" id="app-dlg-rumpf"></div><div class="as-fuss" id="app-dlg-fuss"></div></div>';
+  document.body.appendChild(h);
+  h.addEventListener('click', e => {
+    const b = e.target.closest('[data-dlg]');
+    if(b){ appDlgAntwort(b.dataset.dlg); return; }
+    if(e.target === h) appDlgAntwort('nein');
+  });
+  h.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && e.target && e.target.id === 'app-dlg-feld'){ e.preventDefault(); appDlgAntwort('ja'); }
+  });
+  return h;
+}
+function appDialog(o){
+  return new Promise(res => {
+    APP_DLG.schlange.push(Object.assign({}, o, {res}));
+    if(!APP_DLG.offen) appDlgNaechster();
+  });
+}
+function appDlgNaechster(){
+  const o = APP_DLG.schlange.shift();
+  if(!o) return;
+  const h = appDlgBau();
+  APP_DLG.offen = o;
+  try{ APP_DLG.zustand = history.state; }catch(e){ APP_DLG.zustand = null; }
+  document.getElementById('app-dlg-titel').textContent = o.titel
+    || {hinweis:'Hinweis', frage:'Bitte bestätigen', eingabe:'Eingabe', wahl:'Bitte wählen'}[o.art] || '';
+  let rumpf = appDlgText(o.text);
+  if(o.art === 'eingabe') rumpf += '<input id="app-dlg-feld" type="' + (o.zahl ? 'number' : 'text') + '"'
+    + (o.zahl ? ' inputmode="decimal"' : '') + (o.max ? ' maxlength="' + o.max + '"' : '')
+    + ' value="' + esc(o.wert == null ? '' : o.wert) + '" aria-label="' + esc(o.titel || 'Eingabe') + '" autocomplete="off">';
+  if(o.art === 'wahl') rumpf += '<div class="wahl-liste app-dlg-wahl">' + (o.liste || []).map((x, i) =>
+    '<button type="button" data-dlg="w' + i + '">' + esc(x.text) + '</button>').join('') + '</div>';
+  document.getElementById('app-dlg-rumpf').innerHTML = rumpf;
+  document.getElementById('app-dlg-fuss').innerHTML =
+    (o.art === 'hinweis' ? '' : '<button type="button" data-dlg="nein">' + esc(o.nein || 'Abbrechen') + '</button>')
+    + (o.art === 'wahl' ? '' : '<button type="button" data-dlg="ja" class="' + (o.gefahr ? 'loeschen' : 'haupt') + '">' + esc(o.ja || 'OK') + '</button>');
+  APP_DLG.inert = [];
+  Array.prototype.forEach.call(document.body.children, k => {
+    if(k === h || k.tagName === 'SCRIPT' || k.tagName === 'STYLE' || k.id === 'tour') return;
+    if(!k.hasAttribute('inert')){ k.setAttribute('inert', ''); APP_DLG.inert.push(k); }
+  });
+  h.removeAttribute('inert');
+  h.hidden = false;
+  document.documentElement.classList.add('app-dlg-an');
+  setTimeout(() => {
+    if(APP_DLG.offen !== o) return;
+    const f = document.getElementById(o.art === 'eingabe' ? 'app-dlg-feld' : 'app-dlg-titel');
+    try{ f.focus(); if(o.art === 'eingabe' && f.select) f.select(); }catch(e){}
+  }, 0);
+}
+function appDlgAntwort(k){
+  const o = APP_DLG.offen;
+  if(!o) return;
+  let wert;
+  if(o.art === 'frage') wert = k === 'ja';
+  else if(o.art === 'eingabe'){ const f = document.getElementById('app-dlg-feld'); wert = k === 'ja' && f ? f.value : null; }
+  else if(o.art === 'wahl'){ const x = /^w\d+$/.test(k || '') ? (o.liste || [])[Number(k.slice(1))] : null; wert = x ? x.wert : null; }
+  const h = document.getElementById('app-dlg-huelle');
+  if(h) h.hidden = true;
+  APP_DLG.inert.forEach(el => el.removeAttribute('inert'));
+  APP_DLG.inert = [];
+  APP_DLG.offen = null;
+  document.documentElement.classList.remove('app-dlg-an');
+  o.res(wert);
+  if(APP_DLG.schlange.length) appDlgNaechster();
+}
+/* Steht vor allen anderen popstate- und Esc-Zuhörern, damit die
+   Zurück-Taste nur das App-Fenster schließt, nicht das Fenster darunter. */
+window.addEventListener('popstate', e => {
+  if(!APP_DLG.offen) return;
+  e.stopImmediatePropagation();
+  try{ history.pushState(APP_DLG.zustand, ''); }catch(x){}
+  appDlgAntwort('nein');
+});
+document.addEventListener('keydown', e => {
+  if(!APP_DLG.offen || e.key !== 'Escape') return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  appDlgAntwort('nein');
+});
+function appHinweis(text, o){ return appDialog(Object.assign({art:'hinweis', text}, o || {})); }
+function appFrage(text, o){ return appDialog(Object.assign({art:'frage', text, ja:'Ja'}, o || {})); }
+function appEingabe(text, o){ return appDialog(Object.assign({art:'eingabe', text, ja:'Übernehmen'}, o || {})); }
+function appWahl(text, liste, o){ return appDialog(Object.assign({art:'wahl', text, liste}, o || {})); }
+
+/* ══ 4.0-beta.45 (Etappe 14, B2): Knopflisten statt Systemlisten ══
+   Jede sichtbare Auswahlliste wird beim Einsetzen zur Knopfliste. Die
+   Liste bleibt versteckt im Dokument und ist die Wahrheit: ein Knopf
+   setzt ihren Wert und löst „change“ und „input“ aus, die vorhandenen
+   Zuhörer arbeiten unverändert. Neue Optionen sowie ein Wert oder
+   „disabled“, die der Code setzt, ziehen die Knöpfe nach. Ausgenommen
+   sind versteckte Listen, Listen mit data-e (Bearbeiten) und mit
+   data-kein-knopf. */
+function selKnoepfeSync(sel){
+  const box = sel._selBox;
+  if(!box) return;
+  const kn = box.querySelectorAll('.sel-knopf');
+  if(kn.length !== sel.options.length){ selKnoepfeBauen(sel); return; }
+  kn.forEach((b, i) => {
+    const o = sel.options[i];
+    b.setAttribute('aria-pressed', o.selected ? 'true' : 'false');
+    b.disabled = !!(sel.disabled || o.disabled);
+  });
+}
+function selKnoepfeBauen(sel){
+  let box = sel._selBox;
+  if(!box){
+    box = document.createElement('div');
+    box.className = 'al-knoepfe sel-knoepfe';
+    box.setAttribute('role', 'group');
+    const lab = sel.closest('label') && sel.closest('label').querySelector('.lab');
+    box.setAttribute('aria-label', sel.getAttribute('aria-label') || (lab ? lab.textContent.trim() : 'Auswahl'));
+    sel.insertAdjacentElement('afterend', box);
+    sel._selBox = box;
+    sel.hidden = true;
+    sel.setAttribute('aria-hidden', 'true');
+    sel.tabIndex = -1;
+    sel.setAttribute('data-sel-knopf', '');
+  }
+  box.innerHTML = Array.prototype.map.call(sel.options, (o, i) =>
+    '<button type="button" class="al-knopf sel-knopf" data-seli="' + i + '" aria-pressed="' + (o.selected ? 'true' : 'false') + '"'
+    + ((sel.disabled || o.disabled) ? ' disabled' : '') + '><b>' + esc(o.textContent) + '</b></button>').join('');
+}
+function selPruefen(sel){
+  if(!sel || sel._selBox || sel.hidden || sel.hasAttribute('data-e') || sel.hasAttribute('data-kein-knopf')) return;
+  selKnoepfeBauen(sel);
+}
+(function(){
+  if(typeof HTMLSelectElement === 'undefined') return;
+  const P = HTMLSelectElement.prototype;
+  ['value', 'selectedIndex', 'disabled'].forEach(k => {
+    const d = Object.getOwnPropertyDescriptor(P, k) || Object.getOwnPropertyDescriptor(HTMLElement.prototype, k);
+    if(!d || !d.set) return;
+    Object.defineProperty(P, k, {configurable:true, enumerable:d.enumerable, get:d.get,
+      set(v){ d.set.call(this, v); if(this._selBox) selKnoepfeSync(this); }});
+  });
+})();
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.sel-knopf');
+  if(!b || b.disabled) return;
+  const box = b.parentElement, sel = box && box.previousElementSibling;
+  if(!sel || sel.tagName !== 'SELECT' || sel._selBox !== box) return;
+  sel.selectedIndex = Number(b.dataset.seli);
+  sel.dispatchEvent(new Event('change', {bubbles:true}));
+  sel.dispatchEvent(new Event('input', {bubbles:true}));
+});
+document.querySelectorAll('select').forEach(selPruefen);
+if(typeof MutationObserver === 'function') new MutationObserver(ms => ms.forEach(m => {
+  const t = m.target;
+  if(t && t.tagName === 'SELECT'){ if(t._selBox) selKnoepfeBauen(t); else selPruefen(t); return; }
+  m.addedNodes.forEach(n => {
+    if(n.nodeType !== 1) return;
+    if(n.tagName === 'SELECT') selPruefen(n);
+    else if(n.querySelectorAll) n.querySelectorAll('select').forEach(selPruefen);
+  });
+})).observe(document.body, {childList:true, subtree:true});
+
 /* ══ Erklärtexte: eine Zeile, Rest hinter „Mehr dazu“ (Grundstil S3) ══
    erklSetzen(el, text, kurz): Ohne `kurz` bleibt der erste Satz stehen,
    mit `kurz` steht dieser kurze Satz vorn und der ganze Text dahinter.
@@ -11744,7 +11964,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.44';
+const FASSUNG = '4.0-beta.45';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -11961,6 +12181,7 @@ const LEERSTAND = () => ({
   /* Tierhaltung: aktiv sagt, ob überhaupt Warnungen kommen sollen. */
   tiere:{aktiv:null, arten:['katze']},
   feuchtRueck:{},  /* Rückmeldungen „noch feucht“ je Pflanze */
+  stabLog:{},      /* 4.0-beta.45: Moosstab befeuchtet ohne Gießen, je Pflanze Daten */
   /* Wie viel auf einer aufgeklappten Karte steht: knapp, normal,
      voll. Steuert nur, was zugeklappt startet — nichts verschwindet. */
   dichte:'normal',
@@ -12179,6 +12400,7 @@ function grundwerteErgaenzen(){
   if(!S.tiere || typeof S.tiere !== 'object') S.tiere = {aktiv:null, arten:['katze']};
   if(!Array.isArray(S.tiere.arten)) S.tiere.arten = ['katze'];
   if(!S.feuchtRueck || typeof S.feuchtRueck !== 'object') S.feuchtRueck = {};
+  if(!S.stabLog || typeof S.stabLog !== 'object' || Array.isArray(S.stabLog)) S.stabLog = {};
   if(S.startGesehen === undefined) S.startGesehen = null;
   if(!S.tutorial || typeof S.tutorial !== 'object' || Array.isArray(S.tutorial))
     S.tutorial = {aus:false, kapitel:{}, einricht:0};
@@ -12557,16 +12779,16 @@ function sichern(){
     const anteil = speicherAnteil();
     if(anteil > 0.8 && !speicherGewarnt){
       speicherGewarnt = true;
-      alert('Der Browserspeicher ist zu ' + Math.round(anteil*100) + ' Prozent voll.\n\n'
+      appHinweis('Der Browserspeicher ist zu ' + Math.round(anteil*100) + ' Prozent voll.\n\n'
         + 'Lade jetzt hinter dem Zahnrad eine Sicherung herunter. Fotos brauchen den meisten '
-        + 'Platz — wenn es eng wird, hilft es, ältere Bilder zu löschen.');
+        + 'Platz — wenn es eng wird, hilft es, ältere Bilder zu löschen.', {titel:'Speicher fast voll'});
     }
     if(anteil < 0.7) speicherGewarnt = false;
   }catch(e){
     SPEICHER_OK = false; statusText();
-    alert('Der Browserspeicher ist voll — diese Änderung konnte NICHT gespeichert werden.\n\n'
+    appHinweis('Der Browserspeicher ist voll — diese Änderung konnte NICHT gespeichert werden.\n\n'
       + 'Schließe die Seite jetzt nicht. Lade zuerst hinter dem Zahnrad eine Sicherung herunter '
-      + 'und lösche danach ein paar Fotos, damit wieder Platz entsteht.');
+      + 'und lösche danach ein paar Fotos, damit wieder Platz entsteht.', {titel:'Speicher voll'});
   }
 }
 
@@ -13127,8 +13349,15 @@ function giessen(id){
   const l = S.water[id] = giessTermine(id);
   const heute = iso(HEUTE);
   if(l.includes(heute)){
-    if(!confirm('Für heute ist bereits ein Gießvermerk eingetragen.\n\nSoll er wieder entfernt werden?')) return false;
-    S.water[id] = l.filter(d => d !== heute);
+    /* 4.0-beta.45: Rückfrage im App-Fenster; entfernt wird erst nach „Entfernen“ */
+    appFrage('Für heute ist bereits ein Gießvermerk eingetragen.\n\nSoll er wieder entfernt werden?',
+      {titel:'Gießvermerk entfernen?', ja:'Entfernen', gefahr:true}).then(ok => {
+      if(!ok) return;
+      S.water[id] = giessTermine(id).filter(d => d !== heute);
+      sichern();
+      render();
+    });
+    return false;
   } else {
     l.push(heute); l.sort();
     if(typeof tagGiessNotizWeg === 'function') tagGiessNotizWeg(id);
@@ -14998,12 +15227,13 @@ document.addEventListener('click', e=>{
   if(art === 'iv-vor-ja'){  ivVorschlagUebernehmen(id); render(); return; }
   if(art === 'iv-vor-nein'){ ivVorschlagWeg(id);        render(); return; }
   if(art === 'topf-eintragen'){
-    const roh = prompt('Topfdurchmesser in Zentimetern?', p.topf ? String(p.topf) : '');
-    if(roh === null) return;
-    const n = parseInt(String(roh).replace(',', '.'), 10);
-    if(!(n >= 4 && n <= 120)){ alert('Bitte eine Zahl zwischen 4 und 120 eingeben.'); return; }
-    aenderungSetzen(id, {topf:String(n)});
-    render();
+    appEingabe('Topfdurchmesser in Zentimetern?', {titel:'Topfgröße', wert:p.topf ? String(p.topf) : '', zahl:true}).then(roh => {
+      if(roh === null) return;
+      const n = parseInt(String(roh).replace(',', '.'), 10);
+      if(!(n >= 4 && n <= 120)){ appHinweis('Bitte eine Zahl zwischen 4 und 120 eingeben.'); return; }
+      aenderungSetzen(id, {topf:String(n)});
+      render();
+    });
   }
 });
 
@@ -15098,20 +15328,27 @@ document.addEventListener('click', e=>{
   /* Ein zweiter Tipp auf den gewählten Knopf hebt die Wahl auf */
   if(v !== '__neu' && sel.getAttribute('aria-pressed') === 'true') v = '';
 
+  /* 4.0-beta.45: „+ Neu“ fragt den Namen im App-Fenster */
   if(sel.dataset.lageK === 'raum'){
     if(v === '__neu'){
-      const name = prompt('Wie soll der Raum heißen?', '');
-      const neu = raumAnlegen(name);
-      if(!neu){ render(); return; }
-      v = neu;
+      appEingabe('Wie soll der Raum heißen?', {titel:'Neuer Raum', ja:'Anlegen'}).then(name => {
+        const neu = name ? raumAnlegen(name) : '';
+        if(neu) aenderungSetzen(id, {raum:neu, stellplatz:''});
+        render();
+      });
+      return;
     }
     /* Raum gewechselt: der alte Stellplatz gehörte zum alten Raum */
     aenderungSetzen(id, v === p.raum ? {raum:v} : {raum:v, stellplatz:''});
   } else {
     if(v === '__neu'){
-      if(!p.raum){ alert('Erst einen Raum wählen — Stellplätze gehören immer zu einem Raum.'); render(); return; }
-      v = stellplatzAnlegen(p.raum, prompt('Wie heißt der Stellplatz?', ''));
-      if(!v){ render(); return; }
+      if(!p.raum){ appHinweis('Erst einen Raum wählen — Stellplätze gehören immer zu einem Raum.'); render(); return; }
+      appEingabe('Wie heißt der Stellplatz?', {titel:'Neuer Stellplatz', ja:'Anlegen'}).then(name => {
+        const neu = name ? stellplatzAnlegen(p.raum, name) : '';
+        if(neu) aenderungSetzen(id, {stellplatz:neu});
+        render();
+      });
+      return;
     }
     aenderungSetzen(id, {stellplatz:v});
   }
@@ -17800,7 +18037,7 @@ $('#btn-download').onclick = async ()=>{
   try{ await sicherungHerunterladen(); }
   catch(e){
     console.error(e);
-    alert('Die Sicherung ließ sich nicht herunterladen.\n\n' + (e && e.message ? e.message : ''));
+    appHinweis('Die Sicherung ließ sich nicht herunterladen.\n\n' + (e && e.message ? e.message : ''));
   }
 };
 
@@ -17956,12 +18193,12 @@ if(_btnVorher) _btnVorher.onclick = async ()=>{
   if(!roh){ vorherZeigen(); return; }
   let ohneFotos = false;
   try{ ohneFotos = localStorage.getItem(KEY + ':vorherOhneFotos') === '1'; }catch(e){}
-  if(!confirm('Den Stand von vor dem Laden zurückholen?\n\n'
+  if(!(await appFrage('Den Stand von vor dem Laden zurückholen?\n\n'
       + 'Die zuletzt geladene Sicherung wird dabei ersetzt — auch ihre Fotos.'
       + (ohneFotos
          ? '\n\nACHTUNG: Für den alten Stand konnten die Fotos nicht mit beiseitegelegt werden, '
            + 'der Speicher war zu voll. Sie sind danach weg.'
-         : ''))) return;
+         : ''), {titel:'Zurückholen?', ja:'Zurückholen'}))) return;
   try{
     S = Object.assign(LEERSTAND(), JSON.parse(roh));
     /* Fotos gehören zum Stand und müssen mit zurück. Fehlen sie im
@@ -17977,12 +18214,12 @@ if(_btnVorher) _btnVorher.onclick = async ()=>{
     sichern();
     vorherZeigen();
     render();
-    alert('Zurückgeholt: ' + allePflanzen().length + ' Pflanzen.');
+    appHinweis('Zurückgeholt: ' + allePflanzen().length + ' Pflanzen.');
     _sichPflichtFrei = false; _sichPflichtFehler = 0;
     sicherungPflichtZeigen();
   }catch(e){
     console.error(e);
-    alert('Der alte Stand ließ sich nicht lesen.');
+    appHinweis('Der alte Stand ließ sich nicht lesen.');
   }
 };
 
@@ -17990,12 +18227,12 @@ $('#btn-import').onclick = ()=>$('#import-file').click();
 $('#import-file').onchange = ()=>{
   const f = $('#import-file').files[0]; if(!f) return;
   const fr = new FileReader();
-  fr.onload = ()=>{
+  fr.onload = async ()=>{
     try{
       const daten = JSON.parse(fr.result);
       const einwand = sicherungPruefen(daten);
       if(einwand) throw new Error(einwand);
-      if(!confirm('Sicherung laden? Der aktuelle Stand in diesem Browser wird ersetzt.')) return;
+      if(!(await appFrage('Sicherung laden? Der aktuelle Stand in diesem Browser wird ersetzt.', {titel:'Sicherung laden?', ja:'Laden'}))) return;
       /* Den bisherigen Stand einmal beiseitelegen, bevor er verschwindet.
          Wichtig: im kleinen Speicher stehen die Fotos nicht mehr — die
          liegen getrennt. Beiseitegelegt wird deshalb der Arbeitsstand
@@ -18026,16 +18263,16 @@ $('#import-file').onchange = ()=>{
       try{ render(); }
       catch(zeichenFehler){
         console.error(zeichenFehler);
-        alert('Sicherung geladen. Die Seite wird einmal neu aufgebaut.');
+        await appHinweis('Sicherung geladen. Die Seite wird einmal neu aufgebaut.');
         location.reload(); return;
       }
-      alert('Sicherung geladen: ' + allePflanzen().length + ' Pflanzen.'
+      appHinweis('Sicherung geladen: ' + allePflanzen().length + ' Pflanzen.'
         + '\n\nDer vorherige Stand liegt noch im Browser. Über „Stand vor dem Laden zurückholen“ in Mehr kommst du zurück.');
       _sichPflichtFrei = false; _sichPflichtFehler = 0;
       sicherungPflichtZeigen();
     }catch(err){
       console.error(err);
-      alert('Die Datei konnte nicht gelesen werden.\n\n' + (err && err.message ? err.message : '')
+      appHinweis('Die Datei konnte nicht gelesen werden.\n\n' + (err && err.message ? err.message : '')
         + '\n\nIst es eine Sicherung aus dieser App?');
     }
   };
@@ -18043,7 +18280,8 @@ $('#import-file').onchange = ()=>{
   $('#import-file').value = '';
 };
 $('#btn-reset').onclick = async ()=>{
-  if(!confirm('Alle eigenen Änderungen zurücksetzen? Das betrifft Haken, Gießeinträge, eigene Fotos und selbst angelegte Pflanzen.')) return;
+  if(!(await appFrage('Alle eigenen Änderungen zurücksetzen? Das betrifft Haken, Gießeinträge, eigene Fotos und selbst angelegte Pflanzen.',
+    {titel:'Zurücksetzen?', ja:'Zurücksetzen', gefahr:true}))) return;
   try{ localStorage.removeItem(KEY); }catch(e){}
   /* Der Bildspeicher liegt getrennt und muss eigens geleert werden,
      sonst tauchen die alten Fotos nach dem Neuladen wieder auf. */
@@ -18287,9 +18525,9 @@ function betaAlleFaellig(){
   sichern();
   return n;
 }
-document.addEventListener('click', e => {
+document.addEventListener('click', async e => {
   if(!e.target.closest('#btn-beta-faellig')) return;
-  if(!confirm('Alle Pflanzen fällig machen?\n\nDas ändert den Gießverlauf der Testdaten.')) return;
+  if(!(await appFrage('Alle Pflanzen fällig machen?\n\nDas ändert den Gießverlauf der Testdaten.', {titel:'Alle fällig?'}))) return;
   const n = betaAlleFaellig();
   render();
   erklSetzen(document.getElementById('beta-faellig-text'), n + ' ' + (n === 1 ? 'Pflanze ist' : 'Pflanzen sind') + ' jetzt fällig. Der Gießmodus auf Heute startet mit ihnen.');
@@ -19592,12 +19830,14 @@ function samAktionenZeichnen(){
           const z = allePflanzen().filter(p => p.raum === r.id).length;
           return sakZeile('data-sak-raum', r.id, r.name, z === 1 ? 'Eine Pflanze' : z + ' Pflanzen');
         }).join('')}</div>`
-        : '<p class="fhint">Noch kein Raum angelegt. Räume legst du unter Einstellungen → Räume an.</p>');
+        : '<p class="fhint">Noch kein Raum angelegt.</p>')
+      + `<div class="wahl-liste" role="group" aria-label="Neuer Raum">${sakZeile('data-sak-neu', 'raum', '+ Neuer Raum', '')}</div>`;
   } else if(SAK.seite === 'platz'){
     h = zurueck + `<p class="ein-abschnitt">Stellplatz in „${esc(raumNameVon(SAK.raum))}“</p>
       <div class="wahl-liste" role="group" aria-label="Stellplatz">${
         sakZeile('data-sak-platz', '', 'Ohne Stellplatz', 'Nur der Raum wird gesetzt')
-        + stellplaetzeFuer(SAK.raum).map(x => sakZeile('data-sak-platz', x, x, '')).join('')}</div>`;
+        + stellplaetzeFuer(SAK.raum).map(x => sakZeile('data-sak-platz', x, x, '')).join('')
+        + sakZeile('data-sak-neu', 'platz', '+ Neuer Stellplatz', '')}</div>`;
   } else if(SAK.seite === 'tags'){
     h = zurueck + tagWahlHTML('data-sak-tag') + tagWahlFussHTML('data-sak', 'tag-neu', 'tag-verwalten');
   } else if(SAK.seite === 'tagedit'){
@@ -19677,12 +19917,30 @@ document.addEventListener('click', e => {
   if(tg){ sakTagWahl(tg.dataset.sakTag); return; }
   const rm = t.closest('[data-sak-raum]');
   if(rm){ SAK.raum = rm.dataset.sakRaum; SAK.seite = 'platz'; samAktionenZeichnen(); return; }
-  const pl = t.closest('[data-sak-platz]');
-  if(pl){
-    const stand = samStandNehmen(ids), platz = pl.dataset.sakPlatz || '';
+  const verschieben = platz => {
+    const stand = samStandNehmen(ids);
     const r = samVerschieben(ids, SAK.raum, platz);
     const wo = raumNameVon(SAK.raum) + (platz ? ' · ' + platz : '');
     samAktionSchluss(r.neu ? samZahlText(r.neu) + ' nach ' + wo + ' verschoben' : 'Alle stehen schon dort', r.neu ? stand : null);
+  };
+  const pl = t.closest('[data-sak-platz]');
+  if(pl){ verschieben(pl.dataset.sakPlatz || ''); return; }
+  /* 4.0-beta.45 (B6): neuer Raum oder Stellplatz direkt beim Verschieben */
+  const nw = t.closest('[data-sak-neu]');
+  if(nw){
+    const raum = nw.dataset.sakNeu === 'raum';
+    appEingabe(raum ? 'Wie soll der Raum heißen?' : 'Wie heißt der Stellplatz?',
+      {titel:raum ? 'Neuer Raum' : 'Neuer Stellplatz', ja:'Anlegen'}).then(name => {
+      if(!name || !modalOffen('sam-akt-modal')) return;
+      if(raum){
+        const rid = raumAnlegen(name);
+        if(!rid) return;
+        SAK.raum = rid; SAK.seite = 'platz'; samAktionenZeichnen();
+      } else {
+        const sp = stellplatzAnlegen(SAK.raum, name);
+        if(sp) verschieben(sp);
+      }
+    });
     return;
   }
   const a = t.closest('[data-sak]');
@@ -23100,9 +23358,9 @@ botChipZeichnen();
     if(feld) feld.focus();
   };
   const weg = document.getElementById('btn-ki-key-weg');
-  if(weg) weg.onclick = ()=>{
-    if(!confirm('Schlüssel von diesem Gerät löschen?\n\nDer Weg über die Zwischenablage bleibt. '
-      + 'Bei Google bleibt der Schlüssel gültig — dort musst du ihn zusätzlich entwerten.')) return;
+  if(weg) weg.onclick = async ()=>{
+    if(!(await appFrage('Schlüssel von diesem Gerät löschen?\n\nDer Weg über die Zwischenablage bleibt. '
+      + 'Bei Google bleibt der Schlüssel gültig — dort musst du ihn zusätzlich entwerten.', {titel:'Schlüssel löschen?', ja:'Löschen', gefahr:true}))) return;
     kiSchluesselSetzen('');
     S.kiModelle = null;
     S.kiModell = null;
@@ -23310,36 +23568,34 @@ fassungPruefen();
    allein auf die Einstellung unter „Mehr". Gefragt wird genau
    einmal; wer ablehnt, wird nicht wieder gefragt. Der Ort geht
    nur beim Suchen ans Netz, danach nur noch Koordinaten. */
-function ortFrageStellen(){
+async function ortFrageStellen(){
   if(!S.wetter) return;
   if(S.wetter.ort || S.wetter.gefragt) return;
   let hat = 0;
   try{ hat = allePflanzen().length; }catch(e){}
   if(!hat) return;   /* wer noch nichts angelegt hat, hat Dringenderes */
   S.wetter.gefragt = true; sichern();
-  const ort = prompt(
+  const ort = await appEingabe(
     'In welcher Stadt stehen deine Pflanzen?\n\n'
     + 'Die App holt damit Temperatur, Regen und Frostwarnung und zeigt '
     + 'sie auf „Heute". Übertragen wird einmal der Ortsname, danach nur '
     + 'noch die Koordinaten — nichts über dich, nichts über deine Pflanzen.\n\n'
     + 'Leer lassen geht auch, dann bleibt die Zeile aus. '
-    + 'Nachtragen kannst du den Ort jederzeit unter „Einstellungen › Wetter“.');
+    + 'Nachtragen kannst du den Ort jederzeit unter „Einstellungen › Wetter“.', {titel:'Wetter', ja:'Suchen', nein:'Später'});
   if(!ort || !ort.trim()) return;
   /* Die Suche kann mehrere Orte finden. Bei genau einem Treffer wird
      er genommen; sonst fuehrt die Antwort in die Einstellung, wo man
      auswaehlt — raten waere hier der falsche Dienst. */
   wetterSuchen(ort.trim()).then(treffer=>{
     if(treffer && treffer.length === 1) return wetterOrtSetzen(treffer[0]);
+    /* 4.0-beta.45: mehrere Treffer als Knopfliste im App-Fenster */
     if(treffer && treffer.length > 1){
-      alert('Zu „' + ort.trim() + '“ gibt es mehrere Orte. '
-        + 'Unter „Mehr › Wetter“ steht die Auswahl.');
-      sektionOeffnen('wetter');
-      const feld = document.getElementById('wt-ort');
-      if(feld){ feld.value = ort.trim(); wetterOrtSuchen(); }
-      return;
+      return appWahl('Zu „' + ort.trim() + '“ gibt es mehrere Orte. Welcher ist es?',
+        treffer.map(t => ({wert:t, text:t.name + (t.admin1 ? ', ' + t.admin1 : '') + (t.country ? ' · ' + t.country : '')})),
+        {titel:'Ort wählen'}).then(t => { if(t) wetterOrtSetzen(t); });
     }
-    alert('Zu „' + ort.trim() + '“ wurde kein Ort gefunden. '
-      + 'Unter „Mehr › Wetter“ lässt sich das nachholen.');
+    appHinweis('Zu „' + ort.trim() + '“ wurde kein Ort gefunden. '
+      + 'Unter „Einstellungen › Wetter“ lässt sich das nachholen.');
   }).catch(()=>{});
 }
 setTimeout(ortFrageStellen, 1200);
@@ -23844,7 +24100,8 @@ document.addEventListener('change', e=>{
     formLageStand = '';
     /* Raumwechsel: der alte Stellplatz gehörte zum alten Raum */
     if(el.value === '__neu')
-      formLageZeichnen(raumAnlegen(prompt('Wie soll der Raum heißen?','')) || '', '');
+      appEingabe('Wie soll der Raum heißen?', {titel:'Neuer Raum', ja:'Anlegen'})
+        .then(name => formLageZeichnen((name && raumAnlegen(name)) || '', ''));
     else
       formLageZeichnen(el.value, '');
     return;
@@ -23853,11 +24110,12 @@ document.addEventListener('change', e=>{
     const rid = document.getElementById('f-raum').value;
     formLageStand = '';
     if(!rid){
-      alert('Erst einen Raum wählen — Stellplätze gehören immer zu einem Raum.');
+      appHinweis('Erst einen Raum wählen — Stellplätze gehören immer zu einem Raum.');
       formLageZeichnen(null, '');
       return;
     }
-    formLageZeichnen(null, stellplatzAnlegen(rid, prompt('Wie heißt der Stellplatz?','')) || '');
+    appEingabe('Wie heißt der Stellplatz?', {titel:'Neuer Stellplatz', ja:'Anlegen'})
+      .then(name => formLageZeichnen(null, (name && stellplatzAnlegen(rid, name)) || ''));
   }
 });
 
@@ -23874,7 +24132,7 @@ async function alSpeichern(){
   const name = $('#f-name').value.trim();
   const suchtext = $('#f-art').value.trim();
   const art = gewaehlteArt ? gewaehlteArt.de : suchtext;
-  if(!name && !art){ alert('Bitte mindestens einen Namen oder eine Art angeben.'); return; }
+  if(!name && !art){ appHinweis('Bitte mindestens einen Namen oder eine Art angeben.'); return; }
   const id = neueId();
   const gift = $('#f-giftig').value;
   const kl = $('#f-klasse').value;
@@ -24058,8 +24316,8 @@ $('#btn-melde-github').onclick = ()=>{
   if(!u && typeof inZwischenablage === 'function') inZwischenablage(t);
   window.open(u || ISSUE_URL, '_blank', 'noopener');
 };
-$('#btn-melden-weg').onclick = ()=>{
-  if(!confirm('Die Liste der gemeldeten Arten wirklich leeren?')) return;
+$('#btn-melden-weg').onclick = async ()=>{
+  if(!(await appFrage('Die Liste der gemeldeten Arten wirklich leeren?', {titel:'Liste leeren?', ja:'Leeren', gefahr:true}))) return;
   S.neueArten = []; sichern(); $('#melde-box').hidden = true; meldeRender();
 };
 
@@ -24125,7 +24383,7 @@ let gmTeil = null;
    Gießmodus heißt: hier eintragen, sonst bleibt nach Rückgängig ein
    Rest stehen. */
 /* 4.0-beta.28 (G2b-1): 'dueng' ist mit dem alten Düngerweg weg. */
-const GM_SNAP_FAECHER = ['water', 'lernen', 'tagEin', 'feuchtRueck', 'gesehen', 'anstau', 'spuelen'];
+const GM_SNAP_FAECHER = ['water', 'lernen', 'tagEin', 'feuchtRueck', 'gesehen', 'anstau', 'spuelen', 'stabLog'];
 
 /* ── 4.0-beta.36 (P2): Zeile „Erledigt“ ──────────────────────────
    Offene Termine von heute und früher stehen in der Übersicht und auf der
@@ -24181,12 +24439,23 @@ function gmSnapPflanze(id){
   return o;
 }
 function gmSnapAz(e){
+  if(e && e.typ === 'moos'){
+    const l = S.stabLog ? S.stabLog[e.ref] : undefined;
+    return {moos:{ref:e.ref, wert:l !== undefined ? JSON.stringify(l) : null}};
+  }
   const o = azGefaess(e.ref);
   const k = 'gewechselt';
   return {az:{typ:e.typ, ref:e.ref, k, wert:(o && o[k] !== undefined) ? JSON.stringify(o[k]) : null}};
 }
 function gmSnapZurueck(sn){
   if(!sn) return;
+  if(sn.moos){
+    if(!S.stabLog || typeof S.stabLog !== 'object') S.stabLog = {};
+    if(sn.moos.wert === null) delete S.stabLog[sn.moos.ref];
+    else S.stabLog[sn.moos.ref] = JSON.parse(sn.moos.wert);
+    sichern();
+    return;
+  }
   if(sn.az){
     const o = azGefaess(sn.az.ref);
     if(o){ if(sn.az.wert === null) delete o[sn.az.k]; else o[sn.az.k] = JSON.parse(sn.az.wert); }
@@ -24275,8 +24544,21 @@ function gmListeBauen(){
   const az = typeof azFaellig === 'function' ? azFaellig() : [];
   const azK = (g.sammelAz !== false && az.length > 1)
     ? [{anzucht:true, sammel:true, name:'Anzucht', eintraege:az}] : az;
-  gmListe = laufweg.concat(uK).concat(azK);
+  /* 4.0-beta.45 (Etappe 14): Moosstäbe ohne Gießtermin, immer als Sammelkarte */
+  const mo = gmLaufweg(moosFaellig(alle)).map(gmMoosEintrag);
+  const moK = mo.length ? [{anzucht:true, sammel:true, moos:true, name:'Moosstäbe', eintraege:mo}] : [];
+  gmListe = laufweg.concat(uK).concat(moK).concat(azK);
   gmSnaps = {};
+}
+function gmMoosEintrag(p){
+  const n = stabTageVon(p);
+  return {anzucht:true, typ:'moos', ref:p.id, name:nice(p), art:p.art || '', tat:'Befeuchtet', iv:n, rest:0, unter:[],
+    klein:'Moosstab · alle ' + n + ' Tage', sp:[gmRaumName(p), p.stellplatz].filter(Boolean).join(' · ')};
+}
+function gmMoosAlle(){
+  const r = [];
+  gmListe.forEach(x => { if(x && x.moos) x.eintraege.forEach(e => r.push(e)); });
+  return r;
 }
 /* Alle Anstau-Pflanzen und alle Anzucht-Einträge, gleich wie sie verteilt sind. */
 function gmUntersetzerAlle(){
@@ -24286,7 +24568,7 @@ function gmUntersetzerAlle(){
 }
 function gmAzAlle(liste){
   const r = [];
-  (liste || gmListe).forEach(x => { if(x && x.anzucht){ if(x.sammel) x.eintraege.forEach(e => r.push(e)); else r.push(x); } });
+  (liste || gmListe).forEach(x => { if(x && x.anzucht && !x.moos){ if(x.sammel) x.eintraege.forEach(e => r.push(e)); else r.push(x); } });
   return r;
 }
 function gmAzId(e){ return 'az:' + e.typ + ':' + e.ref; }
@@ -24308,7 +24590,7 @@ function gmStarten(){
   gmListeBauen();
   if(!gmListe.length){
     const gtn = (typeof gtNaechsterName === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
-    alert('Gerade ist nichts fällig. Schön.' + (gtn ? ' Nächster Gießtag: ' + gtn + '.' : ''));
+    appHinweis('Gerade ist nichts fällig. Schön.' + (gtn ? ' Nächster Gießtag: ' + gtn + '.' : ''), {titel:'Gießen'});
     return;
   }
   gmZwHinweisMerken();
@@ -24389,17 +24671,17 @@ function gmAnzeigen(){
   else if(gmPhase === 'ende') gmZeichnenEnde();
   else gmZeichnen();
 }
-let gmUErledigt = 0;
+let gmUErledigt = 0, gmMoosErledigt = 0;
 function gmZaehlen(){
-  let erl = 0, ueb = 0, az = 0, u = 0;
+  let erl = 0, ueb = 0, az = 0, u = 0, mo = 0;
   gmVerlauf.forEach(e => {
-    if(e.typ === 'az'){ if(e.a === 'azja') az++; else ueb++; }
+    if(e.typ === 'az'){ if(e.a === 'azja'){ if(e.moos) mo++; else az++; } else ueb++; }
     else if(e.typ === 'urest') ueb += e.ids.length;
     else if(e.typ === 'u') u++;
     else if(e.a === 'ja' || e.a === 'trocken') erl++;
     else ueb++;
   });
-  gmErledigt = erl; gmUebersprungen = ueb; gmAzErledigt = az; gmUErledigt = u;
+  gmErledigt = erl; gmUebersprungen = ueb; gmAzErledigt = az; gmUErledigt = u; gmMoosErledigt = mo;
 }
 function gmFort(){
   const f = document.getElementById('gm-fort');
@@ -24790,8 +25072,8 @@ function gmMeldenUntersetzer(p, a, tat){
 }
 function gmMeldenAz(e, a){
   const snap = gmSnapAz(e);
-  if(a === 'azja') azErledigen(e.typ, e.ref);
-  gmVerlauf.push({index:gmIndex, typ:'az', id:'az:' + e.typ + ':' + e.ref, name:e.name, a,
+  if(a === 'azja') gmAzTun(e);
+  gmVerlauf.push({index:gmIndex, typ:'az', id:'az:' + e.typ + ':' + e.ref, name:e.name, a, moos:e.typ === 'moos',
     tat:a === 'azja' ? e.tat : '', snap, nach:gmSnapAz(e), befund:null});
   gmZaehlen();
   gmNach();
@@ -24802,9 +25084,13 @@ function gmMeldenAz(e, a){
    zurücknimmt. */
 function gmMeldenAzZeile(e, a, gruppe){
   const snap = gmSnapAz(e);
-  if(a === 'azja') azErledigen(e.typ, e.ref);
-  gmVerlauf.push({index:gmIndex, typ:'az', id:gmAzId(e), name:e.name, a,
+  if(a === 'azja') gmAzTun(e);
+  gmVerlauf.push({index:gmIndex, typ:'az', id:gmAzId(e), name:e.name, a, moos:e.typ === 'moos',
     tat:a === 'azja' ? e.tat : '', snap, nach:gmSnapAz(e), befund:null, gruppe:gruppe || null});
+}
+function gmAzTun(e){
+  if(e.typ === 'moos') moosBefeuchtet(e.ref);
+  else azErledigen(e.typ, e.ref);
 }
 function gmAzMeldung(index, id){
   for(let i = gmVerlauf.length - 1; i >= 0; i--){
@@ -25027,9 +25313,9 @@ function gmZeichnenAzSammel(e){
   const zeilen = e.eintraege.map((z, i) => {
     const id = gmAzId(z);
     const m = gmAzMeldung(gmIndex, id);
-    const f = (z.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(z.ref) : null;
+    const f = ((z.typ === 'gefaess' || z.typ === 'moos') && typeof profilFoto === 'function') ? profilFoto(z.ref) : null;
     const offen = !m && (!nurId || nurId === id);
-    const lage = z.rest < 0 ? `${-z.rest} ${-z.rest === 1 ? 'Tag' : 'Tage'} überfällig` : 'heute dran';
+    const lage = z.typ === 'moos' ? (z.sp || 'Ohne Raum') : z.rest < 0 ? `${-z.rest} ${-z.rest === 1 ? 'Tag' : 'Tage'} überfällig` : 'heute dran';
     const ergebnis = m ? (m.a === 'azja' ? m.tat : 'Später') : (nurId && nurId !== id ? 'unverändert' : '');
     return `<div class="gm-ut-zeile${m ? ' fertig' : ''}" data-gm-azz="${esc(id)}">
       <div class="gm-ut-kopf">
@@ -25046,8 +25332,9 @@ function gmZeichnenAzSammel(e){
   $('#gm-inhalt').innerHTML = `
     ${gmKopf(e)}
     <div class="gm-karte gm-ut gm-azs">
-      <h3>Anzucht versorgen</h3>
-      <p class="gm-art">Gläser: Wasser wechseln. Anzuchthäuser und Gefäße mit Substrat: befeuchten.</p>
+      <h3>${e.moos ? 'Moosstäbe befeuchten' : 'Anzucht versorgen'}</h3>
+      <p class="gm-art">${e.moos ? 'Nur den Moosstab einsprühen oder übergießen, bis er durchfeuchtet ist; die Pflanze nicht gießen.'
+        : 'Gläser: Wasser wechseln. Anzuchthäuser und Gefäße mit Substrat: befeuchten.'}</p>
       ${zeilen}
     </div>`;
   $('#gm-knoepfe').innerHTML = offenZahl
@@ -25150,11 +25437,13 @@ function gmZeichnenUebersicht(){
   const unterAlle = gmUntersetzerAlle();
   const nU = unterAlle.length;
   const az = gmAzAlle();
+  const mo = gmMoosAlle();
   const nP = pfl.length - nU;
   const pW = n => n + ' ' + (n === 1 ? 'Pflanze' : 'Pflanzen');
   const kopf = [];
   if(nP) kopf.push(pW(nP));
   if(nU) kopf.push(nU + ' Untersetzer');
+  if(mo.length) kopf.push(mo.length + ' ' + (mo.length === 1 ? 'Moosstab' : 'Moosstäbe'));
   if(az.length) kopf.push(az.length + ' Anzucht');
 
   /* Was du brauchst: Wasser je Art. Karnivoren brauchen weiches Wasser,
@@ -25247,6 +25536,15 @@ function gmZeichnenUebersicht(){
   if(nU){
     heute += `<p class="gm-ue-raum">Untersetzer · ${nU}</p>` + unterAlle.map(p => pflZeile(p, 'anstau', 0)).join('');
   }
+  if(mo.length){
+    heute += `<p class="gm-ue-raum">Moosstäbe · ${mo.length}</p>` + mo.map(e => {
+      const f = typeof profilFoto === 'function' ? profilFoto(e.ref) : null;
+      return `<div class="gm-ue-pfl">
+        <span class="gm-ue-bild">${f && f.src ? `<img src="${f.src}" alt="">` : `<span class="gm-ue-init" aria-hidden="true">${esc((String(e.name).trim()[0] || '?').toUpperCase())}</span>`}</span>
+        <span class="gm-ue-pfl-t"><b>${esc(e.name)}</b><i>${esc(e.klein)}</i></span>
+      </div>`;
+    }).join('');
+  }
   if(az.length){
     heute += `<p class="gm-ue-raum">Anzucht · ${az.length}</p>` + az.map(e => {
       const f = (e.typ === 'gefaess' && typeof profilFoto === 'function') ? profilFoto(e.ref) : null;
@@ -25295,7 +25593,7 @@ function gmZeichnenUebersicht(){
    gmMeldenAzZeile); jeder Eintrag trägt seine Gruppe in e.lg. */
 function gmGruppen(){
   const raum = [], nach = {};
-  let u = null, az = null;
+  let u = null, az = null, mo = null;
   gmListe.forEach((x, i) => {
     if(!x) return;
     if(x.untersetzer){
@@ -25304,6 +25602,11 @@ function gmGruppen(){
         if(!u) u = {key:'u', typ:'u', name:'Untersetzer', eintraege:[]};
         u.eintraege.push({id:p.id, p, index:i, sp:''});
       });
+      return;
+    }
+    if(x.moos){
+      if(!mo) mo = {key:'moos', typ:'moos', name:'Moosstäbe', eintraege:[]};
+      x.eintraege.forEach(e => mo.eintraege.push({id:gmAzId(e), az:e, index:i, sp:e.sp || ''}));
       return;
     }
     if(x.anzucht){
@@ -25323,7 +25626,7 @@ function gmGruppen(){
   const ohne = raum.filter(g => g.key === 'r:');
   /* 4.0-beta.42: Gefäße nach Raum und Stellplatz */
   if(az) az.eintraege.sort((a, b) => a.rang - b.rang);
-  return raum.filter(g => g.key !== 'r:').concat(ohne).concat(u ? [u] : []).concat(az ? [az] : []);
+  return raum.filter(g => g.key !== 'r:').concat(ohne).concat(u ? [u] : []).concat(mo ? [mo] : []).concat(az ? [az] : []);
 }
 /* 4.0-beta.22 (Plan M2c, F204): Pflanzen in der Gießpause stehen nicht
    in der Gießliste. Die Karte „Nacheinander“ ohne Liste behält sie. */
@@ -25339,7 +25642,7 @@ function gmGruppeZahl(key){
   return gmVerlauf.filter(e => e.lg === key
     && (e.a === 'ja' || e.a === 'trocken' || e.a === 'auf' || e.a === 'leer' || e.a === 'azja')).length;
 }
-const GM_LG_WORT = {raum:['Alle gegossen', 'gegossen'], u:['Alle aufgefüllt', 'aufgefüllt'], az:['Alle versorgt', 'versorgt']};
+const GM_LG_WORT = {raum:['Alle gegossen', 'gegossen'], u:['Alle aufgefüllt', 'aufgefüllt'], az:['Alle versorgt', 'versorgt'], moos:['Alle befeuchtet', 'befeuchtet']};
 function gmLgKnopfText(g){
   const n = g.eintraege.filter(gmHakenAn).length;
   return n ? GM_LG_WORT[g.typ][0] + ' (' + n + ')' : 'Alle später';
@@ -25348,7 +25651,7 @@ function gmLgKnopfText(g){
    und Untersetzer zeigen ihr Profilfoto, Anzucht das Foto des Gefäßes;
    ohne Foto steht der erste Buchstabe im Kreis (F206). */
 function gmLgBild(z, name){
-  const id = z.p ? z.p.id : (z.az && z.az.typ === 'gefaess' ? z.az.ref : null);
+  const id = z.p ? z.p.id : (z.az && (z.az.typ === 'gefaess' || z.az.typ === 'moos') ? z.az.ref : null);
   const f = (id && typeof profilFoto === 'function') ? profilFoto(id) : null;
   return '<span class="gm-ue-bild">' + (f && f.src ? '<img src="' + fotoUrl(f) + '" alt="">'
     : '<span class="gm-ue-init" aria-hidden="true">' + esc((String(name).trim()[0] || '?').toUpperCase()) + '</span>') + '</span>';
@@ -25373,7 +25676,9 @@ function gmZeichnenListe(){
         spVor = z.sp;
       }
       const name = z.az ? z.az.name : nice(z.p);
-      const klein = z.az ? z.az.tat : (z.p.art || '');
+      /* 4.0-beta.45: „+ Moosstab“ auch in der Liste */
+      const klein = z.az ? (z.az.klein || z.az.tat)
+        : [z.p.art || '', typeof moosHeute === 'function' && moosHeute(z.p) ? '+ Moosstab' : ''].filter(Boolean).join(' ');
       const tn = z.p ? tagGiessNotizen(z.p) : [];
       zeilen += `<label class="gm-lg-zeile">${gmLgBild(z, name)}<span class="gm-ue-pfl-t"><b>${esc(name)}</b>${klein ? `<i>${esc(klein)}</i>` : ''}${tn.length ? `<i class="gm-tagnotiz">${esc(tn.join(' · '))}</i>` : ''}</span>`
         + `<input type="checkbox" data-gm-hk="${esc(z.id)}" data-gm-lgk="${esc(g.key)}"${gmHakenAn(z) ? ' checked' : ''}></label>`;
@@ -25512,12 +25817,12 @@ function gmZeichnenEnde(){
     </div>`).join('');
   /* 4.0-beta.9 (E): alle Meldungen nach Ergebnis. Jede Zeile lässt
      sich antippen und neu melden. */
-  const G = {gegossen:[], feucht:[], unter:[], az:[], spaeter:[]};
+  const G = {gegossen:[], feucht:[], unter:[], moos:[], az:[], spaeter:[]};
   const pName = id => { const p = allePflanzen().find(x => x.id === id); return p ? nice(p) : id; };
   gmVerlauf.forEach((e, vi) => {
     if(e.typ === 'urest'){ e.ids.forEach(id => G.spaeter.push({vi, id, name:pName(id), tat:'Untersetzer'})); return; }
     if(e.typ === 'u'){ G.unter.push({vi, id:e.id, name:e.name, tat:e.tat}); return; }
-    if(e.typ === 'az'){ (e.a === 'azja' ? G.az : G.spaeter).push({vi, id:e.id, name:e.name, tat:e.a === 'azja' ? e.tat : 'Anzucht'}); return; }
+    if(e.typ === 'az'){ (e.a === 'azja' ? (e.moos ? G.moos : G.az) : G.spaeter).push({vi, id:e.id, name:e.name, tat:e.a === 'azja' ? e.tat : (e.moos ? 'Moosstab' : 'Anzucht')}); return; }
     if(e.a === 'ja' || e.a === 'trocken'){
       G.gegossen.push({vi, id:e.id, name:e.name, tat:e.a === 'trocken' ? e.tat : ''});
     }
@@ -25528,13 +25833,13 @@ function gmZeichnenEnde(){
     <div class="ein-liste gm-ende-liste">${z.map(r => `<button type="button" class="ein-zeile" data-gm-neu="${r.vi}" data-id="${esc(r.id)}">
       <span class="ein-txt"><b>${esc(r.name)}</b>${r.tat ? `<i>${esc(r.tat)}</i>` : ''}</span><span class="ein-p" aria-hidden="true">›</span></button>`).join('')}</div>` : '';
   const meldungen = liste('Gegossen', G.gegossen)
-    + liste('Noch feucht', G.feucht) + liste('Untersetzer', G.unter)
+    + liste('Noch feucht', G.feucht) + liste('Untersetzer', G.unter) + liste('Moosstäbe', G.moos)
     + liste('Anzucht', G.az) + liste('Später', G.spaeter);
   $('#gm-inhalt').innerHTML = `
     <p class="gm-zaehler">Fertig</p>
     <div class="gm-fertig">✓</div>
     <h3>Durch</h3>
-    <p class="gm-art">${gmErledigt} ${gmErledigt===1?'Pflanze':'Pflanzen'} gegossen${gmUErledigt?`, ${gmUErledigt} Untersetzer nachgesehen`:''}${gmAzErledigt?`, ${gmAzErledigt} ${gmAzErledigt===1?'Anzucht':'Anzuchten'} versorgt`:''}${rest?`, ${rest} übersprungen`:''}.</p>
+    <p class="gm-art">${gmErledigt} ${gmErledigt===1?'Pflanze':'Pflanzen'} gegossen${gmUErledigt?`, ${gmUErledigt} Untersetzer nachgesehen`:''}${gmMoosErledigt?`, ${gmMoosErledigt} ${gmMoosErledigt===1?'Moosstab':'Moosstäbe'} befeuchtet`:''}${gmAzErledigt?`, ${gmAzErledigt} ${gmAzErledigt===1?'Anzucht':'Anzuchten'} versorgt`:''}${rest?`, ${rest} übersprungen`:''}.</p>
     ${meldungen ? `<div class="gm-ue gm-ende">${meldungen}<p class="gm-ue-klein">Eine Zeile antippen, um sie neu zu melden.</p></div>` : ''}
     ${befunde ? `<p class="gm-hinweis">${gmBefunde.length===1?'Eine Pflanze ist aufgefallen':gmBefunde.length + ' Pflanzen sind aufgefallen'}:</p>${befunde}` : ''}
     ${rest ? '<p class="gm-hinweis">Übersprungene bleiben in der Liste und tauchen morgen wieder auf.</p>' : ''}`;
@@ -25649,12 +25954,14 @@ $('#btn-giessmodus').onclick = gmStarten;
 function gmKnopfAktualisieren(){
   const n = heuteDran().length;
   const m = (typeof azFaellig === 'function') ? azFaellig().length : 0;
+  const mo = (typeof moosFaellig === 'function') ? moosFaellig().length : 0;
   const sub = document.getElementById('gm-start-sub');
   const btn = document.getElementById('btn-giessmodus');
   if(!sub || !btn) return;
-  btn.classList.toggle('leer', n + m === 0);
+  btn.classList.toggle('leer', n + m + mo === 0);
   const teile = [];
   if(n) teile.push(`${n} ${n===1?'Pflanze wartet':'Pflanzen warten'}`);
+  if(mo) teile.push(`${mo} ${mo===1?'Moosstab':'Moosstäbe'}`);
   if(m) teile.push(`${m} ${m===1?'Anzucht':'Anzuchten'}`);
   /* 4.0-beta.12: an festen Tagen der nächste Gießtag */
   const gtn = (!teile.length && typeof giesstageAktiv === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
@@ -25793,15 +26100,17 @@ function schubFragen(p){
     + `Soll sie künftig einen Tag später fällig werden?\n\n`
     + `Bisher: ${ivWort(iv)}${jetzt ? ' (bereits um ' + jetzt + ' verschoben)' : ''}\n`
     + `Neu: ${ivWort(iv + 1)}`;
-  if(confirm(frage)){
+  /* 4.0-beta.45: Rückfrage im App-Fenster. Der Zähler geht gleich auf
+     null, damit dieselbe Pflanze nicht ein zweites Mal fragt. */
+  S.feuchtRueck[id] = {zahl:0, zuletzt:iso(HEUTE)};
+  sichern();
+  appFrage(frage, {titel:'Gießabstand', ja:'Einen Tag später', nein:'Nein'}).then(ok => {
+    if(!ok) return;
     schubSetzen(id, neu);
     S.feuchtRueck[id] = {zahl:0, zuletzt:iso(HEUTE)};
     sichern();
-  } else {
-    /* Nein heißt: erstmal Ruhe, Zähler zurück auf null. */
-    S.feuchtRueck[id] = {zahl:0, zuletzt:iso(HEUTE)};
-    sichern();
-  }
+    render();
+  });
 }
 
 /* Gießen setzt den Zähler zurück — der Rhythmus stimmte dann ja. */
@@ -25855,14 +26164,17 @@ function heuteLageText(){
   let n = 0, m = 0;
   try{ n = heuteDran().length; }catch(e){ return ''; }
   try{ m = (typeof azFaellig === 'function') ? azFaellig().length : 0; }catch(e){ m = 0; }
-  if(!n && !m){
+  let mo = 0;
+  try{ mo = (typeof moosFaellig === 'function') ? moosFaellig().length : 0; }catch(e){ mo = 0; }
+  if(!n && !m && !mo){
     /* 4.0-beta.12: an festen Tagen der nächste Gießtag */
     const gtn = (typeof giesstageAktiv === 'function' && giesstageAktiv()) ? gtNaechsterName() : '';
     return 'Heute ist nichts fällig.' + (gtn ? ' Nächster Gießtag: ' + gtn + '.' : '');
   }
   const pfl = !n ? '' : (n === 1 ? 'Eine Pflanze ist heute dran.' : n + ' Pflanzen sind heute dran.');
   const az = !m ? '' : (m === 1 ? 'Eine Anzucht braucht Wasser.' : m + ' Anzuchten brauchen Wasser.');
-  return [pfl, az].filter(Boolean).join(' ');
+  const ms = !mo ? '' : (mo === 1 ? 'Ein Moosstab braucht Wasser.' : mo + ' Moosstäbe brauchen Wasser.');
+  return [pfl, ms, az].filter(Boolean).join(' ');
 }
 
 function tagesGruss(){
@@ -31437,12 +31749,14 @@ document.addEventListener('click', e=>{
   }
   const fw = t.closest('[data-az-fotoweg]');
   if(fw){
-    if(!confirm('Dieses Foto löschen?')) return;
-    const id = fw.dataset.g;
-    S.fotos[id] = (S.fotos[id] || []).filter(f=>f.key !== fw.dataset.azFotoweg);
-    if(!S.fotos[id].length) delete S.fotos[id];
-    sichern();
-    azZeichnen();
+    const id = fw.dataset.g, key = fw.dataset.azFotoweg;
+    appFrage('Dieses Foto löschen?', {titel:'Foto löschen?', ja:'Löschen', gefahr:true}).then(ok => {
+      if(!ok) return;
+      S.fotos[id] = (S.fotos[id] || []).filter(f=>f.key !== key);
+      if(!S.fotos[id].length) delete S.fotos[id];
+      sichern();
+      azZeichnen();
+    });
     return;
   }
   const k = t.closest('[data-az]');
@@ -31483,13 +31797,15 @@ document.addEventListener('click', e=>{
   if(a === 'gef-weg'){
     const g = azGefaess(k.dataset.g);
     if(!g || azZahlIn(g.id)) return;
-    if(!confirm('„' + g.name + '“ auflösen? Die Fotos des Gefäßes werden mit gelöscht.')) return;
-    const A = anzuchtDaten();
-    A.gefaesse = A.gefaesse.filter(x=>x !== g);
-    A.gruppen = A.gruppen.filter(x=>x.gefaess !== g.id);
-    delete S.fotos[g.id];
-    sichern(); render();
-    azZeigen({art:'liste'});
+    appFrage('„' + g.name + '“ auflösen? Die Fotos des Gefäßes werden mit gelöscht.', {titel:'Gefäß auflösen?', ja:'Auflösen', gefahr:true}).then(ok => {
+      if(!ok) return;
+      const A = anzuchtDaten();
+      A.gefaesse = A.gefaesse.filter(x=>x !== g);
+      A.gruppen = A.gruppen.filter(x=>x.gefaess !== g.id);
+      delete S.fotos[g.id];
+      sichern(); render();
+      azZeigen({art:'liste'});
+    });
     return;
   }
   if(a === 'frei-los'){ azFreiAnlegen(); return; }
@@ -32685,9 +33001,9 @@ document.addEventListener('click', e=>{
     let hat = 0;
     try{ hat = allePflanzen().length; }catch(e){}
     if(hat){
-      alert('Die Einrichtung führt durch das Anlegen der allerersten Pflanze. '
+      appHinweis('Die Einrichtung führt durch das Anlegen der allerersten Pflanze. '
         + 'Da schon Pflanzen da sind, gibt es dabei nichts mehr zu zeigen — '
-        + 'das Kapitel „Die Sammlung“ erklärt denselben Weg noch einmal.');
+        + 'das Kapitel „Die Sammlung“ erklärt denselben Weg noch einmal.', {titel:'App Tour'});
       tourListeZeichnen();
       return;
     }
