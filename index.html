@@ -4349,6 +4349,20 @@ html[data-design] .sel-knoepfe{margin-top:2px}
 html[data-design] .feld-knopf:has(> .sel-knoepfe){flex-wrap:wrap;gap:8px}
 html[data-design] .feld-knopf > .sel-knoepfe{flex:1 1 100%}
 html[data-design] .feld-knopf:has(> .sel-knoepfe) > button{border-radius:var(--r-mittel)}
+/* 4.0-beta.47 (Etappe 16): App-Dropdown */
+html[data-design] .sel-drop{display:block;min-width:0}
+html[data-design] button.sel-drop-feld{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;
+  min-height:var(--feld-h);margin:0;padding:0 14px;border:1.5px solid var(--linie);border-radius:var(--r-mittel);
+  background:var(--fl-tief);box-shadow:none;color:var(--schrift);font-family:var(--f-body);font-size:var(--t-l);
+  font-weight:400;line-height:1.3;text-align:left;text-transform:none;letter-spacing:0;cursor:pointer}
+html[data-design="botanisch"] button.sel-drop-feld{border-color:transparent}
+html[data-design="klartext"] button.sel-drop-feld{border-width:2px}
+html[data-design] button.sel-drop-feld:disabled{opacity:.55;cursor:default}
+html[data-design] .sel-drop-wert{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-design] .sel-drop-pfeil{flex:0 0 auto;color:var(--schrift-2)}
+:is(.formwrap, .bibbox, .bearb, .aqua, .dok-rueck) button.sel-drop-feld{background-color:var(--fl-karte)}
+html[data-design] .feld-knopf > .sel-drop{flex:1 1 auto}
+html[data-design] .feld-knopf > .sel-drop > button.sel-drop-feld{border-radius:var(--r-mittel) 0 0 var(--r-mittel)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -10059,7 +10073,7 @@ function pflanzeEntfernen(id){
       </label>
       <div class="kidirekt" id="ki-direkt-doktor" hidden>
         <div class="kimodell">
-          <select class="ki-modell-wahl" aria-label="Welches Modell"></select>
+          <select class="ki-modell-wahl" aria-label="Welches Modell" data-sel-dropdown data-sel-titel="KI-Modell"></select>
           <span class="ki-empf ki-modell-abz" hidden>empfohlen</span>
         </div>
         <p class="kihinweis" id="ki-lauf-doktor" hidden></p>
@@ -10336,7 +10350,7 @@ function pflanzeEntfernen(id){
           <h3>Bei einer KI nachfragen</h3>
           <div class="kidirekt" id="ki-direkt-vermehren" hidden>
             <div class="kimodell">
-              <select class="ki-modell-wahl" aria-label="Welches Modell"></select>
+              <select class="ki-modell-wahl" aria-label="Welches Modell" data-sel-dropdown data-sel-titel="KI-Modell"></select>
               <span class="ki-empf ki-modell-abz" hidden>empfohlen</span>
             </div>
           </div>
@@ -10902,7 +10916,7 @@ function pflanzeEntfernen(id){
 
       <p class="ein-abschnitt">Modell</p>
       <div class="kimodell feld-knopf">
-        <select class="ki-modell-wahl" aria-label="Welches Modell"></select>
+        <select class="ki-modell-wahl" aria-label="Welches Modell" data-sel-dropdown data-sel-titel="KI-Modell"></select>
         <button id="btn-ki-modelle" type="button">Neu holen</button>
       </div>
       <span class="ki-empf ki-modell-abz" hidden>empfohlen</span>
@@ -11339,7 +11353,7 @@ function pflanzeEntfernen(id){
           </div>
           <div class="kidirekt" id="ki-direkt-anlegen" hidden>
             <div class="kimodell">
-              <select class="ki-modell-wahl" aria-label="Welches Modell"></select>
+              <select class="ki-modell-wahl" aria-label="Welches Modell" data-sel-dropdown data-sel-titel="KI-Modell"></select>
               <span class="ki-empf ki-modell-abz" hidden>empfohlen</span>
             </div>
             <div class="kibilder" id="ki-bilder-anlegen"></div>
@@ -11749,8 +11763,12 @@ function appDlgNaechster(){
   if(o.art === 'eingabe') rumpf += '<input id="app-dlg-feld" type="' + (o.zahl ? 'number' : 'text') + '"'
     + (o.zahl ? ' inputmode="decimal"' : '') + (o.max ? ' maxlength="' + o.max + '"' : '')
     + ' value="' + esc(o.wert == null ? '' : o.wert) + '" aria-label="' + esc(o.titel || 'Eingabe') + '" autocomplete="off">';
+  /* 4.0-beta.47: Einträge mit `an` (gewählt) oder `unter` (Unterzeile) stehen mit Punkt, wie die Wahllisten. */
   if(o.art === 'wahl') rumpf += '<div class="wahl-liste app-dlg-wahl">' + (o.liste || []).map((x, i) =>
-    '<button type="button" data-dlg="w' + i + '">' + esc(x.text) + '</button>').join('') + '</div>';
+    (x.an != null || x.unter)
+      ? '<button type="button" data-dlg="w' + i + '" aria-pressed="' + (x.an ? 'true' : 'false') + '"><span class="wl-punkt" aria-hidden="true"></span>'
+        + '<span class="wl-txt"><b>' + esc(x.text) + '</b>' + (x.unter ? '<i>' + esc(x.unter) + '</i>' : '') + '</span></button>'
+      : '<button type="button" data-dlg="w' + i + '">' + esc(x.text) + '</button>').join('') + '</div>';
   document.getElementById('app-dlg-rumpf').innerHTML = rumpf;
   document.getElementById('app-dlg-fuss').innerHTML =
     (o.art === 'hinweis' ? '' : '<button type="button" data-dlg="nein">' + esc(o.nein || 'Abbrechen') + '</button>')
@@ -11811,9 +11829,24 @@ function appWahl(text, liste, o){ return appDialog(Object.assign({art:'wahl', te
    „disabled“, die der Code setzt, ziehen die Knöpfe nach. Ausgenommen
    sind versteckte Listen, Listen mit data-e (Bearbeiten) und mit
    data-kein-knopf. */
+/* 4.0-beta.47 (Etappe 16, Regel 7.6): Lange Listen (ab SEL_DROP_AB
+   Einträgen) und Listen mit data-sel-dropdown werden ein App-Dropdown:
+   ein Feld mit dem gewählten Wert, ein Tipp öffnet appWahl. */
+const SEL_DROP_AB = 6;
+function selIstDrop(sel){ return sel.hasAttribute('data-sel-dropdown') || sel.options.length >= SEL_DROP_AB; }
+function selDropText(sel){
+  const o = sel.options[sel.selectedIndex];
+  return o ? o.textContent : '';
+}
 function selKnoepfeSync(sel){
   const box = sel._selBox;
   if(!box) return;
+  if(box.classList.contains('sel-drop') !== selIstDrop(sel)){ selKnoepfeBauen(sel); return; }
+  if(box.classList.contains('sel-drop')){
+    const f = box.querySelector('.sel-drop-feld');
+    if(f){ f.querySelector('.sel-drop-wert').textContent = selDropText(sel); f.disabled = !!sel.disabled; }
+    return;
+  }
   const kn = box.querySelectorAll('.sel-knopf');
   if(kn.length !== sel.options.length){ selKnoepfeBauen(sel); return; }
   kn.forEach((b, i) => {
@@ -11824,10 +11857,12 @@ function selKnoepfeSync(sel){
 }
 function selKnoepfeBauen(sel){
   let box = sel._selBox;
+  const drop = selIstDrop(sel);
+  if(box && box.classList.contains('sel-drop') !== drop){ box.remove(); box = null; sel._selBox = null; }
   if(!box){
     box = document.createElement('div');
-    box.className = 'al-knoepfe sel-knoepfe';
-    box.setAttribute('role', 'group');
+    box.className = drop ? 'sel-drop' : 'al-knoepfe sel-knoepfe';
+    if(!drop) box.setAttribute('role', 'group');
     const lab = sel.closest('label') && sel.closest('label').querySelector('.lab');
     box.setAttribute('aria-label', sel.getAttribute('aria-label') || (lab ? lab.textContent.trim() : 'Auswahl'));
     sel.insertAdjacentElement('afterend', box);
@@ -11836,6 +11871,12 @@ function selKnoepfeBauen(sel){
     sel.setAttribute('aria-hidden', 'true');
     sel.tabIndex = -1;
     sel.setAttribute('data-sel-knopf', '');
+  }
+  if(drop){
+    box.innerHTML = '<button type="button" class="sel-drop-feld" aria-haspopup="dialog"'
+      + ' aria-label="' + esc(box.getAttribute('aria-label') || 'Auswahl') + '"' + (sel.disabled ? ' disabled' : '') + '>'
+      + '<span class="sel-drop-wert">' + esc(selDropText(sel)) + '</span><span class="sel-drop-pfeil" aria-hidden="true">\u25BE</span></button>';
+    return;
   }
   box.innerHTML = Array.prototype.map.call(sel.options, (o, i) =>
     '<button type="button" class="al-knopf sel-knopf" data-seli="' + i + '" aria-pressed="' + (o.selected ? 'true' : 'false') + '"'
@@ -11855,6 +11896,22 @@ function selPruefen(sel){
       set(v){ d.set.call(this, v); if(this._selBox) selKnoepfeSync(this); }});
   });
 })();
+document.addEventListener('click', e => {
+  const f = e.target.closest && e.target.closest('.sel-drop-feld');
+  if(!f || f.disabled) return;
+  const box = f.parentElement, sel = box && box.previousElementSibling;
+  if(!sel || sel.tagName !== 'SELECT' || sel._selBox !== box) return;
+  const liste = Array.prototype.map.call(sel.options, (o, i) => o.disabled ? null
+    : {wert:String(i), text:o.textContent, an:o.selected, unter:o.dataset.unter || ''}).filter(Boolean);
+  appWahl('', liste, {titel:sel.dataset.selTitel || box.getAttribute('aria-label') || 'Bitte wählen'}).then(w => {
+    if(w == null || !sel.isConnected) return;
+    const i = Number(w);
+    if(i === sel.selectedIndex) return;
+    sel.selectedIndex = i;
+    sel.dispatchEvent(new Event('change', {bubbles:true}));
+    sel.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+});
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('.sel-knopf');
   if(!b || b.disabled) return;
@@ -11979,7 +12036,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.46';
+const FASSUNG = '4.0-beta.47';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15870,7 +15927,7 @@ async function heftFrageLos(){
   let erg = null, fehler = null;
   try{
     erg = await kiFragenEinmal(heftFragePrompt(f, HFT.frage, HFT.vonKat), [], null,
-      {denken:'niedrig', zweck:'Pflegeheft · Frage', schema:heftFrageSchema()});
+      {denken:'min', zweck:'Pflegeheft · Frage', schema:heftFrageSchema()});
   }catch(e){ fehler = e; }
   if(!HFT || HFT.tok !== tok) return false;
   HFT.laeuft = false;
@@ -15896,7 +15953,7 @@ async function heftSpickLos(){
   let erg = null, fehler = null;
   try{
     erg = await kiFragenEinmal(heftSpickPrompt(f), [], null,
-      {denken:'niedrig', zweck:'Pflegeheft · Spickzettel', schema:heftSpickSchema()});
+      {denken:'min', zweck:'Pflegeheft · Spickzettel', schema:heftSpickSchema()});
   }catch(e){ fehler = e; }
   if(!HFT || HFT.tok !== tok) return false;
   HFT.laeuft = false;
@@ -21323,8 +21380,13 @@ function kiProtokollZeichnen(){
     const ok = e.ergebnis === 'ok';
     const sek = (Math.round((e.dauer || 0) / 100) / 10).toString().replace('.', ',') + ' s';
     const bild = e.bilder ? ' · ' + e.bilder + (e.bilder === 1 ? ' Bild, ' : ' Bilder, ') + kiZahlText(e.kb) + ' kB' : '';
+    /* 4.0-beta.47: Denkstufe, Token und Tempo */
+    const denk = e.denk ? ' · Denken ' + e.denk : '';
+    const tk = e.tOut != null
+      ? ' · ' + kiZahlText(e.tDenk) + ' Denk-, ' + kiZahlText(e.tOut) + ' Antwort-Token · '
+        + Math.round(((e.tDenk || 0) + (e.tOut || 0)) / Math.max(0.1, (e.dauer || 0) / 1000)) + ' Token/s' : '';
     return '<li class="' + (ok ? 'ok' : 'warn') + '"><b>' + esc(zeit + ' · ' + e.zweck + ' · ' + (kiNameVon(e.modell) || '—'))
-      + '</b><span>' + esc(e.ergebnis) + ' · ' + esc(sek) + ' · ' + kiZahlText(e.zeichen) + ' Zeichen' + esc(bild) + '</span></li>';
+      + '</b><span>' + esc(e.ergebnis) + ' · ' + esc(sek) + ' · ' + kiZahlText(e.zeichen) + ' Zeichen' + esc(bild) + esc(denk) + esc(tk) + '</span></li>';
   }).join('') + '</ol>';
 }
 
@@ -21342,18 +21404,27 @@ const KI_PRUEF_FRIST = 30000;
 const KI_LANGSAM_MS = 15000;
 let KI_PRUEF_AUS = [];
 let KI_PRUEF_LANGSAM = [];
-function kiDenkCfg(id, stufe){
+/* 4.0-beta.47 (Etappe 16): 'min' ist die niedrigste Stufe, die das
+   Modell bei der Prüfung angenommen hat (m.denkMin), sonst low.
+   'minimal' nutzt nur die Prüfung. */
+function kiDenkCfg(id, stufe, m){
+  const gv = kiModellVersion(id);
+  if(stufe === 'minimal') return gv >= 3 ? {thinkingLevel:'minimal'} : null;
+  if(stufe === 'min'){
+    if(gv >= 3) return {thinkingLevel:(m && m.denkMin) || 'low'};
+    stufe = 'niedrig';
+  }
   if(stufe !== 'niedrig' && stufe !== 'mittel') return null;
-  const gv = kiModellVersion(id), mittel = stufe === 'mittel';
+  const mittel = stufe === 'mittel';
   if(gv >= 3) return {thinkingLevel: mittel ? 'medium' : 'low'};
   if(gv >= 2.5) return {thinkingBudget: mittel ? 2048 : 512};
   return null;
 }
 async function kiModellPruefen(k, m, alleIds){
   const prompt = 'Antworte nur mit: ok';
-  const versuch = async mitDenken => {
+  const versuch = async stufe => {
     const cfg = {temperature:0};
-    const dc = mitDenken ? kiDenkCfg(m.id, 'niedrig') : null;
+    const dc = stufe ? kiDenkCfg(m.id, stufe) : null;
     if(dc) cfg.thinkingConfig = dc;
     const t0 = Date.now();
     const c = (typeof AbortController !== 'undefined') ? new AbortController() : null;
@@ -21380,14 +21451,16 @@ async function kiModellPruefen(k, m, alleIds){
       dauer:dauer, zeichen:prompt.length});
     return {status:r.ok ? 200 : r.status, d:d, fehler:fehler, dc:!!dc, dauer:dauer};
   };
-  let e = await versuch(true);
+  /* 4.0-beta.47: zuerst „minimal“ (Gemini 3 und neuer), lehnt das Modell
+     ab, „low“, lehnt es auch das ab, ohne Denkstufe. Gemerkt wird die
+     niedrigste angenommene Stufe (denkMin). */
+  const abgelehnt = x => x.status === 400 && x.dc && /think/i.test(JSON.stringify(x.fehler || ''));
+  let stufe = kiModellVersion(m.id) >= 3 ? 'minimal' : 'niedrig';
+  let e = await versuch(stufe);
   let denken = true;
-  /* Lehnt ein Modell die Denkstufe ab, einmal ohne. Das Ergebnis wird
-     gemerkt, damit es im Gebrauch nicht noch einmal passiert. */
-  if(e.status === 400 && e.dc && /think/i.test(JSON.stringify(e.fehler || ''))){
-    denken = false;
-    e = await versuch(false);
-  }
+  if(abgelehnt(e) && stufe === 'minimal'){ stufe = 'niedrig'; e = await versuch(stufe); }
+  if(abgelehnt(e)){ denken = false; stufe = null; e = await versuch(null); }
+  const denkMin = (denken && stufe === 'minimal') ? 'minimal' : '';
   if(e.netz) return {netz:true};
   const langsam = !!e.zeit || (e.dauer || 0) > KI_LANGSAM_MS;
   if(e.status === 200){
@@ -21398,13 +21471,13 @@ async function kiModellPruefen(k, m, alleIds){
     const ziel = echt && echt.indexOf(gefragt) !== 0
       ? (alleIds || []).find(id => id !== m.id && echt.indexOf(id.replace(/^models\//, '')) === 0) : null;
     if(ziel) return {frei:false, grund:'weitergeleitet auf ' + kiNameVon(ziel)};
-    return {frei:true, denken:denken, langsam:langsam};
+    return {frei:true, denken:denken, denkMin:denkMin, langsam:langsam};
   }
   if(e.status === 429)
-    return kiNichtKostenlos(e.fehler) ? {frei:false, grund:'nicht kostenlos'} : {frei:true, denken:denken, langsam:langsam};
+    return kiNichtKostenlos(e.fehler) ? {frei:false, grund:'nicht kostenlos'} : {frei:true, denken:denken, denkMin:denkMin, langsam:langsam};
   if(e.status === 401 || e.status === 403) return {schluessel:true, status:e.status, fehler:e.fehler};
   /* Überlastet oder zu langsam heißt nicht „kostenpflichtig“. */
-  if(e.status === 0 || e.status === 500 || e.status === 503) return {frei:true, denken:denken, langsam:langsam};
+  if(e.status === 0 || e.status === 500 || e.status === 503) return {frei:true, denken:denken, denkMin:denkMin, langsam:langsam};
   return {frei:false, grund:'Fehler ' + e.status};
 }
 function kiAusgeblendetText(){
@@ -21447,7 +21520,7 @@ async function kiModelleHolen(schluessel){
     + (schl.fehler && schl.fehler.message ? ' Google meldet: ' + schl.fehler.message : ''));
   KI_PRUEF_AUS = kandidaten.map((m, i) => erg[i].frei ? null : {anzeige:m.anzeige, grund:erg[i].grund})
     .filter(Boolean);
-  const liste = kandidaten.map((m, i) => erg[i].frei ? Object.assign({}, m, {denken:erg[i].denken, langsam:!!erg[i].langsam}) : null)
+  const liste = kandidaten.map((m, i) => erg[i].frei ? Object.assign({}, m, {denken:erg[i].denken, denkMin:erg[i].denkMin || '', langsam:!!erg[i].langsam}) : null)
     .filter(Boolean);
   KI_PRUEF_LANGSAM = liste.filter(m => m.langsam).map(m => m.anzeige);
   if(!liste.length)
@@ -21456,6 +21529,7 @@ async function kiModelleHolen(schluessel){
   S.kiModelle = liste.map(m => {
     const o = {id:m.id, anzeige:m.anzeige};
     if(m.denken === false) o.denken = false;
+    if(m.denkMin) o.denkMin = m.denkMin;
     if(m.langsam) o.langsam = true;
     return o;
   });
@@ -21528,13 +21602,14 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   const mitSchema = !!(opt.schema && !KI_SCHEMA_AUS[m.id]);
   if(mitSchema){ genCfg.responseMimeType = 'application/json'; genCfg.responseSchema = opt.schema; }
   if(m.denken !== false && !KI_DENKEN_AUS[m.id]){
-    const dc = kiDenkCfg(m.id, opt.denken);
+    const dc = kiDenkCfg(m.id, opt.denken, m);
     if(dc) genCfg.thinkingConfig = dc;
   }
   const t0 = Date.now();
-  const prot = ergebnis => kiProtokollEintragen({zweck:opt.zweck || 'Frage', modell:m.id, ergebnis:ergebnis,
+  const denkTxt = genCfg.thinkingConfig ? String(genCfg.thinkingConfig.thinkingLevel || ('Budget ' + genCfg.thinkingConfig.thinkingBudget)) : 'aus';
+  const prot = (ergebnis, extra) => kiProtokollEintragen(Object.assign({zweck:opt.zweck || 'Frage', modell:m.id, ergebnis:ergebnis, denk:denkTxt,
     dauer:Date.now() - t0, zeichen:String(prompt || '').length, bilder:mit.length,
-    kb:Math.round(mit.reduce((n, b) => n + String((b && b.daten) || '').length * 0.75, 0) / 1024)});
+    kb:Math.round(mit.reduce((n, b) => n + String((b && b.daten) || '').length * 0.75, 0) / 1024)}, extra || {}));
   const fristFehler = () => {
     const f = new Error((kiNameVon(m) || 'Das Modell') + ' hat nicht rechtzeitig geantwortet (nach '
       + Math.round(fristMs / 1000) + ' Sekunden).');
@@ -21561,7 +21636,7 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
     });
   }catch(e){
     if(uhr) clearTimeout(uhr);
-    if(!ctrl) KI_LAEUFT = null;
+    if(!ctrl && KI_LAEUFT === c) KI_LAEUFT = null;
     if(frist){ prot('Zeitgrenze'); throw fristFehler(); }
     if(e && e.name === 'AbortError'){ prot('abgebrochen'); throw e; }
     prot('keine Verbindung');
@@ -21571,7 +21646,7 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   /* Die Frist läuft weiter, bis die Antwort gelesen ist (3.24.0). Vorher
      endete sie mit dem Kopf der Antwort, und ein stockender Rumpf hielt
      den Kartei-Balken unbegrenzt bei 85 %. */
-  const ende = () => { if(uhr) clearTimeout(uhr); if(!ctrl) KI_LAEUFT = null; };
+  const ende = () => { if(uhr) clearTimeout(uhr); if(!ctrl && KI_LAEUFT === c) KI_LAEUFT = null; };
   if(!r.ok){
     ende();
     const fehler = new Error(await kiFehlerText(r, m));
@@ -21608,6 +21683,10 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
     throw new Error('Die Antwort von Google war nicht lesbar.');
   }
   ende();
+  /* 4.0-beta.47 (Etappe 16): Token für das Protokoll */
+  const um = (d && d.usageMetadata) || {};
+  const tok = um.candidatesTokenCount != null || um.thoughtsTokenCount != null
+    ? {tIn:um.promptTokenCount || 0, tOut:um.candidatesTokenCount || 0, tDenk:um.thoughtsTokenCount || 0} : {};
   const sperre = d && d.promptFeedback && d.promptFeedback.blockReason;
   if(sperre){ prot('zurückgewiesen · ' + sperre); throw new Error('Google hat die Anfrage zurückgewiesen (' + sperre + ').'); }
   const kand = ((d && d.candidates) || [])[0];
@@ -21615,7 +21694,7 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
   const txt = (kand && kand.content && Array.isArray(kand.content.parts))
     ? kand.content.parts.map(p => p.text || '').join('') : '';
   if(!String(txt).trim()){
-    prot('leere Antwort' + (grund ? ' · ' + grund : ''));
+    prot('leere Antwort' + (grund ? ' · ' + grund : ''), tok);
     throw new Error(grund === 'MAX_TOKENS'
       ? 'Die Antwort brach ab, bevor etwas Lesbares kam. Schick weniger Bilder mit.'
       : grund === 'SAFETY' ? 'Google hat die Antwort zurückgehalten (Sicherheitsfilter).'
@@ -21625,11 +21704,11 @@ async function kiFragen(prompt, bilder, modellId, ctrl, opt){
      halb — der Leser fand ein paar Felder und trug sie ein, der Rest
      fehlte ohne ein Wort. Ein Rest ist keine Antwort. */
   if(grund === 'MAX_TOKENS'){
-    prot('abgeschnitten');
+    prot('abgeschnitten', tok);
     throw new Error('Die Antwort wurde mittendrin abgeschnitten. '
       + 'Versuch es mit weniger Bildern oder einem anderen Modell.');
   }
-  prot('ok');
+  prot('ok', tok);
   return txt;
 }
 function kiAbbrechen(){
@@ -21757,6 +21836,8 @@ document.addEventListener('click', e => {
   if(weg){ kiBildWeg(weg.dataset.kiwo, parseInt(weg.dataset.kibildWeg, 10) || 0); return; }
   const stop = e.target.closest('[data-do="ki-stop"]');
   if(stop){ kiAbbrechen(); return; }
+  const wech = e.target.closest('[data-do="ki-wechsel"]');
+  if(wech){ KI_WECHSEL = {wo:wech.dataset.kiwo, id:wech.dataset.kimodell}; kiAbbrechen(); return; }
   const noch = e.target.closest('[data-do="ki-nochmal"],[data-do="ki-anders"]');
   if(noch){ kiDirektLos(noch.dataset.kiwo, noch.dataset.kimodell || null); return; }
   const gal = e.target.closest('[data-kigal]');
@@ -21800,12 +21881,23 @@ function notizWert(v){
   if(/^(keine?[rs]?|nein|unbekannt|nicht bekannt|ohne|n\/?a|k\.?\s?a)(\s|$|[,.;:])/i.test(t)) return '';
   return t;
 }
+/* 4.0-beta.47: Unterzeile im Modell-Dropdown */
+function kiZuletzt(id){
+  const e = kiProtokoll().find(x => x.modell === id && x.ergebnis === 'ok' && x.zweck !== 'Prüfung');
+  return e ? Math.round((e.dauer || 0) / 1000) : null;
+}
+function kiModellUnter(m){
+  const z = kiZuletzt(m.id);
+  return [m.empfohlen ? 'empfohlen' : '', m.langsam ? 'langsam' : '',
+    /lite/i.test(m.id || '') ? 'schnell, aber lückenhafter' : '',
+    z != null ? 'zuletzt ' + z + '\u00a0s' : ''].filter(Boolean).join(' · ');
+}
 function kiModellZeichnen(){
   const liste = kiModelle();
   const aktiv = kiModellAktiv();
   document.querySelectorAll('.ki-modell-wahl').forEach(sel => {
     sel.innerHTML = liste.length
-      ? liste.map(m => '<option value="' + esc(m.id) + '"'
+      ? liste.map(m => '<option value="' + esc(m.id) + '" data-unter="' + esc(kiModellUnter(m)) + '"'
           + (aktiv && m.id === aktiv.id ? ' selected' : '') + '>'
           + esc(m.anzeige) + (m.langsam ? ' (langsam)' : '')
           /* 4.0-beta.11 (F132): Lite lässt öfter Angaben weg */
@@ -21857,10 +21949,23 @@ function kiLaufText(wo, txt){
 /* 3.32.0: Statt „nach dreißig steige ich um“ zählen die Sekunden
    hoch. Die App bricht nicht mehr selbst ab und wechselt kein Modell. */
 const KI_UHREN = {};
+const KI_LANG_S = 30;
+const KI_LANG_TEXT = 'Das dauert länger als üblich: Das Modell denkt noch, oder Google ist ausgelastet.';
 function kiLaufSatz(m, sek){
   const name = kiNameVon(m || kiModellAktiv());
   /* Geschütztes Leerzeichen: „12 s“ bricht nicht um. */
-  return (name ? 'Die Frage an ' + name + ' läuft' : 'Die Frage läuft') + ' · ' + sek + '\u00a0s';
+  return (name ? 'Die Frage an ' + name + ' läuft' : 'Die Frage läuft') + ' · ' + sek + '\u00a0s'
+    + (sek >= KI_LANG_S ? '. ' + KI_LANG_TEXT : '');
+}
+/* 4.0-beta.47: „Mit … versuchen“ während des Laufs. Bricht die laufende
+   Anfrage ab; die neue startet erst, wenn die alte abgeräumt ist
+   (kiLaufZeigen mit laeuft=false). Ein Tipp, eine Anfrage. */
+let KI_WECHSEL = null;
+function kiWechselKnopf(wo, m){
+  const alt = kiNaechstesModell((m && m.id) || ((kiModellAktiv() || {}).id || ''));
+  if(!alt || (m && alt.id === m.id)) return '';
+  return '<button type="button" data-do="ki-wechsel" data-kiwo="' + esc(wo) + '" data-kimodell="' + esc(alt.id) + '">Mit '
+    + esc(alt.anzeige) + ' versuchen</button>';
 }
 function kiLaufZeigen(wo, laeuft, m){
   const p = document.getElementById('ki-lauf-' + wo);
@@ -21875,8 +21980,17 @@ function kiLaufZeigen(wo, laeuft, m){
       : '';
     if(laeuft){
       const t0 = Date.now();
-      KI_UHREN[wo] = setInterval(()=>kiLaufText(wo, kiLaufSatz(m, Math.round((Date.now() - t0) / 1000))), 1000);
+      KI_UHREN[wo] = setInterval(()=>{
+        const sek = Math.round((Date.now() - t0) / 1000);
+        kiLaufText(wo, kiLaufSatz(m, sek));
+        const lauf = p.querySelector('.kilauf');
+        if(sek >= KI_LANG_S && lauf && !lauf.querySelector('[data-do="ki-wechsel"]')) lauf.insertAdjacentHTML('beforeend', kiWechselKnopf(wo, m));
+      }, 1000);
     }
+  }
+  if(!laeuft && KI_WECHSEL && KI_WECHSEL.wo === wo){
+    const w = KI_WECHSEL; KI_WECHSEL = null;
+    setTimeout(()=>kiDirektLos(w.wo, w.id), 0);
   }
   if(knopf){
     knopf.disabled = !!laeuft;
@@ -22082,8 +22196,13 @@ async function kiDirektLos(wo, modellId){
 /* 4.0-beta.20 (Plan M1c): Das Foto beim Anlegen bestimmt nur noch die Art.
    Topfart und Abzugsloch fragt es nicht mehr, die Topfurteile gehören dem
    Doktor. SUBSTRAT bleibt, weil es Wasser- und Hydrokultur erkennt. */
-const AW_FOTO_FELDER = ['ART','BOTANISCH','MERKMALE','SORTE','SORTE_BELEG','SORTEN_VERWECHSLUNG',
+/* 4.0-beta.47 (Etappe 16): MERKMALE zuerst. Die Antwort entsteht in
+   dieser Reihenfolge; erst beschreiben, dann bestimmen. */
+const AW_FOTO_FELDER = ['MERKMALE','ART','BOTANISCH','SORTE','SORTE_BELEG','SORTEN_VERWECHSLUNG',
   'SICHERHEIT','FEHLT','VERWECHSLUNG','SUBSTRAT'];
+const KI_SORTE_ZUERST = 'Beschreib zuerst unter MERKMALE, was du siehst. Ist Farbe oder Zeichnung der Blätter auffällig, etwa weiß, silbern, rosa, panaschiert oder gesprenkelt, '
+  + 'prüfe zuerst die bekannten Sorten und Kreuzungen dieser Gattung und nenne die reine Art nur, wenn keine Sorte passt. '
+  + 'Eine Sorte nennst du weiterhin nur mit sichtbaren Merkmalen in SORTE_BELEG.';
 const AW_ART_TEXT = {
   LICHT:'LICHT: Nur genau eines dieser Wörter: voll, hell, indirekt',
   GIESSKLASSE:'GIESSKLASSE: Nur genau eines dieser Wörter: normal, durstig, kakteenmodus, anstau',
@@ -22138,7 +22257,7 @@ function awFotoZeile(n){
   return sorteSaetze(t);
 }
 function anlegenFotoPromptBauen(){
-  const z = ['Du bestimmst eine Zimmer- oder Balkonpflanze an den angehängten Fotos. Hier geht es nur ums Bestimmen und um das, was zu sehen ist. Pflegewissen fragt die App getrennt.'];
+  const z = ['Du bestimmst eine Zimmer- oder Balkonpflanze an den angehängten Fotos. Hier geht es nur ums Bestimmen und um das, was zu sehen ist. Pflegewissen fragt die App getrennt.', KI_SORTE_ZUERST];
   const art = (typeof gewaehlteArt !== 'undefined' && gewaehlteArt) ? gewaehlteArt : null;
   if(art) z.push('Die Art steht vermutlich schon fest: ' + art.de + ' (' + art.bot + '). Prüfe das am Foto und widersprich, wenn es nicht passt.');
   z.push('', AW_JSON_SATZ, '', 'DIE SCHLÜSSELWÖRTER');
@@ -22346,7 +22465,7 @@ async function anlegenZweistufig(ziel, modellId){
     erg = await kiFragenEinmal(anlegenFotoPromptBauen(), KI_BILDER.anlegen, ziel ? ziel.id : null,
       {denken:'niedrig', zweck:'Anlegen · Foto', schema:awSchema(AW_FOTO_FELDER)});
   }catch(e){
-    if(e && e.name === 'AbortError') kiDirektMeldung('anlegen', 'Abgebrochen.', '');
+    if(e && e.name === 'AbortError') kiDirektMeldung('anlegen', KI_WECHSEL ? '' : 'Abgebrochen.', '');
     else { kiDirektMeldung('anlegen', e.message || String(e), 'warn'); fehler = e; }
   }finally{
     kiLaufZeigen('anlegen', false);
@@ -22431,12 +22550,26 @@ async function awHolen(modellId){
   const ziel = (modellId && kiModelle().find(x => x.id === modellId)) || kiModellAktiv();
   if(!ziel){ awStatus('Kein Modell gewählt. Hol die Modellliste in den Einstellungen.'); return; }
   const tok = AW_TOKEN;
-  awStatus('<span class="aw-lauf">Hole das Artwissen für ' + esc(awArtName(f)) + ' bei ' + esc(ziel.anzeige || ziel.id) + ' …</span> '
-    + '<button type="button" class="linkbtn" data-aw="stopp">Abbrechen</button>');
+  awStatus('<span class="aw-lauf">Hole das Artwissen für ' + esc(awArtName(f)) + ' bei ' + esc(ziel.anzeige || ziel.id) + ' … <span class="aw-sek">0\u00a0s</span></span> '
+    + '<button type="button" class="linkbtn" data-aw="stopp">Abbrechen</button><span class="aw-lang"></span>');
+  /* 4.0-beta.47 (Etappe 16): Zähler, ab 30 s Hinweis und „Mit … versuchen“ */
+  const t0 = Date.now();
+  const uhr = setInterval(() => {
+    const el = document.querySelector('#al-artfrage .aw-sek');
+    if(!el || tok !== AW_TOKEN){ clearInterval(uhr); return; }
+    const sek = Math.round((Date.now() - t0) / 1000);
+    el.textContent = sek + '\u00a0s';
+    const lang = document.querySelector('#al-artfrage .aw-lang');
+    if(sek >= KI_LANG_S && lang && !lang.innerHTML){
+      const alt = kiNaechstesModell(ziel.id);
+      lang.innerHTML = ' ' + esc(KI_LANG_TEXT) + (alt && alt.id !== ziel.id
+        ? ' <button type="button" class="linkbtn" data-aw="wechsel" data-m="' + esc(alt.id) + '">Mit ' + esc(alt.anzeige) + ' versuchen</button>' : '');
+    }
+  }, 1000);
   let erg = null;
   try{
     erg = await kiFragenEinmal(anlegenArtPromptBauen(f), [], ziel.id,
-      {denken:'niedrig', zweck:'Anlegen · Artwissen', schema:awSchema(awArtFelder())});
+      {denken:'min', zweck:'Anlegen · Artwissen', schema:awSchema(awArtFelder())});
   }catch(e){
     if(tok !== AW_TOKEN) return;
     if(e && e.name === 'AbortError'){ awStatus('Abgebrochen.' + awKiKnopf('Artwissen holen')); return; }
@@ -22468,6 +22601,7 @@ document.addEventListener('click', e => {
   if(was === 'ki'){ awHolen(null); return; }
   if(was === 'ki-mit'){ awHolen(k.dataset.m || null); return; }
   if(was === 'stopp'){ kiAbbrechen(); return; }
+  if(was === 'wechsel'){ AW_TOKEN++; kiAbbrechen(); awHolen(k.dataset.m || null); return; }
   if(was === 'bib-alle'){ awBibUebernehmen(); return; }
   if(was === 'wahl'){ awWahl(k.dataset.f, k.dataset.q); return; }
   if(was === 'pflege-auf'){ alPflegeUmschalten(); return; }
@@ -22634,7 +22768,7 @@ async function awLueckeFragen(){
   let erg = null;
   try{
     erg = await kiFragenEinmal(anlegenArtPromptBauen(f, felder), [], m.id,
-      {denken:'niedrig', zweck:'Anlegen · Lücken', schema:awSchema(felder)});
+      {denken:'min', zweck:'Anlegen · Lücken', schema:awSchema(felder)});
   }catch(e){
     if(tok !== AW_TOKEN || AW !== aw) return;
     AW.lueckeLaeuft = false;
@@ -31019,7 +31153,7 @@ function azBearbeitenLos(id){
    wie Anlegen und Kartei (sorteGeprueft). Übernommen wird einzeln
    und erst per Tipp (Regel 10.8). Das Foto wird nicht gespeichert. */
 let AZ_BEST = null;
-const AZ_BEST_FELDER = ['ART', 'BOTANISCH', 'SICHERHEIT', 'SORTE', 'SORTE_BELEG', 'SORTEN_VERWECHSLUNG'];
+const AZ_BEST_FELDER = ['MERKMALE', 'ART', 'BOTANISCH', 'SICHERHEIT', 'SORTE', 'SORTE_BELEG', 'SORTEN_VERWECHSLUNG'];
 const AZ_BEST_KOPF = 'Du hilfst mir, einen Steckling aus meiner Anzucht zu bestimmen. Ich hänge gleich ein Foto an. '
   + 'Stecklinge haben oft nur wenige und kleine Blätter — beurteile nur, was zu sehen ist.';
 const AZ_BEST_SONICHT = 'Kein Text vor oder nach dem Codeblock. Kein **ART:**, kein ### ART, kein - ART:. '
@@ -31029,14 +31163,13 @@ const AZ_BEST_PRUEFLISTE = '1. Steht die gesamte Antwort in einem Codeblock und 
   + '3. Enthält SICHERHEIT nur eine der erlaubten Angaben?\n'
   + '4. Steht ein Sortenname nur in SORTE und nicht in BOTANISCH?';
 function azBestimmenAuftrag(r){
-  const z = [AZ_BEST_KOPF, ''];
+  const z = [AZ_BEST_KOPF, KI_SORTE_ZUERST, ''];
   const bisher = [r && r.art, r && r.botanisch].map(x=>String(x || '').trim()).filter(Boolean);
   if(bisher.length)
     z.push('Eingetragen ist bisher: ' + (bisher.length === 2 && norm(bisher[0]) !== norm(bisher[1])
       ? bisher[0] + ' (' + bisher[1] + ')' : bisher[0]) + '. Prüfe das am Foto und widersprich, wenn es nicht passt.', '');
   let f = auftragMitTieren(AZ_BEST_FELDER, AZ_BEST_SONICHT, AZ_BEST_PRUEFLISTE);
-  f = f.replace(' Danach folgen ein bis drei VERMEHRUNG-Zeilen und ein bis drei MASSNAHME-Zeilen.', '')
-    .replace(' Was du an der Sorte siehst, gehört in MERKMALE.', '');
+  f = f.replace(' Danach folgen ein bis drei VERMEHRUNG-Zeilen und ein bis drei MASSNAHME-Zeilen.', '');
   /* Die Zeilen oben sind entfernt; die Zahl wird neu gezählt. */
   f = promptZahlSetzen(f);
   z.push(f);

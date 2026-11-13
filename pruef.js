@@ -192,7 +192,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.46', w.__T('FASSUNG') === '4.0-beta.46', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.47', w.__T('FASSUNG') === '4.0-beta.47', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -5946,8 +5946,8 @@ setTimeout(async () => {
     pruef('3.29.0: … nicht bei Gruppe mit Mutter', !d.querySelector('[data-az-best="' + T('__rm') + '"]') && !!d.querySelector('[data-az-ent="' + T('__rm') + '"]'));
     const auf = T(`azBestimmenAuftrag(azGruppe('${zid}'))`);
     const felder = Array.from(new Set((auf.match(/^([A-ZÄÖÜ_]{3,}):/gm) || []).map(x=>x.slice(0, -1))));
-    pruef('3.29.0: Auftrag mit genau sechs Feldern', JSON.stringify(felder.sort()) === JSON.stringify(['ART','BOTANISCH','SICHERHEIT','SORTE','SORTEN_VERWECHSLUNG','SORTE_BELEG']), JSON.stringify(felder));
-    pruef('3.29.0: Auftrag ohne Vermehrung, Maßnahmen und Kartennamen', !/VERMEHRUNG|MASSNAHME|Goldi|Queeny/.test(auf) && /Alle sechs Schlüsselwörter/.test(auf), auf.slice(0, 400));
+    pruef('3.29.0: Auftrag mit genau sieben Feldern (beta.47: MERKMALE zuerst)', JSON.stringify(felder.sort()) === JSON.stringify(['ART','BOTANISCH','MERKMALE','SICHERHEIT','SORTE','SORTEN_VERWECHSLUNG','SORTE_BELEG']), JSON.stringify(felder));
+    pruef('3.29.0: Auftrag ohne Vermehrung, Maßnahmen und Kartennamen', !/VERMEHRUNG|MASSNAHME|Goldi|Queeny/.test(auf) && /Alle sieben Schlüsselwörter/.test(auf), auf.slice(0, 400));
     const l1 = JSON.parse(T(`JSON.stringify(azBestimmenLesen('ART: Efeutute\\nBOTANISCH: Epipremnum aureum\\nSICHERHEIT: hoch\\nSORTE: Marble Queen | hoch\\nSORTE_BELEG: keine\\nSORTEN_VERWECHSLUNG: keine'))`));
     pruef('3.29.0: Sorte ohne Beleg nur „niedrig“', l1.sorte && l1.sorte.sicher === 'niedrig', JSON.stringify(l1));
     const l2 = JSON.parse(T(`JSON.stringify(azBestimmenLesen('ART: Efeutute\\nBOTANISCH: Epipremnum aureum\\nSICHERHEIT: hoch\\nSORTE: Efeutute | hoch\\nSORTE_BELEG: marmoriert\\nSORTEN_VERWECHSLUNG: keine'))`));
@@ -6122,7 +6122,7 @@ setTimeout(async () => {
     const zwo = JSON.parse(zw);
     pruef('3.30.0: Anlegen-Auftrag nennt die richtige Zahl, samt SORTE_BELEG', zwo.sorteBeleg && !!zwo.soll && zwo.wort === zwo.soll, zw);
     pruef('3.30.0: Mit Tierfrage sind es einundzwanzig', zwo.zahl === 21 && zwo.wort === 'einundzwanzig', zw);
-    pruef('3.30.0: Bestimmen-Auftrag nennt weiter sechs', /Alle sechs Schlüsselwörter/.test(T(`azBestimmenAuftrag({art:'x'})`)));
+    pruef('3.30.0: Bestimmen-Auftrag nennt sieben (beta.47)', /Alle sieben Schlüsselwörter/.test(T(`azBestimmenAuftrag({art:'x'})`)));
 
     /* Datum nach Ortszeit: 00:30 Uhr in Berlin ist in UTC noch gestern. */
     const tzAlt = process.env.TZ;
@@ -7431,7 +7431,7 @@ setTimeout(async () => {
     const felder = ['ck-saison', 'ck-wetterzeile', 'ck-kennzahlen', 'sch-pflege', 'tour-aus']
       .filter(id => !d.getElementById(id).closest('.ein-karte'));
     pruef('beta.6: Felder und Schalter der Einstellungen stehen in Gruppenkarten', felder.length === 0, felder.join(', '));
-    pruef('beta.6: Ort und Modell stehen als Feld mit Knopf (beta.45: Modell als Knopfliste)', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select[hidden] + .sel-knoepfe + #btn-ki-modelle'));
+    pruef('beta.6: Ort und Modell stehen als Feld mit Knopf (beta.45: Modell als Knopfliste)', !!d.querySelector('.wt-zeile.feld-knopf > #wt-ort + #wt-such') && !!d.querySelector('.kimodell.feld-knopf > select[hidden] + .sel-drop + #btn-ki-modelle'));
     pruef('beta.6: „empfohlen“ steht unter dem Modell, nicht zwischen Feld und Knopf', !d.querySelector('#mh-in-kidienst .kimodell .ki-modell-abz') && !!d.querySelector('#mh-in-kidienst .kimodell + .ki-modell-abz'));
     T('tourListeZeichnen()');
     const tz = [...d.querySelectorAll('#tour-liste [data-tourgo]')];
@@ -13962,6 +13962,57 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.46 (15): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
     } finally {
       T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.gelernteArten = a.gelernt; while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); sichern(); render(); return 1; })(${JSON.stringify(alt46)})`);
+    }
+  }
+
+  /* ── 4.0-beta.47 (Etappe 16): App-Dropdown, Denkstufe, Feldreihenfolge ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const altM = T(`JSON.stringify({m:S.kiModelle || null, a:S.kiModell || null})`);
+    try {
+      T(`S.kiModelle = [{id:'gemini-3.8-flash', anzeige:'3.8 Flash', denkMin:'minimal'}, {id:'gemini-3.5-flash-lite', anzeige:'3.5 Flash Lite'}];
+        S.kiModell = 'gemini-3.8-flash'; kiModellZeichnen(); 1`);
+      await warte(30);
+      const sels = [...d.querySelectorAll('.ki-modell-wahl')];
+      pruef('beta.47 (16): Alle vier Modellwahlen sind App-Dropdowns',
+        sels.length === 4 && sels.every(x => x.hidden && x._selBox && x._selBox.classList.contains('sel-drop') && x._selBox.querySelector('.sel-drop-feld')),
+        sels.map(x => x._selBox && x._selBox.className).join(','));
+      const s0 = sels[1];
+      pruef('beta.47 (16): Das Feld zeigt das gewählte Modell', /3\.8 Flash/.test(s0._selBox.querySelector('.sel-drop-wert').textContent), s0._selBox.textContent);
+      T(`appDialog = window.__appDialogEcht; 1`);
+      s0._selBox.querySelector('.sel-drop-feld').click(); await warte(30);
+      const knoepfe = [...d.querySelectorAll('#app-dlg-rumpf [data-dlg]')];
+      pruef('beta.47 (16): Tipp öffnet ein App-Fenster mit allen Modellen, das gewählte markiert, Lite mit Unterzeile',
+        knoepfe.length === 2 && knoepfe[0].getAttribute('aria-pressed') === 'true' && /lückenhafter/.test(knoepfe[1].textContent),
+        knoepfe.map(b => b.textContent + '|' + b.getAttribute('aria-pressed')).join(' / '));
+      if(knoepfe[1]) knoepfe[1].click();
+      await warte(40);
+      pruef('beta.47 (16): Die Wahl im Fenster setzt das Modell (change)', T(`S.kiModell`) === 'gemini-3.5-flash-lite', T(`S.kiModell`));
+      pruef('beta.47 (16): Alle Dropdowns ziehen nach', sels.every(x => /Lite/.test(x._selBox.querySelector('.sel-drop-wert').textContent)));
+      T(`appDialog = window.__appDialogTest; 1`);
+      const box = d.createElement('div');
+      box.innerHTML = '<select id="t47">' + [1,2,3,4,5].map(i => '<option value="' + i + '">' + i + '</option>').join('') + '</select>';
+      d.body.appendChild(box); await warte(20);
+      const t47 = d.getElementById('t47');
+      const k1 = !!(t47._selBox && t47._selBox.classList.contains('sel-knoepfe'));
+      const o = d.createElement('option'); o.value = '6'; o.textContent = '6'; t47.appendChild(o); await warte(20);
+      pruef('beta.47 (16): Kurze Liste bleibt Knopfliste, ab 6 Einträgen wird sie Dropdown',
+        k1 && t47._selBox.classList.contains('sel-drop') && d.querySelectorAll('#t47 + .sel-drop').length === 1 && !box.querySelector('.sel-knoepfe'));
+      box.remove();
+      pruef('beta.47 (16): Denkstufe „min“ nimmt die gelernte Stufe, sonst low',
+        T(`JSON.stringify(kiDenkCfg('gemini-3.8-flash', 'min', {denkMin:'minimal'}))`) === '{"thinkingLevel":"minimal"}'
+        && T(`JSON.stringify(kiDenkCfg('gemini-3.6-flash', 'min', {}))`) === '{"thinkingLevel":"low"}'
+        && T(`JSON.stringify(kiDenkCfg('gemini-2.5-flash', 'min', {}))`) === '{"thinkingBudget":512}');
+      pruef('beta.47 (16): Foto-Auftrag beschreibt zuerst, dann Art; Sortenregel steht drin',
+        T(`AW_FOTO_FELDER[0] === 'MERKMALE' && AW_FOTO_FELDER.indexOf('ART') === 1 && anlegenFotoPromptBauen().indexOf('Sorten und Kreuzungen dieser Gattung') > -1`) === true);
+      T(`kiProtokollEintragen({zweck:'Test', modell:'gemini-3.8-flash', ergebnis:'ok', dauer:4000, denk:'minimal', tIn:900, tOut:300, tDenk:100}); 1`);
+      const zeile = (d.querySelector('#ki-protokoll li span') || {}).textContent || '';
+      pruef('beta.47 (16): Protokoll zeigt Denkstufe, Token und Token/s', /Denken minimal/.test(zeile) && /100 Denk-, 300 Antwort-Token · 100 Token\/s/.test(zeile), zeile);
+    } catch (e) {
+      pruef('beta.47 (16): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ while(APP_DLG.offen) appDlgAntwort('nein'); S.kiModelle = a.m; S.kiModell = a.a; if(!a.m) delete S.kiModelle; kiModellZeichnen(); appDialog = window.__appDialogTest; })(${altM}); 1`);
     }
   }
 
