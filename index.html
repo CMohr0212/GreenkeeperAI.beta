@@ -4224,6 +4224,7 @@ html[data-design] .gpl .zs-zeile{align-items:center}
 html[data-design] .gpl button.gpl-erl{flex:0 0 auto;min-height:36px;margin:0;padding:0 12px;border:1.5px solid var(--linie);border-radius:var(--r-klein);
   background:none;color:var(--schrift);font:inherit;font-size:var(--t-s);font-weight:600;cursor:pointer}
 html[data-design] .bearb-feld select[hidden]{display:none}
+html[data-design] .bearb-feld[hidden], #al-stab[hidden]{display:none}
 html[data-design] .bearb-feld .fhint{display:block;margin-top:6px}
 /* ── 4.0-beta.38 (Tags als Markierung, Tag-Liste, Kalender der Karte) ── */
 html[data-design] :is(#termin-modal, #sam-akt-modal) .tag-wahl{border:0;border-radius:0;background:none}
@@ -4328,6 +4329,11 @@ html[data-design] .az-sam-punkt{position:absolute;right:5px;bottom:5px;width:10p
   background:var(--fl-akzent);box-shadow:0 0 0 2px var(--fl-karte)}
 html[data-design] .az-sam-punkt.faellig{background:var(--ton-alarm)}
 html[data-design] .az-ort .as-knoepfe{margin:4px 0 10px}
+/* 4.0-beta.44 (Etappe 13): Schalter Erklärtexte */
+body.erkl-aus [data-erkl]:not(.erkl-bleibt), body.erkl-aus [data-erkl-kurz]:not(.erkl-bleibt),
+body.erkl-aus i.erkl-u, body.erkl-aus #sekm-info{display:none!important}
+body.erkl-voll .erkl > .mehr-dazu{display:none!important}
+body.erkl-voll .erkl > .erkl-rest[hidden]{display:inline!important}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -8395,7 +8401,7 @@ function mixEdHTML(ctx){
       + `<span class="takt-zahl mix-n" aria-live="polite">${teile[id]}</span>`
       + `<button type="button" class="takt-pm" data-mix-pm="1" data-mix-id="${id}" aria-label="Ein Teil mehr ${name}">+</button>`
       + `</span></div>`;
-  }).join('') : '<p class="fhint mix-leer">Tippe eine Mischung an oder füge Bestandteile hinzu.</p>';
+  }).join('') : '<p class="fhint mix-leer" data-erkl>Tippe eine Mischung an oder füge Bestandteile hinzu.</p>';
   /* 4.0-beta.16 (Regel 9.10): ein App-Fenster statt der Systemliste */
   const add = '<div class="gm-zfrage-btns"><button type="button" class="mix-add-knopf" data-mix-add-auf>+ Bestandteil</button></div>';
   const zid = mixZielVon(p);
@@ -8447,7 +8453,7 @@ function mixAddListeHTML(ctx){
   const ed = MIX_ED[ctx]; const teile = ed ? mixSauber(ed.teile) : {};
   return mixAddReihe().filter(id=>!teile[id]).map(id=>
     `<button type="button" data-mix-add-id="${id}"><span class="mix-add-plus" aria-hidden="true">+</span>`
-    + `<span class="wl-txt"><b>${esc(ZUTAT[id].name)}</b><i>${esc(MIX_WIRKUNG[id] || '')}</i></span></button>`).join('');
+    + `<span class="wl-txt"><b>${esc(ZUTAT[id].name)}</b><i class="erkl-u">${esc(MIX_WIRKUNG[id] || '')}</i></span></button>`).join('');
 }
 function mixAddOeffnen(ctx, ausloeser){
   const liste = document.getElementById('mix-add-liste');
@@ -9344,7 +9350,38 @@ function giessTat(p){
 }
 function giessartText(p){ return GIESSARTEN[giessartVon(p)].kurz; }
 
-const AENDERBAR = ['name','art','botanisch','typ','klasse','sonne','giftig','gift','notiz','frostMin','giessart','wichtig','raum','stellplatz'];
+/* 4.0-beta.44 (Etappe 12, M3): Rankhilfe je Pflanze. Leer heißt keine.
+   Ein Moosstab steht beim Gießen als „+ Moosstab“ an der Weg-Zeile der
+   Gießkarte; mit eigenem Rhythmus nur, wenn seit dem letzten Gießen mit
+   Moosstab mindestens so viele Tage vergangen sind. Zurückgerechnet aus
+   den Gießdaten, ohne eigenes Datenfeld. */
+const RANKHILFEN = {moos:'Moosstab', kokos:'Kokosstab', gitter:'Gitter', brett:'Brett'};
+const STAB_TAGE = [2, 3, 5, 7];
+function rankhilfeVon(p){ return (p && RANKHILFEN[p.rankhilfe]) ? p.rankhilfe : ''; }
+function stabTageVon(p){
+  const n = Number(p && p.stabTage);
+  return STAB_TAGE.indexOf(n) > -1 ? n : 0;
+}
+function rankhilfeText(p){
+  const r = rankhilfeVon(p);
+  if(!r) return '';
+  const n = r === 'moos' ? stabTageVon(p) : 0;
+  return RANKHILFEN[r] + (r === 'moos' ? (n ? ' · befeuchten alle ' + n + ' Tage' : ' · befeuchten bei jedem Gießen') : '');
+}
+function moosHeute(p){
+  if(rankhilfeVon(p) !== 'moos') return false;
+  const n = stabTageVon(p);
+  if(!n) return true;
+  const heute = iso(HEUTE);
+  const tage = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
+  let zuletzt = null;
+  giessLog(p.id).filter(d => d < heute).sort().forEach(d => {
+    if(!zuletzt || tage(zuletzt, d) >= n) zuletzt = d;
+  });
+  return !zuletzt || tage(zuletzt, heute) >= n;
+}
+
+const AENDERBAR = ['name','art','botanisch','typ','klasse','sonne','giftig','gift','notiz','frostMin','giessart','wichtig','raum','stellplatz','rankhilfe','stabTage'];
 
 /* ── Herkunft und Rangfolge ───────────────────────────────────
    Sieben Steckbrieffelder tragen einen Stempel, woher ihr Wert
@@ -9426,6 +9463,12 @@ document.addEventListener('click', e=>{
   feld.querySelectorAll('[data-bk]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
   sel.dispatchEvent(new Event('change', {bubbles:true}));
 });
+document.addEventListener('change', e=>{
+  const sel = e.target && e.target.closest && e.target.closest('select[data-e="rankhilfe"]');
+  if(!sel) return;
+  const f = sel.closest('.fgrid'), st = f ? f.querySelector('[data-stabfeld]') : null;
+  if(st) st.hidden = sel.value !== 'moos';
+});
 function bearbeitenInnenHTML(p){
   const gEig = giftVon(p);
   const gift = (gEig.quelle === 'nutzer' && gEig.status === 'fest')
@@ -9442,10 +9485,13 @@ function bearbeitenInnenHTML(p){
       ${bearbKnopfFeld(p, 'sonne', 'Licht', Object.keys(SONNE).map(k=>[k, SONNE[k].text, '']), p.sonne)}
       ${bearbKnopfFeld(p, 'giftig', 'Für Katzen', [['unbekannt', 'Nicht geprüft', ''], ['nein', 'Nicht giftig', ''], ['ja', 'Giftig', '']], gift)}
       ${bearbKnopfFeld(p, 'giessart', 'Gießart', Object.keys(GIESSARTEN).map(k=>[k, GIESSARTEN[k].name, '']), giessartVon(p),
-        'data-schalter="giessart"', `<span class="fhint">${esc(giessartText(p))}</span>`)}
+        'data-schalter="giessart"', `<span class="fhint" data-erkl>${esc(giessartText(p))}</span>`)}
+      ${bearbKnopfFeld(p, 'rankhilfe', 'Rankhilfe', [['', 'Keine', '']].concat(Object.keys(RANKHILFEN).map(k=>[k, RANKHILFEN[k], ''])), rankhilfeVon(p))}
+      ${bearbKnopfFeld(p, 'stabTage', 'Moosstab befeuchten', [['', 'Bei jedem Gießen', '']].concat(STAB_TAGE.map(n=>[String(n), 'Alle ' + n + ' Tage', ''])),
+        stabTageVon(p) ? String(stabTageVon(p)) : '', 'data-stabfeld' + (rankhilfeVon(p) === 'moos' ? '' : ' hidden'))}
       <label class="fspan"><span class="lab">Wichtig zu wissen</span>
         <textarea data-e="wichtig" data-p="${p.id}" rows="2" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie">${esc(p.wichtig||'')}</textarea>
-        <span class="fhint">Pflegehinweise, die über Leben und Tod entscheiden und die man nicht von selbst weiß. Erscheinen auf der Karte und werden auf den Urlaubszettel übernommen.</span></label>
+        <span class="fhint" data-erkl>Pflegehinweise, die über Leben und Tod entscheiden und die man nicht von selbst weiß. Erscheinen auf der Karte und werden auf den Urlaubszettel übernommen.</span></label>
       <label class="fspan"><span class="lab">Notiz</span><textarea data-e="notiz" data-p="${p.id}" rows="3">${esc(p.notiz||'')}</textarea></label>
     </div>
     <div class="tools bearb-fuss">
@@ -9840,11 +9886,11 @@ function pflanzeEntfernen(id){
   <div data-ans="sammlung" class="sam-answ" id="sammel-ansicht">
     <button type="button" class="sam-ansicht-knopf" id="sam-ansicht-knopf" aria-haspopup="true" aria-expanded="false" aria-controls="sam-ansicht-menue">Ansicht: <b id="sam-ansicht-name">Galerie</b><span class="sam-ansicht-pfeil" aria-hidden="true">▾</span></button>
     <div class="ein-wahl senkrecht wahl-liste sam-ansicht-menue" id="sam-ansicht-menue" role="group" aria-label="Ansicht der Sammlung wählen" hidden>
-      <button type="button" data-samstufe="liste" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Liste</b><i>Schnell, eine Zeile je Pflanze</i></span></button>
-      <button type="button" data-samstufe="2" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Galerie</b><i>Zwei Spalten, große Bilder</i></span></button>
-      <button type="button" data-samstufe="3" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 3</b><i>Bild, Name und wann gießen</i></span></button>
-      <button type="button" data-samstufe="4" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 4</b><i>Bild, Name und wann gießen</i></span></button>
-      <button type="button" data-samstufe="5" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 5</b><i>Bild, Name und ein Punkt fürs Gießen</i></span></button>
+      <button type="button" data-samstufe="liste" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Liste</b><i class="erkl-u">Schnell, eine Zeile je Pflanze</i></span></button>
+      <button type="button" data-samstufe="2" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Galerie</b><i class="erkl-u">Zwei Spalten, große Bilder</i></span></button>
+      <button type="button" data-samstufe="3" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 3</b><i class="erkl-u">Bild, Name und wann gießen</i></span></button>
+      <button type="button" data-samstufe="4" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 4</b><i class="erkl-u">Bild, Name und wann gießen</i></span></button>
+      <button type="button" data-samstufe="5" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Raster 5</b><i class="erkl-u">Bild, Name und ein Punkt fürs Gießen</i></span></button>
     </div>
   </div>
 
@@ -9883,7 +9929,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tags" aria-expanded="false" aria-label="Wozu sind Tags da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tags" hidden>
-      <p class="wz-hilfe" hidden>Ein Tag markiert eine Pflanze: dauerhaft als Markierung, etwa „Karnivoren“, oder mit Datum, etwa „Gießpause“ oder „Dünger“. Hier legst du Tags und eigene Gruppen an, änderst und löschst sie. Gesetzt wird ein Tag in der Pflanzenkarte.</p>
+      <p class="wz-hilfe" data-erkl hidden>Ein Tag markiert eine Pflanze: dauerhaft als Markierung, etwa „Karnivoren“, oder mit Datum, etwa „Gießpause“ oder „Dünger“. Hier legst du Tags und eigene Gruppen an, änderst und löschst sie. Gesetzt wird ein Tag in der Pflanzenkarte.</p>
       <div id="tv-inhalt"></div>
     </div>
   </section>
@@ -9897,7 +9943,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="raeume" aria-expanded="false" aria-label="Wozu ist die Raumliste da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-raeume" hidden>
-      <p class="wz-hilfe" hidden>Hier benennst du Räume und Stellplätze um oder löschst sie. Ein Tipp auf einen Raum zeigt seine Stellplätze. Neue legst du hier an oder beim Anlegen einer Pflanze.</p>
+      <p class="wz-hilfe" data-erkl hidden>Hier benennst du Räume und Stellplätze um oder löschst sie. Ein Tipp auf einen Raum zeigt seine Stellplätze. Neue legst du hier an oder beim Anlegen einer Pflanze.</p>
       <div id="rv-inhalt"></div>
     </div>
   </section>
@@ -9908,7 +9954,7 @@ function pflanzeEntfernen(id){
   <section id="doktor-sec" data-wz="doktor" hidden>
     <h2 class="wz-h2">Pflanzendoktor</h2>
     <div class="wz-in" id="wz-in-doktor" hidden>
-      <p class="wz-hilfe" hidden>Schritt für Schritt zur wahrscheinlichsten Ursache. Am schnellsten mit Foto und einer KI — die App rechnet aber auch ohne, dann über deine Angaben. Die App sieht dein Bild nicht, eine KI schon: Dienst wählen, öffnen, Foto anhängen, abschicken, Antwort zurück ins Feld. Zustand, Befund und Maßnahmen wandern dann in die gewählte Pflanze; fehlende oder veraltete Angaben im Steckbrief bietet die App dir danach zum Übernehmen an.</p>
+      <p class="wz-hilfe" data-erkl hidden>Schritt für Schritt zur wahrscheinlichsten Ursache. Am schnellsten mit Foto und einer KI — die App rechnet aber auch ohne, dann über deine Angaben. Die App sieht dein Bild nicht, eine KI schon: Dienst wählen, öffnen, Foto anhängen, abschicken, Antwort zurück ins Feld. Zustand, Befund und Maßnahmen wandern dann in die gewählte Pflanze; fehlende oder veraltete Angaben im Steckbrief bietet die App dir danach zum Übernehmen an.</p>
     <ol class="dok-schritte" id="dok-fortschritt"></ol>
     <p class="dok-schritt-zeile" id="dok-schritt-zeile" aria-hidden="true"></p>
 
@@ -9922,7 +9968,7 @@ function pflanzeEntfernen(id){
         </div>
         <div class="pwahl-gitter" id="dok-liste"></div>
       </div>
-      <p class="fhint">Steht die Pflanze nicht in deiner Sammlung, wähl „Keine bestimmte Pflanze“ — dann bekommst du die Einschätzung ohne Übernahme.</p>
+      <p class="fhint" data-erkl>Steht die Pflanze nicht in deiner Sammlung, wähl „Keine bestimmte Pflanze“ — dann bekommst du die Einschätzung ohne Übernahme.</p>
     </div>
 
     <div class="dok-stufe" id="dok-s2" hidden>
@@ -9965,7 +10011,7 @@ function pflanzeEntfernen(id){
         <span class="lab">Was möchtest du wissen?</span>
         <textarea id="dok-frage-eigen" rows="3"
           placeholder="Zum Beispiel: Was ist die braune Stelle am mittleren Blatt?"></textarea>
-        <span class="fhint">Deine Frage wird zuerst beantwortet. Ohne Eingabe schaut die KI die Pflanze allgemein an.</span>
+        <span class="fhint" data-erkl>Deine Frage wird zuerst beantwortet. Ohne Eingabe schaut die KI die Pflanze allgemein an.</span>
       </label>
       <div class="kidirekt" id="ki-direkt-doktor" hidden>
         <div class="kimodell">
@@ -10055,7 +10101,7 @@ function pflanzeEntfernen(id){
   <section data-wz="umtopfen" hidden>
     <h2 class="wz-h2">Umtopfen</h2>
     <div class="wz-in" id="wz-in-umtopfen" hidden>
-      <p class="wz-hilfe" hidden>Führt in sieben Schritten durch das Umtopfen und trägt am Ende ein, was sich geändert hat: neue Topfgröße, Verlaufseintrag und abgegangene Stecklinge. Einen Tag setzt du danach selbst über „Tag setzen“. Wenn dabei Stecklinge abgehen, werden sie als eigene Pflanzen angelegt und im Stammbaum mit der Mutter verbunden — du musst nichts doppelt eintragen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Führt in sieben Schritten durch das Umtopfen und trägt am Ende ein, was sich geändert hat: neue Topfgröße, Verlaufseintrag und abgegangene Stecklinge. Einen Tag setzt du danach selbst über „Tag setzen“. Wenn dabei Stecklinge abgehen, werden sie als eigene Pflanzen angelegt und im Stammbaum mit der Mutter verbunden — du musst nichts doppelt eintragen.</p>
 
       <ol class="ut-fortschritt" id="ut-fortschritt" aria-label="Fortschritt">
         <li class="jetzt"></li><li></li><li></li><li></li><li></li><li></li><li></li>
@@ -10147,7 +10193,7 @@ function pflanzeEntfernen(id){
   <section id="substrat-sec" data-wz="substrat" hidden>
     <h2 class="wz-h2">Substrat mischen</h2>
     <div class="wz-in" id="wz-in-substrat" hidden>
-      <p class="wz-hilfe" hidden>Hak an, was du zu Hause hast. Die App rechnet daraus die beste mögliche Mischung für die gewählte Pflanze — und sagt, wo sie am Ziel vorbeischrammt.</p>
+      <p class="wz-hilfe" data-erkl hidden>Hak an, was du zu Hause hast. Die App rechnet daraus die beste mögliche Mischung für die gewählte Pflanze — und sagt, wo sie am Ziel vorbeischrammt.</p>
 
     <ol class="as-fortschritt" id="sub-fortschritt" aria-label="Fortschritt">
       <li class="jetzt"></li><li></li><li></li><li></li>
@@ -10215,7 +10261,7 @@ function pflanzeEntfernen(id){
   <section id="vermehr-sec" data-wz="vermehren" hidden>
     <h2 class="wz-h2">Anzucht</h2>
     <div class="wz-in" id="wz-in-vermehren" hidden>
-      <p class="wz-hilfe" hidden>Alle Stecklinge an einem Ort: Gefäße wie Wassergläser stehen an Raum und Stellplatz, darin die Gruppen. Wasserwechsel und Befeuchten stehen im Gießplan wie bei einer Pflanze in Wasserkultur. „Neue Stecklinge“ zeigt, welche Wege bei einer Pflanze deiner Sammlung funktionieren.</p>
+      <p class="wz-hilfe" data-erkl hidden>Alle Stecklinge an einem Ort: Gefäße wie Wassergläser stehen an Raum und Stellplatz, darin die Gruppen. Wasserwechsel und Befeuchten stehen in der Gießliste wie bei einer Pflanze in Wasserkultur. „Neue Stecklinge“ zeigt, welche Wege bei einer Pflanze deiner Sammlung funktionieren.</p>
       <div id="az-ansicht"></div>
       <div id="az-assistent" hidden>
       <button type="button" class="linkbtn az-zurueck" data-az="liste">‹ Zur Übersicht</button>
@@ -10319,7 +10365,7 @@ function pflanzeEntfernen(id){
   <section data-wz="stammbaum" hidden>
     <h2 class="wz-h2">Stammbaum</h2>
     <div class="wz-in" id="wz-in-stammbaum" hidden>
-      <p class="wz-hilfe" hidden>Wer von wem abstammt. Erst die Liste aller Linien, dann der Baum einer einzelnen — und ein Antippen zeigt, was mit dieser Pflanze seit ihrer Abnahme passiert ist. Ableger und Teilungen erben die Eigenschaften der Mutterpflanze.</p>
+      <p class="wz-hilfe" data-erkl hidden>Wer von wem abstammt. Erst die Liste aller Linien, dann der Baum einer einzelnen — und ein Antippen zeigt, was mit dieser Pflanze seit ihrer Abnahme passiert ist. Ableger und Teilungen erben die Eigenschaften der Mutterpflanze.</p>
 
       <!-- Ansicht 1: alle Linien -->
       <div class="sb-ansicht an" id="sb-liste-ansicht">
@@ -10364,12 +10410,12 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="sicherung" aria-expanded="false" aria-label="Wozu ist die Sicherung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-sicherung" hidden>
-      <p class="wz-hilfe" hidden>Alle Daten liegen ausschließlich auf diesem Gerät — nichts davon liegt auf einem fremden Rechner. Eine Sicherung ist eine einzige Datei mit allem darin: Pflanzen, Fotos, Gießstand, Räume, Einstellungen. Lade sie ab und zu herunter und lege sie irgendwo ab, wo du sie wiederfindest. Auf einem neuen Gerät lädst du sie mit „Sicherung laden“ wieder ein, und alles steht wie vorher. „Alles zurücksetzen“ löscht den gesamten Bestand und lässt sich nicht rückgängig machen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Alle Daten liegen ausschließlich auf diesem Gerät — nichts davon liegt auf einem fremden Rechner. Eine Sicherung ist eine einzige Datei mit allem darin: Pflanzen, Fotos, Gießstand, Räume, Einstellungen. Lade sie ab und zu herunter und lege sie irgendwo ab, wo du sie wiederfindest. Auf einem neuen Gerät lädst du sie mit „Sicherung laden“ wieder ein, und alles steht wie vorher. „Alles zurücksetzen“ löscht den gesamten Bestand und lässt sich nicht rückgängig machen.</p>
     <p class="fhint" id="storage-state"></p>
     <p class="fhint" id="storage-size"></p>
     <!-- 4.0-beta.40 (Etappe 7): Fotos verkleinern -->
     <div class="fotos-klein" id="fotos-klein" hidden></div>
-    <p class="fhint" id="teilen-ersatz" data-erkl-kurz="Teilen hat hier nicht funktioniert." hidden>Teilen hat auf diesem Gerät nicht funktioniert — meist ist
+    <p class="fhint erkl-bleibt" id="teilen-ersatz" data-erkl-kurz="Teilen hat hier nicht funktioniert." hidden>Teilen hat auf diesem Gerät nicht funktioniert — meist ist
       die Sicherung mit vielen Fotos zu groß dafür. Nimm „Sicherung herunterladen“; die Datei liegt
       danach im Download-Ordner und lässt sich von dort über das Teilen-Symbol des Systems weitergeben.</p>
     <div class="tools ein-knoepfe">
@@ -10380,7 +10426,7 @@ function pflanzeEntfernen(id){
     <div class="tools ein-knoepfe" id="vorher-zeile" hidden>
       <button id="btn-vorher">Stand vor dem Laden zurückholen</button>
     </div>
-    <p class="fhint" id="vorher-hint" data-erkl-kurz="Macht das letzte Laden rückgängig." hidden>Beim letzten Laden einer Sicherung wurde der bis dahin
+    <p class="fhint erkl-bleibt" id="vorher-hint" data-erkl-kurz="Macht das letzte Laden rückgängig." hidden>Beim letzten Laden einer Sicherung wurde der bis dahin
       vorhandene Stand beiseitegelegt. Solange er hier steht, kommst du damit zurück.</p>
     <p class="ein-abschnitt">Erinnerung ohne Sicherung</p>
     <div class="ein-karte">
@@ -10400,7 +10446,7 @@ function pflanzeEntfernen(id){
       <p class="ein-abschnitt">Beta-Test</p>
       <div class="ein-karte">
         <div class="tools"><button type="button" class="haupt" id="btn-beta-faellig">Alle Pflanzen fällig machen</button></div>
-        <p class="fhint" id="beta-faellig-text" data-erkl>Trägt bei jeder Pflanze ein Gießdatum ein, das einen Tag über ihrem Abstand liegt, und macht Anzucht-Gläser fällig. Feucht-Meldungen werden gelöscht. Nur für Testdaten.</p>
+        <p class="fhint erkl-bleibt" id="beta-faellig-text" data-erkl>Trägt bei jeder Pflanze ein Gießdatum ein, das einen Tag über ihrem Abstand liegt, und macht Anzucht-Gläser fällig. Feucht-Meldungen werden gelöscht. Nur für Testdaten.</p>
       </div>
     </div>
     <div class="ein-gefahr">
@@ -10425,7 +10471,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="bibliothek" aria-expanded="false" aria-label="Wozu ist Nachschlagen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-bibliothek" hidden>
-      <p class="wz-hilfe" hidden>Zum Nachschlagen, unabhängig von deiner Sammlung. Die Artentabelle sagt, was eine Pflanze braucht, bevor du sie kaufst. Unter Wissenswertes steht, was rund um Wasser, Substrat und Nährstoffe immer wieder aufkommt. Die Gießklassen nennen die Richtwerte, mit denen die App rechnet.</p>
+      <p class="wz-hilfe" data-erkl hidden>Zum Nachschlagen, unabhängig von deiner Sammlung. Die Artentabelle sagt, was eine Pflanze braucht, bevor du sie kaufst. Unter Wissenswertes steht, was rund um Wasser, Substrat und Nährstoffe immer wieder aufkommt. Die Gießklassen nennen die Richtwerte, mit denen die App rechnet.</p>
 
       <div class="ein-liste">
         <button class="ein-zeile" data-mh-go="bib-arten">
@@ -10449,7 +10495,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="bib-arten" aria-expanded="false" aria-label="Wozu sind die Steckbriefe da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-bib-arten" hidden>
-      <p class="wz-hilfe" hidden>Alle Arten, die die App kennt — auch die, die du nicht besitzt. Gedacht zum Nachschlagen vor einem Kauf: Licht, Gießklasse, Giftigkeit für Tiere und Frosthärte stehen hier, bevor die Pflanze bei dir steht.</p>
+      <p class="wz-hilfe" data-erkl hidden>Alle Arten, die die App kennt — auch die, die du nicht besitzt. Gedacht zum Nachschlagen vor einem Kauf: Licht, Gießklasse, Giftigkeit für Tiere und Frosthärte stehen hier, bevor die Pflanze bei dir steht.</p>
       <label class="fspan bib-such-feld"><span class="lab">Art suchen</span>
         <input id="bib-such" placeholder="Name, botanisch oder Familie" autocomplete="off"></label>
       <p class="fhint" id="bib-such-zahl"></p>
@@ -10466,7 +10512,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="bib-wissen" aria-expanded="false" aria-label="Wozu ist das Nachschlagewerk da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-bib-wissen" hidden>
-      <p class="wz-hilfe" hidden>Was rund um Wasser, Substrat und Nährstoffe immer wieder aufkommt. Zum Aufklappen antippen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Was rund um Wasser, Substrat und Nährstoffe immer wieder aufkommt. Zum Aufklappen antippen.</p>
       <div id="bib-wissen"></div>
     </div>
   </section>
@@ -10479,7 +10525,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="bib-klassen" aria-expanded="false" aria-label="Wozu sind die Gießklassen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-bib-klassen" hidden>
-      <p class="wz-hilfe" hidden>Jede Pflanze gehört zu einer von vier Gießklassen. Die Abstände sind Richtwerte. Entscheidend ist die Fingerprobe, außer bei Klasse S, dort gilt das Anstauprinzip. Unter jeder Klasse steht, welche deiner Pflanzen dazugehören.</p>
+      <p class="wz-hilfe" data-erkl hidden>Jede Pflanze gehört zu einer von vier Gießklassen. Die Abstände sind Richtwerte. Entscheidend ist die Fingerprobe, außer bei Klasse S, dort gilt das Anstauprinzip. Unter jeder Klasse steht, welche deiner Pflanzen dazugehören.</p>
       <div class="ein-karte gp-liste" id="klassen"></div>
     </div>
   </section>
@@ -10494,7 +10540,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="giess" aria-expanded="false" aria-label="Wozu ist Gießen da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-giess" hidden>
-      <p class="wz-hilfe" hidden>Alles zum Gießen an einer Stelle. Oben der Zettel für die Vertretung. Darunter, was für alle Pflanzen gilt: welches Wasser du nimmst und ob die App im Winter von selbst größere Abstände ansetzt.</p>
+      <p class="wz-hilfe" data-erkl hidden>Alles zum Gießen an einer Stelle. Oben der Zettel für die Vertretung. Darunter, was für alle Pflanzen gilt: welches Wasser du nimmst und ob die App im Winter von selbst größere Abstände ansetzt.</p>
 
       <p class="ein-abschnitt">Planen</p>
       <div class="ein-liste">
@@ -10524,24 +10570,24 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="wasser" aria-expanded="false" aria-label="Wozu ist die Wasser-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-wasser" hidden>
-      <p class="wz-hilfe" hidden>Womit du gießt, entscheidet bei einigen Arten mehr als wie oft. Karnivoren sterben an Leitungswasser, Calathea und Orchideen bekommen braune Blattränder von hartem Wasser. Wenn hier steht, was aus deinem Hahn kommt, kann die App bei den betroffenen Pflanzen rechtzeitig warnen statt allgemein.</p>
+      <p class="wz-hilfe" data-erkl hidden>Womit du gießt, entscheidet bei einigen Arten mehr als wie oft. Karnivoren sterben an Leitungswasser, Calathea und Orchideen bekommen braune Blattränder von hartem Wasser. Wenn hier steht, was aus deinem Hahn kommt, kann die App bei den betroffenen Pflanzen rechtzeitig warnen statt allgemein.</p>
 
       <p class="ein-abschnitt">Was du normalerweise nimmst</p>
       <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Wasserart wählen" id="wasser-wahl">
-        <button data-wasser="leitung"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Leitungswasser</b><i>Passt für die meisten Pflanzen</i></span></button>
-        <button data-wasser="abgestanden"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Leitungswasser, abgestanden</b><i>Weniger Chlor, nicht weniger Kalk</i></span></button>
-        <button data-wasser="regen"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Regenwasser</b><i>Weich, kalkfrei, fast immer ideal</i></span></button>
-        <button data-wasser="osmose"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Osmose oder destilliert</b><i>Nötig für Karnivoren</i></span></button>
+        <button data-wasser="leitung"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Leitungswasser</b><i class="erkl-u">Passt für die meisten Pflanzen</i></span></button>
+        <button data-wasser="abgestanden"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Leitungswasser, abgestanden</b><i class="erkl-u">Weniger Chlor, nicht weniger Kalk</i></span></button>
+        <button data-wasser="regen"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Regenwasser</b><i class="erkl-u">Weich, kalkfrei, fast immer ideal</i></span></button>
+        <button data-wasser="osmose"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Osmose oder destilliert</b><i class="erkl-u">Nötig für Karnivoren</i></span></button>
       </div>
-      <p class="fhint" id="wasser-text"></p>
+      <p class="fhint" data-erkl id="wasser-text"></p>
 
       <p class="ein-abschnitt">So gieße ich meistens</p>
       <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Gießweise wählen" id="weise-wahl">
-        <button data-weise="oben"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von oben mit der Kanne</b><i>Der ganze Ballen wird nass, Salze werden ausgespült</i></span></button>
-        <button data-weise="unten"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von unten im Gefäß (Eimer, Wanne)</b><i>Die Erde zieht nur, was sie aufnehmen kann</i></span></button>
-        <button data-weise="pflanze"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wie es jede Pflanze braucht</b><i>Die Gießart jeder Pflanze gilt</i></span></button>
+        <button data-weise="oben"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von oben mit der Kanne</b><i class="erkl-u">Der ganze Ballen wird nass, Salze werden ausgespült</i></span></button>
+        <button data-weise="unten"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Von unten im Gefäß (Eimer, Wanne)</b><i class="erkl-u">Die Erde zieht nur, was sie aufnehmen kann</i></span></button>
+        <button data-weise="pflanze"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wie es jede Pflanze braucht</b><i class="erkl-u">Die Gießart jeder Pflanze gilt</i></span></button>
       </div>
-      <p class="fhint" id="weise-text"></p>
+      <p class="fhint" data-erkl id="weise-text"></p>
 
       <p class="ein-abschnitt">Härte deines Leitungswassers</p>
       <p class="fhint" data-erkl-kurz="Steht auf der Wasserrechnung.">Steht auf der Rechnung des Wasserwerks oder auf dessen Netzseite. Unbekannt ist in Ordnung — dann warnt die App nur bei Arten, die grundsätzlich kein Leitungswasser vertragen.</p>
@@ -10551,7 +10597,7 @@ function pflanzeEntfernen(id){
         <button data-haerte="hart">Hart</button>
         <button data-haerte="">Unbekannt</button>
       </div>
-      <p class="fhint" id="haerte-text"></p>
+      <p class="fhint" data-erkl id="haerte-text"></p>
 
       <p class="ein-abschnitt">Gießmodus</p>
       <div class="ein-karte">
@@ -10574,12 +10620,12 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="rhythmus" aria-expanded="false" aria-label="Wozu ist die Rhythmus-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-rhythmus" hidden>
-      <p class="wz-hilfe" hidden>Im Winter verdunstet eine Pflanze deutlich weniger. Wer dann weitergießt wie im Juli, ersäuft sie — der häufigste Fehler überhaupt. Die App rechnet die Abstände von selbst größer, sobald die kalte Hälfte des Jahres beginnt. Abschalten kannst du das, wenn du in einem Wintergarten oder unter Lampen hältst, wo sich über das Jahr wenig ändert.</p>
+      <p class="wz-hilfe" data-erkl hidden>Im Winter verdunstet eine Pflanze deutlich weniger. Wer dann weitergießt wie im Juli, ersäuft sie — der häufigste Fehler überhaupt. Die App rechnet die Abstände von selbst größer, sobald die kalte Hälfte des Jahres beginnt. Abschalten kannst du das, wenn du in einem Wintergarten oder unter Lampen hältst, wo sich über das Jahr wenig ändert.</p>
 
       <p class="ein-abschnitt">Wann du gießt</p>
       <div class="ein-wahl senkrecht wahl-liste" role="group" aria-label="Wann du gießt" id="gtmodus-wahl">
-        <button data-gtmodus="faellig"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wenn eine Pflanze dran ist</b><i>Jede Pflanze nach ihrem eigenen Abstand</i></span></button>
-        <button data-gtmodus="fest"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>An festen Tagen</b><i>Die App legt jede Pflanze auf deine Gießtage</i></span></button>
+        <button data-gtmodus="faellig"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>Wenn eine Pflanze dran ist</b><i class="erkl-u">Jede Pflanze nach ihrem eigenen Abstand</i></span></button>
+        <button data-gtmodus="fest"><span class="wl-punkt" aria-hidden="true"></span><span class="wl-txt"><b>An festen Tagen</b><i class="erkl-u">Die App legt jede Pflanze auf deine Gießtage</i></span></button>
       </div>
       <div id="gt-fest" hidden>
         <div class="ein-karte gt-vorschlag" id="gt-vorschlag">
@@ -10617,7 +10663,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="urlaub" aria-expanded="false" aria-label="Wozu ist der Vertretungszettel da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-urlaub" hidden>
-      <p class="wz-hilfe" hidden>Wer während deiner Abwesenheit gießt, bekommt einen Zettel mit Raumliste, Nummern, Bildern und Terminen — darauf stehen nur die Pflanzen, die im Zeitraum wirklich drankommen. Pflanzen in der Gießpause und Pflanzen ohne Eintrag werden getrennt aufgeführt, damit die Vertretung weiß, warum sie fehlen. Der Zettel wird immer in Schwarzweiß gesetzt, damit er auf jedem Drucker lesbar bleibt.</p>
+      <p class="wz-hilfe" data-erkl hidden>Wer während deiner Abwesenheit gießt, bekommt einen Zettel mit Raumliste, Nummern, Bildern und Terminen — darauf stehen nur die Pflanzen, die im Zeitraum wirklich drankommen. Pflanzen in der Gießpause und Pflanzen ohne Eintrag werden getrennt aufgeführt, damit die Vertretung weiß, warum sie fehlen. Der Zettel wird immer in Schwarzweiß gesetzt, damit er auf jedem Drucker lesbar bleibt.</p>
 
     <ol class="url-schritte">
       <li>
@@ -10683,7 +10729,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="wetter" aria-expanded="false" aria-label="Wozu ist das Wetter da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-wetter" hidden>
-      <p class="wz-hilfe" hidden>Wer Pflanzen auf dem Balkon stehen hat, gießt bei angesagtem Regen umsonst — und bei dreißig Grad reicht der übliche Rhythmus oft nicht. Trägst du hier einen Ort ein, zeigt „Heute“ eine Zeile mit Temperatur und Regen. Die App ändert damit nichts an deinen Gießabständen; sie sagt nur Bescheid. Die Daten kommen von Open-Meteo, einem freien Wetterdienst ohne Anmeldung. Übertragen wird nur der Ortsname beim Suchen und danach die Koordinaten — keine Angaben zu dir oder deinen Pflanzen. Ohne eingetragenen Ort fragt die App nichts ab und die Zeile bleibt aus. Unten stehen der Tagesverlauf bis Mitternacht und ein Ausblick über sieben Tage; geht es darin unter null, wird der Tag als Frosttag benannt. Alles davon steckt in derselben einen Anfrage — sie läuft nur beim Start und nur, wenn der letzte Wert älter als eine Stunde ist.</p>
+      <p class="wz-hilfe" data-erkl hidden>Wer Pflanzen auf dem Balkon stehen hat, gießt bei angesagtem Regen umsonst — und bei dreißig Grad reicht der übliche Rhythmus oft nicht. Trägst du hier einen Ort ein, zeigt „Heute“ eine Zeile mit Temperatur und Regen. Die App ändert damit nichts an deinen Gießabständen; sie sagt nur Bescheid. Die Daten kommen von Open-Meteo, einem freien Wetterdienst ohne Anmeldung. Übertragen wird nur der Ortsname beim Suchen und danach die Koordinaten — keine Angaben zu dir oder deinen Pflanzen. Ohne eingetragenen Ort fragt die App nichts ab und die Zeile bleibt aus. Unten stehen der Tagesverlauf bis Mitternacht und ein Ausblick über sieben Tage; geht es darin unter null, wird der Tag als Frosttag benannt. Alles davon steckt in derselben einen Anfrage — sie läuft nur beim Start und nur, wenn der letzte Wert älter als eine Stunde ist.</p>
       <div class="wt-suche">
         <label class="fspan" for="wt-ort"><span class="lab">Ort</span></label>
         <div class="wt-zeile feld-knopf">
@@ -10706,7 +10752,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tiere" aria-expanded="false" aria-label="Wozu ist die Haustier-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tiere" hidden>
-      <p class="wz-hilfe" hidden>Hier legst du fest, ob die App vor giftigen Pflanzen in Reichweite warnen soll — und vor welchen Tieren. Die Angaben stammen aus der Giftpflanzenliste der ASPCA sowie aus Fachlisten für Nager und Ziervögel. Für Hund und Katze ist die Datenlage gut, bei Nagern und Vögeln lückenhaft — was sich nicht belegen ließ, wird als „ungeprüft“ ausgewiesen und nicht als unbedenklich. Im Zweifel gilt: außer Reichweite stellen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Hier legst du fest, ob die App vor giftigen Pflanzen in Reichweite warnen soll — und vor welchen Tieren. Die Angaben stammen aus der Giftpflanzenliste der ASPCA sowie aus Fachlisten für Nager und Ziervögel. Für Hund und Katze ist die Datenlage gut, bei Nagern und Vögeln lückenhaft — was sich nicht belegen ließ, wird als „ungeprüft“ ausgewiesen und nicht als unbedenklich. Im Zweifel gilt: außer Reichweite stellen.</p>
     <div class="ein-karte"><div class="ctrl-row ein-ctrl"><span class="ctrl-lab">Hast du Haustiere?</span>
       <span class="tier-wahl segment" id="tier-anaus">
         <button class="chip" data-tieraktiv="1" aria-pressed="false">Ja</button>
@@ -10728,7 +10774,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="ansicht" aria-expanded="false" aria-label="Wozu ist die Ansicht-Einstellung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-ansicht" hidden>
-      <p class="wz-hilfe" hidden>Normalerweise ist die App in vier Reiter geteilt, die unten am Rand stehen. Mit dem Haken läuft stattdessen wieder alles untereinander auf einer einzigen langen Seite. Am großen Bildschirm ist das oft angenehmer, am Handy meistens nicht. Der Modus Sammler zeigt nur das Wichtigste, der Modus Entdecker alles. Darunter lässt sich jeder Schalter einzeln umlegen und die Kartendichte wählen; dann heißt der Modus „angepasst“, und „Zurücksetzen“ stellt die Vorgabe wieder her. Die Schalter blenden nur aus: Es geht nichts verloren, und keine Rechnung ändert sich. Pflegehinweise sind die kleinen grauen Kästen auf den Pflanzenkarten — etwa wenn an einem Platz deutlich weniger Sonne ankommt, als die Art gewohnt ist. Sie verbieten nichts und ändern nichts, sie sagen nur Bescheid. Einzelne lassen sich mit dem × wegklicken, mit dem Haken hier verschwinden sie alle.</p>
+      <p class="wz-hilfe" data-erkl hidden>Der Modus Sammler zeigt nur das Wichtigste, der Modus Entdecker alles. Darunter lässt sich jeder Schalter einzeln umlegen und die Kartendichte wählen; dann heißt der Modus „angepasst“, und „Zurücksetzen“ stellt die Vorgabe wieder her. Die Schalter blenden nur aus: Es geht nichts verloren, und keine Rechnung ändert sich. Die Erklärtexte stellst du unabhängig vom Modus ein; Warnungen, Rückfragen und Fehlermeldungen bleiben immer sichtbar.</p>
     <span class="dsn-lab ein-abschnitt">Design</span>
     <div class="dsn-wahl" role="group" aria-label="Design wählen" id="dsn-wahl"></div>
     <p class="ein-abschnitt">Modus</p>
@@ -10776,7 +10822,15 @@ function pflanzeEntfernen(id){
       <button data-dichte="normal" aria-pressed="true">Normal</button>
       <button data-dichte="voll">Ausführlich</button>
     </div>
-    <p class="fhint" id="dichte-text"></p>
+    <p class="fhint" data-erkl id="dichte-text"></p>
+    <!-- 4.0-beta.44 (Etappe 13): Erklärtexte, unabhängig vom Modus -->
+    <p class="ein-abschnitt">Erklärtexte</p>
+    <div class="ein-wahl segment" role="group" aria-label="Erklärtexte wählen" id="erkl-wahl">
+      <button type="button" data-erkl-stufe="aus" aria-pressed="false">Aus</button>
+      <button type="button" data-erkl-stufe="knapp" aria-pressed="false">Knapp</button>
+      <button type="button" data-erkl-stufe="voll" aria-pressed="false">Ausführlich</button>
+    </div>
+    <p class="fhint">Aus zeigt keine Erklärungen, Knapp einen Satz, Ausführlich alles; Warnungen bleiben immer.</p>
     </div>
   </section>
 
@@ -10788,7 +10842,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="kidienst" aria-expanded="false" aria-label="Wozu ist der KI-Dienst da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-kidienst" hidden>
-      <p class="wz-hilfe" hidden>Ohne Schlüssel läuft jede KI-Frage über die Zwischenablage: Frage kopieren, Dienst öffnen, Antwort zurückkopieren. Mit einem eigenen Schlüssel fragt die App selbst — Pflanzendoktor und Anlegen bekommen die Antwort direkt ins Feld. Der Weg über die Zwischenablage bleibt daneben bestehen und funktioniert weiter, auch mit ChatGPT, Claude oder Perplexity.</p>
+      <p class="wz-hilfe" data-erkl hidden>Ohne Schlüssel läuft jede KI-Frage über die Zwischenablage: Frage kopieren, Dienst öffnen, Antwort zurückkopieren. Mit einem eigenen Schlüssel fragt die App selbst — Pflanzendoktor und Anlegen bekommen die Antwort direkt ins Feld. Der Weg über die Zwischenablage bleibt daneben bestehen und funktioniert weiter, auch mit ChatGPT, Claude oder Perplexity.</p>
 
       <p class="ein-abschnitt">Dein Schlüssel</p>
       <div class="ki-key-feld" id="ki-key-eingabe">
@@ -10812,7 +10866,7 @@ function pflanzeEntfernen(id){
 
       <details class="ki-prot-box">
         <summary>Letzte Anfragen <span id="ki-protokoll-zahl"></span></summary>
-        <p class="fhint">Jede Anfrage an Google, auch die Prüfung beim Holen der Liste. Damit lässt sich das Diagramm in Google AI Studio nachzählen. Es stehen höchstens 20 Einträge hier, der neueste oben.</p>
+        <p class="fhint" data-erkl>Jede Anfrage an Google, auch die Prüfung beim Holen der Liste. Damit lässt sich das Diagramm in Google AI Studio nachzählen. Es stehen höchstens 20 Einträge hier, der neueste oben.</p>
         <div id="ki-protokoll"></div>
       </details>
 
@@ -10845,7 +10899,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tour" aria-expanded="false" aria-label="Wozu ist die App Tour da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tour" hidden>
-      <p class="wz-hilfe" hidden>Beim ersten Öffnen eines Bereichs legt sich ein kurzes Kapitel der App Tour über die Seite: der Rest verblasst, ein Pfeil zeigt auf das, worum es gerade geht. Jedes Kapitel lässt sich mit „Überspringen“ oder dem × sofort schließen und mit „Zurück“ noch einmal durchblättern — ein versehentlich weggetippter Schritt ist also nicht verloren. Von allein kommt ein Kapitel kein zweites Mal. Hier stehen alle Kapitel zum erneuten Ansehen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Beim ersten Öffnen eines Bereichs legt sich ein kurzes Kapitel der App Tour über die Seite: der Rest verblasst, ein Pfeil zeigt auf das, worum es gerade geht. Jedes Kapitel lässt sich mit „Überspringen“ oder dem × sofort schließen und mit „Zurück“ noch einmal durchblättern — ein versehentlich weggetippter Schritt ist also nicht verloren. Von allein kommt ein Kapitel kein zweites Mal. Hier stehen alle Kapitel zum erneuten Ansehen.</p>
       <div id="tour-liste"></div>
       <div class="tools ein-knoepfe">
         <button id="btn-tour-alle">Alle Kapitel zurücksetzen</button>
@@ -10866,7 +10920,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="rueck" aria-expanded="false" aria-label="Wozu ist die Rückmeldung da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-rueck" hidden>
-      <p class="wz-hilfe" hidden>Etwas fehlt, etwas stimmt nicht, eine Art gehört in die Bibliothek? Schreib es hier auf — die App baut daraus eine fertige Nachricht samt Angaben zu deiner Fassung. Du kannst sie als E-Mail öffnen oder den Text kopieren und irgendwo einfügen. Die technischen Angaben helfen beim Nachstellen und enthalten keine Pflanzendaten.</p>
+      <p class="wz-hilfe" data-erkl hidden>Etwas fehlt, etwas stimmt nicht, eine Art gehört in die Bibliothek? Schreib es hier auf — die App baut daraus eine fertige Nachricht samt Angaben zu deiner Fassung. Du kannst sie als E-Mail öffnen oder den Text kopieren und irgendwo einfügen. Die technischen Angaben helfen beim Nachstellen und enthalten keine Pflanzendaten.</p>
     <div class="fgrid">
       <label class="fspan"><span class="lab">Worum geht es</span><select id="ru-art">
         <option value="fehler">Etwas funktioniert nicht</option>
@@ -10877,7 +10931,7 @@ function pflanzeEntfernen(id){
       <label class="fspan"><span class="lab">Deine Nachricht</span>
         <textarea id="ru-text" rows="5" placeholder="Was ist passiert, was hattest du erwartet?"></textarea></label>
       <label class="fspan"><span class="lab">Empfänger</span><input id="ru-mail" type="email" placeholder="name@beispiel.de">
-        <span class="fhint">Wird gemerkt. Leer lassen, wenn du den Text lieber nur kopieren willst.</span></label>
+        <span class="fhint" data-erkl>Wird gemerkt. Leer lassen, wenn du den Text lieber nur kopieren willst.</span></label>
       <label class="fspan check"><input type="checkbox" role="switch" id="ru-technik" checked>
         <span class="lab" style="display:inline">Technische Angaben anhängen</span></label>
     </div>
@@ -10899,7 +10953,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="install" aria-expanded="false" aria-label="Wozu ist die Installation da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-install" hidden>
-      <p class="wz-hilfe" hidden>Installiert liegt die App als eigenes Symbol auf dem Startbildschirm, startet ohne Browserleiste und funktioniert auch ohne Netz. Die Daten bleiben dieselben — es ist kein zweiter Bestand, sondern derselbe.</p>
+      <p class="wz-hilfe" data-erkl hidden>Installiert liegt die App als eigenes Symbol auf dem Startbildschirm, startet ohne Browserleiste und funktioniert auch ohne Netz. Die Daten bleiben dieselben — es ist kein zweiter Bestand, sondern derselbe.</p>
     <p class="install-hin" id="install-text"></p>
     <div class="tools"><button id="btn-installieren" class="haupt" hidden>Jetzt installieren</button></div>
     </div>
@@ -10914,7 +10968,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="melde" aria-expanded="false" aria-label="Was steht hier?">i</button>
     </div>
     <div class="wz-in" id="mh-in-melde" hidden>
-      <p class="wz-hilfe" hidden>Hier stehen Arten, die die Bibliothek nicht kennt, und deine gelernten Arten aus KI-Antworten. Mit dem Knopf baust du daraus eine fertige Nachricht — abschicken oder in den Chat kopieren, dann kommen sie mit vollständigen Pflegedaten in die nächste Fassung. Der Block erscheint nur, solange etwas darin liegt.</p>
+      <p class="wz-hilfe" data-erkl hidden>Hier stehen Arten, die die Bibliothek nicht kennt, und deine gelernten Arten aus KI-Antworten. Mit dem Knopf baust du daraus eine fertige Nachricht — abschicken oder in den Chat kopieren, dann kommen sie mit vollständigen Pflegedaten in die nächste Fassung. Der Block erscheint nur, solange etwas darin liegt.</p>
     <div id="melde-liste"></div>
     <div class="tools">
       <button id="btn-melden" class="haupt">Nachricht erzeugen</button>
@@ -10927,7 +10981,7 @@ function pflanzeEntfernen(id){
         <button id="btn-melde-mail">Als E-Mail öffnen</button>
         <button id="btn-melde-github">Auf GitHub melden</button>
       </div>
-      <p class="fhint melde-konto">Für GitHub brauchst du ein GitHub-Konto. Ohne Konto geht es per E-Mail.</p>
+      <p class="fhint melde-konto" data-erkl>Für GitHub brauchst du ein GitHub-Konto. Ohne Konto geht es per E-Mail.</p>
     </div>
     </div>
   </section>
@@ -10940,7 +10994,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="patch" aria-expanded="false" aria-label="Was steht hier?">i</button>
     </div>
     <div class="wz-in" id="mh-in-patch" hidden>
-      <p class="wz-hilfe" hidden>Hier steht, was in jeder Fassung dazugekommen ist, besser geworden ist oder repariert wurde — nur die Funktionen, nicht die Technik dahinter. Nach einem Update zeigt die App den obersten Eintrag einmal von selbst; hier lassen sich auch die älteren nachlesen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Hier steht, was in jeder Fassung dazugekommen ist, besser geworden ist oder repariert wurde — nur die Funktionen, nicht die Technik dahinter. Nach einem Update zeigt die App den obersten Eintrag einmal von selbst; hier lassen sich auch die älteren nachlesen.</p>
     <div id="patch-liste"></div>
     <p class="fhint pn-alt">Ältere Fassungen stehen im <a id="patch-changelog" href="https://github.com/cmohr0212/GreenkeeperAi/blob/HEAD/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG</a>.</p>
     </div>
@@ -10954,7 +11008,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="sprot" aria-expanded="false" aria-label="Was steht hier?">i</button>
     </div>
     <div class="wz-in" id="mh-in-sprot" hidden>
-      <p class="wz-hilfe" hidden>Eine Messung, keine Funktion. Ändert sich die Höhe der Seite, während der Finger noch wischt, klemmt der Browser den Scrollstand ans neue Ende — und man prallt zurück. Hier steht, wann das passiert ist und um wie viel. Wer nichts sucht, braucht die Liste nicht.</p>
+      <p class="wz-hilfe" data-erkl hidden>Eine Messung, keine Funktion. Ändert sich die Höhe der Seite, während der Finger noch wischt, klemmt der Browser den Scrollstand ans neue Ende — und man prallt zurück. Hier steht, wann das passiert ist und um wie viel. Wer nichts sucht, braucht die Liste nicht.</p>
       <p class="sprot-hin">Scrolle in der Sammlung, bis es prallt. Dann hier auf „Nachsehen“ tippen und die Zeilen weitergeben.</p>
       <div class="sprot-taten">
         <button class="linkbtn" data-do="sprot-lesen">Nachsehen</button>
@@ -11229,7 +11283,7 @@ function pflanzeEntfernen(id){
             <div class="al-feld">
               <span class="lab">Du kennst den Namen?</span>
               <input id="f-kiname" placeholder="z. B. Alocasia baginda" autocomplete="off" spellcheck="false" aria-describedby="f-kiname-hint">
-              <span class="fhint" id="f-kiname-hint">Botanisch oder deutsch. Dann holt die KI nur die Daten dazu, ohne Foto. Leer lassen, wenn sie die Art am Foto bestimmen soll.</span>
+              <span class="fhint" data-erkl id="f-kiname-hint">Botanisch oder deutsch. Dann holt die KI nur die Daten dazu, ohne Foto. Leer lassen, wenn sie die Art am Foto bestimmen soll.</span>
             </div>
             <div class="al-feld">
               <span class="lab">Was die KI liefert</span>
@@ -11266,7 +11320,7 @@ function pflanzeEntfernen(id){
               <summary>Prompt anzeigen und selbst kopieren</summary>
               <textarea id="ki-text" aria-label="Prompt für die KI" readonly></textarea>
               <div class="tools"><button id="btn-ki-kopie" class="haupt" type="button">Prompt kopieren</button></div>
-              <p class="kihinweis">Falls das Kopieren am Handy nicht greift: langes Tippen ins Feld, alles markieren, kopieren.</p>
+              <p class="kihinweis" data-erkl>Falls das Kopieren am Handy nicht greift: langes Tippen ins Feld, alles markieren, kopieren.</p>
             </details>
             <div class="tools" style="margin-top:10px">
               <button id="btn-paste-auf" type="button">Antwort einfügen</button>
@@ -11279,7 +11333,7 @@ function pflanzeEntfernen(id){
             </div>
           </details>
         </div>
-        <p class="fhint" id="al-hand-hinweis" hidden>Nichts weiter zu tun — die Angaben trägst du auf den nächsten Stufen selbst ein.</p>
+        <p class="fhint" data-erkl id="al-hand-hinweis" hidden>Nichts weiter zu tun — die Angaben trägst du auf den nächsten Stufen selbst ein.</p>
       </div>
 
       <!-- Stufe 3: die Pflanze -->
@@ -11411,7 +11465,7 @@ function pflanzeEntfernen(id){
                 aria-label="Topfdurchmesser in Zentimetern">
             </label>
             <p class="topf-ergebnis" id="f-topf-ergebnis"></p>
-            <span class="fhint">Zählt, sobald du den Schieber antippst oder bewegst.</span>
+            <span class="fhint" data-erkl>Zählt, sobald du den Schieber antippst oder bewegst.</span>
             <p class="al-pflicht" id="al-pflicht-topf" hidden>Bitte den Topfdurchmesser einstellen.</p>
           </div>
           <div class="al-feld">
@@ -11430,6 +11484,29 @@ function pflanzeEntfernen(id){
             <div class="al-knoepfe" id="f-ablauf-knoepfe"></div>
           </div>
         </div>
+        <div class="al-feld">
+          <span class="lab">Rankhilfe</span>
+          <select id="f-rankhilfe" hidden>
+            <option value="">Keine</option>
+            <option value="moos">Moosstab</option>
+            <option value="kokos">Kokosstab</option>
+            <option value="gitter">Gitter</option>
+            <option value="brett">Brett</option>
+          </select>
+          <div class="al-knoepfe" id="f-rankhilfe-knoepfe"></div>
+        </div>
+        <div class="al-feld" id="al-stab" hidden>
+          <span class="lab">Moosstab befeuchten</span>
+          <select id="f-stabtage" hidden>
+            <option value="">Bei jedem Gießen</option>
+            <option value="2">Alle 2 Tage</option>
+            <option value="3">Alle 3 Tage</option>
+            <option value="5">Alle 5 Tage</option>
+            <option value="7">Alle 7 Tage</option>
+          </select>
+          <div class="al-knoepfe" id="f-stabtage-knoepfe"></div>
+          <span class="fhint" data-erkl>Beim Gießen steht dann „+ Moosstab“ auf der Karte.</span>
+        </div>
       </div>
 
       <!-- Stufe 5: Bilder, Notizen, Abschluss -->
@@ -11444,7 +11521,7 @@ function pflanzeEntfernen(id){
         <div class="al-feld">
           <span class="lab">Wichtig zu wissen</span>
           <textarea id="f-wichtig" rows="3" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie"></textarea>
-          <span class="fhint">Pflegehinweise, die über Leben und Tod entscheiden.</span>
+          <span class="fhint" data-erkl>Pflegehinweise, die über Leben und Tod entscheiden.</span>
         </div>
         <div class="al-feld">
           <span class="lab">Notizen</span>
@@ -11628,6 +11705,20 @@ document.querySelectorAll('[data-erkl], [data-erkl-kurz]').forEach(el=>{
   if(el.classList.contains('erkl')) return;
   erklSetzen(el, el.textContent, el.hasAttribute('data-erkl-kurz') ? el.dataset.erklKurz : undefined);
 });
+/* 4.0-beta.44 (Etappe 13): Erklärtexte, die der Code später einsetzt,
+   bekommen dieselbe Form. Nur reiner Text wird gekürzt; ein Absatz mit
+   Fettschrift oder Link bleibt ganz und hängt nur am Schalter. */
+function erklNeu(el){
+  if(!el || el.classList.contains('erkl') || el.children.length) return;
+  erklSetzen(el, el.textContent, el.hasAttribute('data-erkl-kurz') ? el.dataset.erklKurz : undefined);
+}
+if(typeof MutationObserver === 'function'){
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => {
+    if(n.nodeType !== 1) return;
+    if(n.matches('[data-erkl], [data-erkl-kurz]')) erklNeu(n);
+    if(n.firstElementChild) n.querySelectorAll('[data-erkl], [data-erkl-kurz]').forEach(erklNeu);
+  }))).observe(document.documentElement, {childList:true, subtree:true});
+}
 
 /* ══════════════════ Zustand ══════════════════ */
 const KEY = 'gk-beta';
@@ -11653,7 +11744,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.43';
+const FASSUNG = '4.0-beta.44';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13827,7 +13918,7 @@ function tagFensterZeichnen(){
   const zeitFelder = t.art === 'zeitraum'
     ? `<label class="fspan zeile"><span class="lab">Dauer in Tagen</span>
         <input type="number" id="tagf-dauer" min="0" max="730" inputmode="numeric" value="${dauer}"></label>
-       <p class="fhint">0 heißt: läuft, bis du „Beenden“ tippst.</p>
+       <p class="fhint" data-erkl>0 heißt: läuft, bis du „Beenden“ tippst.</p>
        <label class="check"><input type="checkbox" role="switch" id="tagf-er"${er ? ' checked' : ''}> <span class="lab">Erinnerung bei Ende</span></label>` : '';
   const warn = TAGF.warn.length ? `<div class="tag-warn" id="tagf-warn" role="status">${TAGF.warn.map(w =>
     `<p>${esc(w.text)}</p>`).join('')}</div>` : '';
@@ -13998,11 +14089,11 @@ function tvZeichnen(){
     const mk = f.art === 'marke';
     box.innerHTML = `<button type="button" class="mehr-dazu" data-tv="zurueck">${gastNeu ? '‹ Zurück' : '‹ Alle Tags'}</button>
       <p class="ein-abschnitt">${TV.edit === 'neu' ? 'Neuer Tag' : 'Tag bearbeiten'}</p>
-      ${fest ? '<p class="fhint">Winterruhe ist fest: Name und Wirkung bleiben. Dauer und Prozent stellst du hier vor oder je Pflanze beim Setzen ein.</p>' : ''}
+      ${fest ? '<p class="fhint" data-erkl>Winterruhe ist fest: Name und Wirkung bleiben. Dauer und Prozent stellst du hier vor oder je Pflanze beim Setzen ein.</p>' : ''}
       <label class="fspan"><span class="lab">Name</span><input type="text" id="tv-name" maxlength="40" value="${esc(f.name)}"${fest ? ' disabled' : ''}></label>
       <span class="lab">Art</span>
       <div class="as-knoepfe" role="group" aria-label="Art">${tvKnopf('data-tv-art', 'marke', 'Markierung', mk, fest)}${tvKnopf('data-tv-art', 'einmalig', 'Einmalig', !zr && !mk, fest)}${tvKnopf('data-tv-art', 'zeitraum', 'Zeitraum', zr, fest)}</div>
-      <p class="fhint">Markierung: bleibt an der Pflanze, bis du sie entfernst, zum Suchen und Filtern. Einmalig: an einem Tag passiert. Zeitraum: gilt eine Weile.</p>
+      <p class="fhint" data-erkl>Markierung: bleibt an der Pflanze, bis du sie entfernst, zum Suchen und Filtern. Einmalig: an einem Tag passiert. Zeitraum: gilt eine Weile.</p>
       ${zr ? `<span class="lab">Gießen</span>
       <div class="as-knoepfe" role="group" aria-label="Gießen">${tvKnopf('data-tv-giess', '', 'Keine', !f.giess, fest)}${Object.keys(TAG_GIESS).map(k =>
         tvKnopf('data-tv-giess', k, TAG_GIESS[k].name, f.giess === k, fest)).join('')}</div>
@@ -14011,7 +14102,7 @@ function tvZeichnen(){
       ${mk ? '' : `<label class="check"><input type="checkbox" role="switch" id="tv-duenger"${f.duenger ? ' checked' : ''}> <span class="lab">Dünger</span></label>
       <label class="check"><input type="checkbox" role="switch" id="tv-schaedling"${f.schaedling ? ' checked' : ''}> <span class="lab">Schädlingsbekämpfung</span></label>`}
       ${zr ? `<label class="fspan zeile"><span class="lab">Dauer in Tagen</span><input type="number" id="tv-dauer" min="0" max="730" inputmode="numeric" value="${f.dauer}"></label>
-      <p class="fhint">0 heißt: läuft, bis du „Beenden“ tippst.</p>
+      <p class="fhint" data-erkl>0 heißt: läuft, bis du „Beenden“ tippst.</p>
       <label class="check"><input type="checkbox" role="switch" id="tv-erinnern"${f.erinnern ? ' checked' : ''}> <span class="lab">Erinnerung bei Ende</span></label>` : ''}
       <span class="lab">Gruppe</span>
       <div class="as-knoepfe" role="group" aria-label="Gruppe">${tvKnopf('data-tv-gruppe', '', 'Keine', !f.gruppe)}${tagGruppen().map(g =>
@@ -14726,6 +14817,7 @@ function steckbriefDaten(p){
   const fakten = {};
   if(wert(p.merkmale)) fakten['Merkmale'] = wert(p.merkmale);
   if(wert(p.herkunft)) fakten['Herkunft'] = wert(p.herkunft);
+  if(rankhilfeVon(p)) fakten['Rankhilfe'] = rankhilfeText(p);
   if(p.bedingungen && typeof p.bedingungen === 'object')
     Object.keys(p.bedingungen).forEach(k => { if(wert(k) && wert(p.bedingungen[k])) fakten[k] = wert(p.bedingungen[k]); });
   const da = sonstWas || Object.keys(fakten).length;
@@ -17415,9 +17507,10 @@ function formularLeeren(){
   const sortHint = document.getElementById('f-sorte-hint');
   if(sortHint){ sortHint.innerHTML = ''; sortHint.hidden = true; }
   ['f-klasse','f-sonne','f-giftig','f-giessart','f-raum','f-stellplatz',
-   'f-topfform','f-substrat','f-ablauf','f-anstau'].forEach(x=>{
+   'f-topfform','f-substrat','f-ablauf','f-anstau','f-rankhilfe','f-stabtage'].forEach(x=>{
     const el = $('#'+x); if(el) el.selectedIndex = 0;
   });
+  if(typeof alStabFeld === 'function') alStabFeld();
   if(typeof AL_LAGE_NEU !== 'undefined') AL_LAGE_NEU = '';
   if(typeof alTopfZuruecksetzen === 'function') alTopfZuruecksetzen();
   if(typeof MIX_ED !== 'undefined' && MIX_ED.anlegen){ MIX_ED.anlegen.teile = {}; mixEdZeichnen('anlegen'); }
@@ -19521,7 +19614,7 @@ function samAktionenZeichnen(){
     h = `<p class="ein-abschnitt">Gießen später</p>
       <div class="gm-zfrage-btns" role="group" aria-label="Gießen später">${[1, 2, 3].map(i =>
         `<button type="button" data-sak-spaeter="${i}">${i === 1 ? '1 Tag' : i + ' Tage'}</button>`).join('')}</div>
-      <p class="fhint">Verschiebt nur den nächsten Gießtermin. Der Rhythmus bleibt.</p>
+      <p class="fhint" data-erkl>Verschiebt nur den nächsten Gießtermin. Der Rhythmus bleibt.</p>
       <p class="ein-abschnitt">Tag setzen</p>
       ${schnell.length ? `<div class="as-knoepfe sak-schnell" role="group" aria-label="Schnell setzen">${schnell.map(t =>
         `<button type="button" class="as-knopf" data-sak-tag="${esc(t.id)}"><b>${esc(t.name)}</b></button>`).join('')}</div>` : ''}
@@ -19794,7 +19887,7 @@ function alKnopfGruppe(selId){
     const i = t.indexOf(' — ');
     const kopf = i > -1 ? t.slice(0, i) : t;
     const rest = i > -1 ? t.slice(i + 3) : '';
-    const text = '<b>' + esc(kopf) + '</b>' + (rest ? '<i>' + esc(rest) + '</i>' : '');
+    const text = '<b>' + esc(kopf) + '</b>' + (rest ? '<i' + (selId === 'f-klasse' ? '' : ' class="erkl-u"') + '>' + esc(rest) + '</i>' : '');
     const mitBild = bild && o.value;
     return '<button type="button" class="al-knopf' + (mitBild ? ' as-knopf-bild' : '') + '"'
       + ' data-alwert="' + esc(o.value) + '"'
@@ -19913,9 +20006,19 @@ document.addEventListener('input', e => {
 function alKnoepfeAlle(){
   alListenFuellen();
   ['f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
-   'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum'].forEach(alKnopfGruppe);
+   'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum', 'f-rankhilfe', 'f-stabtage'].forEach(alKnopfGruppe);
   alAnstauFeld();
+  alStabFeld();
 }
+/* 4.0-beta.44: Die Frage nach dem Befeuchten nur beim Moosstab. */
+function alStabFeld(){
+  const f = document.getElementById('al-stab');
+  const r = document.getElementById('f-rankhilfe');
+  if(f) f.hidden = !r || r.value !== 'moos';
+}
+document.addEventListener('change', e => {
+  if(e.target && e.target.id === 'f-rankhilfe') alStabFeld();
+});
 /* 4.0-beta.9: Die Frage nach dem Untersetzer nur bei Klasse S. */
 function alAnstauFeld(){
   const f = document.getElementById('al-anstau');
@@ -20176,6 +20279,7 @@ function alZsfZeichnen(){
     + alZeile('Gießklasse', text('f-klasse'))
     + alZeile('Licht', text('f-sonne'))
     + alZeile('Für Katzen', alGiftText())
+    + alZeile('Rankhilfe', kopf('f-rankhilfe') + (wert('f-rankhilfe') === 'moos' ? ' · ' + text('f-stabtage') : ''))
     + alZeile('Fotos', AL_FOTOS.length ? String(AL_FOTOS.length) : '');
 }
 
@@ -23802,6 +23906,8 @@ async function alSpeichern(){
     eltern:null, linie:null, seit:iso(HEUTE),
     notiz: $('#f-notiz').value.trim(), log:[],
     giessart: $('#f-giessart').value || '',
+    rankhilfe: ($('#f-rankhilfe') || {}).value || '',
+    stabTage: ($('#f-rankhilfe') || {}).value === 'moos' ? (Number(($('#f-stabtage') || {}).value) || null) : null,
     wichtig: $('#f-wichtig').value.trim(),
     /* Auffangnetz fuer Gattungen, die die Tabelle nicht kennt.
        Ausgewertet wird es nur dann — steht die Gattung in
@@ -24477,7 +24583,9 @@ function gmWegZeile(p){
   const m = gmMengeText(p, weg);
   if(m) teile.push(m);
   const anders = gmAnders(weg);
-  return {weg, anders, text:(anders ? 'Anders als sonst: ' : '') + teile.join(' · ')};
+  /* 4.0-beta.44 (Etappe 12): keine eigene Zeile, nur ein Zusatz */
+  const moos = typeof moosHeute === 'function' && moosHeute(p) ? ' + Moosstab' : '';
+  return {weg, anders, text:(anders ? 'Anders als sonst: ' : '') + teile.join(' · ') + moos};
 }
 
 /* ── Icons je Gießweg (Plan G1, F126: nach Chris' Bild vom 01.11.) ──
@@ -26977,8 +27085,8 @@ function einfachSetzen(an){
    Schalter blendet nur aus (Klasse s-aus-<k> am body), er ändert nie
    eine Rechnung. Gelesen wird nur über schalterAn(k). */
 var MODI = {
-  sammler:   {name:'Sammler',   dichte:'knapp',  kiStufe:'kurz', kurz:'Nur das Wichtigste: gießen, Sammlung, Notizen. Für viele Pflanzen und wenig Text.'},
-  entdecker: {name:'Entdecker', dichte:'normal', kiStufe:'voll', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
+  sammler:   {name:'Sammler',   dichte:'knapp',  kiStufe:'kurz', erkl:'knapp', kurz:'Nur das Wichtigste: gießen, Sammlung, Notizen. Für viele Pflanzen und wenig Text.'},
+  entdecker: {name:'Entdecker', dichte:'normal', kiStufe:'voll', erkl:'voll', kurz:'Alles, was die App kann, mit Pflegetexten, Befunden und Erklärungen.'}
 };
 var SCHALTER = [
   /* 4.0-beta.31 (B4a, F255): blendet den Reiter Pflegeheft aus, Vorgabe in beiden Modi an */
@@ -27064,7 +27172,35 @@ function schalterAnwenden(){
     : MODI[m].kurz;
   const zb = document.getElementById('modus-zurueck-box');
   if(zb) zb.hidden = !n;
+  erklAnwenden();
 }
+/* 4.0-beta.44 (Etappe 13, L): Erklärtexte Aus, Knapp, Ausführlich.
+   Unabhängig vom Modus: Ohne eigene Wahl gilt die Vorgabe des Modus
+   (Sammler Knapp, Entdecker Ausführlich); eine Wahl bleibt, auch über
+   einen Moduswechsel und „Zurücksetzen“. Am Schalter hängen nur
+   Erklärtexte (`data-erkl`, `data-erkl-kurz` ohne `.erkl-bleibt`) und
+   Untertitel (`i.erkl-u`); Warnungen, Rückfragen, Fehler und
+   Leerzustände tragen keine Marke. */
+var ERKL_STUFEN = ['aus', 'knapp', 'voll'];
+function erklStufe(){
+  return ERKL_STUFEN.indexOf(S.erkl) !== -1 ? S.erkl : (MODI[modusVon()].erkl || 'knapp');
+}
+function erklAnwenden(){
+  const st = erklStufe();
+  ERKL_STUFEN.forEach(x => document.body.classList.toggle('erkl-' + x, x === st));
+  document.querySelectorAll('#erkl-wahl [data-erkl-stufe]').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.erklStufe === st ? 'true' : 'false'));
+}
+function erklStufeSetzen(v){
+  if(ERKL_STUFEN.indexOf(v) === -1) return;
+  S.erkl = v;
+  erklAnwenden();
+  sichern();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#erkl-wahl [data-erkl-stufe]');
+  if(b) erklStufeSetzen(b.dataset.erklStufe);
+});
 function modusSetzen(m){
   if(!MODI[m]) return;
   S.modus = m;
@@ -28813,7 +28949,7 @@ function utAufbauen(){
   if(art && !art.children.length && typeof V_METHODEN === 'object'){
     art.innerHTML = Object.keys(V_METHODEN).map(k=>
       `<button type="button" data-ut-art="${k}" aria-pressed="false"><span class="wl-punkt" aria-hidden="true"></span>`
-      + `<span class="wl-txt"><b>${esc(V_METHODEN[k].name)}</b><i>${esc(V_METHODEN[k].kurz || '')}</i></span></button>`).join('');
+      + `<span class="wl-txt"><b>${esc(V_METHODEN[k].name)}</b><i class="erkl-u">${esc(V_METHODEN[k].kurz || '')}</i></span></button>`).join('');
     if(!UT.art || !V_METHODEN[UT.art]) UT.art = Object.keys(V_METHODEN)[0];
   }
   utZeichnen();
@@ -30469,7 +30605,7 @@ function azBearbeitenHTML(id){
   return '<button type="button" class="linkbtn az-zurueck" data-az-gef="' + esc(r.gefaess) + '">‹ Zurück zu '
     + esc(g ? g.name : 'dem Gefäß') + '</button><h3 class="az-titel">Gruppe bearbeiten</h3>'
     + '<p class="az-unter">' + esc(azGruppeText(r) + (g ? ' · ' + g.name : '')) + '</p>'
-    + '<p class="az-still">Zum Korrigieren. Es entsteht kein Eintrag im Verlauf.'
+    + '<p class="az-still" data-erkl>Zum Korrigieren. Es entsteht kein Eintrag im Verlauf.'
     + (frei ? '' : ' Art und Sorte kommen von der Mutter und lassen sich hier nicht ändern.') + '</p>'
     + '<div class="fgrid az-form">' + azGefWahlHTML('az-gb', r.gefaess, null)
     + '<label><span class="lab">Wie viele?</span><input type="number" id="az-gb-zahl" min="1" max="500" step="1" inputmode="numeric" value="' + r.anzahl + '"></label>'
@@ -30607,7 +30743,7 @@ function azBestimmenHTML(){
   let h = '<button type="button" class="linkbtn az-zurueck" data-az-gef="' + esc(r.gefaess) + '">‹ Zurück zu '
     + esc(g ? g.name : 'dem Gefäß') + '</button><h3 class="az-titel">Per Foto bestimmen</h3>'
     + '<p class="az-unter">' + esc(azGruppeText(r) + (g ? ' · ' + g.name : '')) + '</p>'
-    + '<p class="az-still">Ein Foto der Stecklinge, möglichst mit Blatt. Es wird nur für die Frage gebraucht und nicht gespeichert.</p>'
+    + '<p class="az-still" data-erkl>Ein Foto der Stecklinge, möglichst mit Blatt. Es wird nur für die Frage gebraucht und nicht gespeichert.</p>'
     + '<div class="az-best-bild">' + (B.bild ? '<img alt="Gewähltes Foto" src="' + B.bild.vorschau + '">' : '')
     + '<label class="az-fotoneu"><span aria-hidden="true">+</span><span>' + (B.bild ? 'Anderes Foto' : 'Foto wählen') + '</span>'
     + '<input type="file" accept="image/*" hidden data-az-bfoto="1"></label>'
@@ -30619,7 +30755,7 @@ function azBestimmenHTML(){
     + (B.fehlerModell && !B.laeuft ? kiNochmalHTML(B.fehlerModell, (was, mid) => 'data-az="best-' + was + '"'
         + (mid ? ' data-kimodell="' + esc(mid) + '"' : '')) : '')
     + '<details class="kiprompt"' + (B.handweg ? ' open' : '') + '><summary>Ohne Schlüssel: kopieren und einfügen</summary>'
-    + '<p class="az-still">Auftrag kopieren, zusammen mit dem Foto in Gemini stellen und die Antwort hier einfügen.</p>'
+    + '<p class="az-still" data-erkl>Auftrag kopieren, zusammen mit dem Foto in Gemini stellen und die Antwort hier einfügen.</p>'
     + '<div class="tools"><button type="button" data-az="best-kopieren">Auftrag kopieren</button></div>'
     + '<textarea id="az-best-paste" rows="5" aria-label="Antwort der KI" placeholder="Antwort hier einfügen"></textarea>'
     + '<div class="tools"><button type="button" data-az="best-paste">Antwort auswerten</button></div></details>';
@@ -30775,7 +30911,7 @@ function azMischHTML(r, andere){
   h += '<div class="fgrid az-form"><label><span class="lab">Hauptpflanze</span><select id="az-e-haupt">'
     + teile.map(t=>'<option value="' + esc(t.r.id) + '"' + (t === haupt ? ' selected' : '') + '>'
       + esc(azHerkunft(t.r) + ' (' + t.n + ')') + '</option>').join('') + '</select></label></div>'
-    + '<p class="az-still">Die Karte erbt Art, Sorte und Steckbrief von der Hauptpflanze'
+    + '<p class="az-still" data-erkl>Die Karte erbt Art, Sorte und Steckbrief von der Hauptpflanze'
     + (azMutter(haupt.r) ? ' und hängt im Stammbaum unter ihrer Mutter' : '') + '. Die anderen stehen als „Mit im Topf“ auf der Karte.</p>';
   const gi = azMischGiessen(teile, haupt), gt = azMischGiessText(gi);
   if(gt) h += '<p class="' + (gi.passt ? 'az-still' : 'az-hinweis') + '" id="az-misch-giessen">' + esc(gt) + '</p>';
@@ -30959,7 +31095,7 @@ function azGefaessHTML(id){
 }
 function azNeuGefaessHTML(){
   return azZurueckHTML() + '<h3 class="az-titel">Neues Gefäß</h3>'
-    + '<p class="az-unter">Glas, Schale oder Topf. Bei Wasser steht der Wechsel im Gießplan, bei Substrat, Moos und Perlite das Befeuchten.</p>'
+    + '<p class="az-unter" data-erkl>Glas, Schale oder Topf. Bei Wasser steht der Wechsel in der Gießliste, bei Substrat, Moos und Perlite das Befeuchten.</p>'
     + azGefaessFelderHTML(null)
     + '<div class="tools"><button type="button" class="haupt" data-az="gef-anlegen">Anlegen</button></div>';
 }
@@ -30993,7 +31129,7 @@ function azFreiHTML(){
   const zur = AZ_SICHT.vomAssistent
     ? '<button type="button" class="linkbtn az-zurueck" data-az="zum-assistent">‹ Zurück</button>' : azZurueckHTML();
   return zur + '<h3 class="az-titel">Stecklinge ohne Mutterpflanze</h3>'
-    + '<p class="az-unter">Etwa getauscht, gekauft oder geschenkt. Art und Sorte trägst du von Hand ein.</p>'
+    + '<p class="az-unter" data-erkl>Etwa getauscht, gekauft oder geschenkt. Art und Sorte trägst du von Hand ein.</p>'
     + '<div class="fgrid az-form">'
     + '<label><span class="lab">Art</span><input id="az-fr-art" placeholder="z. B. Efeutute"></label>'
     + '<label><span class="lab">Botanischer Name</span><input id="az-fr-bot" placeholder="z. B. Epipremnum aureum"></label>'
@@ -31035,7 +31171,7 @@ function azEntnehmenHTML(){
     + wahl('ausfall', 'Ausfall', 'data-az-was', AZ_ENT.was) + '</div>';
   let knopf = '', aus = false;
   if(AZ_ENT.was === 'eintopfen'){
-    if(AZ_ENT.topf !== 'misch') h += '<p class="az-still">' + (azMutter(r)
+    if(AZ_ENT.topf !== 'misch') h += '<p class="az-still" data-erkl>' + (azMutter(r)
       ? 'Die Karte erbt von der Mutter wie bisher und hängt im Stammbaum unter ihr.'
       : 'Ohne Mutter in der Sammlung: Art und Sorte kommen aus der Gruppe.') + '</p>';
     const andere = anzuchtDaten().gruppen.filter(x=>x !== r && x.anzahl > 0);
@@ -31054,10 +31190,10 @@ function azEntnehmenHTML(){
   } else if(AZ_ENT.was === 'umsetzen'){
     if(!AZ_ENT.ziel || (AZ_ENT.ziel !== '__neu' && !azGefaess(AZ_ENT.ziel))) AZ_ENT.ziel = azStandardGef(r.gefaess);
     h += '<div class="fgrid az-form">' + azGefWahlHTML('az-e', AZ_ENT.ziel, r.gefaess) + '</div>'
-      + '<p class="az-still">Der Verlauf wandert mit. Steht dort schon eine Gruppe derselben Herkunft, kommen sie dazu.</p>';
+      + '<p class="az-still" data-erkl>Der Verlauf wandert mit. Steht dort schon eine Gruppe derselben Herkunft, kommen sie dazu.</p>';
     knopf = 'Umsetzen';
   } else {
-    h += '<p class="az-still">Zählt nur herunter und trägt es in den Verlauf ein.</p>';
+    h += '<p class="az-still" data-erkl>Zählt nur herunter und trägt es in den Verlauf ein.</p>';
     knopf = n === 1 ? 'Als Ausfall eintragen' : n + ' als Ausfall eintragen';
   }
   return h + '<div class="tools"><button type="button" class="haupt" data-az="entnehmen-los"' + (aus ? ' disabled' : '') + '>' + esc(knopf) + '</button></div>';
@@ -31127,7 +31263,7 @@ function verWohinZeichnen(){
   az.hidden = verWohin !== 'anzucht';
   if(verWohin !== 'anzucht') return;
   if(VER_AZ.gef !== '__neu' && !azGefaess(VER_AZ.gef)) VER_AZ.gef = azStandardGef(null);
-  az.innerHTML = '<p class="as-unter">Die Stecklinge kommen als Gruppe in ein Gefäß. Eigene Karten bekommen sie erst beim Eintopfen.</p>'
+  az.innerHTML = '<p class="as-unter" data-erkl>Die Stecklinge kommen als Gruppe in ein Gefäß. Eigene Karten bekommen sie erst beim Eintopfen.</p>'
     + '<div class="fgrid az-form">' + azGefWahlHTML('ver-az', VER_AZ.gef, null)
     + '<label><span class="lab">Wie viele Stecklinge?</span><input type="number" id="ver-az-zahl" min="1" max="500" step="1"'
     + ' inputmode="numeric" value="' + VER_AZ.anzahl + '"></label></div>';
@@ -31159,7 +31295,7 @@ function verInAnzucht(){
     meld.hidden = false;
     meld.innerHTML = '<b>' + esc(azGruppeText(r) + (n === 1 ? ' steht' : ' stehen') + ' jetzt in ' + g.name + '.')
       + '</b> Eigene Karten bekommen sie beim Eintopfen. '
-      + (g.abstand ? esc(azMedium(g).rhythmus + ' alle ' + g.abstand + ' Tage steht im Gießplan. ') : '')
+      + (g.abstand ? esc(azMedium(g).rhythmus + ' alle ' + g.abstand + ' Tage steht in der Gießliste. ') : '')
       + '<button type="button" class="linkbtn" data-az-gef="' + esc(g.id) + '">Zum Gefäß</button>';
   }
   VER_AZ = {gef:g.id, anzahl:1, gname:'', gmed:'wasser'};

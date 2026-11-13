@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.43', w.__T('FASSUNG') === '4.0-beta.43', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.44', w.__T('FASSUNG') === '4.0-beta.44', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -13326,8 +13326,8 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       d.body.appendChild(form);
       try {
         const sels = Array.from(form.querySelectorAll('select'));
-        pruef('beta.37 (B5): Das Bearbeiten-Formular zeigt keine Systemliste mehr; vier Felder sind Knopflisten',
-          sels.length === 4 && sels.every(x => x.hidden && !!x.closest('.bearb-feld')) && sels.map(x => x.dataset.e).join() === 'klasse,sonne,giftig,giessart'
+        pruef('beta.37 (B5): Das Bearbeiten-Formular zeigt keine Systemliste mehr; vier Felder sind Knopflisten (beta.44: dazu Rankhilfe und Moosstab)',
+          sels.length === 6 && sels.every(x => x.hidden && !!x.closest('.bearb-feld')) && sels.map(x => x.dataset.e).join() === 'klasse,sonne,giftig,giessart,rankhilfe,stabTage'
           && form.querySelectorAll('.bearb-feld [data-bk]').length >= 4 + 4 + 3, sels.map(x => x.dataset.e + ':' + x.hidden).join());
         const kl = form.querySelector('select[data-e="klasse"]');
         const kn = kl.closest('.bearb-feld').querySelector('[data-bk="S"]');
