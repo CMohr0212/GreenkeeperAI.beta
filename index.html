@@ -2228,7 +2228,9 @@ body.s-aus-symbole [data-schalter~="symbole"],
 body.s-aus-pflege .ktab[data-ktab="pflegeheft"],
 body.s-aus-pflege [data-kpane="pflegeheft"],
 body.s-aus-befunde .kblock[data-kblock="befunde"],
-body.s-aus-abstammung .kblock[data-kblock="abstammung"]{display:none!important}
+body.s-aus-abstammung .kblock[data-kblock="abstammung"],
+body.s-aus-abstammung .ktab[data-ktab="stammbaum"],
+body.s-aus-abstammung [data-kpane="stammbaum"]{display:none!important}
 .ktabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line);
   overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .ktabs::-webkit-scrollbar{display:none}
@@ -4270,6 +4272,8 @@ html[data-design] .bot-ok{font-weight:600;color:var(--moss)}
 html[data-design] .bot-rueck p{font-weight:600}
 body[data-ansicht="botaniker"].bot-gespraech-an{padding-bottom:205px}
 @media(min-width:760px){ body[data-ansicht="botaniker"].bot-gespraech-an{padding-bottom:140px} }
+/* 4.0-beta.41 (Etappe 8): fünf Reiter in der Karte, etwas kleiner */
+html[data-design="botanisch"] #karte-rumpf .ktab{font-size:.95rem;flex:1 1 auto}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -8951,7 +8955,7 @@ function abstammungHTML(p){
       ${mitBei.map(k=>`<button class="kid-link" data-go="${k.id}">${esc(nice(k))}</button>`).join(' · ')}</p>`);
 
   return `<div class="abstammung">${zeilen.join('')}
-    <p class="ab-zeile"><button class="linkbtn" data-do="stammbaum-auf">Im Stammbaum ansehen</button></p>
+    <p class="ab-zeile"><button class="linkbtn" data-do="stammbaum-auf" data-p="${esc(p.id)}">Im Stammbaum ansehen</button></p>
   </div>`;
 }
 
@@ -9165,9 +9169,13 @@ document.addEventListener('click', e=>{
      zu sein, sonst oeffnet die Werkzeugsektion hinter dem Fenster. */
   if(b.dataset.do === 'stammbaum-auf'){
     e.stopPropagation();
+    /* 4.0-beta.41: direkt beim Baum dieser Pflanze, sonst die Liste */
+    const pid = b.dataset.p;
     if(typeof modalZu === 'function') modalZu('karte-modal');
     setTimeout(()=>{
       if(typeof sektionOeffnen === 'function') sektionOeffnen('stammbaum');
+      const wurzel = sbBaumFuer(allePflanzen().find(x=>x.id === pid));
+      if(wurzel) sbZeigeBaum(wurzel);
     }, 90);
     return;
   }
@@ -10639,7 +10647,7 @@ function pflanzeEntfernen(id){
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-befunde"> <span class="lab" style="display:inline">Befunde des Doktors in der Karte</span></label>
       <label class="fspan check">
-        <input type="checkbox" role="switch" id="sch-abstammung"> <span class="lab" style="display:inline">Abstammung in der Karte</span></label>
+        <input type="checkbox" role="switch" id="sch-abstammung"> <span class="lab" style="display:inline">Stammbaum in der Karte</span></label>
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-giessart"> <span class="lab" style="display:inline">Gießart von Hand festlegen</span></label>
       <label class="fspan check">
@@ -11575,7 +11583,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.40';
+const FASSUNG = '4.0-beta.41';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -15518,8 +15526,13 @@ function kartenDetailHTML(p){
      Reiter heraus. */
   const verlauf = kblock('historie', 'Historie', giessVerlaufHTML(p))
     + kblock('geplant', 'Geplant', typeof geplantHTML === 'function' ? geplantHTML(p) : '')
-    + kblock('befunde', 'Befunde des Doktors', befundeHTML(p), nBef ? `${nBef}` : '')
-    + kblock('abstammung', 'Abstammung', abstammungHTML(p));
+    + kblock('befunde', 'Befunde des Doktors', befundeHTML(p), nBef ? `${nBef}` : '');
+  /* 4.0-beta.41 (Etappe 8): Die Abstammung steht im eigenen Reiter
+     „Stammbaum“; ohne Mutter und Ableger sagt er, wie einer entsteht. */
+  const stammbaum = schalterAn('abstammung')
+    ? (kblock('abstammung', 'Abstammung', abstammungHTML(p))
+       || '<div class="kblock" data-kblock="stammbaum-leer"><p class="kb-leer">Noch keine Mutter und keine Ableger. Einen Ableger legst du über „Vermehren“ oder beim Umtopfen an.</p></div>')
+    : '';
   const leer = (key, text) => `<div class="kblock" data-kblock="${key}"><p class="kb-leer">${text}</p></div>`;
 
   return `<div class="detail">
@@ -15540,7 +15553,8 @@ function kartenDetailHTML(p){
         {key:'steckbrief', titel:'Steckbrief', inhalt:
           (wissenLeer ? `<div class="kblock" data-kblock="wissen-leer"><p class="kb-leer">Zu dieser Art ist noch nichts hinterlegt.</p>
             <div class="kb-aktionen"><button type="button" class="kb-zweit" data-do="bearb-auf" data-p="${p.id}">Angaben ergänzen</button></div></div>` : '')
-          + kblock('steckbrief', 'Steckbrief', steckbrief)}
+          + kblock('steckbrief', 'Steckbrief', steckbrief)},
+        {key:'stammbaum', titel:'Stammbaum', inhalt: stammbaum}
       ])}
     </div>`;
 }
@@ -16540,6 +16554,16 @@ function sbBlattPunkte(p){
 /* Der Ursprung einer Linie: so weit zurueck, wie die Sammlung reicht.
    Ein Ring in den Eltern waere ein Datenfehler, aber er darf die App
    nicht aufhaengen — daher die Zaehlgrenze. */
+/* 4.0-beta.41: Die Wurzel des Baums, in dem diese Pflanze steht —
+   die Ausgangspflanze der Linie oder die Linie ohne Mutter. */
+function sbBaumFuer(p){
+  if(!p) return null;
+  const u = sbUrsprung(p) || p;
+  const w = sbWurzeln();
+  if(w.some(x=>x.art === 'pflanze' && x.id === u.id)) return u.id;
+  if(u.linie && w.some(x=>x.id === 'linie:' + u.linie)) return 'linie:' + u.linie;
+  return null;
+}
 function sbUrsprung(p){
   const alle = allePflanzen();
   let jetzt = p, tiefe = 0;

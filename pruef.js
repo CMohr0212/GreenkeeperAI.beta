@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.40', w.__T('FASSUNG') === '4.0-beta.40', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.41', w.__T('FASSUNG') === '4.0-beta.41', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -681,10 +681,10 @@ setTimeout(async () => {
   /* ── Vier Reiter (seit 3.11.0: Wissen über die Art eigener Reiter) ── */
   {
     const tabs = [...d.querySelectorAll('#karte-rumpf .ktab')].map(x=>x.dataset.ktab);
-    pruef('Genau vier Reiter', tabs.length === 4, tabs.join(','));
+    pruef('Genau fünf Reiter (beta.41: Stammbaum)', tabs.length === 5, tabs.join(','));
     /* 4.0-beta.30 (B2, F309): Verlauf, Platz, Pflegeheft, Steckbrief */
     pruef('Reiter heißen verlauf, platz, pflegeheft, steckbrief',
-      tabs.join(',') === 'verlauf,platz,pflegeheft,steckbrief', tabs.join(','));
+      tabs.join(',') === 'verlauf,platz,pflegeheft,steckbrief,stammbaum', tabs.join(','));
     pruef('Kein Reiter „Allgemein" mehr', tabs.indexOf('allgemein') === -1);
     /* Seit 3.12.0 bleibt „Wissen" auch bei einer Pflanze ohne hinterlegte
        Artangaben stehen — dann mit dem Hinweis, was zu tun waere. */
@@ -1291,10 +1291,17 @@ setTimeout(async () => {
         pruef('Abstammung greift ohne Ereignisse',
           w.__T(`abstammungHTML(allePflanzen().find(x=>x.id==='${ids.k}'))`) !== '');
         w.__T(`karteOeffnen('${ids.k}')`); await tick();
-        const b = d.querySelector('#karte-rumpf .ktab[data-ktab="verlauf"]');
+        /* 4.0-beta.41 (Etappe 8): eigener Reiter „Stammbaum“ als letzter */
+        const reiter = Array.from(d.querySelectorAll('#karte-rumpf .ktab')).map(x=>x.dataset.ktab);
+        pruef('beta.41 (8): Reiter Stammbaum steht als letzter', reiter[reiter.length - 1] === 'stammbaum', reiter.join(','));
+        pruef('beta.41 (8): Der Verlauf hat keine Abstammung mehr',
+          !d.querySelector('#karte-rumpf [data-kpane="verlauf"] .abstammung'));
+        const b = d.querySelector('#karte-rumpf .ktab[data-ktab="stammbaum"]');
         if(b){ b.click(); await tick(); }
-        const blk = d.querySelector('#karte-rumpf [data-kpane="verlauf"] .abstammung');
-        pruef('Abstammung steht im Verlauf-Reiter', !!blk);
+        const blk = d.querySelector('#karte-rumpf [data-kpane="stammbaum"] .abstammung');
+        pruef('Abstammung steht im Reiter Stammbaum', !!blk);
+        pruef('beta.41 (8): Der Baum des Ablegers hat die Mutter als Wurzel',
+          w.__T(`sbBaumFuer(allePflanzen().find(x=>x.id==='${ids.k}'))`) === ids.m);
         pruef('und nicht in einem Akkordeon',
           !!blk && !blk.closest('.acc'));
         pruef('Sie nennt die Mutter mit Sprung',
@@ -2278,8 +2285,8 @@ setTimeout(async () => {
       /* 4.0-beta.30 (B2, F309): Reiter Verlauf, Platz, Pflegeheft, Steckbrief */
       pruef('Eigene Pflanze hat Steckbrief im Reiter Steckbrief', lv.indexOf('steckbrief:steckbrief') > -1, lv);
       pruef('Eigene Pflanze hat Giftigkeit im Reiter Steckbrief', /Giftigkeit /.test((kv.querySelector('[data-kpane="steckbrief"] [data-kblock="steckbrief"]') || {}).textContent || ''), lv);
-      pruef('Vier Reiterflächen in jeder Karte',
-        [...kv.querySelectorAll('[data-kpane]')].map(x=>x.dataset.kpane).join(',') === 'verlauf,platz,pflegeheft,steckbrief');
+      pruef('Fünf Reiterflächen in jeder Karte',
+        [...kv.querySelectorAll('[data-kpane]')].map(x=>x.dataset.kpane).join(',') === 'verlauf,platz,pflegeheft,steckbrief,stammbaum');
       pruef('Im Reiter Platz kein Aufklapper', !kv.querySelector('[data-kpane="platz"] details.acc'));
       const pfl = kv.querySelector('[data-kpane="platz"]');
       pruef('beta.30: Reiter Platz beginnt mit dem Platz, die Tags stehen über den Reitern',
@@ -2295,7 +2302,7 @@ setTimeout(async () => {
       const txt = kv.textContent;
       pruef('Kein „Gießen und Verlauf“ mehr', txt.indexOf('Gießen und Verlauf') < 0);
       pruef('Kein „Statusänderung und Verlauf“ mehr', txt.indexOf('Statusänderung') < 0);
-      pruef('Abstammung ist da', !!kv.querySelector('[data-kpane="verlauf"] [data-kblock="abstammung"] .abstammung'));
+      pruef('Abstammung ist da (beta.41: im Reiter Stammbaum)', !!kv.querySelector('[data-kpane="stammbaum"] [data-kblock="abstammung"] .abstammung'));
       pruef('Kein „Verlauf ansehen“ mehr', !kv.querySelector('[data-sbblatt]'));
       /* Befunde */
       const bef = kv.querySelector('[data-kpane="verlauf"] [data-kblock="befunde"]');
@@ -11501,7 +11508,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       /* (9) vier Reiter, Verlauf offen beim Öffnen */
       await zu(); TS(`S.kartenTab = 'platz'; karteOeffnen('B2A')`); await warte(60);
       const reiter = qa('#karte-rumpf .ktab').map(b => b.dataset.ktab + ':' + b.textContent).join(',');
-      pruef('beta.30 B2 (9): vier Reiter Verlauf, Platz, Pflegeheft, Steckbrief', reiter === 'verlauf:Verlauf,platz:Platz,pflegeheft:Pflegeheft,steckbrief:Steckbrief', reiter);
+      pruef('beta.30 B2 (9): fünf Reiter Verlauf, Platz, Pflegeheft, Steckbrief, Stammbaum', reiter === 'verlauf:Verlauf,platz:Platz,pflegeheft:Pflegeheft,steckbrief:Steckbrief,stammbaum:Stammbaum', reiter);
       pruef('beta.30 B2 (9): „Verlauf“ ist beim Öffnen offen',
         ((q('#karte-rumpf .ktab[data-ktab="verlauf"]') || {getAttribute(){ return ''; }}).getAttribute('aria-selected')) === 'true'
         && (q('#karte-rumpf [data-kpane="verlauf"]') || {}).hidden === false && (q('#karte-rumpf [data-kpane="platz"]') || {}).hidden === true);
