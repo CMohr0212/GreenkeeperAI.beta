@@ -3970,6 +3970,8 @@ html[data-design] #karte-rumpf .km-giess-k{flex:0 0 auto;min-height:40px;padding
   border-radius:999px;background:var(--fl-tief);color:var(--schrift);font-family:var(--f-body);font-size:var(--t-s);
   font-weight:600;letter-spacing:0;text-transform:none;cursor:pointer}
 html[data-design="klartext"] #karte-rumpf .km-giess-k{min-height:var(--tap);border:2px solid var(--schrift);font-size:var(--t-m)}
+html[data-design] .km-gelernt{display:inline;min-height:0;padding:0 2px;border:0;background:none;color:inherit;font:inherit;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
+html[data-design] .km-gelernt-t .kb-link{min-height:0;padding:0 2px;margin:0}
 html[data-design] .km-giess-wirk{margin:4px 0 0 17px;font-size:var(--t-s);font-weight:400;color:var(--schrift-2)}
 html[data-design="botanisch"] #karte-rumpf .km-giess{margin:14px 0 0}
 html[data-design] .tagk-zeile{display:flex;align-items:center;gap:10px;min-width:0}
@@ -4087,15 +4089,8 @@ html[data-design] #tv-inhalt label.fspan{display:flex;flex-direction:column;gap:
 html[data-design] #tv-inhalt label.fspan.zeile{flex-direction:row;align-items:center;justify-content:space-between}
 html[data-design] #tv-inhalt label.fspan.zeile input{flex:0 0 110px;width:110px}
 /* Chipleiste unter Suche und „Filter“: feste Höhe, waagerecht wischbar */
-html[data-design] .tag-leiste{display:flex;flex-wrap:nowrap;gap:8px;height:44px;margin:8px 0 0;padding:0 0 4px;
-  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-html[data-design] .tag-leiste[hidden]{display:none}
-html[data-design] .tag-leiste::-webkit-scrollbar{display:none}
-html[data-design] .tag-leiste > .tag-fchip{flex:0 0 auto;height:40px;min-height:40px}
 html[data-design] .tag-fchip[aria-pressed="true"]{background:var(--tagf);color:#fff;border-color:var(--tagf)}
 html[data-design] .tag-fchip[aria-pressed="true"] .tag-punkt{box-shadow:0 0 0 2px #fff}
-html[data-design="klartext"] .tag-leiste{height:var(--tap)}
-html[data-design="klartext"] .tag-leiste > .tag-fchip{height:calc(var(--tap) - 4px)}
 html[data-design] #filter-tags .tag-fgruppe{margin:8px 0 4px;font-size:var(--t-xs);color:var(--schrift-2)}
 /* ══ Plan B1 (4.0-beta.29): Ohne Aufgabenzeile stieß die Tag-Zeile in
    Botanisch an die Knöpfe; der Abstand der alten Zeile (12 px) bleibt. ══ */
@@ -9001,7 +8996,7 @@ function fotoEingang(){
   return el;
 }
 document.addEventListener('click', e => {
-  const add = e.target.closest && e.target.closest('.foto-add');
+  const add = e.target.closest && e.target.closest('.foto-add:not(.foto-sichern)');
   if(add){
     e.preventDefault(); e.stopPropagation();
     _fotoZiel = add.dataset.p || null;
@@ -9407,10 +9402,22 @@ document.addEventListener('click', e=>{
     return;
   }
   if(a === 'bearb-weg'){
+    /* 4.0-beta.40 (Etappe 7): Rückfrage in der Karte statt Systemdialog;
+       sie nennt, was mitgeht, und bietet „Fotos sichern“ an. */
+    const p = (S.eigene||[]).find(x=>x.id===id);
+    const box = btn.closest('.bearb-gefahr');
+    if(!p || !box) return;
+    box.innerHTML = loeschFrageHTML(p);
+    return;
+  }
+  if(a === 'bearb-weg-nein'){
+    const box = btn.closest('.bearb-gefahr');
+    if(box) box.innerHTML = `<button class="loeschen" data-do="bearb-weg" data-p="${esc(id)}">Pflanze löschen</button>`;
+    return;
+  }
+  if(a === 'bearb-weg-ja'){
     const p = (S.eigene||[]).find(x=>x.id===id);
     if(!p) return;
-    const frage = '„'+nice(p)+'“ wirklich löschen? Fotos und Gießverlauf gehen mit. Das lässt sich nicht rückgängig machen.';
-    if(!confirm(frage)) return;
     pflanzeEntfernen(id);
     /* Hier stand `offen.delete(id)`. Die Menge `offen` ist mit der
        Zuklapp-Mechanik in 3.10.7 weggefallen; der Aufruf warf und brach
@@ -9428,6 +9435,106 @@ document.addEventListener('click', e=>{
   }
 });
 
+/* 4.0-beta.40 (Etappe 7): Was beim Löschen mitgeht. */
+function loeschWeg(id){
+  const fotos = (S.fotos[id] || []).length;
+  const verlauf = ((S.water && S.water[id]) || []).length + ((S.ereignisse && S.ereignisse[id]) || []).length;
+  const alle = allePflanzen();
+  const p = alle.find(x=>x.id === id) || {};
+  const ableger = alle.filter(k=>k.eltern === id || (Array.isArray(k.muetter) && k.muetter.indexOf(id) >= 0)).length;
+  return {fotos, verlauf, ableger, mutter: !!p.eltern};
+}
+function loeschFrageHTML(p){
+  const w = loeschWeg(p.id);
+  const teile = [];
+  if(w.fotos) teile.push(w.fotos === 1 ? '1 Foto' : w.fotos + ' Fotos');
+  if(w.verlauf) teile.push('der Verlauf');
+  if(w.ableger) teile.push(w.ableger === 1 ? 'die Verbindung zum Ableger' : 'die Verbindung zu ' + w.ableger + ' Ablegern');
+  if(w.mutter) teile.push('die Verbindung zur Mutterpflanze');
+  const liste = teile.length > 1 ? teile.slice(0, -1).join(', ') + ' und ' + teile[teile.length - 1] : (teile[0] || '');
+  return `<div class="loesch-frage" role="group" aria-label="Pflanze löschen">
+    <p class="kb-klein">„${esc(nice(p))}“ löschen?${liste ? ' Weg sind dann auch ' + esc(liste) + '.' : ''} Das lässt sich nicht rückgängig machen.</p>
+    <div class="gm-zfrage-btns">
+      ${w.fotos ? `<button type="button" data-do="fotos-sichern" data-p="${esc(p.id)}">Fotos sichern</button>` : ''}
+      <button type="button" class="loeschen" data-do="bearb-weg-ja" data-p="${esc(p.id)}">Endgültig löschen</button>
+      <button type="button" data-do="bearb-weg-nein" data-p="${esc(p.id)}">Abbrechen</button>
+    </div></div>`;
+}
+/* 4.0-beta.40 (Etappe 7): Fotos verkleinern. Jedes eigene Foto wird auf
+   höchstens FOTO_KLEIN_KANTE Pixel neu gespeichert, aber nur, wenn es
+   dadurch kleiner wird. Pflanzen, Verlauf und alles andere bleiben. */
+const FOTO_KLEIN_KANTE = 1000, FOTO_KLEIN_GUETE = 0.7;
+var FOTO_KLEIN = {frage:false, laeuft:false, meldung:''};
+function fotoNeuKodieren(src){
+  return new Promise((res, rej)=>{
+    const im = new Image();
+    const uhr = setTimeout(()=>rej(new Error('zu langsam')), BILD_GEDULD);
+    im.onload = ()=>{
+      clearTimeout(uhr);
+      try{
+        let w = im.width, h = im.height;
+        const f = Math.min(1, FOTO_KLEIN_KANTE / Math.max(w, h));
+        w = Math.round(w * f); h = Math.round(h * f);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(im, 0, 0, w, h);
+        res(c.toDataURL('image/jpeg', FOTO_KLEIN_GUETE));
+      }catch(e){ rej(e); }
+    };
+    im.onerror = e=>{ clearTimeout(uhr); rej(e); };
+    im.src = src;
+  });
+}
+async function fotosVerkleinern(umwandeln){
+  umwandeln = umwandeln || fotoNeuKodieren;
+  const vorher = fotoGroesseKB();
+  let n = 0;
+  for(const id of Object.keys(S.fotos || {})){
+    const liste = S.fotos[id];
+    if(!Array.isArray(liste)) continue;
+    for(const f of liste){
+      if(!f || !/^data:image\//.test(String(f.src || ''))) continue;
+      let neu = null;
+      try{ neu = await umwandeln(f.src); }catch(e){ neu = null; }
+      if(typeof neu === 'string' && /^data:image\//.test(neu) && neu.length < f.src.length){ f.src = neu; n++; }
+    }
+  }
+  if(n) sichern();
+  return {vorher, nachher: fotoGroesseKB(), n};
+}
+function fotosKleinZeichnen(){
+  const box = document.getElementById('fotos-klein'); if(!box) return;
+  const anzahl = Object.values(S.fotos || {}).reduce((a,v)=>a + (Array.isArray(v) ? v.length : 0), 0);
+  box.hidden = !anzahl;
+  if(!anzahl){ box.innerHTML = ''; return; }
+  const mb = kb => (kb / 1024).toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' MB';
+  const kopf = `<p class="fhint">Fotos: ${anzahl}, zusammen ${mb(fotoGroesseKB())}.</p>`;
+  if(FOTO_KLEIN.laeuft){ box.innerHTML = kopf + '<p class="fhint">Fotos werden verkleinert …</p>'; return; }
+  if(FOTO_KLEIN.frage){
+    box.innerHTML = kopf + `<p class="fhint">Alle Fotos auf höchstens ${FOTO_KLEIN_KANTE} Pixel verkleinern? Das lässt sich nicht rückgängig machen.</p>
+      <div class="tools ein-knoepfe"><button type="button" class="haupt" id="fotos-klein-ja">Verkleinern</button>
+      <button type="button" id="fotos-klein-nein">Abbrechen</button></div>`;
+    return;
+  }
+  box.innerHTML = kopf + (FOTO_KLEIN.meldung ? `<p class="fhint">${esc(FOTO_KLEIN.meldung)}</p>` : '')
+    + '<div class="tools ein-knoepfe"><button type="button" id="fotos-klein-auf">Fotos verkleinern</button></div>';
+}
+document.addEventListener('click', async e=>{
+  const t = e.target;
+  if(!t.closest || !t.closest('#fotos-klein')) return;
+  if(t.closest('#fotos-klein-auf')){ FOTO_KLEIN.frage = true; FOTO_KLEIN.meldung = ''; fotosKleinZeichnen(); return; }
+  if(t.closest('#fotos-klein-nein')){ FOTO_KLEIN.frage = false; fotosKleinZeichnen(); return; }
+  if(t.closest('#fotos-klein-ja')){
+    FOTO_KLEIN.frage = false; FOTO_KLEIN.laeuft = true; fotosKleinZeichnen();
+    let r = null;
+    try{ r = await fotosVerkleinern(); } finally { FOTO_KLEIN.laeuft = false; }
+    FOTO_KLEIN.meldung = r && r.n
+      ? r.n + (r.n === 1 ? ' Foto' : ' Fotos') + ' verkleinert, ' + Math.max(0, r.vorher - r.nachher) + ' KB frei.'
+      : 'Die Fotos sind schon klein genug.';
+    if(typeof statusText === 'function') statusText();
+    fotosKleinZeichnen();
+  }
+});
 /* Eine Pflanze samt allem, was an ihrer Kennung hängt (3.31.0).
    Bis 3.30.0 blieben Ereignisse, „gesehen“ und der Umtopfplan liegen. */
 function pflanzeEntfernen(id){
@@ -9622,8 +9729,6 @@ function pflanzeEntfernen(id){
     <div class="ctrl-klapp" id="ctrl-klapp" hidden>
     </div>
     <div class="filter-marken" id="filter-marken"></div>
-    <!-- 4.0-beta.27 (G2a+c): Tags, die gerade eine Pflanze trägt -->
-    <div class="tag-leiste" id="tag-leiste" role="group" aria-label="Nach Tag filtern" hidden></div>
   </section>
   <div data-ans="sammlung" id="ctrl-platz" aria-hidden="true"></div>
   <!-- 4.0-beta.24 (G1a-2, F218): Ansicht über ein eigenes Aufklappmenü, keine Systemliste -->
@@ -10156,6 +10261,8 @@ function pflanzeEntfernen(id){
       <p class="wz-hilfe" hidden>Alle Daten liegen ausschließlich auf diesem Gerät — nichts davon liegt auf einem fremden Rechner. Eine Sicherung ist eine einzige Datei mit allem darin: Pflanzen, Fotos, Gießstand, Räume, Einstellungen. Lade sie ab und zu herunter und lege sie irgendwo ab, wo du sie wiederfindest. Auf einem neuen Gerät lädst du sie mit „Sicherung laden“ wieder ein, und alles steht wie vorher. „Alles zurücksetzen“ löscht den gesamten Bestand und lässt sich nicht rückgängig machen.</p>
     <p class="fhint" id="storage-state"></p>
     <p class="fhint" id="storage-size"></p>
+    <!-- 4.0-beta.40 (Etappe 7): Fotos verkleinern -->
+    <div class="fotos-klein" id="fotos-klein" hidden></div>
     <p class="fhint" id="teilen-ersatz" data-erkl-kurz="Teilen hat hier nicht funktioniert." hidden>Teilen hat auf diesem Gerät nicht funktioniert — meist ist
       die Sicherung mit vielen Fotos zu groß dafür. Nimm „Sicherung herunterladen“; die Datei liegt
       danach im Download-Ordner und lässt sich von dort über das Teilen-Symbol des Systems weitergeben.</p>
@@ -10889,7 +10996,7 @@ function pflanzeEntfernen(id){
     <div class="as-knoepfe" id="filter-zustand"></div>
 
     <!-- 4.0-beta.27 (G2a+c): Tags nach Gruppen und Wirkung -->
-    <p class="ein-abschnitt">Tags</p>
+    <p class="ein-abschnitt" id="filter-tags-titel">Tags</p>
     <div id="filter-tags"></div>
 
     <p class="ein-abschnitt">Wirkung</p>
@@ -11468,7 +11575,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.39';
+const FASSUNG = '4.0-beta.40';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -13166,8 +13273,56 @@ function galerieHTML(p, ruhig){
     : `<button type="button" class="foto-add breit" data-p="${p.id}">
         <span class="fa-kreis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
         <span class="fa-txt"><b>Foto hinzufügen</b><span>Das erste Foto wird das Titelbild.</span></span></button>`;
-  return `<div class="gal">${bilder}${add}</div>`;
+  /* 4.0-beta.40 (Etappe 7): eigene Fotos sichern */
+  const sichernK = (S.fotos[p.id] || []).length
+    ? `<button type="button" class="foto-add plus foto-sichern" data-do="fotos-sichern" data-p="${p.id}" aria-label="Fotos sichern">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 19h14"/></svg></button>` : '';
+  return `<div class="gal">${bilder}${add}${sichernK}</div>`;
 }
+/* Alle eigenen Fotos einer Pflanze über das Teilen-Menü; geht das nicht,
+   wird jedes Foto einzeln heruntergeladen. */
+function fotoDatei(f, name, i){
+  const src = String(f.src || '');
+  const k = src.indexOf(',');
+  const kopf = src.slice(5, k);
+  const typ = kopf.split(';')[0] || 'image/jpeg';
+  const roh = src.slice(k + 1);
+  let teil;
+  if(/;base64/i.test(kopf)){
+    const bin = atob(roh);
+    teil = new Uint8Array(bin.length);
+    for(let j = 0; j < bin.length; j++) teil[j] = bin.charCodeAt(j);
+  } else teil = decodeURIComponent(roh);
+  const endung = typ === 'image/png' ? 'png' : 'jpg';
+  const datei = (name + '-' + (f.datum || 'foto') + '-' + (i + 1) + '.' + endung).replace(/[^\wäöüÄÖÜß.-]+/g, '-');
+  return new File([teil], datei, {type: typ});
+}
+async function fotosSichern(id){
+  const p = allePflanzen().find(x=>x.id === id);
+  const fs = (S.fotos[id] || []).filter(f=>f && /^data:/.test(String(f.src || '')));
+  if(!p || !fs.length) return 'leer';
+  let dateien = [];
+  try{ dateien = fs.map((f, i)=>fotoDatei(f, nice(p), i)); }catch(e){ dateien = []; }
+  try{
+    if(dateien.length && navigator.canShare && navigator.canShare({files: dateien})){
+      await navigator.share({files: dateien, title: 'Fotos: ' + nice(p)});
+      return 'geteilt';
+    }
+  }catch(e){ if(e && e.name === 'AbortError') return 'abgebrochen'; }
+  fs.forEach((f, i)=>{
+    const a = document.createElement('a');
+    a.href = f.src;
+    a.download = dateien[i] ? dateien[i].name : ('foto-' + (i + 1) + '.jpg');
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  return 'geladen';
+}
+document.addEventListener('click', e=>{
+  const k = e.target.closest && e.target.closest('[data-do="fotos-sichern"]');
+  if(!k) return;
+  e.preventDefault(); e.stopPropagation();
+  fotosSichern(k.dataset.p);
+});
 
 /* ══════════════════ Steuerung ══════════════════ */
 /* Gruppieren und Sortieren ueberleben das Neuladen. Vorher standen sie
@@ -13892,16 +14047,6 @@ function tagFilterPasst(p){
 function tagSuchText(p){
   return tagEintraege(p.id).map(e => { const t = tagDef(e.t); return (t ? t.name : '') + ' ' + (e.notiz || ''); }).join(' ');
 }
-function tagLeisteZeichnen(){
-  const box = document.getElementById('tag-leiste'); if(!box) return;
-  const liste = tagGetragen();
-  /* Gesetzte Filter bleiben sichtbar, auch wenn keine Pflanze den Tag mehr trägt */
-  filterTags.forEach(id => { const t = tagDef(id); if(t && liste.indexOf(t) === -1) liste.push(t); });
-  const gruppen = tagNachGruppe(liste);
-  box.hidden = !gruppen.length;
-  box.innerHTML = gruppen.map(gr => gr.tags.map(t =>
-    `<button type="button" class="tag-chip tag-fchip" data-ftag="${esc(t.id)}" aria-pressed="${filterTags.has(t.id)}" style="--tagf:${esc(gr.h.farbe)}">${tagPunktHTML(gr.h.farbe)}<span>${esc(t.name)}</span></button>`).join('')).join('');
-}
 function tagFilterKnoepfeZeichnen(){
   const knopf = (attr, wert, name, an) => '<button type="button" class="as-knopf" ' + attr + '="' + esc(wert) + '"'
     + ' aria-pressed="' + (an ? 'true' : 'false') + '"><b>' + esc(name) + '</b></button>';
@@ -13909,9 +14054,13 @@ function tagFilterKnoepfeZeichnen(){
   if(tb){
     const liste = tagGetragen();
     filterTags.forEach(id => { const t = tagDef(id); if(t && liste.indexOf(t) === -1) liste.push(t); });
+    /* 4.0-beta.40 (Etappe 7): Ohne getragene Tags entfällt der Abschnitt */
+    const tt = document.getElementById('filter-tags-titel');
+    if(tt) tt.hidden = !liste.length;
+    tb.hidden = !liste.length;
     tb.innerHTML = liste.length ? tagNachGruppe(liste).map(gr => '<p class="tag-fgruppe">' + esc(gr.h.name) + '</p>'
       + '<div class="as-knoepfe">' + gr.tags.map(t => knopf('data-ftag', t.id, t.name, filterTags.has(t.id))).join('') + '</div>').join('')
-      : '<p class="fhint">Gerade trägt keine Pflanze einen Tag.</p>';
+      : '';
   }
   const wb = document.getElementById('filter-wirk');
   if(wb) wb.innerHTML = Object.keys(TAG_GIESS).concat(Object.keys(TAG_SCHALTER)).map(k =>
@@ -14145,11 +14294,50 @@ function giessZeileHTML(p, lage, stand){
   const wirk = !tg ? ''
     : tg.t.giess === 'pause' ? tg.t.name + ': Gießpause, ' + stoppText(p) + '.'
     : tg.t.name + ': ' + tagWirkText(intervallVon(p, true), tg.t.giess, tagProzent(tg));
+  /* 4.0-beta.40 (Etappe 7): „gelernt“ erklärt sich auf Tipp */
+  const gel = st.stand !== 'stopp' && rhythmusQuelle(p).wort === 'gelernt';
+  const gelAuf = gel && GELERNT_AUF === p.id;
   return `<div class="km-giess">
-      <p class="km-stand" data-ton="${stand.ton}"><i class="km-punkt" aria-hidden="true"></i><span class="km-giess-t">${esc(lage)}${abstand ? ' · ' + esc(abstand) : ''}</span><button type="button" class="km-giess-k" data-do="iv-fenster" data-p="${esc(p.id)}">Ändern</button></p>
+      <p class="km-stand" data-ton="${stand.ton}"><i class="km-punkt" aria-hidden="true"></i><span class="km-giess-t">${esc(lage)}${abstand ? ' · ' + esc(abstand) : ''}${gel ? ` <button type="button" class="km-gelernt" data-do="gelernt-auf" data-p="${esc(p.id)}" aria-expanded="${gelAuf}">gelernt</button>` : ''}</span><button type="button" class="km-giess-k" data-do="iv-fenster" data-p="${esc(p.id)}">Ändern</button></p>
       ${wirk ? `<p class="km-giess-wirk">${esc(wirk)}</p>` : ''}
+      ${gelAuf ? `<p class="km-giess-wirk km-gelernt-t">${esc(gelerntSatz(p))} <button type="button" class="kb-link" data-do="gelernt-weg" data-p="${esc(p.id)}">Zurücksetzen</button></p>` : ''}
     </div>`;
 }
+/* 4.0-beta.40 (Etappe 7): Richtwert ohne Gelerntes, eigener Schnitt aus den
+   letzten Gießgängen, Rechenwert der App. */
+var GELERNT_AUF = null;
+function gelerntRichtwert(p){
+  const e = S.lernen && S.lernen[p.id];
+  if(!e || typeof e.lernFaktor !== 'number') return intervallVon(p, true);
+  const f = e.lernFaktor;
+  delete e.lernFaktor;
+  try{ return intervallVon(p, true); } finally { e.lernFaktor = f; }
+}
+function gelerntSchnitt(id){
+  const log = giessLog(id).slice(0, 7);
+  if(log.length < 2) return null;
+  let summe = 0;
+  for(let i = 0; i < log.length - 1; i++)
+    summe += Math.round((new Date(log[i] + 'T12:00:00') - new Date(log[i + 1] + 'T12:00:00')) / 864e5);
+  return Math.max(1, Math.round(summe / (log.length - 1)));
+}
+function gelerntSatz(p){
+  const t = n => n === 1 ? '1 Tag' : n + ' Tage';
+  const schnitt = gelerntSchnitt(p.id);
+  return 'Richtwert ' + t(gelerntRichtwert(p))
+    + (schnitt ? ', dein Schnitt zuletzt ' + t(schnitt) : '')
+    + ', die App rechnet mit ' + t(intervallVon(p, true)) + '.';
+}
+document.addEventListener('click', e=>{
+  const auf = e.target.closest && e.target.closest('[data-do="gelernt-auf"]');
+  const weg = !auf && e.target.closest && e.target.closest('[data-do="gelernt-weg"]');
+  if(!auf && !weg) return;
+  e.stopPropagation();
+  const id = (auf || weg).dataset.p;
+  if(auf) GELERNT_AUF = GELERNT_AUF === id ? null : id;
+  else { lernZuruecksetzen(id); GELERNT_AUF = null; }
+  render();
+});
 
 /* ── Fenster „Gießabstand“ (4.0-beta.30, B2, F301) ────────────
    Blatt von unten wie das Filterfenster. Es stellt den Grundabstand
@@ -16915,7 +17103,6 @@ function render(){
   const alle = allePflanzen();
   const q = $('#q').value.trim().toLowerCase();
   lageFilterZeichnen();
-  if(typeof tagLeisteZeichnen === 'function') tagLeisteZeichnen();
   if(typeof formLageZeichnen === 'function') formLageZeichnen();
   const list = alle.filter(p=>{
     if(filterKlasse && p.klasse!==filterKlasse) return false;
@@ -17203,6 +17390,7 @@ function statusText(){
       + 'steht in dieser Ansicht nicht zur Verfügung, deshalb zählen Fotos hier voll mit. '
       + 'Lade regelmäßig eine Sicherung herunter.',
     'Belegt: rund ' + klein + ' KB von etwa 5000 KB.');
+  if(typeof fotosKleinZeichnen === 'function') fotosKleinZeichnen();
 }
 /* Beim Herunterladen merken, wann zuletzt gesichert wurde. */
 function sicherungGemerkt(){

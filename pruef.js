@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.39', w.__T('FASSUNG') === '4.0-beta.39', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.40', w.__T('FASSUNG') === '4.0-beta.40', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -5119,20 +5119,27 @@ setTimeout(async () => {
     w.__T(`(function(){ S.water['${lid}'] = ['2026-09-01']; S.fotos['${lid}'] = [{key:'lo', src:'data:,', datum:'2026-09-01'}]; sichern(); return 1; })()`);
     pruef('Löschprobe: Ableger ist angelegt', w.__T(`S.eigene.some(p=>p.id==='${lid}')`) === true);
 
-    /* Abbrechen im Dialog ändert nichts */
-    w.confirm = () => false;
+    /* Abbrechen in der Rückfrage ändert nichts (4.0-beta.40: Rückfrage in der Karte) */
     let knopf = await oeffneBearbeiten(lid);
     pruef('Der Löschknopf steht in der Karte', !!knopf && /Pflanze löschen/.test(knopf.textContent));
     if (knopf) { knopf.click(); await tick(); }
+    const frageBox = d.querySelector('#karte-rumpf .loesch-frage');
+    pruef('beta.40 (7): Die Rückfrage nennt Fotos, Verlauf und Mutterpflanze und bietet „Fotos sichern“',
+      !!frageBox && /1 Foto/.test(frageBox.textContent) && /Verlauf/.test(frageBox.textContent) && /Mutterpflanze/.test(frageBox.textContent)
+      && !!frageBox.querySelector('[data-do="fotos-sichern"]'), frageBox ? frageBox.textContent : 'keine Rückfrage');
+    pruef('beta.40 (7): Der erste Tipp löscht noch nichts', w.__T(`S.eigene.some(p=>p.id==='${lid}')`) === true);
+    const nein = d.querySelector('#karte-rumpf .loesch-frage [data-do="bearb-weg-nein"]');
+    if (nein) { nein.click(); await tick(); }
     pruef('Abbrechen im Dialog lässt den Ableger stehen',
       w.__T(`S.eigene.some(p=>p.id==='${lid}')`) === true);
     pruef('Abbrechen lässt die Karte offen', w.__T(`modalOffen('karte-modal')`) === true);
 
     /* Löschen */
-    w.confirm = () => true;
     const vorLf = lf();
     knopf = wegKnopf(lid);
-    if (knopf) { knopf.click(); await tick(); await tick(); }
+    if (knopf) { knopf.click(); await tick(); }
+    const ja = d.querySelector('#karte-rumpf .loesch-frage [data-do="bearb-weg-ja"]');
+    if (ja) { ja.click(); await tick(); await tick(); }
     pruef('Löschen wirft keinen Laufzeitfehler', lf() === vorLf, fehler.slice(-1)[0]);
     pruef('Der Ableger ist aus der Sammlung', w.__T(`S.eigene.some(p=>p.id==='${lid}')`) === false);
     const g = gespeichert();
@@ -6091,7 +6098,7 @@ setTimeout(async () => {
       S.water['E-9311'] = ['2026-09-01']; S.ereignisse['E-9311'] = [{id:'x1', datum:'2026-09-01', typ:'notiz', text:''}];
       S.gesehen['E-9311'] = '2026-09-02'; S.umtopfPlan = S.umtopfPlan || {}; S.umtopfPlan['E-9311'] = {seit:'2026-09-03', warum:''};
       sichern(); return 1; })()`);
-    const lk = d.createElement('button'); lk.setAttribute('data-do', 'bearb-weg'); lk.setAttribute('data-p', 'E-9311');
+    const lk = d.createElement('button'); lk.setAttribute('data-do', 'bearb-weg-ja'); lk.setAttribute('data-p', 'E-9311');
     d.body.appendChild(lk); w.confirm = () => true; lk.click(); await tick(); lk.remove();
     pruef('3.31.0: Löschen entfernt die Pflanze', T(`!S.eigene.some(function(p){ return p.id === 'E-9311'; })`) === true);
     pruef('3.31.0: Löschen nimmt Ereignisse mit', T(`!('E-9311' in S.ereignisse)`) === true);
@@ -10826,17 +10833,23 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         tagSetzen('A1', '${neem}'); tagSetzen('A2', '${raub}'); tagSetzen('A3', '${neem}'); tagSetzen('A3', 'tv-quarantaene');
         S.tagEin.A3[0].notiz = 'Spinnmilbenbefall unten';
         filterZuruecksetzen(); $('#q').value = ''; render(); return 1; })()`);
-      const leiste = [...d.querySelectorAll('#tag-leiste [data-ftag]')].map(b => b.dataset.ftag).sort().join(',');
-      pruef('beta.27 (11): Chipleiste zeigt nur die getragenen Tags', leiste === [neem, raub, 'tv-quarantaene'].sort().join(',') && d.getElementById('tag-leiste').hidden === false, leiste);
-      kl(`#tag-leiste [data-ftag="${neem}"]`); kl(`#tag-leiste [data-ftag="${raub}"]`);
+      /* 4.0-beta.40: keine Tag-Zeile mehr in der Sammlung, Tags nur im Filter-Fenster */
+      T(`filterKnoepfeZeichnen()`);
+      const leiste = [...d.querySelectorAll('#filter-tags [data-ftag]')].map(b => b.dataset.ftag).sort().join(',');
+      pruef('beta.40 (7): Filter-Fenster zeigt nur die getragenen Tags, keine Tag-Zeile in der Sammlung', leiste === [neem, raub, 'tv-quarantaene'].sort().join(',') && !d.getElementById('tag-leiste'), leiste);
+      kl(`#filter-tags [data-ftag="${neem}"]`); kl(`#filter-tags [data-ftag="${raub}"]`);
       pruef('beta.27 (11): zwei Tags derselben Gruppe: ODER', ids() === 'A1,A2,A3', ids());
-      kl('#tag-leiste [data-ftag="tv-quarantaene"]');
+      pruef('beta.40 (7): Gesetzte Tag-Filter stehen als Marken unter der Suche', d.querySelectorAll('#filter-marken [data-fweg^="tag:"]').length === 2);
+      kl('#filter-tags [data-ftag="tv-quarantaene"]');
       pruef('beta.27 (11): dazu ein Tag einer anderen Gruppe: UND', ids() === 'A3', ids());
       T(`filterZuruecksetzen(); filterWirk.add('schaedling'); render()`);
       pruef('beta.27 (11): Filter nach Wirkung „Schädlingsbekämpfung“', ids() === 'A1,A3', ids());
       T(`filterZuruecksetzen(); filterKnoepfeZeichnen(); render()`);
       pruef('beta.27 (11): Filterfenster hat die Abschnitte Tags und Wirkung', d.querySelectorAll('#filter-tags [data-ftag]').length === 3 && d.querySelectorAll('#filter-wirk [data-fwirk]').length === 6);
-      pruef('beta.27 (11): Chipleiste hat eine feste Höhe (Stiltext)', /html\[data-design\] \.tag-leiste\{[^}]*height:44px/.test([...d.querySelectorAll('style')].map(x => x.textContent).join('\n')));
+      const ohneTags = T(`(function(){ var te = S.tagEin; S.tagEin = {}; filterKnoepfeZeichnen();
+        var r = document.getElementById('filter-tags-titel').hidden === true && document.getElementById('filter-tags').hidden === true;
+        S.tagEin = te; filterKnoepfeZeichnen(); return r; })()`);
+      pruef('beta.40 (7): Ohne getragene Tags fehlt der Abschnitt Tags im Filter-Fenster', ohneTags === true);
 
       /* (12) Suche findet Tag-Namen und Notizen */
       const such = q => { T(`$('#q').value = ${JSON.stringify(q)}; render()`); return ids(); };
@@ -13695,6 +13708,68 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         kiSchluesselSetzen(''); S.kiModelle = a.kiModelle; S.kiModell = a.kiModell;
         botNeu(); ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt39)})`);
       w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
+    }
+  }
+
+  /* ══ 4.0-beta.40 (Etappe 7): „gelernt“ erklärt sich, Fotos verkleinern
+     (Gegenprobe: nur kleinere Fassungen werden übernommen, Pflanze und
+     Verlauf bleiben). Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt40 = T(`JSON.stringify({eigene:S.eigene, water:S.water, fotos:S.fotos, lernen:S.lernen, ereignisse:S.ereignisse})`);
+    try {
+      T(`(function(){
+        S.eigene.push({id:'F40', eigen:true, name:'Lern40', art:'Efeutute', klasse:'B', sonne:Object.keys(SONNE)[0]});
+        S.water.F40 = [iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 2)),
+                       iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 14)),
+                       iso(new Date(HEUTE.getFullYear(), HEUTE.getMonth(), HEUTE.getDate() - 26))];
+        S.lernen = S.lernen || {}; S.lernen.F40 = {lernFaktor: 1.3};
+        GELERNT_AUF = null; return 1; })()`);
+      const p40 = `allePflanzen().find(function(x){ return x.id === 'F40'; })`;
+      const zeile = T(`giessZeileHTML(${p40}, 'heute')`);
+      pruef('beta.40 (7): Die Gießzeile zeigt „gelernt“ als Knopf', /data-do="gelernt-auf"/.test(zeile), zeile.slice(0, 300));
+      T(`GELERNT_AUF = 'F40'`);
+      const satz = T(`gelerntSatz(${p40})`);
+      const richt = T(`(function(){ var f = S.lernen.F40.lernFaktor; delete S.lernen.F40.lernFaktor; var r = intervallVon(${p40}, true); S.lernen.F40.lernFaktor = f; return r; })()`);
+      pruef('beta.40 (7): Der Satz nennt Richtwert, Schnitt (12 Tage) und Rechenwert',
+        satz.indexOf('Richtwert ' + richt + ' Tage') === 0 && /Schnitt zuletzt 12 Tage/.test(satz) && /rechnet mit \d+ Tage/.test(satz)
+        && T(`intervallVon(${p40}, true)`) !== richt, satz + ' | ' + richt);
+      pruef('beta.40 (7): Der Lernfaktor bleibt nach dem Satz unverändert', T(`S.lernen.F40.lernFaktor`) === 1.3);
+      const zeile2 = T(`giessZeileHTML(${p40}, 'heute')`);
+      pruef('beta.40 (7): Offen steht der Satz mit „Zurücksetzen“', /km-gelernt-t/.test(zeile2) && /data-do="gelernt-weg"/.test(zeile2));
+      const k = d.createElement('button'); k.setAttribute('data-do', 'gelernt-weg'); k.setAttribute('data-p', 'F40');
+      d.body.appendChild(k); k.click(); await warte(60); k.remove();
+      pruef('beta.40 (7): „Zurücksetzen“ nimmt das Gelernte weg', T(`lernFaktorVon('F40')`) === 1 && T(`GELERNT_AUF`) === null);
+
+      /* Fotos verkleinern mit einer Attrappe statt Canvas */
+      T(`(function(){
+        S.fotos.F40 = [{key:'f40a', src:'data:image/jpeg;base64,' + 'A'.repeat(4000), datum:'2026-11-01'},
+                       {key:'f40b', src:'data:image/jpeg;base64,' + 'B'.repeat(400), datum:'2026-11-02'}];
+        window.__wv40 = null;
+        fotosVerkleinern(function(src){ return Promise.resolve('data:image/jpeg;base64,' + 'C'.repeat(1000)); })
+          .then(function(r){ window.__wv40 = r; });
+        return 1; })()`);
+      await warte(120);
+      const r40 = T(`JSON.stringify(window.__wv40)`);
+      pruef('beta.40 (7): Fotos verkleinern übernimmt nur die kleinere Fassung',
+        T(`S.fotos.F40[0].src.length`) === 1023 && T(`S.fotos.F40[1].src.length`) === 423 && JSON.parse(r40 || '{}').n === 1, r40);
+      pruef('beta.40 (7): Fotos verkleinern lässt Pflanze, Gießverlauf, Schlüssel und Datum stehen',
+        T(`S.water.F40.length`) === 3 && T(`S.fotos.F40[0].key`) === 'f40a' && T(`S.fotos.F40[0].datum`) === '2026-11-01'
+        && T(`allePflanzen().some(function(x){ return x.id === 'F40'; })`) === true);
+      T(`(function(){ window.__wv40 = null; fotosVerkleinern(function(){ return Promise.reject(new Error('kaputt')); }).then(function(r){ window.__wv40 = r; }); return 1; })()`);
+      await warte(120);
+      pruef('beta.40 (7): Ein Fehler beim Umwandeln lässt das Foto unverändert', T(`S.fotos.F40[0].src.length`) === 1023 && T(`window.__wv40.n`) === 0);
+      T(`(function(){ FOTO_KLEIN.frage = false; FOTO_KLEIN.meldung = ''; fotosKleinZeichnen(); return 1; })()`);
+      pruef('beta.40 (7): Die Einstellungen zeigen Fotos mit Größe und „Fotos verkleinern“',
+        /Fotos: \d+, zusammen/.test(d.getElementById('fotos-klein').textContent) && !!d.getElementById('fotos-klein-auf'));
+      const gal = T(`galerieHTML(${p40}, true)`);
+      pruef('beta.40 (7): Die Karte bietet „Fotos sichern“ bei eigenen Fotos', /data-do="fotos-sichern"/.test(gal));
+    } catch (e) {
+      pruef('beta.40: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.water = a.water; S.fotos = a.fotos; S.lernen = a.lernen; S.ereignisse = a.ereignisse;
+        GELERNT_AUF = null; FOTO_KLEIN.frage = false; FOTO_KLEIN.meldung = ''; delete window.__wv40; sichern(); render(); return 1; })(${JSON.stringify(alt40)})`);
     }
   }
 
