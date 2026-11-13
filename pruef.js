@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.38', w.__T('FASSUNG') === '4.0-beta.38', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.39', w.__T('FASSUNG') === '4.0-beta.39', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -6915,7 +6915,8 @@ setTimeout(async () => {
     pruef('beta.3: Nach der Wahl stehen Pflanze und Problem da', !!k4 && /Rankel/.test(k4.textContent) && /Problem klären/.test(k4.textContent)
       && posts().length === 0, k4 && k4.textContent.slice(0, 160));
 
-    /* Nichts erkannt */
+    /* Nichts erkannt (4.0-beta.39: ohne gemerkte Pflanze) */
+    T(`botPflanzeSetzen(null)`);
     await senden('Hallo du');
     pruef('beta.3: Ohne Treffer sagt er es und bietet die KI an', /nicht zuordnen/.test(letzte().textContent) && !!letzte().querySelector('[data-bot="ki"]'));
 
@@ -13478,6 +13479,222 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
         if(typeof schalterAnwenden === 'function') schalterAnwenden();
         if(typeof botNeu === 'function') botNeu();
         ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt38)})`);
+    }
+  }
+
+  /* ══ 4.0-beta.39 (D): BOTaniker als Chat — eine Werkzeugliste für Kacheln,
+     Leiste, Absichten und Kartenknöpfe; die Pflanze gilt über mehrere
+     Nachrichten (Chip mit „Andere“ und „Keine“); Sicherheit vom Code;
+     Rückfrage statt Vermutung; „Ins Pflegeheft“ erst nach Bestätigung;
+     Werkzeuge schreiben eine Zeile zurück; Nachschlagen mit Wörtern.
+     Legt alles selbst an, stellt am Ende zurück. ══ */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const q = s => d.querySelector(s);
+    const qa = s => Array.from(d.querySelectorAll(s));
+    const zu = async () => { T(`(function(){ var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m); history.replaceState(null, ''); return 1; })()`); await warte(80); };
+    const fetch0 = w.fetch;
+    const alt39 = T(`JSON.stringify({eigene:S.eigene, water:S.water, ereignisse:S.ereignisse, raeume:S.raeume, ansicht:S.ansicht, kartenTab:S.kartenTab,
+      kiModelle:S.kiModelle || null, kiModell:S.kiModell || null})`);
+    const P = id => `allePflanzen().find(function(x){ return x.id === '${id}'; })`;
+    let antwort39 = {};
+    const antwort = () => JSON.stringify(Object.assign({KURZANTWORT:'Stell sie heller, aber nicht in die Mittagssonne.', SICHERHEIT:'mittel',
+      SICHERHEIT_GRUND:'Der Platz ist nur beschrieben.', PRUEFEN:['Schau, ob neue Blätter größer werden'], RUECKFRAGE:'keine', KATEGORIE:'licht'}, antwort39));
+    let aufrufe = [];
+    const posts = () => aufrufe.filter(a => a.u.indexOf(':generateContent') > -1);
+    const auftrag = i => { const p = posts()[i]; return p && p.leib ? p.leib.contents[0].parts[0].text : ''; };
+    const verlauf = () => q('#bot-verlauf');
+    const letzte = () => { const k = verlauf().querySelectorAll('.bot-antwort'); return k[k.length - 1]; };
+    const zurueck = () => qa('#bot-verlauf .bot-zurueck').map(x => x.textContent);
+    const senden = async text => { q('#bot-text').value = text; q('#bot-senden').click(); await warte(120); };
+    try {
+      await zu();
+      w.fetch = (u, o) => {
+        const url = String(u);
+        let leib = null; try{ leib = JSON.parse(o && o.body); }catch(e){}
+        aufrufe.push({u:url, leib:leib});
+        return new Promise(res => setTimeout(() => res({ok:true, status:200,
+          json:() => Promise.resolve({candidates:[{finishReason:'STOP', content:{parts:[{text:antwort()}]}}]})}), 10));
+      };
+      T(`(function(){
+        kiSchluesselSetzen('${ATTRAPPE_ECHT}'); S.kiModelle = [{id:'models/gemini-3.6-flash', anzeige:'3.6 Flash'}]; S.kiModell = 'models/gemini-3.6-flash';
+        S.raeume = [{id:'rD1', name:'D Zimmer', plaetze:[]}];
+        var p = function(id, name, art, bot){ return {id:id, eigen:true, name:name, art:art, botanisch:bot, klasse:'B', sonne:'hell', topf:'14', raum:'rD1', stellplatz:'',
+          quellen:{}, log:[], notiz:'', seit:'2026-10-01'}; };
+        S.eigene = [p('D1', 'D Monti', 'Fensterblatt', 'Monstera deliciosa'), p('D2', 'D Rankel', 'Efeutute', 'Epipremnum aureum'),
+          p('D3', 'D Hängi', 'Efeutute', 'Epipremnum aureum')];
+        S.water = {}; S.ereignisse = {};
+        ansichtZeigen('botaniker'); botNeu(); sichern(); render(); return 1; })()`);
+
+      /* ── 1: eine Werkzeugliste ── */
+      pruef('beta.39 (D1): Acht Kacheln in der Reihenfolge des Plans, Urlaubszettel als letzte Zeile',
+        qa('#bot-start .bot-aktion').map(b => b.dataset.botAktion).join() === 'problem,umtopfen,substrat,vermehren,stammbaum,bestimmen,standort,nachschlagen'
+        && qa('#bot-start .bot-vorschlag').map(b => b.dataset.botAktion).join() === 'urlaub',
+        qa('#bot-start [data-bot-aktion]').map(b => b.dataset.botAktion).join());
+      pruef('beta.39 (D1): Kacheln, Leiste und Absichten kommen aus derselben Liste',
+        qa('#bot-leiste [data-bot-aktion]').map(b => b.dataset.botAktion).join() === T(`BOT_WERKZEUGE.map(function(x){ return x.key; }).join()`)
+        && T(`BOT_ABSICHTEN.length === BOT_WERKZEUGE.length && BOT_ABSICHTEN.every(function(a){ return BOT_WERKZEUGE.indexOf(a) > -1; })`)
+        && T(`BOT_ABSICHTEN.findIndex(function(a){ return a.key === 'stammbaum'; }) < BOT_ABSICHTEN.findIndex(function(a){ return a.key === 'vermehren'; })`));
+      pruef('beta.39 (D1): Ohne Gespräch keine Leiste, die Eingabe steht', q('#bot-leiste').hidden === true && q('#bot-eingabe').hidden === false);
+      T(`karteOeffnen('D1')`); await warte(80);
+      pruef('beta.39 (D1): Die Kartenknöpfe kommen aus der Werkzeugliste',
+        qa('#karte-rumpf .km-neben button').map(b => b.dataset.do + ':' + b.textContent).join() === 'doktor-fuer:Doktor,umtopfen-fuer:Umtopfen,vermehren-fuer:Vermehren,bearb-auf:Bearbeiten',
+        qa('#karte-rumpf .km-neben button').map(b => b.dataset.do).join());
+      await zu();
+
+      /* ── 2: Pflanze über mehrere Nachrichten ── */
+      await senden('D Monti hat gelbe Blätter');
+      pruef('beta.39 (D2): Im Gespräch steht die Leiste über der Eingabe', q('#bot-leiste').hidden === false && d.body.classList.contains('bot-gespraech-an'));
+      pruef('beta.39 (D2): Die erkannte Pflanze steht im Chip', T(`BOT.pflanze`) === 'D1' && /D Monti/.test(q('#bot-chip').textContent)
+        && !!q('#bot-chip [data-bot="andere-pflanze"]') && !!q('#bot-chip [data-bot="keine-pflanze"]'), q('#bot-chip').textContent);
+      await senden('Wann sollte ich umtopfen?');
+      const k2 = letzte();
+      pruef('beta.39 (D2): Die nächste Nachricht ohne Namen bleibt bei derselben Pflanze',
+        T(`BOT.pflanze`) === 'D1' && /Weiter mit „D Monti“/.test(k2.textContent) && !!k2.querySelector('[data-bot-aktion="umtopfen"][data-p="D1"]'), k2.textContent.slice(0, 160));
+      pruef('beta.39 (D2): Dabei geht keine Anfrage raus', posts().length === 0, String(posts().length));
+      await senden('Und die Efeutute?');
+      const k3 = letzte();
+      pruef('beta.39 (D2): Passen zwei andere, fragt er nach statt zu raten',
+        /Welche Pflanze meinst du/.test(k3.textContent) && k3.querySelectorAll('[data-bot-wahl="D2"],[data-bot-wahl="D3"]').length === 2 && T(`BOT.pflanze`) === 'D1');
+      k3.querySelector('[data-bot-wahl="D2"]').click(); await warte(60);
+      pruef('beta.39 (D2): Die Wahl gilt danach', T(`BOT.pflanze`) === 'D2' && /D Rankel/.test(q('#bot-chip').textContent));
+      await senden('Wie geht es der Efeutute?');
+      pruef('beta.39 (D2): Ist die gemerkte unter den passenden, bleibt sie ohne Rückfrage',
+        T(`BOT.pflanze`) === 'D2' && !/Welche Pflanze meinst du/.test(letzte().textContent), letzte().textContent.slice(0, 120));
+      q('#bot-chip [data-bot="keine-pflanze"]').click();
+      pruef('beta.39 (D2): „Keine“ nimmt die Pflanze weg', T(`BOT.pflanze`) === null && /keine bestimmte Pflanze/.test(q('#bot-chip').textContent));
+      q('#bot-chip [data-bot="andere-pflanze"]').click(); await warte(40);
+      const k4 = letzte();
+      pruef('beta.39 (D2): „Andere“ zeigt alle Pflanzen zur Wahl', k4.querySelectorAll('[data-bot-wahl]').length === 4);
+      k4.querySelector('[data-bot-wahl="D3"]').click(); await warte(60);
+      pruef('beta.39 (D2): Die Wahl setzt nur die Pflanze, ohne Anfrage und ohne neue Antwort',
+        T(`BOT.pflanze`) === 'D3' && letzte() === k4 && posts().length === 0);
+      T(`botAktion('substrat')`); await warte(150);
+      pruef('beta.39 (D2): Eine Kachel nimmt die gemerkte Pflanze', T(`subPflanze`) === 'D3', T(`String(subPflanze)`));
+      await zu();
+
+      /* ── 3: Standort ── */
+      T(`botAktion('standort')`); await warte(120);
+      pruef('beta.39 (D3): „Standort“ öffnet den Reiter Platz der Karte', T(`modalOffen('karte-modal')`) === true && T(`_karteId`) === 'D3'
+        && T(`S.kartenTab`) === 'platz' && !!q('#karte-rumpf [data-kpane="platz"]') && q('#karte-rumpf [data-kpane="platz"]').hidden === false);
+      await zu();
+      T(`botPflanzeSetzen(null)`);
+      T(`botAktion('standort')`); await warte(60);
+      const k5 = letzte();
+      pruef('beta.39 (D3): Ohne Pflanze fragt der Chat, welche', /Welche Pflanze meinst du/.test(k5.textContent) && !k5.querySelector('[data-bot-wahl=""]')
+        && T(`modalOffen('karte-modal')`) === false);
+      k5.querySelector('[data-bot-wahl="D1"]').click(); await warte(120);
+      pruef('beta.39 (D3): Nach der Wahl öffnet die Karte beim Platz', T(`_karteId`) === 'D1' && T(`S.kartenTab`) === 'platz' && T(`BOT.pflanze`) === 'D1');
+      await zu();
+
+      /* ── 4: Sicherheit vom Code ── */
+      aufrufe = [];
+      antwort39 = {SICHERHEIT:'hoch', KURZANTWORT:'Wahrscheinlich zu nass.'};
+      T(`botKiFragen('Warum werden die Blätter gelb?', 'D1')`); await warte(150);
+      const k6 = letzte();
+      pruef('beta.39 (D4): Genau eine Anfrage, ohne Kartennamen', posts().length === 1 && /Monstera deliciosa/.test(auftrag(0)) && auftrag(0).indexOf('D Monti') === -1);
+      pruef('beta.39 (D4): Die KI sagt hoch, ohne Foto bei einem Problem setzt der Code mittel',
+        /Sicherheit: mittel/.test(k6.textContent) && /Gesenkt, weil kein Foto/.test(k6.textContent) && k6.querySelectorAll('.bot-punkte i.v').length === 2, k6.textContent.slice(0, 260));
+      pruef('beta.39 (D4): Der Auftrag fragt die Kategorie ab', /KATEGORIE: /.test(auftrag(0)) && !!posts()[0].leib.generationConfig.responseSchema.properties.KATEGORIE);
+      pruef('beta.39 (D4): botSicherheit: hoch bleibt hoch mit Pflanze, Foto und Prüfschritt; Rückfrage ergibt niedrig',
+        T(`botSicherheit({sicher:'hoch', kurz:'x', pruefen:['a'], rueck:''}, {p:{}, bilder:1, absicht:'problem'}).wort`) === 'hoch'
+        && T(`botSicherheit({sicher:'hoch', kurz:'x', pruefen:['a'], rueck:'Wo?'}, {p:{}, bilder:1, absicht:'problem'}).wort`) === 'niedrig'
+        && T(`botSicherheit({sicher:'hoch', kurz:'x', pruefen:['a'], rueck:''}, {p:null, bilder:1, absicht:''}).wort`) === 'mittel'
+        && T(`botSicherheit({sicher:'', kurz:'x', pruefen:['a'], rueck:''}, {p:{}, bilder:0, absicht:''}).wort`) === 'mittel');
+
+      /* ── 5: Rückfrage statt Vermutung ── */
+      aufrufe = [];
+      antwort39 = {KURZANTWORT:'', RUECKFRAGE:'Steht D Monti direkt am Fenster?', SICHERHEIT:'niedrig'};
+      T(`botKiFragen('Ist der Platz gut?', 'D1')`); await warte(150);
+      const k7 = letzte();
+      pruef('beta.39 (D5): Eine Rückfrage steht statt einer Kurzantwort, ohne „Ins Pflegeheft“',
+        !!k7.querySelector('.bot-rueck') && !/Kurzantwort/.test(k7.textContent) && !k7.querySelector('[data-bot="heft"]') && !!T(`BOT.nachfrage`));
+      antwort39 = {};
+      await senden('Ja, am Südfenster');
+      await warte(80);
+      pruef('beta.39 (D5): Die Antwort darauf geht mit der Frage davor an die KI, genau eine Anfrage',
+        posts().length === 2 && /Deine Rückfrage: Steht/.test(auftrag(1)) && /Meine Frage: Ist der Platz gut\?/.test(auftrag(1)) && /Ja, am Südfenster/.test(auftrag(1)) && auftrag(1).indexOf('D Monti') === -1
+        && !/Ohne KI/.test(verlauf().lastElementChild.textContent) && T(`BOT.nachfrage`) === null, auftrag(1).slice(0, 400));
+
+      /* ── 6: Ins Pflegeheft ── */
+      aufrufe = [];
+      const lang = 'Licht: ' + 'Hell, aber ohne pralle Mittagssonne. '.repeat(12);
+      antwort39 = {KURZANTWORT:lang, KATEGORIE:'licht'};
+      T(`${P('D1')}.heft = []; sichern(); 1`);
+      T(`botKiFragen('Wohin mit ihr?', 'D1')`); await warte(150);
+      const k8 = letzte();
+      const heftZahl = () => T(`(${P('D1')}.heft || []).length`);
+      pruef('beta.39 (D6): Unter der Antwort steht „Ins Pflegeheft“', !!k8.querySelector('[data-bot="heft"]'));
+      k8.querySelector('[data-bot="heft"]').click(); await warte(30);
+      pruef('beta.39 (D6): Der erste Tipp zeigt nur die Kategorie, geschrieben ist noch nichts', heftZahl() === 0
+        && k8.querySelector('.bot-heft [aria-pressed="true"]') && k8.querySelector('.bot-heft [aria-pressed="true"]').dataset.botKat === 'licht'
+        && /vorgeschlagen von der KI/.test(k8.querySelector('.bot-heft').textContent), String(heftZahl()));
+      k8.querySelector('.bot-heft [data-bot-kat="giessen"]').click(); await warte(30);
+      pruef('beta.39 (D6): Eine andere Kategorie wählen schreibt auch nichts und benennt den Knopf neu', heftZahl() === 0
+        && /In „Gießen“ eintragen/.test(k8.querySelector('[data-bot="heft-ja"]').textContent));
+      k8.querySelector('[data-bot="heft-ja"]').click(); await warte(60);
+      const eintrag = JSON.parse(T(`JSON.stringify((${P('D1')}.heft || []))`));
+      pruef('beta.39 (D6): Erst die Bestätigung schreibt genau einen KI-Abschnitt, gekürzt auf 300 Zeichen',
+        eintrag.length === 1 && eintrag[0].kat === 'giessen' && eintrag[0].quelle === 'ki' && eintrag[0].text.length <= 300 && /^Licht: Hell/.test(eintrag[0].text)
+        && !k8.querySelector('[data-bot="heft"]') && /Steht im Pflegeheft unter „Gießen“/.test(k8.textContent), JSON.stringify(eintrag).slice(0, 200));
+      T(`botKiFragen('Was braucht sie?', '')`); await warte(150);
+      pruef('beta.39 (D6): Ohne Pflanze kein „Ins Pflegeheft“', !letzte().querySelector('[data-bot="heft"]'));
+      antwort39 = {};
+
+      /* ── 7: Werkzeuge schreiben zurück ── */
+      T(`botNeu()`);
+      T(`botAktion('umtopfen', 'D1')`); await warte(150);
+      T(`(function(){ UT.erledigt = true; UT.topf = 17; utAbschliessen(); return 1; })()`); await warte(150);
+      pruef('beta.39 (D7): Umtopfen schreibt nach „Fertig“ eine Zeile in den Chat',
+        zurueck().length === 1 && /Umtopfen eingetragen: „D Monti“, neuer Topf 17 cm/.test(zurueck()[0]) && q('#bot-gespraech').hidden === false, zurueck().join(' | '));
+      await zu();
+      T(`(function(){ sektionOeffnen('umtopfen'); UT.erledigt = true; utAbschliessen(); return 1; })()`); await warte(150);
+      pruef('beta.39 (D7): Aus der Karte geöffnet schreibt es nichts in den Chat', zurueck().length === 1);
+      await zu();
+      T(`botAktion('substrat', 'D2')`); await warte(150);
+      T(`subStufeZeigen(SUB_STUFEN)`); q('#sub-weiter').click(); await warte(150);
+      pruef('beta.39 (D7): Substrat schreibt nach „Fertig“ zurück', zurueck().length === 2 && /^Substrat: .+ für „D Rankel“/.test(zurueck()[1]), zurueck().join(' | '));
+      await zu();
+      T(`botAktion('vermehren', 'D1')`); await warte(150);
+      T(`(function(){ verPflanze = 'D1'; verErledigt = true; verLetzterWeg = null; verAbschliessen(); return 1; })()`); await warte(150);
+      pruef('beta.39 (D7): Vermehren schreibt nach „Fertig“ zurück', zurueck().length === 3 && /Ableger angelegt: von „D Monti“/.test(zurueck()[2]), zurueck().join(' | '));
+      await zu();
+      T(`botAktion('problem', 'D1')`); await warte(150);
+      T(`dokAbschliessen()`); await warte(150);
+      pruef('beta.39 (D7): Der Doktor schreibt nach „Diagnose abschließen“ zurück', zurueck().length === 4 && /^Doktor für „D Monti“/.test(zurueck()[3]), zurueck().join(' | '));
+      await zu();
+      T(`botAktion('stammbaum', 'D2')`); await warte(150);
+      await zu(); await warte(60);
+      pruef('beta.39 (D7): Der Stammbaum meldet sich beim Schließen', zurueck().length === 5 && /Stammbaum von „D Rankel“ angesehen/.test(zurueck()[4]), zurueck().join(' | '));
+      T(`botAktion('urlaub')`); await warte(150);
+      T(`(function(){ var v = document.getElementById('url-von'); if(v) v.value = ''; ubAufbau(); return 1; })()`);
+      T(`ubBlattBauen()`);
+      await zu(); await warte(60);
+      pruef('beta.39 (D7): Der Urlaubszettel meldet sich beim Schließen, wenn ein Zettel entstand',
+        zurueck().length === 6 && /^Urlaubszettel für .+ erstellt\./.test(zurueck()[5]) && T(`BOT.werkzeug`) === null, zurueck().join(' | '));
+      T(`botAktion('stammbaum')`); await warte(120);
+      T(`botNeu()`);
+      await zu();
+      pruef('beta.39 (D7): „Neues Thema“ vergisst Pflanze, Rückfrage und offenes Werkzeug',
+        T(`BOT.pflanze === null && BOT.nachfrage === null && BOT.werkzeug === null`) && !verlauf().children.length);
+
+      /* ── 8: Nachschlagen mit Wörtern ── */
+      const bibHTML = T(`(function(){ var a = BIB.find(function(x){ return x.spez.indexOf('sukk-weich') > -1; }); return a ? bibArtHTML(a) : ''; })()`);
+      pruef('beta.39 (D8): Nachschlagen zeigt Besonderheiten als Wörter', /zu nass/.test(bibHTML) && bibHTML.indexOf('sukk-weich') === -1, bibHTML.slice(-200));
+      pruef('beta.39 (D8): Unbekannte Codes werden lesbar', T(`spezWort('neu-und-fremd')`) === 'Neu und fremd');
+    } catch (e) {
+      pruef('beta.39: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      w.fetch = fetch0;
+      T(`(function(a){ a = JSON.parse(a); var m, i = 0; while((m = modalOben()) && i++ < 8) _modalWeg(m);
+        if(typeof kiAbbrechen === 'function') try{ kiAbbrechen(); }catch(e){}
+        history.replaceState(null, ''); UT.pflanze = null; UT.erledigt = false; subPflanze = null; verPflanze = null; verErledigt = false;
+        S.eigene = a.eigene; S.water = a.water; S.ereignisse = a.ereignisse; S.raeume = a.raeume;
+        if(a.kartenTab === undefined) delete S.kartenTab; else S.kartenTab = a.kartenTab;
+        kiSchluesselSetzen(''); S.kiModelle = a.kiModelle; S.kiModell = a.kiModell;
+        botNeu(); ansichtZeigen(a.ansicht || 'heute'); sichern(); render(); return 1; })(${JSON.stringify(alt39)})`);
+      w.localStorage.removeItem(T('KI_PROTOKOLL_FACH'));
     }
   }
 

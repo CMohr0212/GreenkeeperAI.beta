@@ -4247,6 +4247,34 @@ html[data-design] .kalk button.zs-weg{flex:0 0 auto;min-width:40px;min-height:36
   background:none;color:var(--schrift-2);font:inherit;font-size:1.3rem;line-height:1;cursor:pointer}
 html[data-design] .kalk button.zs-weg.frage{font-size:var(--t-s);font-weight:600;color:var(--terra);padding:0 10px}
 html[data-design] .knotiz-taten > .knotiz-leeren.frage{color:var(--terra);font-weight:600}
+/* ══ 4.0-beta.39 (D): BOTaniker als Chat ══ */
+html[data-design] .bot-chip{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;margin:10px 0 0;padding:8px 12px;
+  border-radius:var(--r-mittel);background:var(--fl-karte);border:1.5px solid var(--linie)}
+html[data-design] .bot-chip-p{flex:1 1 auto;min-width:0}
+html[data-design] .bot-chip-p small{display:block;font-size:var(--t-xs);color:var(--schrift-2)}
+html[data-design] .bot-chip-p b{font-size:var(--t-m)}
+html[data-design] .bot-chip-p i{font-size:var(--t-s);color:var(--schrift-2);margin-left:6px}
+html[data-design] .bot-leiste{display:flex;gap:6px;overflow-x:auto;max-width:760px;margin:0 auto 8px;padding-bottom:2px;scrollbar-width:none}
+html[data-design] .bot-leiste[hidden]{display:none}
+html[data-design] .bot-leiste::-webkit-scrollbar{display:none}
+html[data-design] .bot-chipk{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);padding:0 12px 0 5px;border-radius:99px;
+  border:1.5px solid var(--linie);background:var(--fl-karte);color:var(--schrift);font:inherit;font-size:var(--t-s);white-space:nowrap;cursor:pointer}
+html[data-design] .bot-chipk .bot-ico{width:30px;height:30px;border-radius:50%}
+html[data-design] .bot-chipk b{font-weight:600}
+html[data-design] .bot-ki{font-family:var(--f-body);font-size:var(--t-s);font-weight:700;letter-spacing:.02em}
+html[data-design] .bot-ki.an{background:var(--water);border-color:var(--water);color:var(--schrift-invers)}
+html[data-design] .bot-zurueck{margin-top:12px;padding:6px 12px;border-left:3px solid var(--moss);font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] .bot-zurueck p{margin:0}
+html[data-design] .bot-zurueck p::before{content:'✓ ';color:var(--moss);font-weight:700}
+html[data-design] .bot-heft{margin-top:12px;padding-top:10px;border-top:1px solid var(--linie)}
+html[data-design] .bot-heft h5{margin:0;font-size:var(--t-m)}
+html[data-design] .bot-katwahl{margin:6px 0 10px;max-height:none}
+html[data-design] .bot-katwahl button[aria-pressed="true"]{background:var(--fl-akzent);border-color:var(--fl-akzent);color:var(--schrift-invers)}
+html[data-design] .bot-heft-text{margin:0;padding:8px 12px;border-radius:var(--r-klein);background:color-mix(in srgb, var(--moss) 8%, transparent);font-size:var(--t-s)}
+html[data-design] .bot-ok{font-weight:600;color:var(--moss)}
+html[data-design] .bot-rueck p{font-weight:600}
+body[data-ansicht="botaniker"].bot-gespraech-an{padding-bottom:205px}
+@media(min-width:760px){ body[data-ansicht="botaniker"].bot-gespraech-an{padding-bottom:140px} }
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9544,22 +9572,13 @@ function pflanzeEntfernen(id){
       <p class="bot-unter">Schreib, was los ist, oder tipp eine Aktion an. Ein Foto hilft immer.</p>
       <div class="bot-strich"></div>
       <p class="bot-ak-titel">Was möchtest du tun?</p>
-      <div class="bot-aktionen">
-        <button type="button" class="bot-aktion" data-bot-aktion="problem"><span class="bot-ico">⚕</span><span><b>Problem klären</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="umtopfen"><span class="bot-ico">⟳</span><span><b>Umtopfen</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="substrat"><span class="bot-ico">≋</span><span><b>Substrat</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="vermehren"><span class="bot-ico">✂</span><span><b>Vermehren</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="standort"><span class="bot-ico">☀</span><span><b>Standort</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="bestimmen"><span class="bot-ico">◎</span><span><b>Art bestimmen</b><small>mit KI</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="nachschlagen"><span class="bot-ico">❒</span><span><b>Nachschlagen</b><small class="bot-off">offline</small></span></button>
-        <button type="button" class="bot-aktion" data-bot-aktion="frage"><span class="bot-ico">?</span><span><b>Frage stellen</b><small>mit KI</small></span></button>
-      </div>
-      <button type="button" class="bot-vorschlag" data-bot-aktion="urlaub"><span class="bot-ico bot-ico-ruhe">✈</span>
-        <span><b>Urlaubszettel</b><small>Zettel für Vertretungen ohne App</small></span></button>
+      <div class="bot-aktionen" id="bot-aktionen"></div>
+      <div id="bot-zeilen"></div>
     </div>
     <div id="bot-gespraech" hidden>
       <div class="bot-gkopf"><span>Gespräch · gilt bis zum Schließen</span>
         <button type="button" class="bot-zu" data-bot="zu" aria-label="Gespräch schließen">✕</button></div>
+      <div class="bot-chip" id="bot-chip"></div>
       <div id="bot-verlauf" aria-live="polite"></div>
     </div>
   </section>
@@ -11270,6 +11289,7 @@ function pflanzeEntfernen(id){
 
 
 <div class="bot-eingabe" id="bot-eingabe" hidden>
+  <div class="bot-leiste" id="bot-leiste" hidden></div>
   <div class="bot-bilder" id="bot-bilder" hidden></div>
   <div class="bot-zeile">
     <label class="bot-rund" aria-label="Foto anhängen" title="Foto anhängen">
@@ -11277,6 +11297,7 @@ function pflanzeEntfernen(id){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
     </label>
     <textarea id="bot-text" rows="1" aria-label="Nachricht an den BOTaniker" placeholder="Schreib dem BOTaniker …"></textarea>
+    <button type="button" class="bot-rund bot-ki" id="bot-ki" data-bot-aktion="frage" aria-label="Direkt die KI fragen" title="Direkt die KI fragen">KI</button>
     <button type="button" class="bot-rund bot-senden" id="bot-senden" aria-label="Senden">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
     </button>
@@ -11447,7 +11468,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.38';
+const FASSUNG = '4.0-beta.39';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -14066,9 +14087,7 @@ function kartenKopfHTML(p){
     <div class="km-taten">
       <button class="km-haupt${heute?' erledigt':''}" data-do="giessen" data-p="${p.id}">${heute?'Heute erledigt ✓':giessTat(p)}</button>
       <div class="km-neben">
-        <button data-do="doktor-fuer" data-p="${p.id}">Doktor</button>
-        <button data-do="umtopfen-fuer" data-p="${p.id}">Umtopfen</button>
-        <button data-do="vermehren-fuer" data-p="${p.id}">Vermehren</button>
+        ${typeof botKartenKnoepfe === 'function' ? botKartenKnoepfe(p) : ''}
         <button data-do="bearb-auf" data-p="${p.id}">Bearbeiten</button>
       </div>
     </div>
@@ -21870,18 +21889,44 @@ document.addEventListener('click', e => {
    Thema“ (F43 a); gespeichert wird nichts. Die Kacheln führen vorerst
    in die bestehenden Werkzeuge (F78). */
 KI_BILDER.bot = [];
-const BOT = {direkt:false, letzte:null, nr:0};
-const BOT_ABSICHTEN = [
-  {key:'stammbaum', name:'Stammbaum',     werkzeug:'stammbaum', worte:/stammbaum|abstammung|stammt .{0,24}\bab\b|mutterpflanze|nachkommen|vorfahr/},
-  {key:'umtopfen',  name:'Umtopfen',      werkzeug:'umtopfen',  worte:/umtopf|umsetz|wurzelgebunden|topf (ist )?zu klein|neuen? topf|groe?(ß|ss)ere?n? topf|eintopf/},
-  {key:'vermehren', name:'Vermehren',     werkzeug:'vermehren', worte:/vermehr|steckling|ableger|abmoos|kindel|teilen|absenker/},
-  {key:'urlaub',    name:'Urlaubszettel', mehr:'urlaub',        worte:/urlaub|verreis|vertretung|bin weg|wegfahr|nachbar(in)? gie(ß|ss)t/},
-  {key:'bestimmen', name:'Art bestimmen',                       worte:/was ist das|welche (art|pflanze) ist|bestimm|wie hei(ß|ss)t (die|diese|das)/},
-  {key:'problem',   name:'Problem klären', werkzeug:'doktor',   worte:/gelb|braun|fleck|krank|schaedling|schädling|laus|läuse|laeuse|milbe|mücke|muecke|thrips|welk|haengt|hängt|fault|faul|schimmel|problem|stirbt|eingeht|vertrock|matsch|weich|abfall|fallen ab|blaetter fallen|blätter fallen|kaputt/},
-  {key:'substrat',  name:'Substrat',      werkzeug:'substrat',  worte:/substrat|erdmischung|mischung|pinienrinde|rinde|perlite|bims|torf|kokos|seramis|pon\b/},
-  {key:'standort',  name:'Standort',      worte:/standort|wohin|wo soll|welches fenster|zu dunkel|zu hell|sonne|licht/},
-  {key:'nachschlagen', name:'Nachschlagen', mehr:'bibliothek',  worte:/steckbrief|nachschlag|was braucht|infos? (zu|über|ueber)/}
+/* 4.0-beta.39 (D): `pflanze` bleibt bis „Neues Thema“ oder bis eine andere
+   erkannt wird; `nachfrage` hält die Rückfrage der KI für die nächste
+   Nachricht; `werkzeug` merkt, welches Werkzeug aus dem Chat offen ist. */
+const BOT = {direkt:false, letzte:null, nr:0, pflanze:null, nachfrage:null, werkzeug:null};
+/* 4.0-beta.39 (D): eine Werkzeugliste für die Kacheln, die Leiste über der
+   Eingabe, die Absichten mit ihren Tippwörtern und die Knöpfe der Karte.
+   Reihenfolge der Liste = Reihenfolge der Kacheln; `rang` = Reihenfolge
+   beim Erkennen (erster Treffer gewinnt; Stammbaum vor Vermehren). */
+const BOT_WERKZEUGE = [
+  {key:'problem',   name:'Problem klären', ico:'⚕', werkzeug:'doktor',   karte:'doktor-fuer',    karteName:'Doktor',    rang:6, worte:/gelb|braun|fleck|krank|schaedling|schädling|laus|läuse|laeuse|milbe|mücke|muecke|thrips|welk|haengt|hängt|fault|faul|schimmel|problem|stirbt|eingeht|vertrock|matsch|weich|abfall|fallen ab|blaetter fallen|blätter fallen|kaputt/},
+  {key:'umtopfen',  name:'Umtopfen',      ico:'⟳', werkzeug:'umtopfen',  karte:'umtopfen-fuer',  karteName:'Umtopfen',  rang:2, worte:/umtopf|umsetz|wurzelgebunden|topf (ist )?zu klein|neuen? topf|groe?(ß|ss)ere?n? topf|eintopf/},
+  {key:'substrat',  name:'Substrat',      ico:'≋', werkzeug:'substrat',  rang:7, worte:/substrat|erdmischung|mischung|pinienrinde|rinde|perlite|bims|torf|kokos|seramis|pon\b/},
+  {key:'vermehren', name:'Vermehren',     ico:'✂', werkzeug:'vermehren', karte:'vermehren-fuer', karteName:'Vermehren', rang:3, worte:/vermehr|steckling|ableger|abmoos|kindel|teilen|absenker/},
+  {key:'stammbaum', name:'Stammbaum',     ico:'⋔', werkzeug:'stammbaum', rang:1, worte:/stammbaum|abstammung|stammt .{0,24}\bab\b|mutterpflanze|nachkommen|vorfahr/},
+  {key:'bestimmen', name:'Art bestimmen', ico:'◎', ki:true,              rang:5, worte:/was ist das|welche (art|pflanze) ist|bestimm|wie hei(ß|ss)t (die|diese|das)/},
+  {key:'standort',  name:'Standort',      ico:'☀', karteTab:'platz',     rang:8, worte:/standort|wohin|wo soll|welches fenster|zu dunkel|zu hell|sonne|licht/},
+  {key:'nachschlagen', name:'Nachschlagen', ico:'❒', mehr:'bibliothek', rang:9, worte:/steckbrief|nachschlag|was braucht|infos? (zu|über|ueber)/},
+  {key:'urlaub',    name:'Urlaubszettel', ico:'✈', mehr:'urlaub', zeile:'Zettel für Vertretungen ohne App', rang:4, worte:/urlaub|verreis|vertretung|bin weg|wegfahr|nachbar(in)? gie(ß|ss)t/}
 ];
+const BOT_ABSICHTEN = BOT_WERKZEUGE.slice().sort((a, b) => a.rang - b.rang);
+function botKachelHTML(w, kurz){
+  if(kurz) return '<button type="button" class="bot-chipk" data-bot-aktion="' + w.key + '"><span class="bot-ico" aria-hidden="true">' + w.ico + '</span><b>' + esc(w.name) + '</b></button>';
+  if(w.zeile) return '<button type="button" class="bot-vorschlag" data-bot-aktion="' + w.key + '"><span class="bot-ico bot-ico-ruhe">' + w.ico + '</span>'
+    + '<span><b>' + esc(w.name) + '</b><small>' + esc(w.zeile) + '</small></span></button>';
+  return '<button type="button" class="bot-aktion" data-bot-aktion="' + w.key + '"><span class="bot-ico">' + w.ico + '</span><span><b>' + esc(w.name) + '</b>'
+    + (w.ki ? '<small>mit KI</small>' : '<small class="bot-off">offline</small>') + '</span></button>';
+}
+function botKachelnZeichnen(){
+  const kacheln = document.getElementById('bot-aktionen');
+  if(kacheln) kacheln.innerHTML = BOT_WERKZEUGE.filter(w => !w.zeile).map(w => botKachelHTML(w)).join('');
+  const zeilen = document.getElementById('bot-zeilen');
+  if(zeilen) zeilen.innerHTML = BOT_WERKZEUGE.filter(w => w.zeile).map(w => botKachelHTML(w)).join('');
+  const leiste = document.getElementById('bot-leiste');
+  if(leiste) leiste.innerHTML = BOT_WERKZEUGE.map(w => botKachelHTML(w, true)).join('');
+}
+function botKartenKnoepfe(p){
+  return BOT_WERKZEUGE.filter(w => w.karte).map(w => '<button data-do="' + w.karte + '" data-p="' + esc(p.id) + '">' + esc(w.karteName || w.name) + '</button>').join('');
+}
 function botAbsicht(key){ return BOT_ABSICHTEN.find(a => a.key === key) || null; }
 
 /* Pflanze und Absicht ohne KI. Gefunden wird über den Namen auf der
@@ -21902,6 +21947,11 @@ function botZeigenGespraech(an){
   const st = document.getElementById('bot-start'), ge = document.getElementById('bot-gespraech');
   if(st) st.hidden = !!an;
   if(ge) ge.hidden = !an;
+  /* 4.0-beta.39 (D): Im Gespräch stehen die Werkzeuge als Leiste über der Eingabe. */
+  const le = document.getElementById('bot-leiste');
+  if(le) le.hidden = !an;
+  document.body.classList.toggle('bot-gespraech-an', !!an);
+  if(an) botChipZeichnen();
 }
 function botAnhaengen(html, cls){
   const v = document.getElementById('bot-verlauf');
@@ -21915,6 +21965,31 @@ function botAnhaengen(html, cls){
   return el;
 }
 function botName(p){ return (p && p.name && p.name !== 'Name offen') ? p.name : (p ? (p.art || p.botanisch || 'Pflanze') : ''); }
+/* 4.0-beta.39 (D): Die Pflanze gilt über mehrere Nachrichten. */
+function botPflanzeVon(){
+  const p = BOT.pflanze ? allePflanzen().find(x => x.id === BOT.pflanze && !x.nurBib) : null;
+  if(!p) BOT.pflanze = null;
+  return p || null;
+}
+function botPflanzeSetzen(pid){
+  BOT.pflanze = (pid && allePflanzen().some(x => x.id === pid && !x.nurBib)) ? pid : null;
+  botChipZeichnen();
+}
+function botChipZeichnen(){
+  const box = document.getElementById('bot-chip');
+  if(!box) return;
+  const p = botPflanzeVon();
+  box.innerHTML = p
+    ? '<span class="bot-chip-p"><small>Es geht um</small><b>' + esc(botName(p)) + '</b>'
+      + ((p.botanisch || p.art) ? '<i>' + esc(p.botanisch || p.art) + '</i>' : '') + '</span>'
+      + '<button type="button" class="linkbtn" data-bot="andere-pflanze">Andere</button>'
+      + '<button type="button" class="linkbtn" data-bot="keine-pflanze">Keine</button>'
+    : '<span class="bot-chip-p"><small>Es geht um</small><b>keine bestimmte Pflanze</b></span>'
+      + '<button type="button" class="linkbtn" data-bot="andere-pflanze">Pflanze wählen</button>';
+}
+function botAllePflanzen(){
+  return allePflanzen().filter(p => p && !p.nurBib).slice().sort((x, y) => botName(x).localeCompare(botName(y), 'de'));
+}
 function botPflanzeChip(p){
   return '<span class="bot-erk"><span><b>' + esc(botName(p)) + '</b><small>' + esc(p.botanisch || p.art || '') + '</small></span></span>';
 }
@@ -21922,11 +21997,21 @@ function botPflanzeChip(p){
 /* Antwort ohne KI */
 function botLokal(text, pid){
   const erk = botErkennen(text);
+  const vorher = botPflanzeVon();
   let p = pid ? allePflanzen().find(x => x.id === pid) : null;
   if(!p && erk.pflanzen.length === 1) p = erk.pflanzen[0];
-  if(!p && erk.pflanzen.length > 1) return botRueckfrage(text, erk.pflanzen, erk.absicht, 'lokal');
+  /* Passen mehrere, fragt er nach — außer die gemerkte ist darunter. */
+  if(!p && erk.pflanzen.length > 1){
+    if(vorher && erk.pflanzen.some(x => x.id === vorher.id)) p = vorher;
+    else return botRueckfrage(text, erk.pflanzen, erk.absicht, 'lokal');
+  }
+  const gemerkt = !p && !!vorher;
+  if(!p) p = vorher;
+  botPflanzeSetzen(p ? p.id : null);
   const a = botAbsicht(erk.absicht);
   const teile = ['<div class="bot-quelle"><span class="bot-etikett bot-e-lokal">Ohne KI · aus deinen Daten</span></div>'];
+  if(gemerkt) teile.push('<p class="bot-mit" style="margin-top:0!important">Weiter mit „' + esc(botName(p)) + '“ aus diesem Gespräch.</p>');
+  if(p && !a) teile.push('<p>Eine Aktion habe ich darin nicht erkannt. Frag den BOTaniker oder tipp unten ein Werkzeug an.</p>');
   if(p || a){
     teile.push('<div class="bot-erkannt">' + (p ? botPflanzeChip(p) : '')
       + (a ? '<span class="bot-erk"><span><b>' + esc(a.name) + '</b><small>Absicht</small></span></span>' : '') + '</div>');
@@ -21936,7 +22021,7 @@ function botLokal(text, pid){
   }
   if(a && a.key === 'problem') teile.push('<p class="bot-mit">Im Doktor klärst du das Problem offline Schritt für Schritt.</p>');
   const kn = [];
-  if(a && (a.werkzeug || a.mehr || a.key === 'bestimmen'))
+  if(a && (a.werkzeug || a.mehr || a.key === 'bestimmen' || (a.karteTab && p)))
     kn.push('<button type="button" class="haupt" data-bot-aktion="' + a.key + '"' + (p ? ' data-p="' + esc(p.id) + '"' : '') + '>' + esc(a.name) + ' öffnen</button>');
   kn.push('<button type="button" data-bot="ki"' + (p ? ' data-p="' + esc(p.id) + '"' : '') + '>BOTaniker fragen</button>');
   teile.push('<div class="tools bot-knoepfe">' + kn.join('') + '</div>');
@@ -21950,7 +22035,8 @@ function botRueckfrage(text, liste, absicht, weiter){
     + (absicht ? '<p class="bot-mit">Erkannt: ' + esc(botAbsicht(absicht).name) + '.</p>' : '')
     + '<div class="bot-wahl">' + liste.map(p => '<button type="button" data-bot-wahl="' + esc(p.id) + '"><b>' + esc(botName(p))
       + '</b><small>' + esc([p.art && p.art !== botName(p) ? p.art : '', raumNameVon(p.raum)].filter(Boolean).join(' · ')) + '</small></button>').join('')
-    + '<button type="button" data-bot-wahl=""><b>Ohne Pflanze</b><small>allgemein fragen</small></button></div>');
+    + (/^werkzeug:/.test(weiter || '') ? '' : weiter === 'setzen' ? '<button type="button" data-bot-wahl=""><b>Keine</b><small>ohne bestimmte Pflanze</small></button>'
+      : '<button type="button" data-bot-wahl=""><b>Ohne Pflanze</b><small>allgemein fragen</small></button>') + '</div>');
   if(el){ el.dataset.botFrage = text; el.dataset.botWeiter = weiter || 'lokal'; }
   return el;
 }
@@ -21976,10 +22062,11 @@ function botKontext(p){
   }
   return z;
 }
-const BOT_FELDER = ['KURZANTWORT', 'SICHERHEIT', 'SICHERHEIT_GRUND', 'PRUEFEN', 'RUECKFRAGE'];
+const BOT_FELDER = ['KURZANTWORT', 'SICHERHEIT', 'SICHERHEIT_GRUND', 'PRUEFEN', 'RUECKFRAGE', 'KATEGORIE'];
 function botSchema(){
   return {type:'OBJECT', properties:{KURZANTWORT:{type:'STRING'}, SICHERHEIT:{type:'STRING', enum:['hoch','mittel','niedrig']},
-    SICHERHEIT_GRUND:{type:'STRING'}, PRUEFEN:{type:'ARRAY', items:{type:'STRING'}}, RUECKFRAGE:{type:'STRING'}},
+    SICHERHEIT_GRUND:{type:'STRING'}, PRUEFEN:{type:'ARRAY', items:{type:'STRING'}}, RUECKFRAGE:{type:'STRING'},
+    KATEGORIE:{type:'STRING', enum:HEFT_KATS.map(c => c.k)}},
     required:BOT_FELDER.slice(), propertyOrdering:BOT_FELDER.slice()};
 }
 /* Der Name der Pflanze kann in der Frage selbst stehen. Er wird durch
@@ -21994,10 +22081,13 @@ function botOhneNamen(text, p){
   });
   return t;
 }
-function botPromptBauen(text, p, nBilder){
+function botPromptBauen(text, p, nBilder, vorher){
   const z = ['Du bist der BOTaniker, ein Pflanzenberater in einer Pflanzenpflege-App. Beantworte die Frage zu einer Zimmer- oder Balkonpflanze kurz, konkret und ehrlich. '
     + 'Rate nicht. Fehlt dir für eine sichere Antwort etwas, sag das und stell eine Rückfrage. Nenne nichts, was für jede Zimmerpflanze gilt, außer es beantwortet die Frage.'];
-  z.push('', 'FRAGE', botOhneNamen(text, p) || '(keine, nur Foto)');
+  if(vorher && vorher.rueck){
+    z.push('', 'VORHER IN DIESEM GESPRÄCH', 'Meine Frage: ' + (botOhneNamen(vorher.frage, p) || '(nur Foto)'), 'Deine Rückfrage: ' + botOhneNamen(vorher.rueck, p));
+    z.push('', 'MEINE ANTWORT AUF DEINE RÜCKFRAGE', botOhneNamen(text, p) || '(keine, nur Foto)');
+  } else z.push('', 'FRAGE', botOhneNamen(text, p) || '(keine, nur Foto)');
   const k = botKontext(p);
   if(k.length) z.push('', 'WAS DIE APP ÜBER DIE PFLANZE WEISS', k.join('\n'));
   if(nBilder) z.push('', 'Angehängt: ' + (nBilder === 1 ? 'ein Foto' : nBilder + ' Fotos') + ' dieser Pflanze.');
@@ -22007,7 +22097,8 @@ function botPromptBauen(text, p, nBilder){
     'SICHERHEIT: Nur genau eines dieser Wörter: hoch, mittel, niedrig',
     'SICHERHEIT_GRUND: Ein Satz, warum die Sicherheit so ist, etwa was auf dem Foto nicht zu sehen ist.',
     'PRUEFEN: Liste mit ein bis drei kurzen Schritten, wie ich die Antwort selbst an der Pflanze überprüfe.',
-    'RUECKFRAGE: Eine Frage an mich, wenn für eine sichere Antwort etwas fehlt. Sonst genau: keine');
+    'RUECKFRAGE: Eine Frage an mich, wenn für eine sichere Antwort etwas fehlt. Dann lass KURZANTWORT leer, statt zu vermuten. Sonst genau: keine',
+    'KATEGORIE: In welche Kategorie eines Pflegehefts die Antwort gehört. Nur genau einer dieser Schlüssel: ' + HEFT_KATS.map(c => c.k).join(', '));
   return z.join('\n');
 }
 function botAntwortLesen(txt){
@@ -22019,7 +22110,7 @@ function botAntwortLesen(txt){
   if(!o || typeof o !== 'object'){
     const d = {};
     String(txt || '').split(/\r?\n/).forEach(z => {
-      const m = z.match(/^\s*[-*]*\s*(KURZANTWORT|SICHERHEIT_GRUND|SICHERHEIT|PRUEFEN|RUECKFRAGE)\s*:\s*(.*)$/i);
+      const m = z.match(/^\s*[-*]*\s*(KURZANTWORT|SICHERHEIT_GRUND|SICHERHEIT|PRUEFEN|RUECKFRAGE|KATEGORIE)\s*:\s*(.*)$/i);
       if(!m) return;
       const k = m[1].toUpperCase();
       if(k === 'PRUEFEN') (d.PRUEFEN = d.PRUEFEN || []).push(m[2]); else d[k] = m[2];
@@ -22028,17 +22119,39 @@ function botAntwortLesen(txt){
   }
   const pr = Array.isArray(o.PRUEFEN) ? o.PRUEFEN : (o.PRUEFEN ? String(o.PRUEFEN).split(/\s*\|\s*|\n+/) : []);
   const rf = String(o.RUECKFRAGE || '').trim();
-  return {kurz:String(o.KURZANTWORT || '').trim(), sicher:norm(String(o.SICHERHEIT || '')),
+  const kn = norm(String(o.KATEGORIE || ''));
+  const kat = kn ? (HEFT_KATS.find(c => c.k === kn || norm(c.t) === kn) || {}).k || '' : '';
+  return {kat:kat, kurz:String(o.KURZANTWORT || '').trim(), sicher:norm(String(o.SICHERHEIT || '')),
     grund:String(o.SICHERHEIT_GRUND || '').trim(), pruefen:pr.map(x => String(x).trim()).filter(Boolean).slice(0, 3),
     rueck:(rf && !/^keine?\.?$/i.test(rf)) ? rf : ''};
 }
 
+/* 4.0-beta.39 (D): Die Sicherheit legt der Code fest. Die KI-Angabe ist
+   die Obergrenze; sie sinkt bei Rückfrage oder leerer Antwort auf niedrig,
+   ohne Pflanze, ohne Prüfschritt oder bei Problem und Bestimmung ohne Foto
+   höchstens auf mittel. Fehlt die KI-Angabe, gilt mittel. */
+function botSicherheit(a, c){
+  const ki = a.sicher === 'hoch' ? 3 : a.sicher === 'niedrig' ? 1 : 2;
+  let st = ki;
+  const weil = [];
+  const deckel = (n, warum) => { if(st > n){ st = n; weil.push(warum); } };
+  if(a.rueck) deckel(1, 'es fehlen noch Angaben');
+  if(!a.kurz) deckel(1, 'die Antwort ist leer');
+  if(!c.p) deckel(2, 'keine Pflanze gewählt');
+  if(!c.bilder && (c.absicht === 'problem' || c.absicht === 'bestimmen')) deckel(2, 'kein Foto');
+  if(!a.pruefen.length) deckel(2, 'kein Prüfschritt');
+  return {stufe:st, wort:['', 'niedrig', 'mittel', 'hoch'][st], weil:weil};
+}
+const BOT_KAT_VON_ABSICHT = {problem:'probleme', umtopfen:'substrat', substrat:'substrat', vermehren:'vermehrung', standort:'licht'};
+function botKatVorschlag(absicht){ return BOT_KAT_VON_ABSICHT[absicht] || 'allgemein'; }
+
 /* KI: genau eine Anfrage je Tipp */
-async function botKiFragen(text, pid, modellId){
+async function botKiFragen(text, pid, modellId, vorher){
   const p = pid ? allePflanzen().find(x => x.id === pid) : null;
   const bilder = KI_BILDER.bot.slice(0, KI_BILD_MAX);
-  BOT.letzte = {text:text, pid:pid || '', bilder:bilder};
-  const prompt = botPromptBauen(text, p, bilder.length);
+  BOT.letzte = {text:text, pid:pid || '', bilder:bilder, vorher:vorher || null};
+  BOT.nachfrage = null;
+  const prompt = botPromptBauen(text, p, bilder.length, vorher);
   if(!kiBereit()){
     const el = botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-ki">KI</span></div>'
       + '<p>Für Fragen an die KI fehlt der Schlüssel. Er steht hinter dem Zahnrad unter Einstellungen, KI-Dienst.</p>'
@@ -22064,20 +22177,95 @@ async function botKiFragen(text, pid, modellId){
   if(lauf) lauf.remove();
   KI_BILDER.bot.length = 0; botBilderZeichnen();
   const a = botAntwortLesen(erg.text);
-  const stufe = a.sicher === 'hoch' ? 3 : a.sicher === 'mittel' ? 2 : a.sicher === 'niedrig' ? 1 : 0;
+  const absicht = botErkennen((vorher ? vorher.frage + ' ' : '') + text).absicht;
+  const sch = botSicherheit(a, {p:p, bilder:bilder.length, absicht:absicht});
+  const stufe = sch.stufe;
   const mit = botKontext(p);
-  botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-ki">KI · ' + esc(erg.modell ? erg.modell.anzeige : 'Gemini') + '</span>'
+  const grund = [a.grund, sch.weil.length ? 'Gesenkt, weil ' + sch.weil.join(', ') + '.' : ''].filter(Boolean).join(' ');
+  const inhalt = a.rueck
+    /* Rückfrage statt Vermutung: keine Kurzantwort, die nächste Nachricht geht direkt an die KI. */
+    ? '<div class="bot-block bot-rueck" style="margin-top:0;padding-top:0;border-top:0"><h5>Rückfrage</h5><p>' + esc(a.rueck) + '</p></div>'
+      + '<p class="bot-mit">Antworte unten im Feld. Mit „Senden“ geht deine Antwort zusammen mit der Frage von eben an die KI.</p>'
+    : '<div class="bot-block" style="margin-top:0;padding-top:0;border-top:0"><h5>Kurzantwort</h5></div>'
+      + '<p>' + esc(a.kurz || 'Die Antwort war leer.') + '</p>'
+      + '<div class="bot-sicher' + (stufe === 3 ? ' hoch' : '') + '"><span class="bot-punkte">'
+      + [1, 2, 3].map(i => '<i' + (i <= stufe ? ' class="v"' : '') + '></i>').join('') + '</span><span><b>Sicherheit: ' + esc(sch.wort) + '</b>'
+      + (grund ? '<small>' + esc(grund) + '</small>' : '') + '</span></div>'
+      + (a.pruefen.length ? '<div class="bot-block"><h5>So prüfst du es</h5><ul>' + a.pruefen.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '');
+  const insHeft = !a.rueck && !!a.kurz && !!p;
+  const el = botAnhaengen('<div class="bot-quelle"><span class="bot-etikett bot-e-ki">KI · ' + esc(erg.modell ? erg.modell.anzeige : 'Gemini') + '</span>'
     + (p ? '<span class="bot-etikett bot-e-lokal">Pflanze: ' + esc(botName(p)) + '</span>' : '') + '</div>'
-    + '<div class="bot-block" style="margin-top:0;padding-top:0;border-top:0"><h5>Kurzantwort</h5></div>'
-    + '<p>' + esc(a.kurz || 'Die Antwort war leer.') + '</p>'
-    + (stufe ? '<div class="bot-sicher' + (stufe === 3 ? ' hoch' : '') + '"><span class="bot-punkte">'
-      + [1, 2, 3].map(i => '<i' + (i <= stufe ? ' class="v"' : '') + '></i>').join('') + '</span><span><b>Sicherheit: ' + esc(a.sicher) + '</b>'
-      + (a.grund ? '<small>' + esc(a.grund) + '</small>' : '') + '</span></div>' : '')
-    + (a.pruefen.length ? '<div class="bot-block"><h5>So prüfst du es</h5><ul>' + a.pruefen.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '')
-    + (a.rueck ? '<div class="bot-block"><h5>Rückfrage</h5><p>' + esc(a.rueck) + '</p></div>' : '')
+    + inhalt
     + '<p class="bot-mit"><b>Mitgeschickt:</b> ' + esc([bilder.length ? (bilder.length === 1 ? '1 Foto' : bilder.length + ' Fotos') : 'kein Foto'].concat(mit).join(' · '))
     + (p && p.name && p.name !== 'Name offen' ? '. Nicht mitgeschickt: der Name „' + esc(p.name) + '“.' : '') + '</p>'
-    + '<div class="tools bot-knoepfe"><button type="button" data-bot="neu">Neues Thema</button></div>');
+    + '<div class="bot-heft" hidden></div>'
+    + '<div class="tools bot-knoepfe">' + (insHeft ? '<button type="button" class="haupt" data-bot="heft">Ins Pflegeheft</button>' : '')
+    + '<button type="button" data-bot="neu">Neues Thema</button></div>');
+  if(el){
+    el.dataset.botPid = p ? p.id : '';
+    el.dataset.botHeft = a.kurz;
+    el.dataset.botKat = a.kat || botKatVorschlag(absicht);
+    el.dataset.botKatKi = a.kat ? '1' : '';
+  }
+  if(a.rueck) BOT.nachfrage = {frage:(vorher ? vorher.frage + ' — ' : '') + text, rueck:a.rueck, pid:p ? p.id : ''};
+}
+
+/* 4.0-beta.39 (D): „Ins Pflegeheft“. Die KI schlägt die Kategorie vor, Chris
+   wählt oder bestätigt; geschrieben wird erst mit dem Knopf, der die
+   Kategorie nennt (Regel 7.2). Der Text ist die Kurzantwort, gekürzt auf
+   die Grenze des KI-Abschnitts. */
+function botHeftZeichnen(karte){
+  const box = karte && karte.querySelector('.bot-heft');
+  if(!box) return;
+  const p = allePflanzen().find(x => x.id === karte.dataset.botPid);
+  if(!p){ box.hidden = false; box.innerHTML = '<p>Die Pflanze gibt es nicht mehr.</p>'; return; }
+  const kat = heftKat(karte.dataset.botKat);
+  const katT = (HEFT_KATS.find(c => c.k === kat) || {}).t || kat;
+  box.hidden = false;
+  box.innerHTML = '<h5>Ins Pflegeheft von „' + esc(botName(p)) + '“</h5>'
+    + '<p class="bot-mit" style="margin-top:4px!important">Kategorie' + (karte.dataset.botKatKi ? ', vorgeschlagen von der KI' : '') + ':</p>'
+    + '<div class="bot-wahl bot-katwahl">' + HEFT_KATS.map(c => '<button type="button" data-bot-kat="' + c.k + '" aria-pressed="' + (c.k === kat) + '"><b>' + esc(c.t) + '</b></button>').join('') + '</div>'
+    + '<p class="bot-heft-text">' + esc(heftKuerzen(karte.dataset.botHeft, 'ki')) + '</p>'
+    + '<div class="tools bot-knoepfe"><button type="button" class="haupt" data-bot="heft-ja">In „' + esc(katT) + '“ eintragen</button>'
+    + '<button type="button" data-bot="heft-nein">Abbrechen</button></div>';
+}
+function botHeftEintragen(karte){
+  const pid = karte.dataset.botPid;
+  const kat = heftKat(karte.dataset.botKat);
+  const a = heftAnhaengen(pid, kat, karte.dataset.botHeft, 'ki');
+  const box = karte.querySelector('.bot-heft');
+  const knopf = karte.querySelector('[data-bot="heft"]');
+  if(!a){ if(box) box.innerHTML = '<p>Eintragen hat nicht geklappt.</p>'; return null; }
+  if(knopf) knopf.remove();
+  karte.dataset.botHeftDa = a.id;
+  if(box) box.innerHTML = '<p class="bot-ok">Steht im Pflegeheft unter „' + esc((HEFT_KATS.find(c => c.k === kat) || {}).t || kat) + '“.</p>';
+  render();
+  return a;
+}
+
+/* 4.0-beta.39 (D): Ein Werkzeug, das aus dem Chat geöffnet wurde, schreibt
+   nach „Fertig“ eine Zeile zurück. Stammbaum und Urlaubszettel haben kein
+   „Fertig“; sie melden sich beim Schließen des Fensters. */
+function botWerkzeugMerken(key, pid){ BOT.werkzeug = {key:key, pid:pid || ''}; }
+function botZurueck(key, text){
+  if(!BOT.werkzeug || BOT.werkzeug.key !== key || !text) return false;
+  BOT.werkzeug = null;
+  botZeigenGespraech(true);
+  botAnhaengen('<p>' + esc(text) + '</p>', 'bot-zurueck');
+  return true;
+}
+function botUrlaubMerken(text){
+  if(BOT.werkzeug && BOT.werkzeug.key === 'urlaub') BOT.werkzeug.text = text;
+}
+function botWerkzeugZu(){
+  const w = BOT.werkzeug;
+  if(!w) return;
+  if(w.key === 'stammbaum'){
+    const p = w.pid ? allePflanzen().find(x => x.id === w.pid) : null;
+    botZurueck('stammbaum', 'Stammbaum' + (p ? ' von „' + botName(p) + '“' : '') + ' angesehen.');
+  }
+  if(w.key === 'urlaub' && w.text) botZurueck('urlaub', w.text);
+  BOT.werkzeug = null;
 }
 
 /* Eingabe */
@@ -22095,16 +22283,33 @@ function botSenden(){
   botAnhaengen((KI_BILDER.bot.length ? '<div class="bot-anhang">' + KI_BILDER.bot.map(b => '<img alt="" src="' + b.vorschau + '">').join('') + '</div>' : '')
     + esc(text || 'Foto'), 'bot-blase');
   if(feld){ feld.value = ''; feld.style.height = ''; feld.placeholder = 'Schreib dem BOTaniker …'; }
+  const kk = document.getElementById('bot-ki');
+  if(kk) kk.classList.remove('an');
+  /* 4.0-beta.39 (D): Die Antwort auf eine Rückfrage der KI geht mit der
+     Frage davor wieder an die KI, genau eine Anfrage. */
+  if(BOT.nachfrage){
+    const nf = BOT.nachfrage;
+    BOT.direkt = false;
+    return botKiFragen(text, nf.pid, null, nf);
+  }
   if(BOT.direkt){
     BOT.direkt = false;
     const erk = botErkennen(text);
-    if(erk.pflanzen.length > 1) return botRueckfrage(text, erk.pflanzen, null, 'ki');
-    return botKiFragen(text, erk.pflanzen[0] ? erk.pflanzen[0].id : '');
+    const vorher = botPflanzeVon();
+    let p = erk.pflanzen.length === 1 ? erk.pflanzen[0] : null;
+    if(erk.pflanzen.length > 1){
+      if(vorher && erk.pflanzen.some(x => x.id === vorher.id)) p = vorher;
+      else return botRueckfrage(text, erk.pflanzen, null, 'ki');
+    }
+    if(!p) p = vorher;
+    botPflanzeSetzen(p ? p.id : null);
+    return botKiFragen(text, p ? p.id : '');
   }
   botLokal(text);
 }
 function botAktion(key, pid){
   const a = botAbsicht(key);
+  if(!pid && key !== 'frage' && BOT.pflanze) pid = botPflanzeVon() ? BOT.pflanze : '';
   if(key === 'frage'){
     BOT.direkt = true;
     const feld = document.getElementById('bot-text');
@@ -22112,11 +22317,27 @@ function botAktion(key, pid){
        geht sie mit diesem Tipp direkt an die KI. */
     if((feld && feld.value.trim()) || KI_BILDER.bot.length) return botSenden();
     if(feld){ feld.placeholder = 'Deine Frage an die KI …'; feld.focus(); }
+    const kk = document.getElementById('bot-ki');
+    if(kk) kk.classList.add('an');
     return;
   }
   if(key === 'bestimmen'){
     alStart(); neuWegSetzen('ki'); alStufeZeigen(2);
     return;
+  }
+  /* 4.0-beta.39 (D): „Standort“ öffnet den Reiter Platz der Karte;
+     ohne Pflanze fragt der Chat, welche gemeint ist. */
+  if(a && a.karteTab){
+    const p = pid ? allePflanzen().find(x => x.id === pid && !x.nurBib) : null;
+    if(p){
+      if(!karteOeffnen(p.id)) return false;
+      S.kartenTab = a.karteTab;
+      if(typeof karteRumpfFuellen === 'function') karteRumpfFuellen();
+      return true;
+    }
+    botZeigenGespraech(true);
+    botRueckfrage('', botAllePflanzen(), a.key, 'werkzeug:' + a.key);
+    return false;
   }
   if(key === 'problem' && pid && typeof dokPflanzeSetzen === 'function') dokPflanzeSetzen(pid);
   /* 4.0-beta.38: Die erkannte Pflanze bleibt im Umtopfen und im
@@ -22126,17 +22347,26 @@ function botAktion(key, pid){
   if(a && a.werkzeug){
     const auf = sektionOeffnen(a.werkzeug);
     if(auf && da && key === 'substrat' && typeof subPflanzeSetzen === 'function') subPflanzeSetzen(pid);
+    if(auf) botWerkzeugMerken(a.werkzeug, da ? pid : '');
     return auf;
   }
-  if(a && a.mehr) return sektionOeffnen(a.mehr);
+  if(a && a.mehr){
+    const auf = sektionOeffnen(a.mehr);
+    if(auf && a.mehr === 'urlaub') botWerkzeugMerken('urlaub', '');
+    return auf;
+  }
 }
 function botNeu(){
   const v = document.getElementById('bot-verlauf');
   if(v) v.innerHTML = '';
   BOT.direkt = false; BOT.letzte = null;
+  BOT.pflanze = null; BOT.nachfrage = null; BOT.werkzeug = null;
+  botChipZeichnen();
   KI_BILDER.bot.length = 0; botBilderZeichnen();
   const feld = document.getElementById('bot-text');
   if(feld){ feld.value = ''; feld.placeholder = 'Schreib dem BOTaniker …'; }
+  const kk = document.getElementById('bot-ki');
+  if(kk) kk.classList.remove('an');
   botZeigenGespraech(false);
 }
 document.addEventListener('click', e => {
@@ -22150,6 +22380,13 @@ document.addEventListener('click', e => {
     const pid = wahl.dataset.botWahl;
     const p = pid ? allePflanzen().find(x => x.id === pid) : null;
     botAnhaengen(esc(p ? botName(p) : 'Ohne Pflanze'), 'bot-blase');
+    /* 4.0-beta.39 (D): Die Wahl gilt für die folgenden Nachrichten. */
+    if(/^werkzeug:/.test(weiter)){
+      if(p){ botPflanzeSetzen(p.id); botAktion(weiter.slice(9), p.id); }
+      return;
+    }
+    botPflanzeSetzen(p ? p.id : null);
+    if(weiter === 'setzen') return;
     if(weiter === 'ki') botKiFragen(text, pid);
     else if(pid) botLokal(text, pid);
     else botKiFragen(text, '');
@@ -22170,10 +22407,23 @@ document.addEventListener('click', e => {
     const alle = allePflanzen().filter(p => p && !p.nurBib).slice().sort((x, y) => botName(x).localeCompare(botName(y), 'de'));
     return botRueckfrage(karte ? karte.dataset.botFrage || '' : '', alle, null, 'lokal');
   }
+  if(was === 'andere-pflanze') return botRueckfrage('', botAllePflanzen(), null, 'setzen');
+  if(was === 'keine-pflanze') return botPflanzeSetzen(null);
+  if(was === 'heft' && karte) return botHeftZeichnen(karte);
+  if(was === 'heft-nein' && karte){ const h = karte.querySelector('.bot-heft'); if(h){ h.hidden = true; h.innerHTML = ''; } return; }
+  if(was === 'heft-ja' && karte) return botHeftEintragen(karte);
   if(was === 'kopieren'){
     const ok = inZwischenablage(karte ? karte.dataset.botPrompt || '' : '');
     b.textContent = ok ? 'Kopiert' : 'Nicht kopiert — lang ins Feld tippen';
   }
+});
+document.addEventListener('click', e => {
+  const k = e.target.closest('[data-bot-kat]');
+  if(!k) return;
+  const karte = k.closest('.bot-antwort');
+  if(!karte) return;
+  karte.dataset.botKat = k.dataset.botKat;
+  botHeftZeichnen(karte);
 });
 document.addEventListener('click', e => {
   const w = e.target.closest('[data-bot-bildweg]');
@@ -22181,6 +22431,8 @@ document.addEventListener('click', e => {
   KI_BILDER.bot.splice(Number(w.dataset.botBildweg), 1);
   botBilderZeichnen();
 });
+botKachelnZeichnen();
+botChipZeichnen();
 {
   const s = document.getElementById('bot-senden');
   if(s) s.onclick = botSenden;
@@ -25195,7 +25447,8 @@ function sekZurueckhaengen(){
 
 modalAnmelden('sek-modal', {
   groesse:'voll', schleier:false,
-  nachZu: ()=>{ sekZurueckhaengen(); _sekWeg = []; sekZurueckKnopf(); }
+  nachZu: ()=>{ sekZurueckhaengen(); _sekWeg = []; sekZurueckKnopf();
+    if(typeof botWerkzeugZu === 'function') botWerkzeugZu(); }
 });
 
 /* Auf der obersten Ebene schliesst der Knopf das Fenster, tiefer
@@ -25948,6 +26201,7 @@ function ubBlattBauen(){
   document.getElementById('ub-inhalt').innerHTML = ubBlattHTML(plan, o);
   document.getElementById('ub-fuss-txt').textContent =
     `Gießplan ${ubDatum(plan.von)} bis ${ubDatum(plan.bis)} · erstellt am ${ubDatum(iso(HEUTE))}`;
+  if(typeof botUrlaubMerken === 'function') botUrlaubMerken('Urlaubszettel für ' + ubDatum(plan.von) + ' bis ' + ubDatum(plan.bis) + ' erstellt.');
   return plan;
 }
 function ubBlattOeffnen(){
@@ -26035,6 +26289,7 @@ function ubTextKopieren(){
   if(!z || z.fehler){ sag(z ? z.fehler : 'Bitte erst Abreise und Rückkehr eintragen.', 'warn'); return; }
   const o = ubOptionen();
   const ok = inZwischenablage(ubTextBauen(ubPlan(z.von, z.bis, o.puffer), o));
+  if(ok && typeof botUrlaubMerken === 'function') botUrlaubMerken('Urlaubszettel für ' + ubDatum(z.von) + ' bis ' + ubDatum(z.bis) + ' als Text kopiert.');
   sag(ok ? 'Kurzfassung kopiert — jetzt in Signal, WhatsApp oder Mail einfügen. Raumliste, Bilder und Nummernstreifen gibt es nur auf dem gedruckten Zettel.'
          : 'Kopieren hat nicht geklappt. Öffne stattdessen den Zettel.', ok ? 'ok' : 'warn');
 }
@@ -26759,7 +27014,19 @@ function dokZeigen(){
    die Pflanze am naechsten Tag noch einmal aufrief, fand die alte
    Diagnose vor. Zuruecksetzen tut aber nur dieser Knopf — wer aus
    Versehen zumacht, soll seine Eingaben wiederfinden. */
+/* 4.0-beta.39 (D): die Zeile für den Chat, bevor der Durchgang abgeräumt wird */
+function dokRueckText(){
+  const p = dokPflanze ? pflanzeAusWahl(dokPflanze) : null;
+  const wer = p && !p.nurBib ? ' für „' + botName(p) + '“' : '';
+  if(dokWeg === 'selbst' && dokSymptome.size){
+    const t = diagnose([...dokSymptome], dokAntworten, p);
+    if(t.length) return 'Doktor' + wer + ': wahrscheinlich ' + t[0].d.name + ' (' + t[0].anteil + ' %).';
+  }
+  if(dokWeg === 'ki' && dokKiDaten) return 'Doktor' + wer + ': Die Einschätzung der KI liegt vor.';
+  return 'Doktor' + wer + ': Diagnose abgeschlossen.';
+}
 function dokAbschliessen(){
+  if(typeof botZurueck === 'function') botZurueck('doktor', dokRueckText());
   dokSchritt = 1;
   dokWeg = null;
   dokKiFertig = false;
@@ -27821,6 +28088,43 @@ function bibSuchen(text){
   ).slice(0, 40);
 }
 
+/* 4.0-beta.39 (D): Besonderheiten der Art als Wörter statt Codes */
+const SPEZ_WORTE = {
+  'alocasia-einzug':'Kann im Winter einziehen, die Knolle lebt weiter',
+  'aroid-luftwurzel':'Bildet Luftwurzeln, nicht abschneiden',
+  'blaetter-rollen':'Rollt die Blätter bei Trockenheit ein',
+  'bluete':'Blühpflanze',
+  'bogenhanf-weich':'Weiche Blätter heißen meist zu nass',
+  'calathea-raender':'Braune Blattränder bei trockener Luft oder hartem Wasser',
+  'erdbeere-auslaeufer':'Bildet Ausläufer',
+  'farn-braun':'Braune Wedel bei trockener Luft',
+  'ficus-blattfall':'Wirft nach einem Umzug oft Blätter ab',
+  'kaktus-korken':'Wird unten mit dem Alter korkig, das ist normal',
+  'karnivore-fallen':'Fallen nicht aus Spaß auslösen',
+  'karnivore-ruhe':'Braucht eine kühle Winterruhe',
+  'knolle-einzug':'Zieht nach der Blüte ein, die Knolle ruht',
+  'kraut-schossen':'Schießt bei Wärme in die Blüte',
+  'kraut-verholzt':'Verholzt unten, regelmäßig zurückschneiden',
+  'monstera-fenster':'Löcher in den Blättern erst bei genug Licht',
+  'orchid-ruhe':'Braucht nach der Blüte eine Ruhezeit',
+  'orchid-wurzel':'Grüne Luftwurzeln sind gesund',
+  'palme-spitzen':'Braune Spitzen bei trockener Luft',
+  'panasch-verlust':'Verliert die Musterung bei zu wenig Licht',
+  'pilea-kindel':'Bildet Kindel am Fuß',
+  'sukk-vergeilt':'Wächst bei zu wenig Licht lang und dünn',
+  'sukk-weich':'Weiche Blätter heißen meist zu nass',
+  'supermarkt-topf':'Steht aus dem Handel oft zu dicht, besser teilen',
+  'tomate-geiz':'Geiztriebe ausbrechen',
+  'weihnachtsstern-dunkel':'Färbt sich nur nach Wochen mit kurzen Tagen',
+  'winterruhe':'Hält Winterruhe',
+  'zitrus-chlorose':'Gelbe Blätter mit grünen Adern heißen Eisenmangel'
+};
+function spezWort(code){
+  const c = String(code || '').trim();
+  if(SPEZ_WORTE[c]) return SPEZ_WORTE[c];
+  const t = c.replace(/[-_]+/g, ' ');
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+}
 function bibArtHTML(a){
   const kl = KLASSEN[a.klasse] || {};
   const gift = a.giftig === 'ja' ? 'Für Katzen und Hunde giftig'
@@ -27838,7 +28142,7 @@ function bibArtHTML(a){
     <dl class="ut-zsf-liste">${zeilen.map(([k, v])=>
       `<div><dt>${esc(k)}</dt><dd>${esc(String(v))}</dd></div>`).join('')}</dl>
     ${a.spez && a.spez.length ? `<ul class="bib-spez">${a.spez.map(x=>
-      `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</details>`;
+      `<li>${esc(spezWort(x))}</li>`).join('')}</ul>` : ''}</details>`;
 }
 
 function bibTrefferZeichnen(){
@@ -28191,6 +28495,11 @@ function utTagNachZu(pid){
 
 /* „Fertig“ raeumt ab und verlaesst das Werkzeug. */
 function utAbschliessen(){
+  /* 4.0-beta.39 (D): Zeile für den Chat */
+  if(UT.erledigt && typeof botZurueck === 'function'){
+    const p = UT.pflanze ? allePflanzen().find(x => x.id === UT.pflanze) : null;
+    botZurueck('umtopfen', 'Umtopfen eingetragen' + (p ? ': „' + botName(p) + '“' : '') + (UT.topf ? ', neuer Topf ' + UT.topf + ' cm' : '') + '.');
+  }
   UT.erledigt = false;
   UT.stufe = 1; UT.gruende = []; UT.stecklinge = false;
   UT.zahl = 1;
@@ -28771,6 +29080,12 @@ document.addEventListener('click', e => {
   const w = document.getElementById('sub-weiter');
   if(w) w.onclick = ()=>{
     if(subStufe === SUB_STUFEN){
+      /* 4.0-beta.39 (D): Zeile für den Chat */
+      if(typeof botZurueck === 'function'){
+        const p = subPflanze ? pflanzeAusWahl(subPflanze) : null;
+        botZurueck('substrat', 'Substrat: ' + ((ZIELE[subZiel] || {}).name || 'Mischung') + ' für '
+          + (p && !p.nurBib ? '„' + botName(p) + '“' : 'deinen Topf') + ', ' + topfMengeText(subTopf, subForm) + '.');
+      }
       subStufeZeigen(1);
       if(typeof modalZu === 'function') modalZu('sek-modal');
       return;
@@ -29018,6 +29333,12 @@ async function verAblegerAnlegen(){
 function verAbschliessen(){
   /* Wer in die Anzucht gesetzt hat, will das Gefäß sehen, nicht raus. */
   const zurAnzucht = verLetzterWeg === 'anzucht';
+  /* 4.0-beta.39 (D): Zeile für den Chat */
+  if(verErledigt && typeof botZurueck === 'function'){
+    const m = verPflanze ? pflanzeAusWahl(verPflanze) : null;
+    botZurueck('vermehren', (zurAnzucht ? 'In die Anzucht gesetzt' : 'Ableger angelegt')
+      + (m && !m.nurBib ? ': von „' + botName(m) + '“' : '') + '.');
+  }
   verLetzterWeg = null;
   verErledigt = false;
   verPflanze = null;
