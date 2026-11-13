@@ -4276,7 +4276,7 @@ body[data-ansicht="botaniker"].bot-gespraech-an{padding-bottom:205px}
 html[data-design="botanisch"] #karte-rumpf .ktab{font-size:.95rem;flex:1 1 auto}
 /* 4.0-beta.42 (Etappe 9): Anzucht in der Sammlung */
 html[data-design] .sam-teil{margin:0 0 10px}
-html[data-design] body.sam-az #out,html[data-design] body.sam-az #empty,html[data-design] body.sam-az #sammel-ansicht,
+html[data-design] body.sam-az #out,html[data-design] body.sam-az #empty,
 html[data-design] body.sam-az #btn-ctrl-auf,html[data-design] body.sam-az #filter-marken,html[data-design] body.sam-az #fab-filter,
 html[data-design] body.sam-az #such-hinweis,html[data-design] body.sam-az #legend{display:none!important}
 html[data-design] #az-out[hidden]{display:none}
@@ -4307,6 +4307,26 @@ html[data-design] .az-sam-haken{display:none;position:absolute;top:8px;right:8px
   background:var(--fl-akzent);color:var(--schrift-invers)}
 html[data-design] .az-sam-k.gewaehlt .az-sam-haken{display:flex}
 html[data-design] .az-sam-k.gewaehlt .az-sam-btn{outline:3px solid var(--fl-akzent);outline-offset:-3px}
+/* 4.0-beta.43 (Etappe 10): Ansichten der Anzucht */
+html[data-design] #az-out[data-stufe="liste"] .az-sam-gitter{grid-template-columns:minmax(0,1fr);gap:8px}
+html[data-design] #az-out[data-stufe="liste"] .az-sam-btn{flex-direction:row;align-items:center}
+html[data-design] #az-out[data-stufe="liste"] .az-sam-bild{flex:0 0 64px;width:64px;height:64px;aspect-ratio:auto}
+html[data-design] #az-out[data-stufe="liste"] .az-sam-init{font-size:1.4rem}
+html[data-design] #az-out[data-stufe="liste"] .az-sam-txt{flex:1 1 auto;padding:8px 44px 8px 12px}
+html[data-design] #az-out[data-stufe="liste"] .az-sam-haken{top:50%;right:12px;transform:translateY(-50%)}
+html[data-design] #az-out[data-stufe="3"] .az-sam-gitter{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+html[data-design] #az-out[data-stufe="4"] .az-sam-gitter{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+html[data-design] #az-out[data-stufe="5"] .az-sam-gitter{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+html[data-design] #az-out[data-stufe="3"] .az-sam-txt,html[data-design] #az-out[data-stufe="4"] .az-sam-txt,
+html[data-design] #az-out[data-stufe="5"] .az-sam-txt{padding:6px 7px 7px}
+html[data-design] #az-out[data-stufe="3"] .az-sam-txt b{font-size:var(--t-s)}
+html[data-design] #az-out[data-stufe="4"] .az-sam-txt b,html[data-design] #az-out[data-stufe="5"] .az-sam-txt b{font-size:var(--t-xs)}
+html[data-design] #az-out[data-stufe="4"] .az-sam-init,html[data-design] #az-out[data-stufe="5"] .az-sam-init{font-size:1.3rem}
+html[data-design] #az-out[data-stufe="3"] .az-sam-haken,html[data-design] #az-out[data-stufe="4"] .az-sam-haken,
+html[data-design] #az-out[data-stufe="5"] .az-sam-haken{top:4px;right:4px;width:20px;height:20px;font-size:.75rem}
+html[data-design] .az-sam-punkt{position:absolute;right:5px;bottom:5px;width:10px;height:10px;border-radius:50%;
+  background:var(--fl-akzent);box-shadow:0 0 0 2px var(--fl-karte)}
+html[data-design] .az-sam-punkt.faellig{background:var(--ton-alarm)}
 html[data-design] .az-ort .as-knoepfe{margin:4px 0 10px}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
@@ -10738,6 +10758,16 @@ function pflanzeEntfernen(id){
       <label class="fspan check">
         <input type="checkbox" role="switch" id="sch-gmwie"> <span class="lab" style="display:inline">Hinweiskärtchen beim Gießen</span></label>
     </div>
+    <!-- 4.0-beta.43 (Etappe 11): Auf der Heute-Seite, früher unter „Einstellungen“ -->
+    <p class="ein-abschnitt">Auf der Heute-Seite</p>
+    <p class="fhint" data-erkl>Zusatzzeilen auf der Heute-Seite. Beides lässt sich jederzeit wieder einblenden.</p>
+    <div class="ein-karte">
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="ck-wetterzeile"> <span class="lab" style="display:inline">Wetter und Standortklima</span></label>
+      <label class="fspan check">
+        <input type="checkbox" role="switch" id="ck-kennzahlen"> <span class="lab" style="display:inline">Kennzahlen</span></label>
+      <p class="fhint" data-erkl-kurz="Gießtreue und Zuwachs.">Kennzahlen zeigen Gießtreue und Zuwachs als Zahlenleiste.</p>
+    </div>
     <!-- 4.0-beta.19 (Plan M1b): Die Kartendichte gehört zum Modus -->
     <p class="ein-abschnitt">Kartendichte</p>
     <p class="fhint" data-erkl-kurz="Wie viel eine offene Karte zeigt.">Wie viel auf einer aufgeklappten Pflanzenkarte steht. Sammler startet mit Knapp, Entdecker mit Normal. Nichts geht verloren — Knapp klappt nur mehr zu.</p>
@@ -10747,55 +10777,6 @@ function pflanzeEntfernen(id){
       <button data-dichte="voll">Ausführlich</button>
     </div>
     <p class="fhint" id="dichte-text"></p>
-    </div>
-  </section>
-
-  <!-- Einstellungen buendeln Ansicht, Haustiere und KI-Dienst. Die
-       Abschnitte bleiben bestehen und behalten ihre Kennungen — hier
-       stehen nur die Wege dorthin, plus was es vorher nirgends gab. -->
-  <section data-ans="mehr" class="plan mh" id="einstell-sec" data-mh="einstell">
-    <h2 class="wz-h2">Einstellungen</h2>
-    <div class="wz-kopfzeile">
-      <button class="wz-kopf" data-mh-go="einstell" aria-expanded="false" aria-controls="mh-in-einstell">
-        <span class="wz-t">Einstellungen</span><span class="wz-p" aria-hidden="true">›</span></button>
-      <button class="wz-i" data-mh-info="einstell" aria-expanded="false" aria-label="Wozu sind die Einstellungen da?">i</button>
-    </div>
-    <div class="wz-in" id="mh-in-einstell" hidden>
-      <p class="wz-hilfe" hidden>Alles, was die App als Ganzes betrifft: wie sie aussieht und welche Tiere bei dir wohnen. Nichts davon greift in deine Pflanzendaten ein — jede Einstellung lässt sich jederzeit zurücknehmen.</p>
-
-      <p class="ein-abschnitt">Aussehen</p>
-      <div class="ein-liste">
-        <button class="ein-zeile" data-mh-go="ansicht">
-          <span class="ein-txt"><b>Ansicht</b><i id="ein-u-ansicht">Botanisch</i></span>
-          <span class="ein-p" aria-hidden="true">›</span></button>
-      </div>
-
-      <p class="ein-abschnitt">Auf der Heute-Seite</p>
-      <p class="fhint" data-erkl>Zusatzzeilen auf der Heute-Seite. Beides lässt sich jederzeit wieder einblenden.</p>
-      <div class="ein-karte">
-        <label class="fspan check">
-          <input type="checkbox" role="switch" id="ck-wetterzeile"> <span class="lab" style="display:inline">Wetter und Standortklima</span></label>
-        <label class="fspan check">
-          <input type="checkbox" role="switch" id="ck-kennzahlen"> <span class="lab" style="display:inline">Kennzahlen</span></label>
-        <p class="fhint" data-erkl-kurz="Gießtreue und Zuwachs.">Kennzahlen zeigen Gießtreue und Zuwachs als Zahlenleiste.</p>
-      </div>
-
-      <p class="ein-abschnitt">Wetter</p>
-      <div class="ein-liste">
-        <button class="ein-zeile" data-mh-go="wetter">
-          <span class="ein-txt"><b>Ort</b><i id="ein-u-wetter">Noch kein Ort festgelegt</i></span>
-          <span class="ein-p" aria-hidden="true">›</span></button>
-      </div>
-
-      <p class="ein-abschnitt">Weiteres</p>
-      <div class="ein-liste">
-        <button class="ein-zeile" data-mh-go="tiere">
-          <span class="ein-txt"><b>Haustiere</b><i id="ein-u-tiere">Welche Warnungen kommen</i></span>
-          <span class="ein-p" aria-hidden="true">›</span></button>
-        <button class="ein-zeile" data-mh-go="kidienst">
-          <span class="ein-txt"><b>KI-Dienst</b><i id="ein-u-kidienst">Noch kein Schlüssel</i></span>
-          <span class="ein-p" aria-hidden="true">›</span></button>
-      </div>
     </div>
   </section>
 
@@ -11672,7 +11653,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.42';
+const FASSUNG = '4.0-beta.43';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -12060,8 +12041,6 @@ function designSetzen(name, merken){
      Design. Neu gezeichnet wird nur, wenn es sie noch nicht gibt. */
   const wahl = document.getElementById('dsn-wahl');
   if(wahl && !wahl.children.length) designWahlZeichnen();
-  const ua = document.getElementById('ein-u-ansicht');
-  if(ua) ua.textContent = DESIGNS[name].name;
   themeFarbe();
   rasterSpannenBald();
   if(merken !== false) sichern();
@@ -15975,7 +15954,7 @@ function kennzahlenHTML(){
 }
 
 function wetterZeileHTML(){
-  /* Abgeschaltet unter Einstellungen › Auf der Heute-Seite. Der
+  /* Abgeschaltet unter Einstellungen › Ansicht › Auf der Heute-Seite. Der
      Wetterdienst laeuft weiter, nur die Zeile bleibt weg —
      Einstellungen › Wetter zeigt die Vorhersage unverändert. */
   if(S.heuteWetter === false) return '';
@@ -16074,13 +16053,7 @@ function wetterDetailHTML(){
   return h;
 }
 
-/* Die Zeile „Ort“ unter Einstellungen › Wetter. */
-function wetterOrtZeile(){
-  const u = document.getElementById('ein-u-wetter');
-  if(u) u.textContent = wetterStand().ort || 'Noch kein Ort festgelegt';
-}
 function wetterEinstellungZeichnen(){
-  wetterOrtZeile();
   const w = wetterStand();
   const feld = document.getElementById('wt-ort');
   const stand = document.getElementById('wt-stand');
@@ -16799,6 +16772,26 @@ function samStufe(){
   return vor;
 }
 function samAnsicht(){ return samStufe() === 'liste' ? 'zeilen' : 'raster'; }
+/* 4.0-beta.43 (Etappe 10): Die Anzucht hat eine eigene Ansichtswahl. */
+function azStufe(){
+  const v = S.azStufe == null ? '' : String(S.azStufe);
+  return SAM_STUFEN.includes(v) ? v : '2';
+}
+function azStufeSetzen(v){
+  v = String(v);
+  S.azStufe = SAM_STUFEN.includes(v) ? v : '2';
+  sichern();
+  samAnsichtBeschriften();
+  render();
+}
+function samMenueAz(){ return typeof samAzAn === 'function' && samAzAn(); }
+const SAM_MENUE_UNTER = {
+  liste:['Schnell, eine Zeile je Pflanze', 'Schnell, eine Zeile je Gefäß'],
+  '2':  ['Zwei Spalten, große Bilder', 'Zwei Spalten, große Bilder'],
+  '3':  ['Bild, Name und wann gießen', 'Bild, Name und nächster Wechsel'],
+  '4':  ['Bild, Name und wann gießen', 'Bild, Name und nächster Wechsel'],
+  '5':  ['Bild, Name und ein Punkt fürs Gießen', 'Bild, Name und ein Punkt für den Wechsel']
+};
 function samSpalten(){ const v = samStufe(); return v === 'liste' ? 1 : parseInt(v, 10); }
 function samStufeSetzen(v){
   v = String(v);
@@ -16815,12 +16808,17 @@ function samAnsichtSetzen(v){
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-samstufe]'); if(!b) return;
   samMenueZu();
-  samStufeSetzen(b.dataset.samstufe);
+  if(samMenueAz()) azStufeSetzen(b.dataset.samstufe);
+  else samStufeSetzen(b.dataset.samstufe);
 });
 function samAnsichtBeschriften(){
-  const v = samStufe();
-  document.querySelectorAll('[data-samstufe]').forEach(b=>
-    b.setAttribute('aria-pressed', String(b.dataset.samstufe === v)));
+  const az = samMenueAz();
+  const v = az ? azStufe() : samStufe();
+  document.querySelectorAll('[data-samstufe]').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.samstufe === v));
+    const i = b.querySelector('.wl-txt i'), u = SAM_MENUE_UNTER[b.dataset.samstufe];
+    if(i && u) i.textContent = u[az ? 1 : 0];
+  });
   const n = document.getElementById('sam-ansicht-name');
   if(n) n.textContent = SAM_NAMEN[v] || v;
 }
@@ -19644,7 +19642,8 @@ function azBewurzelt(g){
   const w = gr.filter(r => (r.verlauf || []).some(v => v.typ === 'wurzeln')).reduce((s, r) => s + r.anzahl, 0);
   return {n, w};
 }
-function azKachelHTML(g, eintr){
+function azKachelHTML(g, eintr, stufe){
+  stufe = stufe || '2';
   const f = profilFoto(g.id);
   const gr = azGruppenIn(g.id), n = azZahlIn(g.id), med = azMedium(g);
   const e = eintr.find(x => x.typ === 'gefaess' && x.ref === g.id);
@@ -19654,11 +19653,25 @@ function azKachelHTML(g, eintr){
   const her = gr.length ? azGruppeText(gr[0]) + (gr.length > 1 ? ' + ' + (gr.length - 1) + ' weitere' : '') : '';
   const bw = azBewurzelt(g);
   const pz = bw.n ? Math.round(bw.w / bw.n * 100) : 0;
-  return '<article class="az-sam-k" data-karte="' + esc(g.id) + '">'
-    + '<button type="button" class="az-sam-btn" data-t="' + esc(g.id) + '" aria-haspopup="dialog">'
+  const faellig = !!(e && e.rest <= 0);
+  const kopf = '<article class="az-sam-k" data-karte="' + esc(g.id) + '">'
+    + '<button type="button" class="az-sam-btn" data-t="' + esc(g.id) + '" aria-haspopup="dialog"'
+    + (stufe === '5' ? ' aria-label="' + esc(g.name + (pflege ? ', ' + pflege : '')) + '"' : '') + '>'
     + '<span class="az-sam-haken" aria-hidden="true">✓</span>'
     + '<span class="az-sam-bild">' + (f && f.src ? '<img src="' + fotoUrl(f) + '" alt="" loading="lazy" decoding="async">'
-      : '<span class="az-sam-init" aria-hidden="true">' + esc((String(g.name).trim()[0] || '?').toUpperCase()) + '</span>') + '</span>'
+      : '<span class="az-sam-init" aria-hidden="true">' + esc((String(g.name).trim()[0] || '?').toUpperCase()) + '</span>')
+    + (stufe === '5' && n && (e || g.abstand) ? '<span class="az-sam-punkt' + (faellig ? ' faellig' : '') + '" aria-hidden="true"></span>' : '')
+    + '</span>';
+  const pfl = pflege ? '<i class="az-sam-pflege' + (faellig ? ' faellig' : '') + '">' + esc(pflege) + '</i>' : '';
+  /* 4.0-beta.43 (Etappe 10): kleinere Ansichten zeigen weniger */
+  if(stufe === '5') return kopf + '<span class="az-sam-txt"><b>' + esc(g.name) + '</b></span></button></article>';
+  if(stufe === '3' || stufe === '4')
+    return kopf + '<span class="az-sam-txt"><b>' + esc(g.name) + '</b>' + pfl + '</span></button></article>';
+  if(stufe === 'liste')
+    return kopf + '<span class="az-sam-txt"><b>' + esc(g.name) + '</b>'
+      + '<i>' + esc(med.name + ' · ' + (n === 1 ? '1 Steckling' : n + ' Stecklinge')
+        + (bw.n ? ' · Wurzeln ' + bw.w + '/' + bw.n : '')) + '</i>' + pfl + '</span></button></article>';
+  return kopf
     + '<span class="az-sam-txt"><b>' + esc(g.name) + '</b>'
     + '<i>' + esc(med.name + ' · ' + (n === 1 ? '1 Steckling' : n + ' Stecklinge') + ' · ' + azSeitText(Math.max(0, tageSeit(g.start)))) + '</i>'
     + (her ? '<i>' + esc(her) + '</i>' : '')
@@ -19677,10 +19690,10 @@ function azSammlungHTML(such){
     [r.art, r.botanisch, r.sorte, r.mutterName, azHerkunft(r)].join(' '))).some(t => norm(t).indexOf(f) !== -1);
   const liste = A.gefaesse.filter(passt);
   if(!liste.length) return '<p class="kb-leer az-sam-leer">Nichts gefunden.</p>';
-  const eintr = azEintraege();
+  const eintr = azEintraege(), st = azStufe();
   return azNachOrt(liste).map(r => '<section class="az-sam-raum"><p class="ein-abschnitt">' + esc(r.name) + '</p>'
     + r.plaetze.map(pl => (r.raum ? '<p class="az-sam-platz">' + esc(pl.name || 'Ohne Stellplatz') + '</p>' : '')
-      + '<div class="az-sam-gitter">' + pl.gef.map(g => azKachelHTML(g, eintr)).join('') + '</div>').join('')
+      + '<div class="az-sam-gitter">' + pl.gef.map(g => azKachelHTML(g, eintr, st)).join('') + '</div>').join('')
     + '</section>').join('');
 }
 function azSammlungZeichnen(){
@@ -19696,7 +19709,9 @@ function azSammlungZeichnen(){
   const box = document.getElementById('az-out');
   if(!box) return;
   box.hidden = !an;
+  if(typeof samAnsichtBeschriften === 'function') samAnsichtBeschriften();
   if(!an){ if(box.innerHTML) box.innerHTML = ''; return; }
+  box.dataset.stufe = azStufe();
   box.innerHTML = azSammlungHTML(q ? q.value : '');
   box.querySelectorAll('.az-sam-btn[data-t]').forEach(b => b.onclick = () => {
     if(typeof samWahlKlick === 'function' && samWahlKlick(b.dataset.t)) return;
@@ -19708,9 +19723,8 @@ modalAnmelden('az-neu-modal', {el:'az-neu-huelle', groesse:'blatt', schleier:tru
 function azNeuMenueAuf(ausloeser){
   const box = document.getElementById('az-neu-inhalt');
   if(box) box.innerHTML = '<div class="wahl-liste" role="group" aria-label="Neu in der Anzucht">'
-    + sakZeile('data-azneu', 'stecklinge', 'Neue Stecklinge', 'Von einer Pflanze aus deiner Sammlung')
+    + sakZeile('data-azneu', 'stecklinge', 'Neue Stecklinge', 'Mit oder ohne Mutterpflanze')
     + sakZeile('data-azneu', 'gefaess', 'Neues Gefäß', 'Glas, Schale oder Topf')
-    + sakZeile('data-azneu', 'frei', 'Frei eintragen', 'Stecklinge ohne Mutter in der Sammlung, etwa getauschte')
     + '</div>';
   return modalAuf('az-neu-modal', ausloeser);
 }
@@ -21396,8 +21410,7 @@ function kiSchluesselZeichnen(){
   if(ein) ein.hidden = da;
   if(box) box.hidden = !da;
   if(mas) mas.textContent = kiMaske(kiSchluessel());
-  const zeile = document.getElementById('ein-u-kidienst');
-  if(zeile) zeile.textContent = da ? 'Schlüssel hinterlegt' : 'Noch kein Schlüssel';
+  if(typeof mehrNebenzeilen === 'function') mehrNebenzeilen();
   kiModellZeichnen();
   kiProtokollZeichnen();
 }
@@ -25899,11 +25912,7 @@ function sektionOeffnen(key, ausloeser){
   if(key === 'ansicht' && typeof designWahlZeichnen === 'function') designWahlZeichnen();
   if(key === 'ansicht' && typeof dichteZeichnen === 'function') dichteZeichnen();
   if(key === 'wetter' && typeof wetterEinstellungZeichnen === 'function') wetterEinstellungZeichnen();
-  if(key === 'einstell'){
-    if(typeof wetterOrtZeile === 'function') wetterOrtZeile();
-    if(typeof dichteZeichnen === 'function') dichteZeichnen();
-    if(typeof heuteSchalterZeichnen === 'function') heuteSchalterZeichnen();
-  }
+  if(key === 'ansicht' && typeof heuteSchalterZeichnen === 'function') heuteSchalterZeichnen();
   if(['giess','wasser','rhythmus'].indexOf(key) !== -1
      && typeof giessCenterZeichnen === 'function') giessCenterZeichnen();
   if(key === 'umtopfen' && typeof utAufbauen === 'function') utAufbauen();
@@ -25935,6 +25944,7 @@ function sekZurueckhaengen(){
 modalAnmelden('sek-modal', {
   groesse:'voll', schleier:false,
   nachZu: ()=>{ sekZurueckhaengen(); _sekWeg = []; sekZurueckKnopf();
+    if(typeof mehrNebenzeilen === 'function') mehrNebenzeilen();
     if(typeof botWerkzeugZu === 'function') botWerkzeugZu(); }
 });
 
@@ -25988,7 +25998,9 @@ const MH_IKON = {
   urlaub:    '<path d="M4 4h16v16H4zM4 9h16M9 4v16"/>',
   wetter:    '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
   tiere:     '<path d="M4 5.5 6 10M20 5.5 18 10"/><path d="M12 20c-4.4 0-7-2.9-7-7.2C5 8.6 8 5.5 12 5.5s7 3.1 7 7.3c0 4.3-2.6 7.2-7 7.2z"/>',
-  ansicht:   '<path d="M4 5h16v12H4z"/><path d="M9 20h6M12 17v3"/>',
+  /* 4.0-beta.43 (Etappe 11): Farbpalette */
+  ansicht:   '<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.9-.8 1.9-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8h2.1a3.7 3.7 0 0 0 3.7-3.7c0-4-3.8-7.1-8.5-7.1z"/>'
+    + '<circle cx="7.6" cy="11.4" r="1.15"/><circle cx="10.6" cy="7.4" r="1.15"/><circle cx="15.4" cy="8.2" r="1.15"/>',
   tour:      '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
   rueck:     '<path d="M4 5h16v11H10l-4.5 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
   patch:     '<path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
@@ -26006,7 +26018,6 @@ const MH_IKON = {
   kidienst:  '<path d="M12 3.5 4.5 7v5.5c0 4.2 3.1 7.4 7.5 8.5 4.4-1.1 7.5-4.3 7.5-8.5V7z"/>'
     + '<path d="M12 11.2a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM12 14.8V17"/>',
   sprot:     '<path d="M3 12h3l2.5-6 3 12 2.5-8 2 4h5"/>',
-  einstell:  '<circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a7.6 7.6 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.3.9 2-3.4z"/>'
 };
 
 /* Eine Nebenzeile je Punkt. Wer die Mehr-Seite aufschlaegt, sieht
@@ -26035,7 +26046,7 @@ const MH_UNTER = {
     const o = (S.wetter && S.wetter.ort) ? S.wetter.ort : null;
     return o ? o + ' · Vorhersage und Frost' : 'Ort noch nicht gesetzt';
   },
-  einstell:  ()=>{
+  ansicht:   ()=>{
     const d = {botanisch:'Botanisch', klartext:'Klartext', terrarium:'Terrarium'}[S.design] || 'Botanisch';
     const dd = {knapp:'Knapp', normal:'Normal', voll:'Ausführlich'}[(typeof dichteVon === 'function' ? dichteVon() : S.dichte) || 'normal'];
     return d + ' · ' + dd;
@@ -26050,19 +26061,24 @@ const MH_UNTER = {
     return n ? n + (n === 1 ? ' Höhenänderung' : ' Höhenänderungen') + ' notiert'
              : 'Messung läuft, nichts Auffälliges';
   },
+  tiere:     ()=>{
+    const t = meineTiere();
+    if(!t.length) return 'Keine Haustiere';
+    return t.map(k=>(typeof TIERARTEN !== 'undefined' && TIERARTEN[k]) ? TIERARTEN[k].name : k).join(', ');
+  },
   kidienst:  ()=>(typeof kiBereit === 'function' && kiBereit())
     ? 'Schlüssel hinterlegt' : 'Noch kein Schlüssel'
 };
 
 /* Vier Gruppen statt einer Liste aus vierzehn. Die Reihenfolge im
    Dokument bleibt, wie sie ist — gruppiert wird beim Aufbau. */
-const MH_STILL = ['ansicht','tiere','kidienst','wasser','rhythmus','urlaub',
+const MH_STILL = ['wasser','rhythmus','urlaub',
                   'bib-arten','bib-wissen','bib-klassen'];
 
 const MH_GRUPPEN = [
   {titel:'Sammlung', punkte:['raeume','tags']},
-  {titel:'Pflege',   punkte:['giess','wetter','bibliothek']},
-  {titel:'App',      punkte:['sicherung','einstell','tour','install']},
+  {titel:'Pflege',   punkte:['giess','wetter','bibliothek','tiere']},
+  {titel:'App',      punkte:['ansicht','kidienst','sicherung','tour','install']},
   {titel:'Hilfe',    punkte:['patch','rueck','melde','sprot']}
 ];
 
@@ -29761,10 +29777,12 @@ function verFussZeichnen(){
   if(zur) zur.hidden = verStufe === 1 || verErledigt;
   if(wei){
     wei.hidden = false;
+    /* 4.0-beta.43 (Etappe 10): Ohne Mutterpflanze geht es zum
+       Eintragen von Hand weiter, statt zu sperren. */
     wei.textContent = verErledigt ? 'Fertig'
-      : letzte ? (verWohin === 'anzucht' ? verAzKnopfText() : 'Ableger anlegen') : 'Weiter';
-    /* Ohne Pflanze und ohne Weg führt Weiter ins Leere. */
-    wei.disabled = (verStufe === 1 && !verPflanze) || (verStufe === 2 && !verMethode);
+      : letzte ? (verWohin === 'anzucht' ? verAzKnopfText() : 'Ableger anlegen')
+      : (verStufe === 1 && !verPflanze) ? 'Weiter ohne Mutterpflanze' : 'Weiter';
+    wei.disabled = verStufe === 2 && !verMethode;
   }
   if(form) form.hidden = verErledigt;
 }
@@ -29843,6 +29861,7 @@ function verAbschliessen(){
 
 function verWeiter(){
   if(verErledigt){ verAbschliessen(); return; }
+  if(verStufe === 1 && !verPflanze){ azZeigen({art:'frei', vomAssistent:true}); return; }
   if(verStufe === VER_STUFEN){ verAblegerAnlegen(); return; }
   verStufeZeigen(verStufe + 1);
 }
@@ -30971,8 +30990,10 @@ function azStandardGef(ohne){
   return l.length ? l[l.length - 1].id : '__neu';
 }
 function azFreiHTML(){
-  return azZurueckHTML() + '<h3 class="az-titel">Frei eintragen</h3>'
-    + '<p class="az-unter">Für Stecklinge ohne Mutter in deiner Sammlung, etwa getauschte. Art und Sorte trägst du von Hand ein.</p>'
+  const zur = AZ_SICHT.vomAssistent
+    ? '<button type="button" class="linkbtn az-zurueck" data-az="zum-assistent">‹ Zurück</button>' : azZurueckHTML();
+  return zur + '<h3 class="az-titel">Stecklinge ohne Mutterpflanze</h3>'
+    + '<p class="az-unter">Etwa getauscht, gekauft oder geschenkt. Art und Sorte trägst du von Hand ein.</p>'
     + '<div class="fgrid az-form">'
     + '<label><span class="lab">Art</span><input id="az-fr-art" placeholder="z. B. Efeutute"></label>'
     + '<label><span class="lab">Botanischer Name</span><input id="az-fr-bot" placeholder="z. B. Epipremnum aureum"></label>'
@@ -31292,6 +31313,7 @@ document.addEventListener('click', e=>{
   if(!k) return;
   const a = k.dataset.az;
   if(a === 'liste'){ azZeigen({art:'liste'}); return; }
+  if(a === 'zum-assistent'){ azZeigen({art:'assistent'}); verStufeZeigen(1); return; }
   if(a === 'termin'){
     const g = azGefaess(k.dataset.g);
     if(!g) return;
@@ -32011,9 +32033,9 @@ const TOUR_KAPITEL = {
         warte: 320 },
       /* „ansicht" liegt seit 2.9.25 unter Einstellungen und ist als
          eigener Punkt ausgeblendet — das Ziel gab es nicht mehr. */
-      { ziel: ()=>document.querySelector('[data-mh="einstell"] .wz-kopfzeile'),
+      { ziel: ()=>document.querySelector('[data-mh="ansicht"] .wz-kopfzeile'),
         titel: 'Wenn es zu viel ist',
-        text: 'Unter Einstellungen liegt der Modus: Sammler zeigt wenig, Entdecker alles. Es geht dabei nichts verloren, die Wahl lässt sich jederzeit ändern. Daneben stehen dort Kartendichte, Haustiere, der Wetter-Ort und die Heute-Zeilen.' },
+        text: 'Unter Ansicht liegt der Modus: Sammler zeigt wenig, Entdecker alles. Es geht dabei nichts verloren, die Wahl lässt sich jederzeit ändern. Daneben stehen dort Design, Kartendichte und die Heute-Zeilen.' },
       { ziel: ()=>document.querySelector('[data-mh="giess"] .wz-kopfzeile'),
         titel: 'Alles zum Gießen an einer Stelle',
         text: 'Der Vertretungszettel, dazu die Angaben, die für alle Pflanzen gelten: welches Wasser du nimmst, wie du düngst und ob im Winter größere Abstände gelten.' },

@@ -169,7 +169,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.42', w.__T('FASSUNG') === '4.0-beta.42', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.43', w.__T('FASSUNG') === '4.0-beta.43', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -1588,9 +1588,12 @@ setTimeout(async () => {
     }
 
     /* Das Mehr-Kapitel zielte auf einen stillgelegten Punkt */
-    pruef('Das Mehr-Kapitel zeigt nicht mehr auf „ansicht\u201c',
+    /* 4.0-beta.43 (Etappe 11): „Ansicht“ ist wieder ein eigener Punkt, „Einstellungen“ ist weg */
+    pruef('beta.43: Das Mehr-Kapitel zeigt auf „ansicht\u201c, nicht mehr auf „einstell\u201c',
       w.__T('JSON.stringify(TOUR_KAPITEL.mehr.schritte().map(s=>String(s.ziel)))')
-        .indexOf('data-mh=\\"ansicht\\"') === -1);
+        .indexOf('data-mh=\\"ansicht\\"') !== -1
+      && w.__T('JSON.stringify(TOUR_KAPITEL.mehr.schritte().map(s=>String(s.ziel)))')
+        .indexOf('data-mh=\\"einstell\\"') === -1);
   }
 
   /* ══ Vermehrung im Verlauf ═════════════════════════════════════
@@ -2728,22 +2731,22 @@ setTimeout(async () => {
     pruef('Jeder Menüpunkt liegt in einer Gruppe',
       alle.length === gruppiert.length,
       alle.filter(x=>gruppiert.indexOf(x) === -1).join(','));
-    pruef('Dreizehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg; beta.30: „Kartei auffrischen“ weg; beta.33: „Wunschliste“ weg)', alle.length === 13, String(alle.length));
+    pruef('Fünfzehn Punkte in der Liste (3.31.0: „Aus der Sammlung genommen“ ist weg; beta.23: „Räume“ neu; beta.27: „Tags“ neu; beta.29: „Aufgaben“ weg; beta.30: „Kartei auffrischen“ weg; beta.33: „Wunschliste“ weg; beta.43: „Einstellungen“ weg, Ansicht, Haustiere und KI-Dienst eigene Punkte)', alle.length === 15, String(alle.length));
     /* 4.0-beta.28: „Dünger“ (G2b-1) und „Dünger selbst ansetzen“ (G2b-2) sind weg; 4.0-beta.29: „Aufgaben“ (B1); 4.0-beta.30: „Kartei auffrischen“ (B3), 23 Abschnitte;
        4.0-beta.33: „Wunschliste“ und „Rundgang“ weg, „Gießklassen“ neu, 22 Abschnitte */
-    pruef('Kein Punkt ist ersatzlos weg',
-      d.querySelectorAll('section[data-mh]').length === 22,
+    pruef('Kein Punkt ist ersatzlos weg (beta.43: 21 Abschnitte)',
+      d.querySelectorAll('section[data-mh]').length === 21,
       String(d.querySelectorAll('section[data-mh]').length));
     /* Stillgelegt heisst nicht unerreichbar: der KI-Dienst steht
        nicht in der Liste, aber eine Zeile in den Einstellungen fuehrt
        hin. Faellt die weg, ist der Abschnitt tot. */
-    pruef('KI-Dienst ist stillgelegt',
-      d.querySelector('section[data-mh="kidienst"]').classList.contains('mh-still'));
-    pruef('KI-Dienst ist aus den Einstellungen erreichbar',
-      !!d.querySelector('#mh-in-einstell [data-mh-go="kidienst"]'));
-    ['giess','wetter','bibliothek','sicherung','einstell',
+    const gruppeVon = k => { const g = d.querySelector('section[data-mh="' + k + '"]').closest('.mh-gruppe');
+      return g ? g.querySelector('.mh-abschnitt').textContent : ''; };
+    pruef('beta.43: KI-Dienst ist ein eigener Punkt in der Gruppe App',
+      !d.querySelector('section[data-mh="kidienst"]').classList.contains('mh-still') && gruppeVon('kidienst') === 'App');
+    pruef('beta.43: Kein Punkt „Einstellungen“ mehr', !d.querySelector('section[data-mh="einstell"]'));
+    ['giess','wetter','bibliothek','sicherung','kidienst',
      'tour','install','patch','rueck','melde','sprot','ansicht','tiere'].forEach(k=>{
-      if(k === 'ansicht' || k === 'tiere') return;
       pruef('Punkt ' + k + ' vorhanden', alle.indexOf(k) !== -1);
     });
     pruef('Vier Gruppen', d.querySelectorAll('.mh-gruppe').length === 4,
@@ -2763,14 +2766,14 @@ setTimeout(async () => {
       d.querySelectorAll('.mh-gruppe .mh-abschnitt').length
         === d.querySelectorAll('.mh-gruppe').length);
 
-    /* Ansicht und Haustiere sind aus der Liste heraus —
-       aber nicht verschwunden: sie hängen unter Einstellungen. */
+    /* 4.0-beta.43 (Etappe 11): Ansicht steht in App, Haustiere in Pflege */
+    pruef('beta.43: Ansicht steht in der Gruppe App', gruppeVon('ansicht') === 'App', gruppeVon('ansicht'));
+    pruef('beta.43: Haustiere stehen in der Gruppe Pflege', gruppeVon('tiere') === 'Pflege', gruppeVon('tiere'));
     ['ansicht','tiere'].forEach(k=>{
-      pruef(k + ' nicht mehr in der Mehr-Liste', alle.indexOf(k) === -1);
-      pruef(k + ' über Einstellungen erreichbar',
-        !!d.querySelector('#mh-in-einstell [data-mh-go="' + k + '"]'));
       pruef(k + ' hat noch seinen Abschnitt', !!w.__T(`!!sekAbschnitt('${k}')`));
     });
+    pruef('beta.43: Ansicht trägt „Auf der Heute-Seite“',
+      !!d.querySelector('#mh-in-ansicht #ck-wetterzeile') && !!d.querySelector('#mh-in-ansicht #ck-kennzahlen'));
 
     /* Nebenzeilen */
     w.__T('mehrNebenzeilen()');
@@ -2986,7 +2989,7 @@ setTimeout(async () => {
      statt in den Einstellungen. */
   {
     const knopf = d.getElementById('sekm-zu');
-    w.__T("sektionOeffnen('einstell')");
+    w.__T("sektionOeffnen('giess')");
     await tick();
     /* Seit 3.2.5 ist der Knopf ein Pfeil ohne Wort. Was er tut, sagt
        die Vorlesebeschriftung. */
@@ -2996,14 +2999,15 @@ setTimeout(async () => {
     pruef('Kein Rueckweg auf der obersten Ebene', w.__T('_sekWeg.length') === 0);
 
     /* Aus dem Fenster heraus eine Ebene tiefer */
-    const tiefer = d.querySelector('#sekm-rumpf [data-mh-go="ansicht"]');
-    pruef('Ansicht ist aus den Einstellungen heraus erreichbar', !!tiefer);
+    /* 4.0-beta.43: „Einstellungen“ ist weg; geprüft wird über Gießen › Vertretungszettel */
+    const tiefer = d.querySelector('#sekm-rumpf [data-mh-go="urlaub"]');
+    pruef('Vertretungszettel ist aus Gießen heraus erreichbar', !!tiefer);
     if(tiefer){
       tiefer.click();
       await tick();
-      pruef('Eine Ebene tiefer angekommen', w.__T('_sekOffen && _sekOffen.key') === 'ansicht',
+      pruef('Eine Ebene tiefer angekommen', w.__T('_sekOffen && _sekOffen.key') === 'urlaub',
         String(w.__T('_sekOffen && _sekOffen.key')));
-      pruef('Rueckweg ist gemerkt', w.__T('_sekWeg.join(",")') === 'einstell',
+      pruef('Rueckweg ist gemerkt', w.__T('_sekWeg.join(",")') === 'giess',
         w.__T('_sekWeg.join(",")'));
       pruef('Knopf f\u00fchrt jetzt eine Ebene zur\u00fcck',
         /Ebene/.test(knopf.getAttribute('aria-label') || ''),
@@ -3012,8 +3016,8 @@ setTimeout(async () => {
 
       knopf.click();
       await tick();
-      pruef('Zur\u00fcck f\u00fchrt in die Einstellungen',
-        w.__T('_sekOffen && _sekOffen.key') === 'einstell',
+      pruef('Zur\u00fcck f\u00fchrt nach Gie\u00dfen',
+        w.__T('_sekOffen && _sekOffen.key') === 'giess',
         String(w.__T('_sekOffen && _sekOffen.key')));
       pruef('und nicht aus dem Fenster heraus', w.__T("modalOffen('sek-modal')"));
       pruef('Rueckweg ist wieder leer', w.__T('_sekWeg.length') === 0);
@@ -5704,10 +5708,45 @@ setTimeout(async () => {
       pruef('beta.42 (9): Rückgängig stellt den Ort wieder her', T('azGefaess(__azO).stellplatz') === '');
       T('azNeuMenueAuf()');
       await warte(60);
-      pruef('beta.42 (9): Das Plus bietet Stecklinge, Gefäß und Frei eintragen',
-        d.querySelectorAll('#az-neu-inhalt [data-azneu]').length === 3);
+      pruef('beta.43 (10): Das Plus bietet Stecklinge und Gefäß, kein „Frei eintragen“ mehr',
+        d.querySelectorAll('#az-neu-inhalt [data-azneu]').length === 2 && !d.querySelector('#az-neu-inhalt [data-azneu="frei"]'));
       T("modalZu('az-neu-modal')");
       await warte(200);
+      /* 4.0-beta.43 (Etappe 10): eigene Ansichtswahl der Anzucht */
+      const vorSam = T('String(S.samStufe)');
+      d.getElementById('sam-ansicht-knopf').click();
+      await warte(30);
+      const menueAz = d.querySelector('#sam-ansicht-menue [data-samstufe="3"] .wl-txt i').textContent;
+      d.querySelector('#sam-ansicht-menue [data-samstufe="liste"]').click();
+      await warte(200);
+      pruef('beta.43 (10): Die Anzucht wechselt auf die Liste, die Pflanzen behalten ihre Ansicht',
+        d.getElementById('az-out').dataset.stufe === 'liste' && T('S.azStufe') === 'liste' && T('String(S.samStufe)') === vorSam,
+        d.getElementById('az-out').dataset.stufe + ' / ' + T('String(S.samStufe)'));
+      pruef('beta.43 (10): Das Menü spricht in der Anzucht vom Wechsel', /Wechsel/.test(menueAz), menueAz);
+      pruef('beta.43 (10): Der Knopf nennt die Ansicht der Anzucht', d.getElementById('sam-ansicht-name').textContent === 'Liste');
+      T("azStufeSetzen('5')");
+      pruef('beta.43 (10): Raster 5 zeigt Bild und Name, ohne Balken',
+        d.getElementById('az-out').dataset.stufe === '5' && !d.querySelector('#az-out .az-sam-balken')
+        && d.querySelectorAll('#az-out .az-sam-k').length === kach);
+      T("azStufeSetzen('2')");
+      /* 4.0-beta.43 (Etappe 10): Weiter ohne Mutterpflanze */
+      T("(function(){ sektionOeffnen('vermehren'); azAssistentNeu(); return 1; })()");
+      await warte(60);
+      const vw = d.getElementById('ver-weiter');
+      pruef('beta.43 (10): Ohne Mutterpflanze heißt der Knopf „Weiter ohne Mutterpflanze“ und ist tippbar',
+        vw.textContent === 'Weiter ohne Mutterpflanze' && !vw.disabled, vw.textContent + ' ' + vw.disabled);
+      vw.click();
+      await warte(60);
+      pruef('beta.43 (10): Er öffnet „Stecklinge ohne Mutterpflanze“',
+        T('AZ_SICHT.art') === 'frei' && /Stecklinge ohne Mutterpflanze/.test(d.getElementById('az-ansicht').textContent));
+      const zb = d.querySelector('#az-ansicht [data-az="zum-assistent"]');
+      if(zb) zb.click();
+      await warte(60);
+      pruef('beta.43 (10): „Zurück“ führt in den Assistenten', !!zb && T('AZ_SICHT.art') === 'assistent' && !d.getElementById('az-assistent').hidden);
+      T("(function(){ verPflanze = allePflanzen()[0].id; verFussZeichnen(); return 1; })()");
+      pruef('beta.43 (10): Mit Mutterpflanze heißt er wieder „Weiter“', vw.textContent === 'Weiter');
+      T("(function(){ verPflanze = null; while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null,''); return 1; })()");
+      await warte(60);
       T("samTeilSetzen('pflanzen')");
       pruef('beta.42 (9): Zurück zu den Pflanzen', !d.body.classList.contains('sam-az') && d.getElementById('az-out').hidden);
     }
@@ -7375,10 +7414,10 @@ setTimeout(async () => {
     const tz = [...d.querySelectorAll('#tour-liste [data-tourgo]')];
     pruef('beta.6: Kapitel der App Tour stehen als Zeilen in Karten', tz.length > 3 && tz.every(b => b.closest('.ein-liste > .tour-z')), tz.length);
     const dv = T('S.design');
-    T(`designSetzen('terrarium', false)`); const uT = d.getElementById('ein-u-ansicht').textContent;
-    T(`designSetzen('klartext', false)`); const uK = d.getElementById('ein-u-ansicht').textContent;
+    T(`designSetzen('terrarium', false)`); const uT = T('MH_UNTER.ansicht()');
+    T(`designSetzen('klartext', false)`); const uK = T('MH_UNTER.ansicht()');
     T('designSetzen(' + JSON.stringify(dv || 'botanisch') + ', false)');
-    pruef('beta.6: Zeile „Ansicht“ nennt das gewählte Design', uT === 'Terrarium' && uK === 'Klartext', uT + ' / ' + uK);
+    pruef('beta.6/43: Menüpunkt „Ansicht“ nennt das gewählte Design', /^Terrarium · /.test(uT) && /^Klartext · /.test(uK), uT + ' / ' + uK);
   } catch(e) { pruef('beta.6: Block läuft ohne Laufzeitfehler', false, e.message); }
 
   /* ══ 4.0-beta.7: Grundstil S4 — Werkzeuge, Vertretungszettel, Nachschlagen, Kartei ══
@@ -12370,12 +12409,12 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       await zu();
       T(`(function(){ S.heuteWetter = false; render(); return 1; })()`);
       pruef('beta.33 (7): Mit abgeschalteter Wetterzeile steht nichts da', !q('#heute-status #wt-leiste'));
-      T(`(function(){ S.heuteWetter = true; render(); sektionOeffnen('einstell'); return 1; })()`); await warte(120);
-      pruef('beta.33 (7): Einstellungen haben unter „Wetter“ die Zeile „Ort“',
-        !!q('#sekm-rumpf [data-mh-go="wetter"] #ein-u-wetter') && q('#ein-u-wetter').textContent === 'Noch kein Ort festgelegt', (q('#ein-u-wetter') || {}).textContent);
-      T(`(function(){ S.wetter.ort = 'Leipzig'; wetterOrtZeile(); return 1; })()`);
-      pruef('beta.33 (7): Die Zeile nennt den gesetzten Ort', q('#ein-u-wetter').textContent === 'Leipzig');
-      pruef('beta.33 (7): „Auf der Heute-Seite“ nennt keine „Gesundheit“ mehr', !/Gesundheit/.test(q('#mh-in-einstell').textContent) && /Gießtreue und Zuwachs/.test(q('#mh-in-einstell').textContent));
+      T(`(function(){ S.heuteWetter = true; render(); mehrNebenzeilen(); sektionOeffnen('ansicht'); return 1; })()`); await warte(120);
+      const wu = () => (q('section[data-mh="wetter"] .mh-unter') || {}).textContent;
+      pruef('beta.43 (11): Der Menüpunkt „Wetter“ sagt, dass kein Ort gesetzt ist', wu() === 'Ort noch nicht gesetzt', wu());
+      T(`(function(){ S.wetter.ort = 'Leipzig'; mehrNebenzeilen(); return 1; })()`);
+      pruef('beta.43 (11): Der Menüpunkt „Wetter“ nennt den gesetzten Ort', /^Leipzig/.test(wu()), wu());
+      pruef('beta.33 (7): „Auf der Heute-Seite“ nennt keine „Gesundheit“ mehr', !/Gesundheit/.test(q('#mh-in-ansicht').textContent) && /Gießtreue und Zuwachs/.test(q('#mh-in-ansicht').textContent));
       await zu();
     } catch(e){
       pruef('beta.33: Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
