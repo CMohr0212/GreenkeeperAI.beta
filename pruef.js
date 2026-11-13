@@ -192,7 +192,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.47', w.__T('FASSUNG') === '4.0-beta.47', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.48', w.__T('FASSUNG') === '4.0-beta.48', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -648,7 +648,8 @@ setTimeout(async () => {
   pruef('Kartenfenster öffnet', w.__T(`karteOeffnen('${pid}')`) === true);
   await tick();
   /* 4.0-beta.29 (B1): Der Schritt „Abschnitte klappen auf“ zeigte auf die Aufgabenzeile und ist weg */
-  ['schnell', 'taten', 'ktabs', 'Fertig'].forEach((n, i) => {
+  /* beta.48 (Etappe 17): fünf Schritte */
+  ['giess', 'tags', 'ktabs', 'werkzeuge', 'bearbeiten'].forEach((n, i) => {
     pruef('Karte · Schritt ' + (i+1) + ' (' + n + ')', zielDa('karte', i) === 'da', zielDa('karte', i));
   });
   /* Die feste Leiste unter dem Kopf ist leer: die Karte beginnt mit
@@ -1195,7 +1196,7 @@ setTimeout(async () => {
   pruef('Sprung Sicherung', JSON.parse(await sprung('sicherung')).sek === 'sicherung');
   pruef('Sprung Vermehren', JSON.parse(await sprung('vermehren')).sek === 'vermehren');
   pruef('Sprung Grundriss entfällt (beta.23, F212)', !w.__T('TOUR_KAPITEL.grundriss'));
-  pruef('Sprung Mehr', JSON.parse(await sprung('mehr')).a === 'mehr');
+  pruef('Sprung Einstellungen (beta.48)', JSON.parse(await sprung('einstellungen')).a === 'mehr');
   pruef('Sprung Sammlung', JSON.parse(await sprung('sammlung')).a === 'sammlung');
   const sk = JSON.parse(await sprung('karte'));
   pruef('Sprung Karte öffnet eine Karte', sk.stapel.indexOf('karte-modal') !== -1, JSON.stringify(sk));
@@ -1516,8 +1517,8 @@ setTimeout(async () => {
      holt — und Kapitel, die nur auf Anforderung laufen. */
   {
     pruef('Die Runde ist ein eigenes Kapitel', !!w.__T('TOUR_KAPITEL.runde'));
-    pruef('Sie hat sechs Schritte',
-      w.__T('TOUR_KAPITEL.runde.schritte().length') === 6,
+    pruef('beta.48: Sie hat sieben Schritte',
+      w.__T('TOUR_KAPITEL.runde.schritte().length') === 7,
       String(w.__T('TOUR_KAPITEL.runde.schritte().length')));
     pruef('Jeder Schritt hat Titel und Text',
       w.__T(`TOUR_KAPITEL.runde.schritte().every(s=>s.titel && s.text)`));
@@ -1525,10 +1526,10 @@ setTimeout(async () => {
       w.__T(`TOUR_KAPITEL.runde.schritte().every(s=>typeof s.ziel === 'function')`));
     /* Bei leerer Sammlung darf nichts ins Leere zeigen — darum die
        Komma-Fallbacks auf die Leerstart-Karte. */
-    pruef('Der Sammlungs-Schritt hat einen Ausweichweg',
-      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[2].ziel)')));
-    pruef('Der Schlussschritt ebenso',
-      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[5].ziel)')));
+    pruef('beta.48: Der BOTaniker-Schritt hat einen Ausweichweg',
+      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[3].ziel)')));
+    pruef('beta.48: Der Schlussschritt ebenso',
+      /,/.test(w.__T('String(TOUR_KAPITEL.runde.schritte()[6].ziel)')));
 
     /* Kein Kapitel startet mehr von selbst */
     pruef('Ansichtswechsel l\u00f6st nichts aus',
@@ -1547,11 +1548,10 @@ setTimeout(async () => {
     /* Willkommen */
     pruef('Willkommen hat keine Bereichsliste mehr',
       !d.querySelector('[data-wk="1"] .wk-liste'));
-    pruef('Der Hauptknopf hei\u00dft „Kurze Runde durch die App\u201c',
-      d.querySelector('[data-wkfertig="1"]').textContent.trim() === 'Kurze Runde durch die App',
-      d.querySelector('[data-wkfertig="1"]').textContent.trim());
-    pruef('Der Nebenknopf hei\u00dft „Selbst umsehen\u201c',
-      d.querySelector('[data-wk="5"] [data-wkfertig="0"]').textContent.trim() === 'Selbst umsehen');
+    pruef('beta.48: Der Schluss hat nur „Los geht\'s\u201c, die Runde folgt von selbst',
+      d.querySelector('[data-wk="5"] [data-wkfertig="1"]').textContent.trim() === 'Los geht\'s'
+      && !d.querySelector('[data-wk="5"] [data-wkfertig="0"]'),
+      d.querySelector('[data-wk="5"]').textContent.trim().slice(0, 80));
     pruef('Die Haustier-Frage bleibt', !!d.querySelector('[data-wk="4"] [data-wktiere]'));
     pruef('Die Grundriss-Frage ist seit beta.20 weg', !d.querySelector('[data-wkplan]'));
 
@@ -1563,27 +1563,27 @@ setTimeout(async () => {
     pruef('Willkommen Schritt 5 nennt den R\u00fcckweg',
       hinweisAuf(d.querySelector('[data-wk="5"]')));
     pruef('Der Schlussschritt der Runde nennt ihn',
-      /Einstellungen \u203a App Tour/.test(w.__T('TOUR_KAPITEL.runde.schritte()[5].text')));
+      /Einstellungen \u203a App Tour/.test(w.__T('tourWort(TOUR_KAPITEL.runde.schritte()[6].text)')));
     pruef('Der \u00dcberspringen-Knopf nennt ihn',
       html.indexOf('Du findest die Runde jederzeit unter Einstellungen \u203a App Tour wieder.') !== -1);
 
     /* Ersteinrichtung bleibt, startet aber nie von allein */
     pruef('Die Ersteinrichtung ist noch da', !!w.__T('TOUR_KAPITEL.einricht'));
-    pruef('Sie ist weiterhin ein Sperrablauf',
-      w.__T('TOUR_KAPITEL.einricht.modus') === 'sperre');
+    pruef('beta.48: Kein Kapitel ist ein Sperrablauf, die Tour zeigt nur',
+      w.__T(`Object.keys(TOUR_KAPITEL).every(k => TOUR_KAPITEL[k].modus !== 'sperre')`) === true);
     pruef('wkFertig startet die Runde, nicht die Einrichtung',
       html.indexOf("requestAnimationFrame(()=>tourStart('runde'))") !== -1
       && html.indexOf("if(tourNoetig('einricht')) requestAnimationFrame(()=>tourStart('einricht'))") === -1);
 
     /* Bestandsnutzer: ein Angebot, dann nie wieder */
     pruef('Der Angebotskasten existiert', !!d.getElementById('runde-angebot'));
-    w.__T("S.startGesehen = iso(HEUTE); S.rundeAngeboten = null; sichern(); rundeAngebotZeichnen()");
+    w.__T("S.startGesehen = iso(HEUTE); S.angebot40 = null; S.tutorial.aus = false; sichern(); rundeAngebotZeichnen()");
     pruef('Das Angebot erscheint einmal',
       d.getElementById('runde-angebot').hidden === false);
     d.querySelector('[data-do="angebot-nein"]').click();
     pruef('Weggetippt bleibt es weg',
       d.getElementById('runde-angebot').hidden === true
-      && !!w.__T('S.rundeAngeboten'));
+      && !!w.__T('S.angebot40'));
     w.__T('rundeAngebotZeichnen()');
     pruef('Auch nach neuem Aufbau', d.getElementById('runde-angebot').hidden === true);
 
@@ -1592,8 +1592,10 @@ setTimeout(async () => {
     const liste = d.getElementById('tour-liste');
     pruef('Die Runde steht in der Liste',
       !!liste.querySelector('[data-tourgo="runde"]'));
-    pruef('Sie steht abgesetzt oben',
-      liste.innerHTML.indexOf('Von vorn') < liste.innerHTML.indexOf('Einzelne Bereiche'));
+    pruef('beta.48: Von vorn, Grundlagen, Werkzeuge in dieser Folge',
+      liste.innerHTML.indexOf('Von vorn') !== -1
+      && liste.innerHTML.indexOf('Von vorn') < liste.innerHTML.indexOf('Grundlagen')
+      && liste.innerHTML.indexOf('Grundlagen') < liste.innerHTML.indexOf('Werkzeuge'));
     pruef('Alle Kapitel stehen zur Wahl',
       liste.querySelectorAll('[data-tourgo]').length
         === w.__T('Object.keys(TOUR_KAPITEL).length'));
@@ -1610,13 +1612,9 @@ setTimeout(async () => {
       pruef('und nennt den R\u00fcckweg', hinweisAuf(es));
     }
 
-    /* Das Mehr-Kapitel zielte auf einen stillgelegten Punkt */
-    /* 4.0-beta.43 (Etappe 11): „Ansicht“ ist wieder ein eigener Punkt, „Einstellungen“ ist weg */
-    pruef('beta.43: Das Mehr-Kapitel zeigt auf „ansicht\u201c, nicht mehr auf „einstell\u201c',
-      w.__T('JSON.stringify(TOUR_KAPITEL.mehr.schritte().map(s=>String(s.ziel)))')
-        .indexOf('data-mh=\\"ansicht\\"') !== -1
-      && w.__T('JSON.stringify(TOUR_KAPITEL.mehr.schritte().map(s=>String(s.ziel)))')
-        .indexOf('data-mh=\\"einstell\\"') === -1);
+    /* beta.48: Das Mehr-Kapitel ist im Kapitel Einstellungen aufgegangen */
+    pruef('beta.48: Kapitel Einstellungen statt Mehr, Heute statt Gießmodus',
+      !w.__T('TOUR_KAPITEL.mehr') && !w.__T('TOUR_KAPITEL.giessmodus') && !!w.__T('TOUR_KAPITEL.einstellungen'));
   }
 
   /* ══ Vermehrung im Verlauf ═════════════════════════════════════
@@ -13962,6 +13960,108 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       pruef('beta.46 (15): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
     } finally {
       T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.gelernteArten = a.gelernt; while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); sichern(); render(); return 1; })(${JSON.stringify(alt46)})`);
+    }
+  }
+
+  /* ── 4.0-beta.48 (Etappe 17): App-Tour neu ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const zu = () => T(`if(tourLauf) tourSchliessen(); while(APP_DLG.offen) appDlgAntwort('nein'); while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); 1`);
+    const altT = T(`JSON.stringify(S.tutorial)`);
+    try {
+      zu(); await warte(60);
+      const grund = ['einricht', 'heute', 'sammlung', 'karte', 'kalender', 'botaniker', 'einstellungen'];
+      const wz = ['doktor', 'substrat', 'vermehren', 'urlaub', 'sicherung'];
+      pruef('beta.48 (17): Kapitel sind Runde, sieben Grundlagen und fünf Werkzeuge',
+        T(`JSON.stringify(Object.keys(TOUR_KAPITEL))`) === JSON.stringify(['runde'].concat(grund, wz))
+        && grund.every(k => T(`TOUR_KAPITEL['${k}'].gruppe`) === 'grund')
+        && wz.every(k => T(`TOUR_KAPITEL['${k}'].gruppe`) === 'werkzeug'), T(`JSON.stringify(Object.keys(TOUR_KAPITEL))`));
+      const soll = {runde:7, einricht:8, heute:4, sammlung:5, karte:5, kalender:3, botaniker:3, einstellungen:4, doktor:3, substrat:3, vermehren:3, urlaub:3, sicherung:3};
+      pruef('beta.48 (17): Schrittzahlen laut Plan',
+        Object.keys(soll).every(k => T(`TOUR_KAPITEL['${k}'].schritte().length`) === soll[k]),
+        Object.keys(soll).map(k => k + ':' + T(`TOUR_KAPITEL['${k}'].schritte().length`)).join(' '));
+      pruef('beta.48 (17): Kein Text nennt Aufgaben, Kartei, Grundriss, Zustände oder den Düngerweg',
+        T(`Object.keys(TOUR_KAPITEL).every(k => TOUR_KAPITEL[k].schritte().every(s => !/Aufgabe|Kartei|Grundriss|Zustand|Zustände|wie du düngst/.test(tourWort(s.text) + tourWort(s.titel))))`) === true);
+      pruef('beta.48 (17): Höchstens zwei Sätze je Schritt',
+        T(`Object.keys(TOUR_KAPITEL).every(k => TOUR_KAPITEL[k].schritte().every(s => (tourWort(s.text).match(/[.!?](\s|$)/g) || []).length <= 2))`) === true);
+
+      /* Jedes Ziel jedes Schritts findet im passenden Zustand ein Element:
+         Kapitel wie aus der Liste starten und Schritt für Schritt weiter. */
+      T(`(function(){ if(!allePflanzen().length){ S.eigene.push({id:'E-9480', name:'Tourprobe', art:'Monstera', klasse:'B'}); sichern(); render(); } return 1; })()`);
+      T(`S.tutorial = {aus:false, kapitel:{}, einricht:0, geprueft:1}; sichern(); 1`);
+      const fehlt = [];
+      for (const k of ['runde'].concat(grund, wz)) {
+        zu(); await warte(80);
+        T(`tourHin('${k}'); 1`); await warte(300);
+        T(`tourStart('${k}', true); 1`); await warte(500);
+        const n = T(`TOUR_KAPITEL['${k}'].schritte().length`);
+        for (let i = 0; i < n; i++) {
+          const st = T(`JSON.stringify(tourLauf ? {i:tourLauf.i, ok:(function(){ const z = tourZiel(tourLauf.schritte[tourLauf.i]); return !!z && !z.closest('[hidden]'); })()} : null)`);
+          const o = JSON.parse(st);
+          if (!o || o.i !== i || !o.ok) { fehlt.push(k + '#' + (i + 1) + (o ? (o.i !== i ? ' übersprungen' : ' ohne Ziel') : ' Tour weg')); break; }
+          if (i < n - 1) { d.getElementById('tour-weiter').click(); await warte(450); }
+        }
+      }
+      pruef('beta.48 (17): Jedes Ziel jedes Kapitels ist da und sichtbar', fehlt.length === 0, fehlt.join(', '));
+
+      /* Die Tour sperrt alles außer ihrer Karte und dunkelt nichts ab */
+      zu(); await warte(60);
+      T(`tourStart('heute'); 1`); await warte(400);
+      pruef('beta.48 (17): Erklärschritt legt den Deckel aufs Ziel (Ziel nicht antippbar)', d.getElementById('tour').classList.contains('zu'));
+      pruef('beta.48 (17): Kein Abdunkeln, das Ziel ist eingekreist',
+        html.indexOf('html[data-design] .tour-bl{background:transparent}') !== -1 && /html\[data-design\] #tour-ring\{border:3px solid var\(--fl-akzent\)/.test(html));
+      zu(); await warte(60);
+
+      /* Schluss der Runde: bei leerer Sammlung „Erste Pflanze geführt anlegen“ */
+      const altE = T(`JSON.stringify(S.eigene)`);
+      T(`S.eigene = []; sichern(); render(); 1`);
+      T(`tourStart('runde'); tourGehe(6, 1); 1`); await warte(600);
+      const ex = d.getElementById('tour-extra');
+      pruef('beta.48 (17): Schluss der Runde bietet bei leerer Sammlung „Erste Pflanze geführt anlegen“ und „Fertig“',
+        !ex.hidden && ex.textContent === 'Erste Pflanze geführt anlegen' && d.getElementById('tour-weiter').textContent === 'Fertig', ex.textContent);
+      ex.click(); await warte(1100);
+      pruef('beta.48 (17): Der Knopf startet das geführte Anlegen', T(`tourLauf && tourLauf.key`) === 'einricht', T(`tourLauf && tourLauf.key`));
+      T(`tourGehe(1, 1); 1`); await warte(600);
+      pruef('beta.48 (17): Das geführte Anlegen öffnet das Formular selbst', T(`modalOffen('anleg-modal') && alStufe === 1`) === true);
+      T(`tourGehe(4, 1); 1`); await warte(600);
+      pruef('beta.48 (17): … und blättert bis Stufe 4, ohne etwas einzutragen', T(`alStufe`) === 4 && T(`allePflanzen().length`) === 0, T(`alStufe`));
+      T(`tourAbbruch(); 1`); await warte(200);
+      pruef('beta.48 (17): Bei leerer Sammlung bleibt das Formular danach auf Stufe 1 offen', T(`modalOffen('anleg-modal') && alStufe === 1`) === true);
+      zu(); await warte(60);
+      T(`S.eigene = JSON.parse(${JSON.stringify(altE)}); sichern(); render(); 1`);
+      T(`tourStart('runde'); tourGehe(6, 1); 1`); await warte(600);
+      pruef('beta.48 (17): Mit Pflanzen hat der Schluss nur „Fertig“', d.getElementById('tour-extra').hidden && d.getElementById('tour-weiter').classList.contains('haupt'));
+      zu(); await warte(60);
+
+      /* Startauslöser */
+      pruef('beta.48 (17): Willkommen startet die Runde nach den Fragen', html.indexOf("requestAnimationFrame(()=>tourStart('runde'))") !== -1
+        && !!d.querySelector('[data-wk="5"] [data-wkfertig="1"]'));
+      T(`erststartZeigen(); 1`);
+      T(`S.eigene = []; sichern(); render(); 1`);
+      const es = d.getElementById('erststart');
+      pruef('beta.48 (17): Leerstart zeigt „Erste Pflanze geführt anlegen“ und „Tour ansehen“',
+        /Erste Pflanze geführt anlegen/.test((es.querySelector('[data-do="start-tour"]') || {}).textContent || '')
+        && /Tour ansehen/.test((es.querySelector('[data-do="start-runde"]') || {}).textContent || '') && !es.querySelector('[data-do="start-anlegen"]'));
+      T(`S.eigene = JSON.parse(${JSON.stringify(altE)}); sichern(); render(); 1`);
+      T(`S.startGesehen = iso(HEUTE); S.angebot40 = null; S.rundeAngeboten = iso(HEUTE); S.tutorial.aus = false; rundeAngebotZeichnen(); 1`);
+      pruef('beta.48 (17): Altbestand bekommt „Neu in 4.0“, auch wenn die alte Runde weggetippt war',
+        !d.getElementById('runde-angebot').hidden && /Neu in 4\.0/.test(d.getElementById('runde-angebot').textContent));
+      T(`S.tutorial.aus = true; rundeAngebotZeichnen(); 1`);
+      pruef('beta.48 (17): Mit abgeschalteter Tour kein Angebot', d.getElementById('runde-angebot').hidden);
+      T(`S.tutorial.aus = false; S.angebot40 = iso(HEUTE); rundeAngebotZeichnen(); 1`);
+      T(`tourListeZeichnen(); 1`);
+      const li = d.getElementById('tour-liste');
+      pruef('beta.48 (17): Liste mit Von vorn, Grundlagen (7) und Werkzeuge (5)',
+        li.querySelectorAll('.ein-liste').length === 3 && li.querySelectorAll('.ein-liste')[1].querySelectorAll('[data-tourgo]').length === 7
+        && li.querySelectorAll('.ein-liste')[2].querySelectorAll('[data-tourgo]').length === 5);
+      pruef('beta.48 (17): Urlaubszettel zeigt auf das sichtbare Feld statt auf die versteckte Liste',
+        T(`(function(){ sektionOeffnen('urlaub'); const z = TOUR_KAPITEL.urlaub.schritte()[1].ziel(); return !!z && z.id !== 'url-puffer' && !z.hidden; })()`) === true);
+    } catch (e) {
+      pruef('beta.48 (17): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      zu();
+      T(`S.eigene = S.eigene.filter(p => p.id !== 'E-9480'); S.tutorial = JSON.parse(${JSON.stringify(altT)}); sichern(); render(); 1`);
     }
   }
 

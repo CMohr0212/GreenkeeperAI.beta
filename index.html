@@ -4363,6 +4363,12 @@ html[data-design] .sel-drop-pfeil{flex:0 0 auto;color:var(--schrift-2)}
 :is(.formwrap, .bibbox, .bearb, .aqua, .dok-rueck) button.sel-drop-feld{background-color:var(--fl-karte)}
 html[data-design] .feld-knopf > .sel-drop{flex:1 1 auto}
 html[data-design] .feld-knopf > .sel-drop > button.sel-drop-feld{border-radius:var(--r-mittel) 0 0 var(--r-mittel)}
+/* 4.0-beta.48 (Etappe 17): Die Tour dunkelt nichts ab. Gesperrt bleibt
+   alles außer ihrer Karte; das Ziel ist eingekreist. */
+html[data-design] .tour-bl{background:transparent}
+html[data-design] #tour-ring{border:3px solid var(--fl-akzent);
+  box-shadow:0 0 0 3px var(--paper),0 0 16px 5px var(--fl-akzent)}
+html[data-design] #tour-karte{box-shadow:0 10px 32px rgba(0,0,0,.38)}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9832,11 +9838,10 @@ function pflanzeEntfernen(id){
       </div>
 
       <div class="wk-knoepfe">
-        <button class="wk-haupt" data-wkfertig="1">Kurze Runde durch die App</button>
-        <button class="wk-neben" data-wkfertig="0">Selbst umsehen</button>
+        <button class="wk-haupt" data-wkfertig="1">Los geht's</button>
       </div>
-      <p class="wk-klein">Die Runde dauert eine Minute und steht später
-        jederzeit unter Einstellungen › App Tour.</p>
+      <p class="wk-klein">Gleich zeigt dir eine kurze Runde, wo was liegt; das × beendet sie.
+        Sie steht später jederzeit unter Einstellungen › App Tour.</p>
     </div>
   </div>
 </div>
@@ -9858,6 +9863,7 @@ function pflanzeEntfernen(id){
     <div id="tour-fuss">
       <button id="tour-zurueck" type="button">&lsaquo; Zurück</button>
       <button id="tour-weiter" type="button" class="haupt">Weiter &rsaquo;</button>
+      <button id="tour-extra" type="button" class="haupt" hidden></button>
       <button id="tour-skip" type="button">Überspringen</button>
     </div>
   </div>
@@ -12036,7 +12042,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.47';
+const FASSUNG = '4.0-beta.48';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -12271,6 +12277,8 @@ const LEERSTAND = () => ({
   gelernteArten:{},
   /* Einmaliges Angebot der Runde an Bestandsnutzer. */
   rundeAngeboten:null,
+  /* 4.0-beta.48: Angebot der neuen Runde an Bestandsnutzer, einmal */
+  angebot40:null,
   /* 4.0-beta.9: gelernter Untersetzer-Abstand je Anstau-Pflanze (Tage)
      und Zahl der Gaben von unten seit dem letzten Durchspülen. */
   anstau:{}, spuelen:{},
@@ -21041,6 +21049,8 @@ function wkArtenZeichnen(){
 
 function wkFertig(mitTutorial){
   S.startGesehen = iso(HEUTE);
+  /* beta.48: Wer hier anfängt, bekommt das Angebot für Bestandsnutzer nicht */
+  S.angebot40 = iso(HEUTE);
   if(S.tiere && S.tiere.aktiv === null) S.tiere.aktiv = false;
   sichern();
   modalZu('willkommen');
@@ -21125,13 +21135,15 @@ document.addEventListener('click', e=>{
 function rundeAngebotZeichnen(){
   const box = document.getElementById('runde-angebot');
   if(!box) return;
-  const neu = !S.startGesehen ? false : true;
-  const zeigen = neu && !S.rundeAngeboten && allePflanzen().length > 0;
+  /* beta.48 (Etappe 17): eigenes Feld, damit auch wer die alte Runde
+     weggetippt hat, die neue einmal angeboten bekommt */
+  const aus = !!(S.tutorial && S.tutorial.aus);
+  const zeigen = !!S.startGesehen && !S.angebot40 && !aus && allePflanzen().length > 0;
   box.hidden = !zeigen;
   if(!zeigen) return;
   box.innerHTML = `<div class="angebot">
-    <p><b>Neu: eine kurze Runde durch die App.</b>
-      Sechs Schritte, eine Minute — zeigt, wo was liegt.</p>
+    <p><b>Neu in 4.0: eine kurze Runde durch die App.</b>
+      Sieben Schritte, eine Minute: wo was liegt.</p>
     <div class="tools">
       <button class="haupt" data-do="angebot-ja">Ansehen</button>
       <button data-do="angebot-nein">Nicht nötig</button>
@@ -21143,7 +21155,7 @@ function rundeAngebotZeichnen(){
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-do]'); if(!b) return;
   if(b.dataset.do === 'angebot-ja' || b.dataset.do === 'angebot-nein'){
-    S.rundeAngeboten = iso(HEUTE);
+    S.angebot40 = iso(HEUTE);
     sichern();
     rundeAngebotZeichnen();
     if(b.dataset.do === 'angebot-ja' && typeof tourStart === 'function') tourStart('runde');
@@ -27972,24 +27984,14 @@ function erststartZeigen(){
   if(!leer) return;
   box.innerHTML = `<div class="start">
     <h3>Willkommen</h3>
-    <p>Deine Sammlung ist noch leer. Leg die erste Pflanze an — such einfach ihren Namen.
-       Die Bibliothek schlägt Gießklasse, Licht und Dünger vor, die Katzenwarnung kommt von selbst.</p>
+    <p>Deine Sammlung ist noch leer. Leg die erste Pflanze an; auf Wunsch zeigt dir die App jede Stufe.</p>
     <div class="tools">
-      <button class="haupt" data-do="start-anlegen">Erste Pflanze anlegen</button>
-      <button data-do="start-import">Sicherung laden</button>
+      <button class="haupt" data-do="start-tour">Erste Pflanze geführt anlegen</button>
+      <button data-do="start-runde">Tour ansehen</button>
     </div>
-    <p class="start-fuss">
-      <button class="linkbtn" data-do="start-runde">Kurze Runde durch die App</button>
-      &nbsp;·&nbsp;
-      <button class="linkbtn" data-do="start-tour">Schritt für Schritt führen lassen</button>
-    </p>
-    <p class="start-fuss">Beides findest du jederzeit unter Einstellungen › App Tour wieder.</p>
-    <ol class="start-weg">
-      <li><b>Anlegen</b> — Art suchen, Name vergeben, fertig.</li>
-      <li><b>Gießmodus</b> — ab dann führt sie dich Pflanze für Pflanze durch.</li>
-    </ol>
-    <p class="start-fuss">Alles bleibt auf diesem Gerät. Lade früh eine Sicherung herunter, sonst ist bei einem
-       Aufräumlauf des Browsers alles weg.</p>
+    <p class="start-fuss"><button class="linkbtn" data-do="start-import">Sicherung laden</button></p>
+    <p class="start-fuss">Beides findest du jederzeit unter Einstellungen › App Tour wieder.
+       Alles bleibt auf diesem Gerät, lade früh eine Sicherung herunter.</p>
   </div>`;
 }
 document.addEventListener('click', e=>{
@@ -27997,10 +27999,6 @@ document.addEventListener('click', e=>{
   if(b.dataset.do === 'start-runde'){
     if(typeof tourStart === 'function') tourStart('runde');
     return;
-  }
-  if(b.dataset.do === 'start-anlegen'){
-    ansichtZeigen('sammlung');
-    if(typeof alStart === 'function') alStart();
   }
   if(b.dataset.do === 'start-tour'){
     if(typeof tourStart === 'function') tourStart('einricht');
@@ -32439,321 +32437,407 @@ let tourTakt = null;
 
 const TOUR_KAPITEL = {
 
-  /* ── Die Runde ────────────────────────────────────────────────
-     Sechs Schritte, je ein Satz. Sie zeigt, *dass* es etwas gibt —
-     nicht, wie es geht. Das steht in den i-Knöpfen der Bereiche.
-
-     Sie läuft auch bei leerer Sammlung, weil jeder Schritt auf einen
-     Ort zeigt und nicht auf einen Inhalt. Wo eine Pflanze stehen
-     könnte, greift der Komma-Fallback auf die Leerstart-Karte. */
+  /* ── Die Startrunde ───────────────────────────────────────────
+     4.0-beta.48 (Etappe 17): sieben Schritte, je ein Satz. Läuft einmal
+     von selbst nach den drei Willkommensfragen, sonst nur auf Wunsch.
+     Die Tour zeigt und erklärt nur; bedienen lässt sich dabei nichts. */
   runde: {
     name: 'Kurze Runde durch die App',
     hin: ()=>{ ansichtZeigen('heute'); },
     schritte: ()=>[
       { vor: ()=>ansichtZeigen('heute'),
         ziel: ()=>document.getElementById('btn-giessmodus'),
-        titel: 'Der Tagesknopf',
-        text: 'Hier steht, was heute zu gießen ist. Ein Antippen führt dich durch alle fälligen Pflanzen nacheinander.',
+        titel: 'Heute',
+        text: 'Heute zeigt, was fällig ist, und der Gießmodus führt dich Pflanze für Pflanze durch.',
         warte: 320 },
-
-      { ziel: ()=>document.querySelector('.nebentaten'),
-        titel: 'Was sonst ansteht',
-        text: 'Der Pflanzendoktor hilft, wenn etwas nicht stimmt.' },
-
-      { vor: ()=>ansichtZeigen('sammlung'),
-        ziel: ()=>document.querySelector('.sam-raster .card, #erststart, .sam-raster'),
-        titel: 'Deine Sammlung',
-        text: 'Jede Pflanze bekommt eine Karte mit Foto, Gießstand und allem, was zu ihr gehört.',
+      { ziel: ()=>document.getElementById('btn-kalender-heute'),
+        titel: 'Kalender',
+        text: 'Termine, Serien und die nächsten Gießtage stehen im Kalender.' },
+      { vor: ()=>{ ansichtZeigen('sammlung'); tourPflanzenTeil(); },
+        ziel: ()=>document.getElementById('sam-teil'),
+        titel: 'Sammlung',
+        text: 'Oben wechselst du zwischen Pflanzen und Anzucht, das Plus unten rechts legt Neues an.',
         warte: 320 },
-
-      { ziel: ()=>document.querySelector('.such-zeile'),
-        titel: 'Wiederfinden',
-        text: 'Gesucht wird über Name, Art, Standort und Symptom — auch nach „gelbe Blätter“.' },
-
-      { vor: ()=>ansichtZeigen('mehr'),
-        ziel: ()=>document.querySelector('.mh-menue, .mh-gruppe'),
-        titel: 'Alles Weitere',
-        text: 'Hinter dem Zahnrad: Sicherung, Gießen, Nachschlagen und die Einstellungen. Hier findest du auch diese Runde wieder.',
+      { vor: ()=>ansichtZeigen('botaniker'),
+        ziel: ()=>tourErstes('#bot-aktionen, #bot-leiste, #tabs [data-ans-go="botaniker"]'),
+        titel: 'BOTaniker',
+        text: 'Hier fragst du um Rat und öffnest Werkzeuge wie Doktor, Umtopfen und Vermehren.',
         warte: 320 },
-
-      { vor: ()=>ansichtZeigen('sammlung'),
-        ziel: ()=>document.querySelector('#erststart [data-do="start-anlegen"], .sam-raster .card, #btn-neu'),
+      { vor: ()=>ansichtZeigen('heute'),
+        ziel: ()=>document.getElementById('kopf-zahnrad'),
+        titel: 'Einstellungen',
+        text: 'Hinter dem Zahnrad liegt alles Weitere; deine Daten liegen nur auf diesem Gerät, deshalb ist die Sicherung dort dein einziger Schutz.',
+        warte: 320 },
+      { ziel: ()=>document.getElementById('tabs'),
+        titel: 'Wischen',
+        text: 'Zwischen Heute, Sammlung und BOTaniker wechselst du auch mit einem Wisch nach links oder rechts.' },
+      { vor: ()=>ansichtZeigen('heute'),
+        ziel: ()=>tourErstes('#erststart, #btn-giessmodus'),
         titel: 'Das war die Runde',
-        text: 'Am besten legst du jetzt deine erste Pflanze an — fast alles in der App hängt daran. Die Runde steht unter Einstellungen › App Tour, falls du sie noch einmal sehen willst.',
+        text: ()=>tourSammlungLeer()
+          ? 'Leg jetzt deine erste Pflanze an, auf Wunsch Schritt für Schritt; jedes Kapitel findest du unter Einstellungen › App Tour.'
+          : 'Einzelne Kapitel holst du jederzeit unter Einstellungen › App Tour.',
+        extra: ()=>tourSammlungLeer()
+          ? {text:'Erste Pflanze geführt anlegen', tun:()=>tourStart('einricht')} : null,
         warte: 320 }
     ]
   },
 
+  /* ── Grundlagen ── */
   einricht: {
-    name: 'Einrichtung',
-    modus: 'sperre',
-    danach: ()=>{ if(tourNoetig('sammlung')) tourStart('sammlung'); },
+    name: 'Pflanze anlegen',
+    gruppe: 'grund',
+    hin: ()=>{ ansichtZeigen('sammlung'); tourPflanzenTeil(); },
+    /* Bei leerer Sammlung bleibt das Formular danach offen, auf Stufe 1:
+       dann legt man die erste Pflanze gleich selbst an. */
+    ende: ()=>{
+      if(!modalOffen('anleg-modal')) return;
+      if(tourSammlungLeer()){
+        try{ formularLeeren(); }catch(e){}
+        if(typeof neuWegSetzen === 'function') neuWegSetzen(null);
+        alStufeZeigen(1);
+      } else modalZu('anleg-modal');
+    },
     schritte: ()=>[
-      { ziel: ()=>document.querySelector('#erststart [data-do="start-anlegen"]'),
-        titel: 'Die erste Pflanze',
-        text: 'Fast alles in der App hängt daran, dass mindestens eine Pflanze angelegt ist. Tipp auf den Knopf — der Rest der Seite ist so lange abgedunkelt.',
-        fertig: ()=>(typeof modalOffen === 'function' && modalOffen('anleg-modal')) },
-
-      { ziel: ()=>document.querySelector('#form-neu .neu-wahl'),
-        titel: 'Drei Wege',
-        text: 'Weißt du, was es ist, such die Art in der Bibliothek — dann sind Gießklasse, Licht, Dünger und Giftigkeit sofort ausgefüllt. Weißt du es nicht, lass eine KI ans Bild. Oder trag alles selbst ein. Alle drei enden an derselben Stelle.',
-        fertig: ()=>(typeof alStufe !== 'undefined' && alStufe >= 2) },
-
-      { ziel: ()=>{ const b = document.getElementById('neu-bibbox');
-                    if(b && !b.hidden) return document.getElementById('f-art');
-                    const k = document.getElementById('neu-kibox');
-                    return (k && !k.hidden) ? k : null; },
-        titel: ()=>{ const b = document.getElementById('neu-bibbox');
-                     return (b && !b.hidden) ? 'Art suchen' : 'Die KI fragen'; },
-        text: ()=>{ const b = document.getElementById('neu-bibbox');
-                    return (b && !b.hidden)
-                      ? 'Die ersten Buchstaben genügen, deutscher oder botanischer Name. Aus der Liste einen Treffer wählen — damit sind die Pflegedaten gesetzt.'
-                      : 'Prompt kopieren, im Chatdienst zusammen mit einem Foto einfügen, die Antwort zurück in „Antwort einfügen“. Die App liest die Felder selbst heraus.'; },
-        weiter: true,
-        fertig: ()=>{ const g = document.getElementById('bib-gewaehlt');
-                      return !!(g && !g.hidden); } },
-
-      { ziel: ()=>document.getElementById('al-weiter'),
-        titel: 'Eine Stufe nach der anderen',
-        text: 'Unten geht es weiter und zurück. Der Balken oben zeigt, wo du stehst — fünf Stufen, keine davon lang.',
-        weiter: true },
-
-      { ziel: ()=>document.getElementById('f-name'),
-        titel: 'Ein Name',
-        text: 'Der Name steht auf der Karte, im Gießmodus und auf dem Urlaubszettel. Er darf ruhig albern sein — er soll dir helfen, die Pflanze im Raum wiederzuerkennen.',
-        weiter: true },
-
-      { ziel: ()=>document.getElementById('al-pflege'),
-        titel: 'Der Rest steht schon da',
-        text: 'Gießklasse, Licht und Giftigkeit kommen aus der Bibliothek. Kam die Art von dort, siehst du hier nur eine Zusammenfassung und einen Knopf zum Ändern — was schon beantwortet ist, musst du nicht noch einmal beantworten.',
-        weiter: true },
-
-      { ziel: ()=>document.getElementById('al-fotos'),
-        titel: 'Fotos sind freiwillig',
-        text: 'Das erste Bild wird das Profilbild. Fotos liegen im großen Speicher des Browsers, nicht im kleinen — es passen also viele hinein.',
-        weiter: true },
-
-      { ziel: ()=>document.getElementById('al-weiter'),
-        titel: 'Anlegen',
-        text: 'Danach steht sie in der Sammlung, und die App fängt an, für sie mitzuzählen.',
-        fertig: ()=>{ try{ return allePflanzen().length > (tourLauf ? tourLauf.stand : 0); }
-                      catch(e){ return false; } } }
-    ]
-  },
-
-  sammlung: {
-    hin: ()=>{ ansichtZeigen('sammlung'); },
-    name: 'Die Sammlung',
-    danach: ()=>{ if(modalOffen('karte-modal') && tourNoetig('karte'))
-                    tourStart('karte'); },
-    schritte: ()=>[
-      { vor: ()=>ansichtZeigen('sammlung'),
-        ziel: ()=>document.querySelector('#out .card'),
-        titel: 'Eine Karte je Pflanze',
-        text: 'Der Balken unter dem Namen zeigt, wie feucht das Substrat gerade sein sollte. Die Zeichen daneben stehen für Zustand, Giftigkeit und offene Aufgaben — die Zeichenerklärung ganz oben löst sie auf. Ein Tipp klappt die Karte auf.',
+      { vor: ()=>{ if(modalOffen('anleg-modal')) modalZu('anleg-modal');
+                   ansichtZeigen('sammlung'); tourPflanzenTeil(); },
+        ziel: ()=>document.getElementById('fab-neu'),
+        titel: 'Das Plus',
+        text: 'Neue Pflanzen legst du in der Sammlung mit dem Plus unten rechts an.',
+        warte: 400 },
+      { fenster: 'anleg-modal',
+        vor: ()=>tourAnlegenAuf(1),
+        ziel: ()=>document.querySelector('#form-neu .neu-wahl'),
+        titel: 'Woher die Angaben kommen',
+        text: 'Aus der Bibliothek, wenn du die Art kennst, von der KI per Foto, wenn nicht, oder ganz von Hand.',
+        warte: 320 },
+      { fenster: 'anleg-modal',
+        vor: ()=>tourAnlegenAuf(2),
+        ziel: ()=>tourErstes('#al-kiname, #neu-kibox'),
+        titel: 'Die KI fragen',
+        text: '„Nur Steckbrief“ ist schneller, „Mit Pflegetexten“ füllt auch das Pflegeheft. Das Modell wählst du im Feld mit ▾; braucht eines zu lange, bietet die App nach 30 Sekunden ein anderes an.',
         warte: 260 },
-
-      { ziel: ()=>document.querySelector('section.controls .such-zeile'),
-        titel: 'Suchen und filtern',
-        text: 'Die Suche geht über Name, Art, Standort und Symptom zugleich. Hinter „Filter“ liegen Gießklasse, Giftigkeit und Raum.' },
-
-      { ziel: ()=>document.getElementById('fab-neu'),
-        titel: 'Weitere Pflanzen',
-        text: 'Der runde Knopf ist der einzige Weg zum Anlegen und steht immer an derselben Stelle.' },
-
-      { ziel: ()=>document.getElementById('sammel-ansicht'),
-        titel: 'Ansicht',
-        text: 'Hinter „Ansicht“ wählst du Liste, Galerie oder ein Raster mit drei bis fünf Spalten. Die Wahl bleibt gemerkt.' }
-    ]
-  },
-
-  karte: {
-    hin: ()=>{ ansichtZeigen('sammlung'); const p = allePflanzen()[0]; if(p) karteOeffnen(p.id); },
-    name: 'Die Pflanzenkarte',
-    schritte: ()=>[
-      { fenster: 'karte-modal',
-        ziel: ()=>document.querySelector('#karte-rumpf .km-held'),
-        titel: 'Das Bild zuerst',
-        text: 'Oben steht das Profilbild groß, darunter das Band mit allen Fotos dieser Pflanze. Über die drei Punkte an einem Bild wählst du das Profilbild oder löschst es.' },
-
-      { fenster: 'karte-modal',
-        ziel: ()=>document.querySelector('#karte-rumpf .km-taten'),
-        titel: 'Zustand und Handlungen',
-        text: 'Eine Zeile sagt, wie es ums Gießen steht. Der breite Knopf trägt das Gießen ein, darunter stehen Doktor, Substrat, Vermehren und Bearbeiten.' },
-
-      { fenster: 'karte-modal',
-        ziel: ()=>document.querySelector('#karte-rumpf .ktabs'),
-        titel: 'Vier Reiter',
-        text: 'Pflege für das, was jetzt ansteht: Zustand, Gießen, Düngen. Standort für Raum und Stellplatz samt Tierwarnung. Verlauf für das, was war: Gießabstände, Einträge, Befunde, Notizen. Wissen für alles über die Art. Welcher Reiter offen ist, merkt sich die App für alle Karten.' },
-
-      { fenster: 'karte-modal',
-        ziel: ()=>document.getElementById('karte-zu'),
-        titel: 'Fertig — und weiterblättern',
-        text: '„Fertig“ schließt das Fenster, der Zurück-Knopf des Geräts genauso. Mit den Pfeilen links und rechts vom Namen gehst du zur nächsten Pflanze, ohne den Umweg über die Liste.' }
+      { fenster: 'anleg-modal',
+        vor: ()=>tourAnlegenAuf(3),
+        ziel: ()=>document.getElementById('f-name'),
+        titel: 'Die Pflanze',
+        text: 'Der Name steht auf Karte und Gießliste; botanischer Name und Sorte kommen von der KI oder von dir.',
+        warte: 260 },
+      { fenster: 'anleg-modal',
+        vor: ()=>tourAnlegenAuf(4),
+        ziel: ()=>document.getElementById('al-feld-raum'),
+        titel: 'Raum und Topf',
+        text: 'Raum und Topfgröße sind Pflicht, weil Laufweg und Gießmenge daran hängen; einen neuen Raum legst du hier mit „+ Neuer Raum“ an.',
+        warte: 260 },
+      { fenster: 'anleg-modal',
+        ziel: ()=>{ const s = document.getElementById('f-giessart');
+                    const f = s ? s.closest('.al-feld') : null;
+                    return (f && !f.closest('[hidden]')) ? f : tourErstes('#al-bibzsf'); },
+        titel: 'Gießart',
+        text: 'Wie du gießt, bestimmt Weg und Hinweise im Gießmodus; Gießklasse und Licht darüber schlägt die KI oder die Bibliothek vor.' },
+      { fenster: 'anleg-modal',
+        ziel: ()=>{ const s = document.getElementById('f-frost');
+                    return s ? s.closest('.al-feld') : null; },
+        titel: 'Rankhilfe und Frostgrenze',
+        text: 'Beim Moosstab erinnert die App ans Befeuchten; die Frostgrenze darunter belegt die KI vor, ändern kannst du sie immer.' },
+      { fenster: 'anleg-modal',
+        vor: ()=>tourAnlegenAuf(5),
+        ziel: ()=>document.getElementById('al-weiter'),
+        titel: 'Anlegen',
+        text: 'Fotos sind freiwillig; „Pflanze anlegen“ speichert sie in der Sammlung.',
+        warte: 260 }
     ]
   },
 
   heute: {
+    name: 'Heute und Gießen',
+    gruppe: 'grund',
     hin: ()=>{ ansichtZeigen('heute'); },
-    name: 'Heute',
     schritte: ()=>[
       { vor: ()=>ansichtZeigen('heute'),
-        ziel: ()=>document.getElementById('heute-status'),
-        titel: 'Was heute dran ist',
-        text: 'Aus der Gießklasse jeder Pflanze entsteht ein Rhythmus; Standort und Jahreszeit ziehen davon Tage ab oder legen welche drauf. Was daraus für heute folgt, steht hier.',
+        ziel: ()=>tourErstes('#kopf-lage, #kopf-titel'),
+        titel: 'Die Kopfzeile',
+        text: 'Oben steht in einem Satz, was heute ansteht, auch Moosstäbe und Anzucht.',
         warte: 260 },
-
+      { ziel: ()=>tourErstes('#heute-status, #faellig-sec > h2'),
+        titel: 'Heute dran',
+        text: 'Hier stehen die fälligen Pflanzen; Pflanzen in der Gießpause zählen nicht mit.' },
       { ziel: ()=>document.getElementById('btn-giessmodus'),
         titel: 'Gießmodus',
-        text: 'Führt dich Pflanze für Pflanze durch alles, was fällig ist — mit Bild, Gießart und Menge. Danach ist der Stand aller Pflanzen aktuell.' },
-
-      { ziel: ()=>document.getElementById('stichtage'),
-        titel: 'Stichtage',
-        text: 'Dünger, Umtopfen und ablaufende Zustände stehen als Termine hier. Einzelne lassen sich in den Kalender des Geräts legen.' }
+        text: 'Eine Karte je Pflanze mit Weg und Menge; „Gegossen“, „Später“ oder „Noch feucht“, und die App lernt den Rhythmus mit.' },
+      { ziel: ()=>document.getElementById('btn-giessmodus'),
+        titel: 'Gießliste',
+        text: 'Im Gießmodus ordnet die Liste alles nach Raum und Stellplatz, mit „Alle gegossen“ oder „Nacheinander“ je Gruppe.' }
     ]
   },
 
-  giessmodus: {
-    hin: ()=>{ ansichtZeigen('heute'); if(typeof gmStarten === 'function') gmStarten(); },
-    name: 'Gießmodus',
+  sammlung: {
+    name: 'Sammlung',
+    gruppe: 'grund',
+    hin: ()=>{ ansichtZeigen('sammlung'); tourPflanzenTeil(); },
     schritte: ()=>[
-      { fenster: 'giessmodus',
-        ziel: ()=>document.getElementById('gm-inhalt'),
-        titel: 'Eine nach der anderen',
-        text: 'Oben läuft ein Balken mit, der zeigt, wie weit du bist. In der Mitte steht die Pflanze, die gerade dran ist — mit Bild, Standort und der Gießart, die zu ihr passt.' },
-      { fenster: 'giessmodus',
-        ziel: ()=>document.getElementById('gm-knoepfe'),
-        titel: 'Gegossen, übersprungen, noch feucht',
-        text: '„Noch feucht“ ist kein Überspringen. Die Pflanze bekommt ein bis fünf Tage Ruhe, je nach Gießklasse — ein Kaktus länger als ein Farn. Kommt die Rückmeldung mehrfach, fragt die App, ob sie den Abstand dauerhaft verlängern soll.' }
+      { vor: ()=>{ ansichtZeigen('sammlung'); tourPflanzenTeil(); },
+        ziel: ()=>document.getElementById('sam-teil'),
+        titel: 'Pflanzen und Anzucht',
+        text: 'Oben wechselst du zwischen deinen Pflanzen und den Gefäßen der Anzucht.',
+        warte: 260 },
+      { ziel: ()=>document.querySelector('section.controls .such-zeile'),
+        titel: 'Suchen und filtern',
+        text: 'Die Suche findet Name, Art, Raum und Stellplatz; der Filterknopf unten rechts filtert auch nach Tags.' },
+      { ziel: ()=>document.getElementById('sammel-ansicht'),
+        titel: 'Ansicht',
+        text: 'Liste, Galerie oder Raster mit drei bis fünf Spalten; die Wahl bleibt gemerkt.' },
+      { ziel: ()=>tourErstes('#out .card, #out'),
+        titel: 'Tippen und lang drücken',
+        text: 'Ein Tipp öffnet die Karte, langes Drücken wählt mehrere: Gegossen, Später, Tag setzen und Verschieben, jeweils mit Rückgängig.' },
+      { ziel: ()=>document.getElementById('fab-neu'),
+        titel: 'Neu anlegen',
+        text: 'Das Plus legt eine Pflanze an, in der Anzucht Stecklinge oder ein Gefäß.' }
     ]
   },
 
+  karte: {
+    name: 'Pflanzenkarte',
+    gruppe: 'grund',
+    pflanzeNoetig: true,
+    hin: ()=>{ ansichtZeigen('sammlung'); const p = allePflanzen()[0]; if(p) karteOeffnen(p.id); },
+    schritte: ()=>[
+      { fenster: 'karte-modal',
+        ziel: ()=>document.querySelector('#karte-rumpf .km-giess'),
+        titel: 'Gießzeile',
+        text: 'Sie zeigt den nächsten Gießtag; „Ändern“ stellt den Abstand, „gelernt“ erklärt den Rhythmus.' },
+      { fenster: 'karte-modal',
+        ziel: ()=>tourErstes('#karte-rumpf .tagk, #karte-rumpf .km-giess'),
+        titel: 'Tags',
+        text: 'Tags markieren eine Pflanze oder wirken, etwa als Gießpause; über die Tag-Zeile setzt du einen.' },
+      { fenster: 'karte-modal',
+        ziel: ()=>document.querySelector('#karte-rumpf .ktabs'),
+        titel: 'Reiter',
+        text: 'Verlauf, Platz, Pflegeheft, Steckbrief und Stammbaum; beim Öffnen steht der Verlauf mit dem Kalender der Pflanze vorn.' },
+      { fenster: 'karte-modal',
+        ziel: ()=>document.querySelector('#karte-rumpf .km-neben'),
+        titel: 'Werkzeuge',
+        text: 'Doktor, Umtopfen und Vermehren öffnen direkt mit dieser Pflanze.' },
+      { fenster: 'karte-modal',
+        ziel: ()=>tourErstes('#karte-rumpf .km-neben [data-do="bearb-auf"], #karte-rumpf .km-neben'),
+        titel: 'Bearbeiten',
+        text: 'Hier änderst du Angaben wie Gießklasse, Rankhilfe und Frostgrenze, und hier löschst du die Pflanze.' }
+    ]
+  },
+
+  kalender: {
+    name: 'Kalender und Termine',
+    gruppe: 'grund',
+    hin: ()=>{ ansichtZeigen('heute'); kalOeffnen(); },
+    schritte: ()=>[
+      { fenster: 'kal-modal',
+        ziel: ()=>document.querySelector('#kal-modal .kal-fest .segment'),
+        titel: 'Woche oder Monat',
+        text: 'Punkte zeigen Gießtage, Termine und Tags; ein Tipp auf einen Tag zeigt, was dort steht.',
+        warte: 320 },
+      { fenster: 'kal-modal',
+        ziel: ()=>document.getElementById('kal-inhalt'),
+        titel: 'Erledigt',
+        text: 'Erledigte Termine hakst du hier ab; das trägt in den Verlauf ein und setzt den Tag des Termins.' },
+      { fenster: 'kal-modal',
+        ziel: ()=>document.querySelector('#kal-modal [data-kal="neu"]'),
+        titel: 'Neuer Termin',
+        text: 'Das Plus plant einen Termin für eine oder mehrere Pflanzen, mit Vorlagen und Serien.' }
+    ]
+  },
+
+  botaniker: {
+    name: 'BOTaniker',
+    gruppe: 'grund',
+    hin: ()=>{ ansichtZeigen('botaniker'); },
+    schritte: ()=>[
+      { vor: ()=>ansichtZeigen('botaniker'),
+        ziel: ()=>tourErstes('#bot-aktionen, #bot-leiste'),
+        titel: 'Werkzeuge',
+        text: 'Doktor, Umtopfen, Substrat, Vermehren, Stammbaum und Urlaubszettel; im Gespräch stehen sie als Leiste über der Eingabe. Zu einigen gibt es unter App Tour ein eigenes Kapitel.',
+        warte: 320 },
+      { ziel: ()=>document.getElementById('bot-text'),
+        titel: 'Schreiben',
+        text: 'Schreib, was los ist; der BOTaniker erkennt Pflanze und Werkzeug ohne KI und merkt sich die Pflanze im Gespräch.' },
+      { ziel: ()=>document.getElementById('bot-ki'),
+        titel: 'Knopf „KI“',
+        text: 'Er schickt deine Frage direkt an die KI; eine gute Antwort legst du mit „Ins Pflegeheft“ in die Karte.' }
+    ]
+  },
+
+  einstellungen: {
+    name: 'Einstellungen',
+    gruppe: 'grund',
+    hin: ()=>{ ansichtZeigen('mehr'); },
+    schritte: ()=>[
+      { vor: ()=>ansichtZeigen('mehr'),
+        ziel: ()=>tourMhGruppe(0),
+        titel: 'Sammlung',
+        text: 'Räume mit ihren Stellplätzen und deine Tags verwaltest du hier.',
+        warte: 320 },
+      { ziel: ()=>tourMhGruppe(1),
+        titel: 'Pflege',
+        text: 'Gießen mit Wasser und Vertretungszettel, Wetter mit deinem Ort, Nachschlagen mit Arten und Gießklassen, dazu Haustiere.' },
+      { ziel: ()=>tourMhGruppe(2),
+        titel: 'App',
+        text: 'Ansicht mit Design, Erklärtexten und Modus (wenn es zu viel ist: Sammler zeigt weniger), dazu KI-Dienst, Sicherung und diese App Tour.' },
+      { ziel: ()=>tourMhGruppe(3),
+        titel: 'Hilfe',
+        text: 'Patchnotes, Rückmeldung, Fehler melden und das KI-Protokoll.' }
+    ]
+  },
+
+  /* ── Werkzeuge: nur auf Wunsch ── */
   doktor: {
-    hin: ()=>{ sektionOeffnen('doktor'); },
     name: 'Pflanzendoktor',
+    gruppe: 'werkzeug',
+    hin: ()=>{ sektionOeffnen('doktor'); },
     schritte: ()=>[
       { fenster: 'sek-modal',
         ziel: ()=>document.getElementById('dok-fortschritt'),
-        titel: 'Vier Schritte',
-        text: 'Die Leiste oben zeigt, wo du stehst. Sie geht nur weiter, wenn der Schritt davor beantwortet ist — halbe Angaben ergeben halbe Diagnosen.',
+        titel: 'Schritt für Schritt',
+        text: 'Die Leiste zeigt, wo du stehst; weiter geht es erst, wenn der Schritt beantwortet ist.',
         warte: 320 },
       { fenster: 'sek-modal',
         ziel: ()=>document.getElementById('dok-s1'),
-        titel: 'Erst die Pflanze',
-        text: 'Auch Arten, die du gar nicht besitzt, stehen zur Auswahl — dann bekommst du die Einschätzung, aber nichts wird in eine Karte übernommen.' },
+        titel: 'Die Pflanze',
+        text: 'Wähl eine Pflanze aus der Sammlung oder eine Art, die du gar nicht hast.' },
       { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('sekm-info'),
-        titel: 'Zwei Wege danach',
-        text: 'Mit Foto von einer KI ansehen lassen — die Frage wird fertig zusammengebaut, du hängst nur das Bild an — oder selbst beschreiben, was auffällt. Das geht ohne Internet. Alles Grundsätzliche steht hinter diesem i.' }
+        ziel: ()=>tourErstes('#sekm-info, #dok-fortschritt'),
+        titel: 'Der Befund',
+        text: 'Mit Foto schaut die KI drauf, ohne beschreibst du selbst; der Befund steht danach im Verlauf, und ein passender Termin wird angeboten.' }
     ]
   },
 
   substrat: {
-    hin: ()=>{ sektionOeffnen('substrat'); },
     name: 'Substrat mischen',
+    gruppe: 'werkzeug',
+    hin: ()=>{ sektionOeffnen('substrat'); },
     schritte: ()=>[
       { fenster: 'sek-modal',
         vor: ()=>{ if(typeof subStufeZeigen === 'function') subStufeZeigen(1); },
         ziel: ()=>document.getElementById('sub-gitter'),
         titel: 'Für welche Pflanze',
-        text: 'Aus der Art ergibt sich die Zielmischung: wie luftig, wie sauer, wie viel Wasser sie halten soll. Ohne Pflanze lässt sich auch eine Gruppe von Hand wählen.',
+        text: 'Aus der Art ergibt sich die Zielmischung: wie luftig und wie wasserhaltend sie sein soll.',
         warte: 320 },
       { fenster: 'sek-modal',
         vor: ()=>{ if(typeof subStufeZeigen === 'function') subStufeZeigen(2); },
         ziel: ()=>document.getElementById('topf-formen'),
-        titel: 'Topfform und Größe',
-        warte: 260,
-        text: 'Aus Form und Durchmesser rechnet die App das Volumen und daraus die Menge je Zutat. Ein konischer Topf fasst deutlich weniger als ein zylindrischer derselben Weite — deshalb die Auswahl.' },
+        titel: 'Topf',
+        text: 'Aus Form und Durchmesser rechnet die App, wie viel du von jeder Zutat brauchst.',
+        warte: 260 },
       { fenster: 'sek-modal',
         vor: ()=>{ if(typeof subStufeZeigen === 'function') subStufeZeigen(3); },
         ziel: ()=>document.getElementById('sub-vorrat'),
-        titel: 'Was du zu Hause hast',
-        warte: 260,
-        text: 'Hak an, was vorrätig ist. Die App rechnet die beste mögliche Mischung daraus — und sagt darunter ausdrücklich, wo sie am Ziel vorbeischrammt, statt so zu tun, als ginge alles.' }
-    ]
-  },
-
-
-  mehr: {
-    hin: ()=>{ ansichtZeigen('mehr'); },
-    name: 'Sichern und einstellen',
-    schritte: ()=>[
-      { vor: ()=>ansichtZeigen('mehr'),
-        ziel: ()=>document.querySelector('[data-mh="sicherung"] .wz-kopfzeile'),
-        titel: 'Das Wichtigste steht oben',
-        text: 'Alle Daten liegen nur in diesem Browser. Die Sicherung ist der einzige Schutz davor, sie bei einem Aufräumlauf oder Gerätewechsel zu verlieren.',
-        warte: 320 },
-      /* „ansicht" liegt seit 2.9.25 unter Einstellungen und ist als
-         eigener Punkt ausgeblendet — das Ziel gab es nicht mehr. */
-      { ziel: ()=>document.querySelector('[data-mh="ansicht"] .wz-kopfzeile'),
-        titel: 'Wenn es zu viel ist',
-        text: 'Unter Ansicht liegt der Modus: Sammler zeigt wenig, Entdecker alles. Es geht dabei nichts verloren, die Wahl lässt sich jederzeit ändern. Daneben stehen dort Design, Kartendichte und die Heute-Zeilen.' },
-      { ziel: ()=>document.querySelector('[data-mh="giess"] .wz-kopfzeile'),
-        titel: 'Alles zum Gießen an einer Stelle',
-        text: 'Der Vertretungszettel, dazu die Angaben, die für alle Pflanzen gelten: welches Wasser du nimmst, wie du düngst und ob im Winter größere Abstände gelten.' },
-      { ziel: ()=>document.querySelector('[data-mh="tour"] .wz-kopfzeile'),
-        titel: 'Und hier steht die App Tour',
-        text: 'Die kurze Runde und jedes einzelne Kapitel lassen sich hier noch einmal ansehen. Die übrigen Abschnitte erklären sich über ihr i oben rechts.' }
-    ]
-  },
-
-  sicherung: {
-    hin: ()=>{ sektionOeffnen('sicherung'); },
-    name: 'Sicherung',
-    schritte: ()=>[
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('storage-state'),
-        titel: 'Wo deine Daten liegen',
-        text: 'Nichts davon liegt auf einem fremden Rechner. Das ist der Vorteil und zugleich das Risiko: niemand sonst hat eine Kopie.',
-        warte: 320 },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('btn-download'),
-        titel: 'Eine Datei mit allem darin',
-        text: 'Pflanzen, Fotos, Gießstand, Räume, Einstellungen. Auf einem neuen Gerät lädst du sie mit „Sicherung laden“ wieder ein, und alles steht wie vorher. Wie oft die App daran erinnert, stellst du hier selbst ein.' },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('btn-reset'),
-        titel: 'Der rote Knopf',
-        text: '„Alles zurücksetzen“ löscht den gesamten Bestand samt Fotos und lässt sich nicht rückgängig machen. Vorher eine Sicherung herunterladen.' }
-    ]
-  },
-
-  urlaub: {
-    hin: ()=>{ sektionOeffnen('urlaub'); },
-    name: 'Urlaubszettel',
-    schritte: ()=>[
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('url-von'),
-        titel: 'Der Zeitraum entscheidet alles',
-        text: 'Auf den Zettel kommen nur Pflanzen, die in diesen Tagen wirklich drankommen. Pflanzen in der Gießpause und solche ohne Eintrag stehen getrennt darunter, damit die Vertretung weiß, warum sie fehlen.',
-        warte: 320 },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('url-puffer'),
-        titel: 'Lieber einen Tag zu früh',
-        text: 'Eine Vertretung kommt selten auf den Tag genau. Ein Tag zu früh schadet fast nie, drei Tage zu spät oft schon.' },
-      { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('btn-url-druck'),
-        titel: 'Ausgeben',
-        text: 'Der Zettel wird immer schwarzweiß gesetzt, damit er auf jedem Drucker lesbar bleibt — mit Raumliste, Nummern zum Ausschneiden und Bildern, wenn du sie mitnimmst.' }
+        titel: 'Vorrat',
+        text: 'Hak an, was du da hast; die App mischt das Beste daraus und sagt, wo es vom Ziel abweicht.',
+        warte: 260 }
     ]
   },
 
   vermehren: {
+    name: 'Anzucht und Vermehren',
+    gruppe: 'werkzeug',
     hin: ()=>{ sektionOeffnen('vermehren'); },
-    name: 'Vermehren',
     schritte: ()=>[
       { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('ver-gitter'),
-        titel: 'Passend zur Art',
-        text: 'Nicht jede Pflanze lässt sich auf jede Weise vermehren. Aus der gewählten Art ergeben sich die Wege, die bei ihr wirklich funktionieren — Kopfsteckling, Teilung, Blattsteckling, Kindel.',
+        vor: ()=>{ if(typeof azZeigen === 'function') azZeigen({art:'liste'}); },
+        ziel: ()=>document.getElementById('az-ansicht'),
+        titel: 'Anzucht',
+        text: 'Hier stehen alle Gefäße mit ihren Stecklingen, dem nächsten Wasserwechsel und den Wurzeln.',
         warte: 320 },
       { fenster: 'sek-modal',
-        ziel: ()=>document.getElementById('ver-inhalt'),
-        titel: 'Vom Ableger zur Pflanze',
-        text: 'Zu jedem Weg stehen Jahreszeit, Werkzeug und die einzelnen Handgriffe. Ein fertiger Ableger lässt sich von hier aus direkt als neue Pflanze anlegen — die Mutterpflanze bleibt im Stammbaum verknüpft.' }
+        vor: ()=>{ if(typeof azAssistentNeu === 'function') azAssistentNeu(); },
+        ziel: ()=>document.getElementById('ver-gitter'),
+        titel: 'Neue Stecklinge',
+        text: 'Erst die Mutterpflanze wählen, oder „Weiter ohne Mutterpflanze“.',
+        warte: 260 },
+      { fenster: 'sek-modal',
+        ziel: ()=>document.getElementById('ver-weiter'),
+        titel: 'Methode und Gefäß',
+        text: 'Danach kommen Methode und Gefäß; die Mutterpflanze bleibt im Stammbaum verknüpft.' }
+    ]
+  },
+
+  urlaub: {
+    name: 'Urlaubszettel',
+    gruppe: 'werkzeug',
+    hin: ()=>{ sektionOeffnen('urlaub'); },
+    schritte: ()=>[
+      { fenster: 'sek-modal',
+        ziel: ()=>document.getElementById('url-von'),
+        titel: 'Zeitraum',
+        text: 'Auf den Zettel kommt, was in diesen Tagen drankommt; Pflanzen in der Gießpause stehen getrennt darunter.',
+        warte: 320 },
+      { fenster: 'sek-modal',
+        ziel: ()=>tourSelBox('url-puffer'),
+        titel: 'Puffer',
+        text: 'Ein Tag zu früh schadet fast nie, ein paar Tage zu spät oft schon.' },
+      { fenster: 'sek-modal',
+        ziel: ()=>document.getElementById('btn-url-druck'),
+        titel: 'Ausgeben',
+        text: 'Drucken, als PDF sichern oder als Text kopieren, mit Raumliste und Nummern.' }
+    ]
+  },
+
+  sicherung: {
+    name: 'Sicherung',
+    gruppe: 'werkzeug',
+    hin: ()=>{ sektionOeffnen('sicherung'); },
+    schritte: ()=>[
+      { fenster: 'sek-modal',
+        ziel: ()=>tourErstes('#storage-state, #btn-download'),
+        titel: 'Wo deine Daten liegen',
+        text: 'Alles liegt nur in diesem Browser, niemand sonst hat eine Kopie.',
+        warte: 320 },
+      { fenster: 'sek-modal',
+        ziel: ()=>document.getElementById('btn-download'),
+        titel: 'Sicherung',
+        text: 'Eine Datei mit allem; auf einem neuen Gerät lädst du sie mit „Sicherung laden“ wieder ein.' },
+      { fenster: 'sek-modal',
+        ziel: ()=>document.getElementById('btn-reset'),
+        titel: 'Der rote Knopf',
+        text: '„Alles zurücksetzen“ löscht alles samt Fotos, vorher also sichern.' }
     ]
   }
 
 };
+
+/* ── Helfer der Ziele (beta.48) ───────────────────
+   Ein Komma-Selektor nimmt das erste Element im Dokument, auch ein
+   verstecktes. tourErstes nimmt das erste sichtbare. */
+function tourErstes(sel){
+  const liste = document.querySelectorAll(sel);
+  for(let i = 0; i < liste.length; i++){
+    const el = liste[i];
+    if(el.closest('[hidden]')) continue;
+    const r = el.getBoundingClientRect();
+    if(r.width || r.height) return el;
+  }
+  return null;
+}
+/* Eine Liste, die als Knöpfe oder Dropdown steht, ist selbst versteckt. */
+function tourSelBox(id){
+  const s = document.getElementById(id);
+  return s ? (s._selBox || s.nextElementSibling) : null;
+}
+function tourMhGruppe(i){
+  const g = document.querySelectorAll('.mh-menue .mh-gruppe');
+  return g[i] || null;
+}
+function tourSammlungLeer(){
+  try{ return allePflanzen().length === 0; }catch(e){ return false; }
+}
+function tourPflanzenTeil(){
+  if(typeof samAzAn === 'function' && samAzAn() && typeof samTeilSetzen === 'function')
+    samTeilSetzen('pflanzen');
+}
+/* Die Tour blättert das Anlegen selbst durch; eingetragen wird nichts. */
+function tourAnlegenAuf(stufe){
+  if(!modalOffen('anleg-modal')) alStart();
+  if(stufe >= 2 && typeof neuWeg !== 'undefined' && neuWeg !== 'ki') neuWegSetzen('ki');
+  alStufeZeigen(stufe);
+}
 
 /* ── Zustand und Merker ───────────────────────── */
 function tourZustand(){
@@ -32920,6 +33004,13 @@ function tourText(){
     wei.hidden = !frei;
     wei.textContent = letzter ? 'Fertig' : 'Weiter ›';
   }
+  /* beta.48: ein Schritt kann einen zweiten Knopf tragen (Schluss der Runde) */
+  const ex = document.getElementById('tour-extra');
+  let extra = null;
+  try{ extra = typeof s.extra === 'function' ? s.extra() : (s.extra || null); }catch(e){ extra = null; }
+  tourLauf.extra = extra;
+  if(ex){ ex.hidden = !extra; ex.textContent = extra ? extra.text : ''; }
+  if(wei) wei.classList.toggle('haupt', !extra);
   const box = document.getElementById('tour');
   /* Deckel nur, wo nichts angetippt werden soll. */
   if(box) box.classList.toggle('zu', !(tourLauf.modus === 'sperre' && !erledigt));
@@ -33036,7 +33127,10 @@ function tourStart(key, ohneSprung){
 
 function tourSchliessen(){
   tourTaktStop();
+  const kapZu = tourLauf ? TOUR_KAPITEL[tourLauf.key] : null;
   tourLauf = null;
+  /* beta.48: ein Kapitel kann danach aufräumen (Anlegen-Fenster) */
+  if(kapZu && typeof kapZu.ende === 'function'){ try{ kapZu.ende(); }catch(e){ console.warn('Tutorial:', e); } }
   const box = document.getElementById('tour');
   if(box){ box.hidden = true; box.classList.remove('zu'); }
   if(typeof tourListeZeichnen === 'function') tourListeZeichnen();
@@ -33090,6 +33184,13 @@ function tourAbbruch(){
   };
   if(zu)  zu.onclick  = wegMitHinweis;
   if(sk)  sk.onclick  = wegMitHinweis;
+  const ex = document.getElementById('tour-extra');
+  if(ex) ex.onclick = ()=>{
+    const x = tourLauf && tourLauf.extra;
+    if(!x) return;
+    tourFertig();
+    setTimeout(()=>{ try{ x.tun(); }catch(e){} }, 480);
+  };
 })();
 
 window.addEventListener('resize', ()=>{ if(tourLauf) tourMalen(); });
@@ -33176,10 +33277,12 @@ function tourListeZeichnen(){
         + '<i>' + (gesehen ? 'gesehen' : 'offen') + '</i></span>'
         + '<button class="linkbtn" data-tourgo="' + k + '">ansehen</button></div>';
     };
+    /* beta.48 (Etappe 17): Grundlagen und Werkzeuge getrennt */
+    const gruppe = g => Object.keys(TOUR_KAPITEL).filter(k=>TOUR_KAPITEL[k].gruppe === g).map(zeile).join('');
     box.innerHTML =
-      (TOUR_KAPITEL.runde ? '<p class="ein-abschnitt">Von vorn</p><div class="ein-liste">' + zeile('runde') + '</div>' : '')
-      + '<p class="ein-abschnitt">Einzelne Bereiche</p><div class="ein-liste">'
-      + Object.keys(TOUR_KAPITEL).filter(k=>k !== 'runde').map(zeile).join('') + '</div>';
+      '<p class="ein-abschnitt">Von vorn</p><div class="ein-liste">' + zeile('runde') + '</div>'
+      + '<p class="ein-abschnitt">Grundlagen</p><div class="ein-liste">' + gruppe('grund') + '</div>'
+      + '<p class="ein-abschnitt">Werkzeuge</p><div class="ein-liste">' + gruppe('werkzeug') + '</div>';
   }
   const schalter = document.getElementById('tour-aus');
   if(schalter) schalter.checked = !!t.aus;
@@ -33188,7 +33291,7 @@ function tourListeZeichnen(){
      versprach das Gegenteil. */
   if(txt) erklSetzen(txt, t.aus
     ? 'Aus. Auch das einmalige Angebot der Runde bleibt weg. Über „ansehen“ lässt sich trotzdem jederzeit ein Kapitel holen.'
-    : 'Kein Kapitel startet von allein. Tippe auf „ansehen“, um eines zu holen — kurze Erklärungen stehen außerdem hinter dem i oben rechts in jedem Bereich.');
+    : 'Die Runde läuft einmal nach dem Willkommen, sonst startet kein Kapitel von allein. Tippe auf „ansehen“, um eines zu holen.');
 }
 
 document.addEventListener('click', e=>{
@@ -33197,18 +33300,8 @@ document.addEventListener('click', e=>{
   const k = g.dataset.tourgo;
   const t = tourZustand();
   if(t.aus){ t.aus = false; sichern(); }
-  if(k === 'einricht'){
-    let hat = 0;
-    try{ hat = allePflanzen().length; }catch(e){}
-    if(hat){
-      appHinweis('Die Einrichtung führt durch das Anlegen der allerersten Pflanze. '
-        + 'Da schon Pflanzen da sind, gibt es dabei nichts mehr zu zeigen — '
-        + 'das Kapitel „Die Sammlung“ erklärt denselben Weg noch einmal.', {titel:'App Tour'});
-      tourListeZeichnen();
-      return;
-    }
-    ansichtZeigen('heute');
-    requestAnimationFrame(()=>tourStart('einricht'));
+  if(TOUR_KAPITEL[k] && TOUR_KAPITEL[k].pflanzeNoetig && tourSammlungLeer()){
+    appHinweis('Dieses Kapitel zeigt eine Pflanzenkarte. Leg zuerst eine Pflanze an.', {titel:'App Tour'});
     return;
   }
   /* Das Kapitelverzeichnis steht selbst in einem Fenster. Das muss
