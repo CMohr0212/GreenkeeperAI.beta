@@ -192,7 +192,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.45', w.__T('FASSUNG') === '4.0-beta.45', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.46', w.__T('FASSUNG') === '4.0-beta.46', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -6864,7 +6864,7 @@ setTimeout(async () => {
       T('alSpeichern()'); await warte(120);
       const pb = JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === ${JSON.stringify(bib.bot)}; }).pop() || null)`));
       pruef('beta.2: Übernommene Bibliothekswerte tragen die Herkunft Bibliothek, mit Frost',
-        !!pb && pb.quellen.klasse === 'bib' && pb.frostMin === bib.frost, JSON.stringify(pb && {q:pb.quellen, f:pb.frostMin}));
+        !!pb && pb.quellen.klasse === 'bib' && pb.frostMin === (bib.frost == null ? -15 : bib.frost) && pb.quellen.frostMin === 'bib', JSON.stringify(pb && {q:pb.quellen, f:pb.frostMin}));
       pruef('beta.2: Bibliothekswerte werden nicht gelernt', T(`Object.keys(S.gelernteArten).some(function(k){ return k.indexOf(${JSON.stringify(bib.bot.toLowerCase())}) === 0; })`) === false);
       /* Ohne Übernahme: kein Frost, keine Bibliotheksherkunft */
       T(`alStart(); artWaehlen(${JSON.stringify(bib.bot)})`);
@@ -13351,7 +13351,7 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       try {
         const sels = Array.from(form.querySelectorAll('select'));
         pruef('beta.37 (B5): Das Bearbeiten-Formular zeigt keine Systemliste mehr; vier Felder sind Knopflisten (beta.44: dazu Rankhilfe und Moosstab)',
-          sels.length === 6 && sels.every(x => x.hidden && !!x.closest('.bearb-feld')) && sels.map(x => x.dataset.e).join() === 'klasse,sonne,giftig,giessart,rankhilfe,stabTage'
+          sels.length === 7 && sels.every(x => x.hidden && !!x.closest('.bearb-feld')) && sels.map(x => x.dataset.e).join() === 'klasse,sonne,giftig,giessart,rankhilfe,stabTage,frostMin'
           && form.querySelectorAll('.bearb-feld [data-bk]').length >= 4 + 4 + 3, sels.map(x => x.dataset.e + ':' + x.hidden).join());
         const kl = form.querySelector('select[data-e="klasse"]');
         const kn = kl.closest('.bearb-feld').querySelector('[data-bk="S"]');
@@ -13902,6 +13902,66 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     } finally {
       T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.water = a.water; S.fotos = a.fotos; S.lernen = a.lernen; S.ereignisse = a.ereignisse;
         GELERNT_AUF = null; FOTO_KLEIN.frage = false; FOTO_KLEIN.meldung = ''; delete window.__wv40; sichern(); render(); return 1; })(${JSON.stringify(alt40)})`);
+    }
+  }
+
+  /* ── 4.0-beta.46 (Etappe 15): Frostgrenze beim Anlegen, in der Karte und gelernt ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const alt46 = T(`JSON.stringify({eigene:S.eigene, gelernt:S.gelernteArten})`);
+    const fw = () => (d.getElementById('f-frost') || {}).value;
+    const neuste = bot => JSON.parse(T(`JSON.stringify(S.eigene.filter(function(p){ return p.botanisch === ${JSON.stringify(bot)}; }).pop() || null)`));
+    const kiAnlegen = (bot, frost) => T(`alStart(); neuWegSetzen('ki'); document.getElementById('f-name').value = 'Frosttest';
+      document.getElementById('f-paste').value = ${JSON.stringify('ART: Frostprobe\nBOTANISCH: ')} + ${JSON.stringify(bot)} + ${JSON.stringify('\nGIESSKLASSE: mittel\nLICHT: hell\nFROST: ')} + ${JSON.stringify(frost)};
+      document.getElementById('btn-paste-los').click(); alStufeZeigen(4); 1`);
+    try {
+      pruef('beta.46 (15): Stufe 4 fragt die Frostgrenze als Knopfliste ab',
+        T(`alStart(); alStufeZeigen(4); document.querySelectorAll('#f-frost-knoepfe .al-knopf').length`) === 7 && fw() === '');
+      kiAnlegen('Frostia probata', '12');
+      pruef('beta.46 (15): Die Frostgrenze der KI belegt die Knopfliste vor (eigener Knopf für 12 °C)',
+        fw() === '12' && !!d.querySelector('#f-frost-knoepfe [data-alwert="12"][aria-pressed="true"]'), fw());
+      pruef('beta.46 (15): Vor „Pflanze anlegen“ steht keine Pflanze mit dieser Art', neuste('Frostia probata') === null);
+      T('alSpeichern()'); await warte(120);
+      const p1 = neuste('Frostia probata');
+      pruef('beta.46 (15): KI-Frostgrenze kommt mit „Anlegen“ in die Karte, Herkunft KI',
+        !!p1 && p1.frostMin === 12 && p1.quellen.frostMin === 'ki', JSON.stringify(p1 && {f:p1.frostMin, q:p1.quellen.frostMin}));
+      pruef('beta.46 (15): Der Steckbrief nennt die Frostgrenze',
+        !!p1 && T(`JSON.stringify(steckbriefDaten(S.eigene.filter(function(p){ return p.botanisch === 'Frostia probata'; }).pop()))`).indexOf('ab 12 °C ins Haus') > -1);
+      pruef('beta.46 (15): Die gelernte Art trägt die Frostgrenze',
+        T(`(function(){ var g = S.gelernteArten; var k = Object.keys(g).filter(function(x){ return x.indexOf('frostia probata') === 0; })[0]; return k ? g[k].frost : null; })()`) === '12');
+      kiAnlegen('Frostia dura', 'winterhart');
+      pruef('beta.46 (15): „winterhart“ der KI wird zu Winterhart (−15 °C)', fw() === '-15', fw());
+      d.querySelector('#f-frost-knoepfe [data-alwert="5"]').click();
+      T('alSpeichern()'); await warte(120);
+      const p2 = neuste('Frostia dura');
+      pruef('beta.46 (15): Von Hand geändert gilt der Knopf, Herkunft Hand',
+        !!p2 && p2.frostMin === 5 && p2.quellen.frostMin === 'hand', JSON.stringify(p2 && {f:p2.frostMin, q:p2.quellen.frostMin}));
+      T(`alStart(); alStufeZeigen(4); 1`);
+      pruef('beta.46 (15): Ein neues Anlegen beginnt mit „Weiß ich nicht“ ohne Zusatzknopf',
+        fw() === '' && !d.querySelector('#f-frost option[data-frost-dyn]'));
+      const id1 = p1 && p1.id;
+      T(`(function(){ var b = document.createElement('div'); b.id = 'b-${id1}';
+        b.innerHTML = bearbeitenInnenHTML(S.eigene.find(function(p){ return p.id === '${id1}'; })); document.body.appendChild(b); return 1; })()`);
+      const bf = d.querySelector('#b-' + id1 + ' select[data-e="frostMin"]').closest('.bearb-feld');
+      pruef('beta.46 (15): Bearbeiten zeigt die Frostgrenze mit dem gespeicherten Wert',
+        !!bf.querySelector('[data-bk="12"][aria-pressed="true"]'));
+      bf.querySelector('[data-bk="-5"]').click();
+      d.querySelector('#b-' + id1 + ' [data-do="bearb-save"]').click(); await warte(60);
+      pruef('beta.46 (15): Bearbeiten speichert die Frostgrenze als Zahl',
+        T(`S.eigene.find(function(p){ return p.id === '${id1}'; }).frostMin`) === -5);
+      T(`(function(){ var b = document.getElementById('b-${id1}'); if(b) b.remove(); return 1; })()`);
+      pruef('beta.46 (15): Der Winterhinweis hängt am Winterruhe-Tag, nicht an der Frostgrenze',
+        T(`(function(){ var h = HEUTE, t = tagWinterruheLaeuft; HEUTE = new Date(2026, 0, 15); try{
+          var p = {id:'xw', klasse:'B', frostMin:12};
+          var ohne = /Kühl überwinternde/.test(giessHinweisFuer(p).text);
+          tagWinterruheLaeuft = function(){ return true; };
+          var mit = /Kühl überwinternde/.test(giessHinweisFuer(p).text);
+          return !sommer() && !ohne && mit; } finally { HEUTE = h; tagWinterruheLaeuft = t; } })()`) === true);
+    } catch (e) {
+      pruef('beta.46 (15): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      T(`(function(a){ a = JSON.parse(a); S.eigene = a.eigene; S.gelernteArten = a.gelernt; while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); sichern(); render(); return 1; })(${JSON.stringify(alt46)})`);
     }
   }
 

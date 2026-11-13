@@ -9530,6 +9530,7 @@ function bearbeitenInnenHTML(p){
       ${bearbKnopfFeld(p, 'rankhilfe', 'Rankhilfe', [['', 'Keine', '']].concat(Object.keys(RANKHILFEN).map(k=>[k, RANKHILFEN[k], ''])), rankhilfeVon(p))}
       ${bearbKnopfFeld(p, 'stabTage', 'Moosstab befeuchten', [['', 'Bei jedem Gießen', '']].concat(STAB_TAGE.map(n=>[String(n), 'Alle ' + n + ' Tage', ''])),
         stabTageVon(p) ? String(stabTageVon(p)) : '', 'data-stabfeld' + (rankhilfeVon(p) === 'moos' ? '' : ' hidden'))}
+      ${(() => { const fz = frostZahl(p.frostMin); return bearbKnopfFeld(p, 'frostMin', 'Frostgrenze', frostWahl(fz).map(x => [x[0], x[1], '']), fz == null ? '' : String(fz)); })()}
       <label class="fspan"><span class="lab">Wichtig zu wissen</span>
         <textarea data-e="wichtig" data-p="${p.id}" rows="2" placeholder="z. B. nur destilliertes oder Regenwasser, Leitungswasser tötet sie">${esc(p.wichtig||'')}</textarea>
         <span class="fhint" data-erkl>Pflegehinweise, die über Leben und Tod entscheiden und die man nicht von selbst weiß. Erscheinen auf der Karte und werden auf den Urlaubszettel übernommen.</span></label>
@@ -9569,6 +9570,7 @@ document.addEventListener('click', e=>{
       const f = el.dataset.e;
       let v = el.value;
       if(f === 'giftig') v = v==='ja' ? true : (v==='nein' ? false : 'unbekannt');
+      else if(f === 'frostMin') v = frostZahl(v);
       else v = v.trim();
       felder[f] = v;
     });
@@ -11549,6 +11551,19 @@ function pflanzeEntfernen(id){
           <div class="al-knoepfe" id="f-stabtage-knoepfe"></div>
           <span class="fhint" data-erkl>Beim Gießen steht dann „+ Moosstab“ auf der Karte.</span>
         </div>
+        <div class="al-feld">
+          <span class="lab">Frostgrenze</span>
+          <select id="f-frost" hidden>
+            <option value="">Weiß ich nicht</option>
+            <option value="-15">Winterhart</option>
+            <option value="-5">bis −5 °C</option>
+            <option value="0">bis 0 °C</option>
+            <option value="5">ab 5 °C ins Haus</option>
+            <option value="10">ab 10 °C ins Haus</option>
+            <option value="15">ab 15 °C ins Haus</option>
+          </select>
+          <div class="al-knoepfe" id="f-frost-knoepfe"></div>
+        </div>
       </div>
 
       <!-- Stufe 5: Bilder, Notizen, Abschluss -->
@@ -11964,7 +11979,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.45';
+const FASSUNG = '4.0-beta.46';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -14973,6 +14988,45 @@ function topfSubstratHTML(p){
 function frostWort(f){
   return f <= 0 ? 'winterhart bis ' + f + ' °C' : 'ab ' + f + ' °C ins Haus';
 }
+/* 4.0-beta.46 (Etappe 15, F386–F388): Frostgrenze als Knopfliste im
+   Anlegen und im Bearbeiten. „Winterhart“ ist −15 °C, weil die Bibliothek
+   dafür keine Zahl hat. Ein Wert, den die Liste nicht kennt (aus KI,
+   Bibliothek oder Altbestand), steht als eigener Knopf dazwischen. */
+const FROST_STUFEN = [['', 'Weiß ich nicht'], ['-15', 'Winterhart'], ['-5', 'bis −5 °C'], ['0', 'bis 0 °C'],
+  ['5', 'ab 5 °C ins Haus'], ['10', 'ab 10 °C ins Haus'], ['15', 'ab 15 °C ins Haus']];
+function frostZahl(v){
+  if(v == null) return null;
+  const t = String(v).trim();
+  if(!t) return null;
+  if(/winterhart/i.test(t)) return -15;
+  const m = t.replace(/[−–]/g, '-').match(/-?\d+(?:[.,]\d+)?/);
+  return m ? Math.round(Number(m[0].replace(',', '.'))) : null;
+}
+function frostKnopfText(n){
+  return n <= -15 ? 'Winterhart' : n <= 0 ? 'bis ' + String(n).replace('-', '−') + ' °C' : 'ab ' + n + ' °C ins Haus';
+}
+function frostWahl(n){
+  const liste = FROST_STUFEN.slice();
+  if(n != null && !isNaN(n) && !liste.some(w => w[0] === String(n))){
+    let i = liste.findIndex((w, k) => k > 0 && Number(w[0]) > n);
+    if(i < 0) i = liste.length;
+    liste.splice(i, 0, [String(n), frostKnopfText(n)]);
+  }
+  return liste;
+}
+function frostSetzen(sel, n){
+  if(!sel) return;
+  sel.querySelectorAll('option[data-frost-dyn]').forEach(o => o.remove());
+  n = (n == null || n === '' || isNaN(Number(n))) ? null : Number(n);
+  if(n != null && !Array.prototype.some.call(sel.options, o => o.value === String(n))){
+    const o = document.createElement('option');
+    o.value = String(n); o.textContent = frostKnopfText(n); o.setAttribute('data-frost-dyn', '');
+    const nach = Array.prototype.find.call(sel.options, x => x.value !== '' && Number(x.value) > n);
+    sel.insertBefore(o, nach || null);
+  }
+  sel.value = n == null ? '' : String(n);
+  if(typeof alKnopfGruppe === 'function' && sel.id === 'f-frost') alKnopfGruppe('f-frost');
+}
 /* Woher die Angaben stammen (3.27.0): KI-Angaben sind als solche zu
    erkennen. Die Herkunft ist je Feld gespeichert. */
 const HERKUNFT_NAMEN = {art:'Art', botanisch:'botanischer Name', typ:'Wuchsform', klasse:'Gießklasse',
@@ -17748,6 +17802,7 @@ function formularLeeren(){
     const el = $('#'+x); if(el) el.selectedIndex = 0;
   });
   if(typeof alStabFeld === 'function') alStabFeld();
+  if(typeof frostSetzen === 'function') frostSetzen(document.getElementById('f-frost'), null);
   if(typeof AL_LAGE_NEU !== 'undefined') AL_LAGE_NEU = '';
   if(typeof alTopfZuruecksetzen === 'function') alTopfZuruecksetzen();
   if(typeof MIX_ED !== 'undefined' && MIX_ED.anlegen){ MIX_ED.anlegen.teile = {}; mixEdZeichnen('anlegen'); }
@@ -20264,7 +20319,7 @@ document.addEventListener('input', e => {
 function alKnoepfeAlle(){
   alListenFuellen();
   ['f-kultur', 'f-klasse', 'f-anstau', 'f-sonne', 'f-giftig',
-   'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum', 'f-rankhilfe', 'f-stabtage'].forEach(alKnopfGruppe);
+   'f-topfform', 'f-substrat', 'f-ablauf', 'f-giessart', 'f-raum', 'f-rankhilfe', 'f-stabtage', 'f-frost'].forEach(alKnopfGruppe);
   alAnstauFeld();
   alStabFeld();
 }
@@ -20538,6 +20593,7 @@ function alZsfZeichnen(){
     + alZeile('Licht', text('f-sonne'))
     + alZeile('Für Katzen', alGiftText())
     + alZeile('Rankhilfe', kopf('f-rankhilfe') + (wert('f-rankhilfe') === 'moos' ? ' · ' + text('f-stabtage') : ''))
+    + alZeile('Frostgrenze', wert('f-frost') !== '' ? text('f-frost') : '')
     + alZeile('Fotos', AL_FOTOS.length ? String(AL_FOTOS.length) : '');
 }
 
@@ -22262,6 +22318,15 @@ function awAnwenden(o){
     vermehrung: w.vermehrung || (letzteKiAntwort && letzteKiAntwort.vermehrung) || '',
     speicher: w.speicher || (letzteKiAntwort && letzteKiAntwort.speicher) || ''
   });
+  /* 4.0-beta.46 (Etappe 15): Die Frostgrenze der Antwort belegt die
+     Knopfliste vor; in die Karte kommt sie erst mit „Pflanze anlegen“. */
+  const frN = frostZahl(w.frost);
+  if(an('frost') && frN != null && !(AW.hand && AW.hand.frost)){
+    frostSetzen(document.getElementById('f-frost'), frN);
+    AW.gesetzt.frostMin = AW.quelle === 'bib' ? 'bib' : 'ki';
+    const bf = b ? (b.frost == null ? -15 : Number(b.frost)) : null;
+    if(bf != null && bf !== frN) msg.push('Frostgrenze: Die Bibliothek nennt ' + frostKnopfText(bf) + ' — du kannst sie auf der Stufe „Platz und Pflege“ ändern');
+  }
   /* 4.0-beta.31 (B4a, F293): keine Frostzeile mehr in der Notiz. */
   if(AW.ausGattung && an('klasse') && !w.klasse) msg.push('Gießklasse S aus dem Gattungswissen gesetzt');
   if(Object.keys(AW.offen).length) msg.push('Bei ' + Object.keys(AW.offen).map(x => x === 'klasse' ? 'Gießklasse' : 'Licht').join(' und ')
@@ -22441,6 +22506,8 @@ function awBibUebernehmen(){
   if(kl && b.klasse){ kl.value = b.klasse; alKnopfGruppe('f-klasse'); AW.gesetzt.klasse = 'bib'; }
   if(so && b.licht){ so.value = b.licht; alKnopfGruppe('f-sonne'); AW.gesetzt.sonne = 'bib'; }
   if(ty && b.typ && !ty.value.trim()){ ty.value = b.typ; AW.gesetzt.typ = 'bib'; }
+  frostSetzen(document.getElementById('f-frost'), b.frost == null ? -15 : Number(b.frost));
+  AW.gesetzt.frostMin = 'bib';
   AW.bibUebernommen = true;
   alBibZsfZeichnen();
 }
@@ -22476,7 +22543,8 @@ function awLernWerte(p){
   if(p.typ && p.typ !== 'Ohne Angabe') raus.typ = p.typ;
   if(p.giessart && p.giessart !== 'wasser' && p.giessart !== 'hydro') raus.giessart = p.giessart;
   if(p.wichtig) raus.wichtig = p.wichtig;
-  ['speicher','frost','pflege','winterruhe','vermehrung'].forEach(k => { if(w[k]) raus[k] = w[k]; });
+  ['speicher','pflege','winterruhe','vermehrung'].forEach(k => { if(w[k]) raus[k] = w[k]; });
+  if(p.frostMin != null) raus.frost = String(p.frostMin);
   if(w.gift === 'ja' && p.gift) raus.gift = 'ja';
   return raus;
 }
@@ -22619,7 +22687,7 @@ function alLueckeSperre(){
   return true;
 }
 /* Von Hand gesetzt zählt nicht mehr als Lücke und wird nie überschrieben. */
-const AW_HAND_FELDER = {'f-klasse':'klasse', 'f-sonne':'sonne', 'f-giftig':'gift', 'f-giessart':'giessart', 'f-typ':'typ', 'f-wichtig':'wichtig'};
+const AW_HAND_FELDER = {'f-frost':'frost', 'f-klasse':'klasse', 'f-sonne':'sonne', 'f-giftig':'gift', 'f-giessart':'giessart', 'f-typ':'typ', 'f-wichtig':'wichtig'};
 function awHandMerken(e){
   const feld = e.target && AW_HAND_FELDER[e.target.id];
   if(!feld || typeof AW === 'undefined' || !AW) return;
@@ -24155,9 +24223,8 @@ async function alSpeichern(){
        wenn du ihren Vorschlag übernommen hast. */
     typ: $('#f-typ').value.trim() || 'Ohne Angabe',
     sonne: $('#f-sonne').value,
-    frostMin: (a && AW && AW.bibUebernommen) ? a.frost
-      : (AW && (AW.quelle === 'gelernt' || AW.quelle === 'pflanze') && AW.werte && AW.werte.frost !== ''
-         && !isNaN(Number(AW.werte.frost))) ? Number(AW.werte.frost) : null,
+    /* 4.0-beta.46 (Etappe 15): aus der Knopfliste Frostgrenze */
+    frostMin: frostZahl(($('#f-frost') || {}).value),
     duenger: (a && AW && AW.bibUebernommen) ? a.duenger : null,
     intervall: KLASSE_IV[kl] || [8,12],
     bib: a ? a.bot : null,
@@ -24197,7 +24264,7 @@ async function alSpeichern(){
   if(AW && AW.gesetzt) Object.keys(AW.gesetzt).forEach(f => {
     if(Q_FELDER.indexOf(f) > -1) p.quellen[f] = AW.gesetzt[f] === 'bib' ? 'bib' : 'ki';
   });
-  if(AW && AW.bibUebernommen && p.frostMin != null) p.quellen.frostMin = 'bib';
+  if(AW && AW.hand && AW.hand.frost) p.quellen.frostMin = 'hand';
   awLernen(p);
   S.eigene.push(p);
   /* 4.0-beta.9: Antwort auf „Wie lange hält das Wasser im Untersetzer?“ */
@@ -25410,7 +25477,7 @@ function giessHinweisFuer(p, ohneArt){
 
   if(p.sonne === 'voll' && !winter && p.klasse !== 'S')
     teile.push('Voller Sonne ausgesetzt — an heißen Tagen trocknet sie schneller aus, als der Rhythmus vorgibt.');
-  else if(winter && p.frostMin != null)
+  else if(winter && typeof tagWinterruheLaeuft === 'function' && tagWinterruheLaeuft(p))
     teile.push('Kühl überwinternde Pflanzen verbrauchen wenig. Im Zweifel einen Tag später.');
 
   return { warn:false, text: teile.join(' ') };
