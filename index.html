@@ -3285,8 +3285,6 @@ html[data-design] .feld-knopf > button{flex:0 0 auto;min-height:var(--feld-h);ma
 html[data-design] .kimodell + .ki-empf{margin:6px 4px 0}
 
 /* App Tour: Kapitel als Zeilen, „ansehen“ rechts */
-html[data-design] .ein-liste > .tour-z{cursor:default}
-html[data-design] .ein-liste > .tour-z .linkbtn{flex:0 0 auto;min-height:var(--tap);padding:0 4px}
 /* Haustiere: Frage in normaler Schrift */
 html[data-design] .ein-karte > .ein-ctrl .ctrl-lab{margin:0;letter-spacing:0;text-transform:none}
 /* Klartext: große Schrift, Segmente nach Inhalt breit, Auswahl in voller Breite */
@@ -4369,6 +4367,26 @@ html[data-design] .tour-bl{background:transparent}
 html[data-design] #tour-ring{border:3px solid var(--fl-akzent);
   box-shadow:0 0 0 3px var(--paper),0 0 16px 5px var(--fl-akzent)}
 html[data-design] #tour-karte{box-shadow:0 10px 32px rgba(0,0,0,.38)}
+/* 4.0-beta.49 (Etappe 20): Übersicht der App Tour als Karten, Schluss mit „Weiter“ */
+html[data-design] .ein-liste > button.tour-z{cursor:pointer}
+html[data-design] .tour-ik{flex:0 0 auto;width:24px;height:24px;display:block;color:var(--schrift-2)}
+html[data-design="klartext"] .tour-ik{display:none}
+html[data-design] .tour-ik svg{width:100%;height:100%;display:block;fill:none;
+  stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+html[data-design] .tour-z .tour-ok, html[data-design] .tour-z .tour-auf{flex:0 0 auto;font-size:1.3rem;line-height:1}
+html[data-design] .tour-z .tour-ok{color:var(--fl-akzent);font-weight:700}
+html[data-design] .tour-z .tour-auf{color:var(--schrift-2)}
+html[data-design] .tour-stand-kopf{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0}
+html[data-design] .tour-stand-kopf b{font-size:var(--t-l);font-weight:600}
+html[data-design] .tour-stand-kopf span{font-size:var(--t-s);color:var(--schrift-2);white-space:nowrap}
+html[data-design] .tour-balken{height:6px;border-radius:3px;background:var(--linie);margin:10px 0 0;overflow:hidden}
+html[data-design] .tour-balken i{display:block;height:100%;border-radius:3px;background:var(--fl-akzent)}
+html[data-design] .tour-stand button.haupt{width:100%;margin-top:14px}
+html[data-design] .tour-stand .tour-fertig{margin:12px 0 0;font-size:var(--t-s);color:var(--schrift-2)}
+html[data-design] #tour-fuss #tour-extra{flex:1 1 auto}
+html[data-design] #tour-alle{display:block;width:100%;margin:10px 0 0;padding:8px 4px;border:0;background:none;
+  font:inherit;font-size:var(--t-s);color:var(--peat);text-align:center;cursor:pointer}
+html[data-design] #tour-alle[hidden]{display:none}
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#F1F4ED">
@@ -9866,6 +9884,7 @@ function pflanzeEntfernen(id){
       <button id="tour-extra" type="button" class="haupt" hidden></button>
       <button id="tour-skip" type="button">Überspringen</button>
     </div>
+    <button id="tour-alle" type="button" hidden>Alle Kapitel ansehen</button>
   </div>
 </div>
 
@@ -10963,7 +10982,7 @@ function pflanzeEntfernen(id){
       <button class="wz-i" data-mh-info="tour" aria-expanded="false" aria-label="Wozu ist die App Tour da?">i</button>
     </div>
     <div class="wz-in" id="mh-in-tour" hidden>
-      <p class="wz-hilfe" data-erkl hidden>Beim ersten Öffnen eines Bereichs legt sich ein kurzes Kapitel der App Tour über die Seite: der Rest verblasst, ein Pfeil zeigt auf das, worum es gerade geht. Jedes Kapitel lässt sich mit „Überspringen“ oder dem × sofort schließen und mit „Zurück“ noch einmal durchblättern — ein versehentlich weggetippter Schritt ist also nicht verloren. Von allein kommt ein Kapitel kein zweites Mal. Hier stehen alle Kapitel zum erneuten Ansehen.</p>
+      <p class="wz-hilfe" data-erkl hidden>Die App Tour zeigt in kurzen Kapiteln, wo was liegt: Ein Ring kreist ein, worum es gerade geht, bedienen lässt sich dabei nichts. Jedes Kapitel lässt sich mit „Überspringen“ oder dem × schließen und beliebig oft ansehen. Von allein läuft nur die Runde nach dem Willkommen.</p>
       <div id="tour-liste"></div>
       <div class="tools ein-knoepfe">
         <button id="btn-tour-alle">Alle Kapitel zurücksetzen</button>
@@ -12042,7 +12061,7 @@ const ISSUE_URL  = REPO_URL + '/issues/new';
 /* Beta (Regel 6.9): FASSUNG trägt „4.0-beta.N“, ohne eigenen Eintrag in
    PATCHNOTES. Die Beta benutzt eigene Speicherschlüssel (`gk-beta…`) und
    einen eigenen Fotospeicher, damit sie die echte App nie berührt. */
-const FASSUNG = '4.0-beta.48';
+const FASSUNG = '4.0-beta.49';
 (function(){ const b = document.getElementById('beta-band');
   if(b) b.textContent = 'BETA ' + FASSUNG + ' · Testdaten'; })();
 /* Unter Mehr stehen nur die letzten zehn Fassungen, alle weiteren im
@@ -26684,7 +26703,9 @@ const MH_UNTER = {
     const dd = {knapp:'Knapp', normal:'Normal', voll:'Ausführlich'}[(typeof dichteVon === 'function' ? dichteVon() : S.dichte) || 'normal'];
     return d + ' · ' + dd;
   },
-  tour:      ()=>((S.tutorial||{}).aus ? 'Abgeschaltet' : 'Kapitel erneut ansehen'),
+  /* 4.0-beta.49 (Etappe 20): Fortschritt; die Kapitel stehen im letzten Skriptteil */
+  tour:      ()=>((S.tutorial||{}).aus ? 'Abgeschaltet'
+    : typeof tourStand === 'function' ? tourStand().gesehen + ' von ' + tourStand().alle + ' gesehen' : 'Kapitel ansehen'),
   install:   ()=>'Auf den Startbildschirm legen',
   melde:     ()=>'Fehlende und gelernte Arten melden',
   rueck:     ()=>'Fehler und Wünsche',
@@ -32475,8 +32496,8 @@ const TOUR_KAPITEL = {
         ziel: ()=>tourErstes('#erststart, #btn-giessmodus'),
         titel: 'Das war die Runde',
         text: ()=>tourSammlungLeer()
-          ? 'Leg jetzt deine erste Pflanze an, auf Wunsch Schritt für Schritt; jedes Kapitel findest du unter Einstellungen › App Tour.'
-          : 'Einzelne Kapitel holst du jederzeit unter Einstellungen › App Tour.',
+          ? 'Leg jetzt deine erste Pflanze an, auf Wunsch Schritt für Schritt. ' + tourMehrSatz()
+          : tourMehrSatz(),
         extra: ()=>tourSammlungLeer()
           ? {text:'Erste Pflanze geführt anlegen', tun:()=>tourStart('einricht')} : null,
         warte: 320 }
@@ -32490,13 +32511,15 @@ const TOUR_KAPITEL = {
     hin: ()=>{ ansichtZeigen('sammlung'); tourPflanzenTeil(); },
     /* Bei leerer Sammlung bleibt das Formular danach offen, auf Stufe 1:
        dann legt man die erste Pflanze gleich selbst an. */
-    ende: ()=>{
+    ende: raeumt=>{
       if(!modalOffen('anleg-modal')) return;
       if(tourSammlungLeer()){
         try{ formularLeeren(); }catch(e){}
         if(typeof neuWegSetzen === 'function') neuWegSetzen(null);
         alStufeZeigen(1);
-      } else modalZu('anleg-modal');
+        return 'bleibt';
+      }
+      if(!raeumt) modalZu('anleg-modal');
     },
     schritte: ()=>[
       { vor: ()=>{ if(modalOffen('anleg-modal')) modalZu('anleg-modal');
@@ -32803,6 +32826,79 @@ const TOUR_KAPITEL = {
 
 };
 
+/* ── Übersicht und Kette (4.0-beta.49, Etappe 20) ─────────────
+   Jedes Kapitel hat einen Satz und ein Symbol für die Übersicht. */
+const TOUR_KURZ = {
+  runde:'Wo was liegt', einricht:'Foto, Art und Platz', heute:'Was fällig ist, Gießmodus',
+  sammlung:'Ansichten, Auswahl, Anzucht', karte:'Verlauf, Pflegeheft, Steckbrief',
+  kalender:'Termine und Serien', botaniker:'Rat und Werkzeuge', einstellungen:'Was wo eingestellt wird',
+  doktor:'Befund per Foto', substrat:'Mischung für die Art', vermehren:'Stecklinge und Gefäße',
+  urlaub:'Zettel für die Vertretung', sicherung:'Daten sichern und laden'
+};
+const TOUR_IKON = {
+  runde:'<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  einricht:'<path d="M12 20v-8"/><path d="M12 12c0-3.5-2.5-5.5-6-5.5 0 3.5 2.5 5.5 6 5.5z"/><path d="M12 14c0-3 2.2-4.8 5.5-4.8 0 3-2.2 4.8-5.5 4.8z"/>',
+  heute: MH_IKON.giess,
+  sammlung:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  karte:'<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
+  kalender:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+  botaniker:'<path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4.5 3.5v-3.5a2 2 0 0 1-2-2z"/>',
+  einstellungen:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>',
+  doktor:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/>',
+  substrat:'<path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/>',
+  vermehren:'<path d="M12 20v-9"/><path d="M12 14l4.5-4.5M12 11L7.5 6.5"/><circle cx="17.5" cy="8.5" r="1.8"/><circle cx="6.5" cy="5.5" r="1.8"/>',
+  urlaub: MH_IKON.urlaub,
+  sicherung: MH_IKON.sicherung
+};
+function tourSchrittzahl(k){
+  try{ return (TOUR_KAPITEL[k].schritte() || []).length; }catch(e){ return 0; }
+}
+function tourStand(){
+  const k = Object.keys(TOUR_KAPITEL), t = tourZustand();
+  return {gesehen: k.filter(x=>t.kapitel[x]).length, alle: k.length};
+}
+/* Das nächste offene Kapitel in der Reihenfolge der Liste. Die
+   Pflanzenkarte fällt ohne Pflanze aus. */
+function tourNaechstes(ohne){
+  const t = tourZustand(), leer = tourSammlungLeer();
+  return Object.keys(TOUR_KAPITEL).find(k=>k !== ohne && !t.kapitel[k]
+    && !(TOUR_KAPITEL[k].pflanzeNoetig && leer)) || null;
+}
+function tourMehrSatz(){
+  const n = Object.keys(TOUR_KAPITEL).length - 1;
+  return 'Es gibt ' + n + ' weitere kurze Kapitel unter Einstellungen \u203a App Tour, etwa zu Sammlung, Kalender und Doktor.';
+}
+/* Was nach dem Schließen geschieht: 'liste' führt zurück in die
+   Übersicht, {weiter:key} startet das nächste Kapitel. Gesetzt nur,
+   wenn ein Kapitel aus der Übersicht kam oder die Kette läuft. */
+let tourNach = null;
+/* Schließt alle Fenster über den Verlauf, eines nach dem anderen, und
+   ruft dann fn. Ein history.back() je Fenster; das nächste erst, wenn
+   das vorige wirklich zu ist. */
+function tourFensterZu(fn){
+  let runden = 0;
+  (function zu(){
+    if(!MODAL_STAPEL.length || runden++ > 6 || modalOffen('sich-pflicht')){ fn(); return; }
+    const oben = modalOben(), vor = MODAL_STAPEL.length;
+    if(modalZu(oben) === false) _modalWeg(oben);
+    let w = 0;
+    (function warte(){
+      if(MODAL_STAPEL.length < vor){ zu(); return; }
+      if(++w > 15){ _modalWeg(oben); zu(); return; }
+      setTimeout(warte, 40);
+    })();
+  })();
+}
+function tourZurListe(){
+  tourFensterZu(()=>{
+    try{ ansichtZeigen('mehr'); sektionOeffnen('tour'); }catch(e){ console.warn('Tutorial:', e); }
+  });
+}
+function tourKapitelAb(k, nach){
+  tourHin(k);
+  setTimeout(()=>{ tourNach = tourStart(k, true) ? nach : null; }, 260);
+}
+
 /* ── Helfer der Ziele (beta.48) ───────────────────
    Ein Komma-Selektor nimmt das erste Element im Dokument, auch ein
    verstecktes. tourErstes nimmt das erste sichtbare. */
@@ -33008,8 +33104,20 @@ function tourText(){
   const ex = document.getElementById('tour-extra');
   let extra = null;
   try{ extra = typeof s.extra === 'function' ? s.extra() : (s.extra || null); }catch(e){ extra = null; }
+  /* beta.49 (Etappe 20): Am Schluss führt ein Tipp ins nächste offene
+     Kapitel oder in die Übersicht. Nicht, wenn das Anlegen danach für
+     die erste Pflanze offen bleibt. */
+  const frei = !(tourLauf.key === 'einricht' && tourSammlungLeer());
+  if(!extra && letzter && frei){
+    const nk = tourNaechstes(tourLauf.key);
+    if(nk) extra = {text:'Weiter: ' + TOUR_KAPITEL[nk].name, weiter:nk};
+  }
   tourLauf.extra = extra;
   if(ex){ ex.hidden = !extra; ex.textContent = extra ? extra.text : ''; }
+  const alle = document.getElementById('tour-alle');
+  if(alle) alle.hidden = !(letzter && frei);
+  const sk = document.getElementById('tour-skip');
+  if(sk) sk.hidden = letzter;
   if(wei) wei.classList.toggle('haupt', !extra);
   const box = document.getElementById('tour');
   /* Deckel nur, wo nichts angetippt werden soll. */
@@ -33129,11 +33237,19 @@ function tourSchliessen(){
   tourTaktStop();
   const kapZu = tourLauf ? TOUR_KAPITEL[tourLauf.key] : null;
   tourLauf = null;
+  /* beta.49: was danach kommt, räumt die Fenster selbst */
+  const nach = tourNach; tourNach = null;
+  let bleibt = false;
   /* beta.48: ein Kapitel kann danach aufräumen (Anlegen-Fenster) */
-  if(kapZu && typeof kapZu.ende === 'function'){ try{ kapZu.ende(); }catch(e){ console.warn('Tutorial:', e); } }
+  if(kapZu && typeof kapZu.ende === 'function'){
+    try{ bleibt = kapZu.ende(!!nach) === 'bleibt'; }catch(e){ console.warn('Tutorial:', e); }
+  }
   const box = document.getElementById('tour');
   if(box){ box.hidden = true; box.classList.remove('zu'); }
   if(typeof tourListeZeichnen === 'function') tourListeZeichnen();
+  if(!nach || bleibt) return;
+  if(nach === 'liste') tourZurListe();
+  else if(nach.weiter) tourFensterZu(()=>tourKapitelAb(nach.weiter, 'liste'));
 }
 
 function tourFertig(){
@@ -33172,7 +33288,8 @@ function tourAbbruch(){
   const wegMitHinweis = ()=>{
     const t = document.getElementById('tour-text');
     const ti = document.getElementById('tour-titel');
-    if(t && ti && tourLauf){
+    /* beta.49: wer in der Übersicht landet, braucht den Hinweis nicht */
+    if(t && ti && tourLauf && tourNach !== 'liste'){
       ti.textContent = 'Abgebrochen';
       t.textContent = 'Du findest die Runde jederzeit unter Einstellungen › App Tour wieder.';
       const f = document.getElementById('tour-fuss');
@@ -33188,9 +33305,13 @@ function tourAbbruch(){
   if(ex) ex.onclick = ()=>{
     const x = tourLauf && tourLauf.extra;
     if(!x) return;
+    if(x.weiter){ tourNach = {weiter:x.weiter}; tourFertig(); return; }
+    tourNach = null;
     tourFertig();
     setTimeout(()=>{ try{ x.tun(); }catch(e){} }, 480);
   };
+  const al = document.getElementById('tour-alle');
+  if(al) al.onclick = ()=>{ if(!tourLauf) return; tourNach = 'liste'; tourFertig(); };
 })();
 
 window.addEventListener('resize', ()=>{ if(tourLauf) tourMalen(); });
@@ -33271,33 +33392,48 @@ function tourListeZeichnen(){
     /* Die Runde steht abgesetzt oben: sie ist der Weg für jemanden,
        der wissen will, wo was liegt. Die übrigen Kapitel sind
        Einzelerklärungen, die man gezielt holt. */
+    /* beta.49 (Etappe 20): Die ganze Zeile ist der Knopf. */
     const zeile = k=>{
-      const gesehen = !!t.kapitel[k];
-      return '<div class="ein-zeile tour-z"><span class="ein-txt"><b>' + esc(TOUR_KAPITEL[k].name) + '</b>'
-        + '<i>' + (gesehen ? 'gesehen' : 'offen') + '</i></span>'
-        + '<button class="linkbtn" data-tourgo="' + k + '">ansehen</button></div>';
+      const kap = TOUR_KAPITEL[k], gesehen = !!t.kapitel[k], n = tourSchrittzahl(k);
+      return '<button type="button" class="ein-zeile tour-z" data-tourgo="' + k + '">'
+        + '<span class="tour-ik" aria-hidden="true"><svg viewBox="0 0 24 24">' + (TOUR_IKON[k] || '') + '</svg></span>'
+        + '<span class="ein-txt"><b>' + esc(kap.name) + '</b>'
+        + '<i>' + esc(TOUR_KURZ[k] || '') + ' \u00b7 ' + n + ' Schritte</i></span>'
+        + (gesehen ? '<span class="tour-ok" role="img" aria-label="gesehen">\u2713</span>'
+                   : '<span class="tour-auf" aria-hidden="true">\u203a</span>')
+        + '</button>';
     };
-    /* beta.48 (Etappe 17): Grundlagen und Werkzeuge getrennt */
     const gruppe = g => Object.keys(TOUR_KAPITEL).filter(k=>TOUR_KAPITEL[k].gruppe === g).map(zeile).join('');
+    const st = tourStand(), nk = tourNaechstes();
+    const rest = Object.keys(TOUR_KAPITEL).filter(k=>!t.kapitel[k]).reduce((x, k)=>x + tourSchrittzahl(k), 0);
+    const min = Math.max(1, Math.ceil(rest * 10 / 60));
     box.innerHTML =
-      '<p class="ein-abschnitt">Von vorn</p><div class="ein-liste">' + zeile('runde') + '</div>'
-      + '<p class="ein-abschnitt">Grundlagen</p><div class="ein-liste">' + gruppe('grund') + '</div>'
+      '<div class="ein-karte tour-stand"><div>'
+      + '<p class="tour-stand-kopf"><b>' + st.gesehen + ' von ' + st.alle + ' gesehen</b>'
+      + (rest ? '<span>noch ca. ' + min + ' Min.</span>' : '') + '</p>'
+      + '<div class="tour-balken" aria-hidden="true"><i style="width:' + Math.round(st.gesehen / st.alle * 100) + '%"></i></div>'
+      + (nk ? '<button type="button" class="haupt" data-tourweiter>' + (st.gesehen ? 'Weiter mit: ' : 'Start: ') + esc(TOUR_KAPITEL[nk].name) + '</button>'
+            : '<p class="tour-fertig">' + (rest ? 'Für das letzte Kapitel brauchst du eine Pflanze.' : 'Alles gesehen. Jedes Kapitel lässt sich erneut ansehen.') + '</p>')
+      + '</div></div>'
+      + '<p class="ein-abschnitt">Grundlagen</p><div class="ein-liste">' + zeile('runde') + gruppe('grund') + '</div>'
       + '<p class="ein-abschnitt">Werkzeuge</p><div class="ein-liste">' + gruppe('werkzeug') + '</div>';
   }
+  if(typeof mehrNebenzeilen === 'function') mehrNebenzeilen();
   const schalter = document.getElementById('tour-aus');
   if(schalter) schalter.checked = !!t.aus;
   const txt = document.getElementById('tour-aus-text');
   /* Seit 2.9.28 startet kein Kapitel mehr von allein — der alte Text
      versprach das Gegenteil. */
   if(txt) erklSetzen(txt, t.aus
-    ? 'Aus. Auch das einmalige Angebot der Runde bleibt weg. Über „ansehen“ lässt sich trotzdem jederzeit ein Kapitel holen.'
-    : 'Die Runde läuft einmal nach dem Willkommen, sonst startet kein Kapitel von allein. Tippe auf „ansehen“, um eines zu holen.');
+    ? 'Aus. Auch das einmalige Angebot der Runde bleibt weg. Ein Tipp auf ein Kapitel startet es trotzdem.'
+    : 'Die Runde läuft einmal nach dem Willkommen, sonst startet kein Kapitel von allein. Tippe auf ein Kapitel, um es anzusehen.');
 }
 
 document.addEventListener('click', e=>{
-  const g = e.target.closest && e.target.closest('[data-tourgo]');
-  if(!g) return;
-  const k = g.dataset.tourgo;
+  const g = e.target.closest && e.target.closest('[data-tourgo], [data-tourweiter]');
+  if(!g || tourLauf) return;
+  const k = g.dataset.tourgo || tourNaechstes();
+  if(!k) return;
   const t = tourZustand();
   if(t.aus){ t.aus = false; sichern(); }
   if(TOUR_KAPITEL[k] && TOUR_KAPITEL[k].pflanzeNoetig && tourSammlungLeer()){
@@ -33305,11 +33441,9 @@ document.addEventListener('click', e=>{
     return;
   }
   /* Das Kapitelverzeichnis steht selbst in einem Fenster. Das muss
-     zu, bevor der Bereich aufgeht, auf den es zeigt. */
-  if(typeof modalOffen === 'function' && modalOffen('sek-modal')
-     && typeof _modalWeg === 'function') _modalWeg('sek-modal');
-  tourHin(k);
-  setTimeout(()=>tourStart(k, true), 260);
+     zu, bevor der Bereich aufgeht, auf den es zeigt. beta.49: über den
+     Verlauf, damit kein toter Eintrag bleibt; danach zurück hierher. */
+  tourFensterZu(()=>tourKapitelAb(k, 'liste'));
 });
 
 (function tourEinstellungen(){

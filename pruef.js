@@ -192,7 +192,7 @@ setTimeout(async () => {
   pruef('Zweitschlüssel geschrieben',
     w.localStorage.getItem('gk-beta-design') === 'botanisch',
     w.localStorage.getItem('gk-beta-design'));
-  pruef('FASSUNG 4.0-beta.48', w.__T('FASSUNG') === '4.0-beta.48', w.__T('FASSUNG'));
+  pruef('FASSUNG 4.0-beta.49', w.__T('FASSUNG') === '4.0-beta.49', w.__T('FASSUNG'));
   pruef('Drei Umschaltknöpfe', d.querySelectorAll('[data-design-go]').length === 3);
   pruef('Botanisch ist gedrückt',
     d.querySelector('[data-design-go="botanisch"]').getAttribute('aria-pressed') === 'true');
@@ -1592,9 +1592,9 @@ setTimeout(async () => {
     const liste = d.getElementById('tour-liste');
     pruef('Die Runde steht in der Liste',
       !!liste.querySelector('[data-tourgo="runde"]'));
-    pruef('beta.48: Von vorn, Grundlagen, Werkzeuge in dieser Folge',
-      liste.innerHTML.indexOf('Von vorn') !== -1
-      && liste.innerHTML.indexOf('Von vorn') < liste.innerHTML.indexOf('Grundlagen')
+    pruef('beta.49: Fortschritt, Grundlagen, Werkzeuge in dieser Folge',
+      liste.innerHTML.indexOf('tour-stand') !== -1
+      && liste.innerHTML.indexOf('tour-stand') < liste.innerHTML.indexOf('Grundlagen')
       && liste.innerHTML.indexOf('Grundlagen') < liste.innerHTML.indexOf('Werkzeuge'));
     pruef('Alle Kapitel stehen zur Wahl',
       liste.querySelectorAll('[data-tourgo]').length
@@ -14031,7 +14031,13 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       zu(); await warte(60);
       T(`S.eigene = JSON.parse(${JSON.stringify(altE)}); sichern(); render(); 1`);
       T(`tourStart('runde'); tourGehe(6, 1); 1`); await warte(600);
-      pruef('beta.48 (17): Mit Pflanzen hat der Schluss nur „Fertig“', d.getElementById('tour-extra').hidden && d.getElementById('tour-weiter').classList.contains('haupt'));
+      pruef('beta.49 (20): Mit Pflanzen bietet der Schluss das nächste offene Kapitel', !d.getElementById('tour-extra').hidden
+        && d.getElementById('tour-extra').textContent === 'Weiter: Pflanze anlegen', d.getElementById('tour-extra').textContent);
+      zu(); await warte(60);
+      T(`Object.keys(TOUR_KAPITEL).forEach(k => { S.tutorial.kapitel[k] = 1; }); 1`);
+      T(`tourStart('runde'); tourGehe(6, 1); 1`); await warte(600);
+      pruef('beta.48 (17): Ist alles gesehen, hat der Schluss nur „Fertig“', d.getElementById('tour-extra').hidden && d.getElementById('tour-weiter').classList.contains('haupt'));
+      T(`S.tutorial.kapitel = {}; 1`);
       zu(); await warte(60);
 
       /* Startauslöser */
@@ -14052,9 +14058,10 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
       T(`S.tutorial.aus = false; S.angebot40 = iso(HEUTE); rundeAngebotZeichnen(); 1`);
       T(`tourListeZeichnen(); 1`);
       const li = d.getElementById('tour-liste');
-      pruef('beta.48 (17): Liste mit Von vorn, Grundlagen (7) und Werkzeuge (5)',
-        li.querySelectorAll('.ein-liste').length === 3 && li.querySelectorAll('.ein-liste')[1].querySelectorAll('[data-tourgo]').length === 7
-        && li.querySelectorAll('.ein-liste')[2].querySelectorAll('[data-tourgo]').length === 5);
+      pruef('beta.49 (20): Liste mit Grundlagen (Runde und 7) und Werkzeuge (5)',
+        li.querySelectorAll('.ein-liste').length === 2 && li.querySelectorAll('.ein-liste')[0].querySelectorAll('[data-tourgo]').length === 8
+        && li.querySelectorAll('.ein-liste')[0].querySelector('[data-tourgo]').dataset.tourgo === 'runde'
+        && li.querySelectorAll('.ein-liste')[1].querySelectorAll('[data-tourgo]').length === 5);
       pruef('beta.48 (17): Urlaubszettel zeigt auf das sichtbare Feld statt auf die versteckte Liste',
         T(`(function(){ sektionOeffnen('urlaub'); const z = TOUR_KAPITEL.urlaub.schritte()[1].ziel(); return !!z && z.id !== 'url-puffer' && !z.hidden; })()`) === true);
     } catch (e) {
@@ -14062,6 +14069,89 @@ pruef('beta.20: Der Kopierweg fragt weiter Topfart und Abzugsloch', /TOPFART:/.t
     } finally {
       zu();
       T(`S.eigene = S.eigene.filter(p => p.id !== 'E-9480'); S.tutorial = JSON.parse(${JSON.stringify(altT)}); sichern(); render(); 1`);
+    }
+  }
+
+  /* ── 4.0-beta.49 (Etappe 20): Übersicht, Kapitelende, Rückweg ── */
+  {
+    const T = c => w.__T(c);
+    const warte = ms => new Promise(r => setTimeout(r, ms));
+    const zu = () => T(`tourNach = null; if(tourLauf) tourSchliessen(); while(APP_DLG.offen) appDlgAntwort('nein'); while(MODAL_STAPEL.length) _modalWeg(modalOben()); history.replaceState(null, ''); 1`);
+    const altT = T(`JSON.stringify(S.tutorial)`);
+    const altE = T(`JSON.stringify(S.eigene)`);
+    const durch = async () => { for (let i = 0; i < 12 && T(`!!tourLauf && tourLauf.i < tourLauf.schritte.length - 1`); i++) { d.getElementById('tour-weiter').click(); await warte(450); } };
+    try {
+      zu(); await warte(60);
+      T(`(function(){ if(!allePflanzen().length){ S.eigene.push({id:'E-9490', name:'Tourprobe', art:'Monstera', klasse:'B'}); } S.tutorial = {aus:false, kapitel:{}, einricht:0, geprueft:1}; sichern(); render(); tourListeZeichnen(); return 1; })()`);
+      const li = d.getElementById('tour-liste');
+      pruef('beta.49 (20): Fortschritt „0 von 13 gesehen“ mit Startknopf auf die Runde',
+        /0 von 13 gesehen/.test(li.querySelector('.tour-stand').textContent) && /Start: Kurze Runde/.test((li.querySelector('[data-tourweiter]') || {}).textContent || ''),
+        li.querySelector('.tour-stand').textContent);
+      pruef('beta.49 (20): Jede Kapitelzeile ist ein Knopf mit Symbol, Satz und Schrittzahl, ohne Link',
+        [...li.querySelectorAll('[data-tourgo]')].every(b => b.tagName === 'BUTTON' && b.querySelector('svg') && /· \d+ Schritte/.test(b.querySelector('.ein-txt i').textContent))
+        && !li.querySelector('.linkbtn') && li.querySelectorAll('.tour-auf').length === 13);
+      T(`S.tutorial.kapitel.runde = 1; S.tutorial.kapitel.einricht = 1; tourListeZeichnen(); 1`);
+      pruef('beta.49 (20): Gesehene tragen den Haken, der Knopf nennt das nächste offene Kapitel',
+        li.querySelectorAll('.tour-ok').length === 2 && /2 von 13 gesehen/.test(li.textContent)
+        && li.querySelector('[data-tourweiter]').textContent === 'Weiter mit: Heute und Gießen', li.querySelector('[data-tourweiter]').textContent);
+      pruef('beta.49 (20): Die Nebenzeile im Menü nennt den Fortschritt', T(`MH_UNTER.tour()`) === '2 von 13 gesehen', T(`MH_UNTER.tour()`));
+
+      /* Aus der Übersicht gestartet: am Ende zurück in die Übersicht */
+      T(`ansichtZeigen('mehr'); sektionOeffnen('tour'); 1`); await warte(200);
+      li.querySelector('[data-tourgo="doktor"]').click(); await warte(1300);
+      pruef('beta.49 (20): Tipp auf die Zeile startet das Kapitel', T(`tourLauf && tourLauf.key`) === 'doktor', String(T(`tourLauf && tourLauf.key`)));
+      await durch();
+      pruef('beta.49 (20): Letzter Schritt: „Fertig“, „Weiter: …“ und „Alle Kapitel ansehen“, kein „Überspringen“',
+        d.getElementById('tour-weiter').textContent === 'Fertig' && d.getElementById('tour-extra').textContent === 'Weiter: Heute und Gießen'
+        && !d.getElementById('tour-alle').hidden && d.getElementById('tour-skip').hidden, d.getElementById('tour-extra').textContent);
+      d.getElementById('tour-weiter').click(); await warte(1300);
+      pruef('beta.49 (20): Nach „Fertig“ steht wieder die Übersicht der App Tour',
+        T(`!tourLauf && modalOffen('sek-modal') && _sekOffen && _sekOffen.key === 'tour' && MODAL_STAPEL.length === 1 && document.body.dataset.ansicht === 'mehr'`) === true,
+        T(`JSON.stringify({m:MODAL_STAPEL, s:_sekOffen && _sekOffen.key, a:document.body.dataset.ansicht})`));
+      pruef('beta.49 (20): … und das Kapitel gilt als gesehen', T(`S.tutorial.kapitel.doktor`) === 1 && /3 von 13 gesehen/.test(li.textContent));
+
+      /* Kette: „Weiter: …“ startet das nächste, danach Übersicht */
+      li.querySelector('[data-tourgo="kalender"]').click(); await warte(1300);
+      pruef('beta.49 (20): Kalender-Kapitel läuft im Kalender', T(`tourLauf && tourLauf.key === 'kalender' && modalOffen('kal-modal')`) === true);
+      await durch();
+      d.getElementById('tour-extra').click(); await warte(1700);
+      pruef('beta.49 (20): „Weiter: …“ schließt den Kalender und startet das nächste offene Kapitel',
+        T(`tourLauf && tourLauf.key === 'heute' && !modalOffen('kal-modal')`) === true, T(`JSON.stringify({k:tourLauf && tourLauf.key, m:MODAL_STAPEL})`));
+      d.getElementById('tour-skip').click(); await warte(1300);
+      pruef('beta.49 (20): Überspringen in der Kette führt ohne Wartetext in die Übersicht',
+        T(`!tourLauf && modalOffen('sek-modal') && _sekOffen && _sekOffen.key === 'tour'`) === true);
+
+      /* „Alle Kapitel ansehen“ aus einem Kapitel, das nicht aus der Übersicht kam */
+      zu(); await warte(80);
+      T(`ansichtZeigen('heute'); tourStart('sammlung'); 1`); await warte(500);
+      await durch();
+      d.getElementById('tour-alle').click(); await warte(1300);
+      pruef('beta.49 (20): „Alle Kapitel ansehen“ öffnet die Übersicht', T(`!tourLauf && modalOffen('sek-modal') && _sekOffen && _sekOffen.key === 'tour'`) === true);
+
+      /* Ohne Herkunft bleibt man, wo das Kapitel endet */
+      zu(); await warte(80);
+      T(`ansichtZeigen('heute'); tourStart('botaniker'); 1`); await warte(500);
+      await durch();
+      d.getElementById('tour-weiter').click(); await warte(700);
+      pruef('beta.49 (20): Ein Kapitel, das nicht aus der Übersicht kam, endet an Ort und Stelle',
+        T(`!tourLauf && !MODAL_STAPEL.length && document.body.dataset.ansicht === 'botaniker'`) === true, T(`document.body.dataset.ansicht`));
+
+      /* Leere Sammlung: Anlegen bleibt offen, kein Rückweg, kein „Weiter“ */
+      zu(); await warte(80);
+      T(`S.eigene = []; sichern(); render(); ansichtZeigen('mehr'); sektionOeffnen('tour'); 1`); await warte(200);
+      li.querySelector('[data-tourgo="einricht"]').click(); await warte(1300);
+      T(`tourGehe(tourLauf.schritte.length - 1, 1); 1`); await warte(700);
+      pruef('beta.49 (20): Bei leerer Sammlung hat der Schluss von „Pflanze anlegen“ weder „Weiter“ noch „Alle Kapitel“',
+        d.getElementById('tour-extra').hidden && d.getElementById('tour-alle').hidden);
+      d.getElementById('tour-weiter').click(); await warte(900);
+      pruef('beta.49 (20): … und das Formular bleibt auf Stufe 1 offen statt der Übersicht',
+        T(`!tourLauf && modalOffen('anleg-modal') && alStufe === 1 && !modalOffen('sek-modal')`) === true, T(`JSON.stringify(MODAL_STAPEL)`));
+      pruef('beta.49 (20): Die Runde nennt die weiteren Kapitel', /Es gibt 12 weitere kurze Kapitel/.test(T(`tourWort(TOUR_KAPITEL.runde.schritte()[6].text)`)));
+    } catch (e) {
+      pruef('beta.49 (20): Block lief ohne Laufzeitfehler', false, String(e && e.stack || e));
+    } finally {
+      zu();
+      T(`S.eigene = JSON.parse(${JSON.stringify(altE)}).filter(p => p.id !== 'E-9490'); S.tutorial = JSON.parse(${JSON.stringify(altT)}); sichern(); ansichtZeigen('heute'); render(); tourListeZeichnen(); 1`);
     }
   }
 
